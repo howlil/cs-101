@@ -2,7 +2,7 @@
 
 Draft arsitektur · 6 Oktober 2026 · Mengikuti [product design](design.md)
 
-**V1: satu aplikasi Astro + MDX, SQLite untuk progres, generation lewat agent/CLI.** Target awal satu learner pada satu server dengan disk persisten. Fondasi halaman, konten, dan API sesi sudah diimplementasikan; review engine dan pipeline generation masih menjadi target. Status fitur dan cara menjalankan ada di [README.md](README.md). Skill `engineering design` belum tersedia, sehingga rancangan disusun langsung dari kontrak course-generator dan product design.
+**V1: satu aplikasi Astro + MDX, SQLite untuk progres, generation lewat agent/CLI.** Target awal satu learner pada satu server dengan disk persisten. Fondasi halaman, konten, dan API sesi sudah diimplementasikan; review engine dan pipeline generation masih menjadi target. Status fitur dan cara menjalankan ada di [README.md](../README.md). Skill `engineering design` belum tersedia, sehingga rancangan disusun langsung dari kontrak course-generator dan product design.
 
 ## Gambaran sistem
 
@@ -135,9 +135,11 @@ Catat request ID, Task ID, durasi operasi, dan kategori error. Hindari memasukka
 
 ```text
 cs-101/
-├── .agents/skill/course-generator/
-├── design.md
-├── engineering-design.md
+├── AGENTS.md
+├── .agents/
+│   ├── design.md
+│   ├── engineering-design.md
+│   └── skill/course-generator/
 ├── curriculum/manifest.json
 ├── generation/<TASK-ID>.json
 ├── scripts/                 # sync, validate, build workflow
@@ -159,7 +161,7 @@ Skill course-generator disimpan di `.agents/skill/course-generator/` agar ikut c
 
 | Tahap | Hasil | Pemeriksaan penting |
 | --- | --- | --- |
-| 1. Content | Manifest schema, satu lesson, shell sesuai design.md | Build MDX, urutan curriculum, link, coverage |
+| 1. Content | Manifest schema, satu lesson, shell sesuai `.agents/design.md` | Build MDX, urutan curriculum, link, coverage |
 | 2. Learning | SQLite, endpoint sesi, continuation, task aktif | Transaksi rollback, retry tanpa duplikasi, konflik dua tab, restart |
 | 3. Assessment | Bukti per kriteria, kelulusan, review | Bukti kurang ditolak, fingerprint stale, assisted review tidak lulus |
 | 4. Release | Build terpisah, backup/restore, UI responsif | Build gagal mempertahankan release lama; restore mengembalikan evidence |

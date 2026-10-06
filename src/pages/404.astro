@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import EmptyAction from '../components/arc/EmptyAction';
 Astro.response.status = 404;
 ---
-<AppLayout title="Halaman tidak ditemukan"><div class="content"><p class="eyebrow">404</p><h1>Halaman tidak ditemukan.</h1><p class="muted">Cek Task ID atau kembali ke daftar materi.</p><a href="/progress">Lihat daftar task</a></div></AppLayout>
+<AppLayout title="Halaman tidak ditemukan"><div class="content"><p class="eyebrow">404</p><EmptyAction client:load title="Halaman tidak ditemukan." description="Cek Task ID atau kembali ke daftar materi." href="/progress" actionLabel="Lihat daftar task" /></div></AppLayout>

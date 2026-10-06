@@ -2,13 +2,15 @@
 import AppLayout from '../layouts/AppLayout.astro';
 import { tasks } from '../server/curriculum';
 import { learning } from '../server/runtime';
-const state = (await learning()).snapshot();
+import EmptyAction from '../components/arc/EmptyAction';
+import TaskCard from '../components/arc/TaskCard';
+const state = await (await learning()).snapshot();
 const active = tasks.find((task) => task.taskId === state.activeTaskId);
 const progress = state.progress.find((item) => item.taskId === active?.taskId);
 ---
 <AppLayout title="Hari ini"><div class="content">
   <p class="eyebrow">BELAJAR / HARI INI</p><h1>Lanjut dari sini.</h1><p class="lede">Satu task. Satu langkah berikutnya.</p>
-  {active ? <section class="empty"><p class="task-code">{active.taskId}</p><h2>{active.title}</h2><p>{progress?.continueFrom || 'Mulai dari konsep pertama, lalu kerjakan latihannya.'}</p><a class="button primary" href={`/learn/${active.taskId}${progress?.lastAnchor ? `#${progress.lastAnchor}` : ''}`}>Lanjutkan</a></section> : <section class="empty"><p class="eyebrow">MULAI</p><h2>{tasks.length ? 'Pilih task pertama.' : 'Curriculum belum tersedia.'}</h2><p class="muted">{tasks.length ? 'Lihat urutan materi dan tentukan task yang mau dikerjakan.' : 'Task dan progres akan muncul setelah curriculum ditambahkan.'}</p><div class="actions"><a class="button primary" href={tasks.length ? '/progress' : '/demo'}>{tasks.length ? 'Pilih task' : 'Lihat contoh tampilan'}</a></div></section>}
-  <h2>Review</h2><p class="muted">Belum ada review terjadwal.</p>
+  {active ? <TaskCard taskId={active.taskId} title={active.title} description={progress?.continueFrom || 'Mulai dari konsep pertama, lalu kerjakan latihannya.'} href={`/learn/${active.taskId}${progress?.lastAnchor ? `#${progress.lastAnchor}` : ''}`} actionLabel="Lanjutkan" /> : <EmptyAction client:load title={tasks.length ? 'Pilih task pertama.' : 'Curriculum belum tersedia.'} description={tasks.length ? 'Lihat urutan materi dan tentukan task yang mau dikerjakan.' : 'Task dan progres akan muncul setelah curriculum ditambahkan.'} href={tasks.length ? '/progress' : '/demo'} actionLabel={tasks.length ? 'Pilih task' : 'Lihat contoh tampilan'} />}
+  <h2>Review</h2><EmptyAction client:load title="Belum ada review terjadwal." description="Jadwal review akan muncul setelah ada materi yang perlu diulang." />
   <hr /><p class="muted small">Progres dihitung dari bukti yang lo simpan.</p>
 </div></AppLayout>

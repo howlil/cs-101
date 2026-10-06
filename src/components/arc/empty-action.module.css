@@ -1,0 +1,2 @@
+.action { color: var(--accent-strong); font-size: var(--text-sm); font-weight: 600; text-underline-offset: 3px; }
+.action:hover { color: var(--accent); }

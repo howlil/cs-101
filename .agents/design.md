@@ -190,4 +190,4 @@ Sumber dibaca pada 6 Oktober 2026 melalui file resmi di GitHub karena domain sit
 - [ ] Pembaca layar memperoleh heading berurutan, label form, feedback jawaban, dan status penyimpanan.
 - [ ] Setiap paragraf menambah informasi; tidak ada CTA ganda, klaim sumber palsu, atau angka progres contoh.
 
-Status: kerangka UI dan demo lesson sudah diimplementasikan. Browser smoke check mencakup kuis, tema, layout 320–1440 px, serta alur simpan bukti dengan fixture terpisah. Checklist di atas tetap menjadi target lengkap; review engine dan curriculum asli belum tersedia. Lihat [README.md](README.md) untuk status fitur.
+Status: kerangka UI dan demo lesson sudah diimplementasikan. Browser smoke check mencakup kuis, tema, layout 320–1440 px, serta alur simpan bukti dengan fixture terpisah. Checklist di atas tetap menjadi target lengkap; review engine dan curriculum asli belum tersedia. Lihat [README.md](../README.md) untuk status fitur.

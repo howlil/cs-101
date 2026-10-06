@@ -1,3 +1,29 @@
-:root { color-scheme: light; --canvas: #fafaf9; --surface: #fff; --text: #1c1c1a; --muted: #575752; --line: #e5e5e1; --control: #73736b; --accent: #1d4ed8; --on-accent: #fff; }
-:root[data-theme='dark'] { color-scheme: dark; --canvas: #111110; --surface: #1c1c1a; --text: #f5f5f4; --muted: #b7b7ad; --line: #343430; --control: #85857b; --accent: #93c5fd; --on-accent: #111110; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { color-scheme: dark; --canvas: #111110; --surface: #1c1c1a; --text: #f5f5f4; --muted: #b7b7ad; --line: #343430; --control: #85857b; --accent: #93c5fd; --on-accent: #111110; } }
+:root {
+  color-scheme: light;
+  --canvas: var(--background);
+  --text: var(--foreground);
+  --muted: var(--text-secondary);
+  --line: var(--border);
+  --control: var(--border-strong);
+  --on-accent: var(--accent-foreground);
+  --focus-ring: color-mix(in oklab, var(--accent) 34%, transparent);
+  --radius-control: .625rem;
+  --radius-panel: .875rem;
+  --radius-surface: 1rem;
+  --space-1: .25rem;
+  --space-2: .375rem;
+  --space-3: .5rem;
+  --space-4: .75rem;
+  --space-5: 1rem;
+  --space-6: 1.25rem;
+  --space-8: 1.5rem;
+  --space-10: 2rem;
+  --space-12: 2.5rem;
+  --space-16: 3rem;
+  --space-20: 4rem;
+  --space-24: 5rem;
+  --font-display: system-ui, sans-serif;
+  --font-body: system-ui, sans-serif;
+}
+
+:root[data-theme="dark"] { color-scheme: dark; }

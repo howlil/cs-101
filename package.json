@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.2",
   "engines": {
     "node": ">=24.0.0 <25"
   },
@@ -10,21 +11,34 @@
     "dev": "astro dev --host 127.0.0.1",
     "check": "astro check",
     "validate:content": "tsx scripts/validate-content.ts",
-    "build": "npm run validate:content && astro build",
+    "build": "pnpm run validate:content && astro build",
+    "build:cloudflare": "pnpm run validate:content && astro build --config astro.cloudflare.config.mjs && node scripts/prepare-cloudflare-pages.mjs",
     "start": "node scripts/start.mjs",
     "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "14.3.3",
     "@astrojs/mdx": "8.0.3",
     "@astrojs/node": "11.1.7",
+    "@astrojs/react": "7.0.1",
+    "@radix-ui/react-accordion": "^1.2.21",
+    "@radix-ui/react-dialog": "^1.2.0",
+    "@radix-ui/react-select": "^2.3.8",
     "astro": "7.3.6",
+    "lucide-react": "^1.52.0",
+    "motion": "^14.0.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "yaml": "^2.9.1",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "tsx": "^4.20.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "wrangler": "^4.148.0"
   }
 }

@@ -5,37 +5,53 @@ Kerangka course pribadi: Astro + MDX, TypeScript, dan SQLite bawaan Node 24.
 ## Jalankan
 
 ```sh
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
 Gunakan Node 24 sesuai `.node-version`. Server dev bind ke `127.0.0.1:4321`. Halaman `/demo` memperlihatkan komponen lesson; demo tidak masuk curriculum atau progres.
 
 ```sh
-npm test
-npm run check
-npm run build
-npm start
+pnpm test
+pnpm check
+pnpm build
+pnpm start
 ```
 
-`npm start` menjalankan hasil build pada host dan port yang sama. Jika port dev sedang dipakai, hentikan dev terlebih dahulu. `HOST` dan `PORT` dapat diatur untuk deployment private. Production membaca environment process; jika memakai `.env`, muat lewat service manager atau `node --env-file=.env scripts/start.mjs`.
+`pnpm start` menjalankan hasil build pada host dan port yang sama. Jika port dev sedang dipakai, hentikan dev terlebih dahulu. `HOST` dan `PORT` dapat diatur untuk deployment private. Production membaca environment process; jika memakai `.env`, muat lewat service manager atau `node --env-file=.env scripts/start.mjs`.
+
+## Deploy ke Cloudflare Pages lewat GitHub
+
+1. Push repository ke GitHub, lalu di Cloudflare buka **Workers & Pages → Create application → Pages → Import an existing Git repository** dan pilih repository ini.
+2. Isi build command `pnpm build:cloudflare`, build output directory `dist/client`, dan environment variable build `NODE_VERSION=24`.
+3. Buat database D1 bernama `cs101-learning`. Pada project Pages, buka **Settings → Bindings**, tambahkan D1 binding dengan variable name `LEARNING_DB`, pilih database tersebut, lalu simpan.
+4. Terapkan schema satu kali dari terminal yang sudah login ke Cloudflare:
+
+   ```sh
+   pnpm exec wrangler login
+   pnpm exec wrangler d1 execute cs101-learning --remote --file=migrations/0001_initial.sql
+   ```
+
+5. Deploy ulang Pages. Setelah koneksi GitHub aktif, commit baru ke branch production akan memicu build dan deploy; pull request mendapat preview deployment.
+
+Runtime Pages memakai Astro Cloudflare adapter dan D1 untuk progres dan riwayat. `pnpm dev`/`pnpm start` tetap memakai Node + `node:sqlite` lokal. Isi database D1 tidak ikut dibawa oleh GitHub.
 
 ## Yang sudah tersedia
 
 - Halaman Hari ini, Progres, lesson dinamis, demo MDX, dan empty state review.
 - Tema terang/gelap/sistem, navigasi responsif, reveal, kuis lokal, challenge, dan form sesi.
 - Schema curriculum dengan validasi prerequisite, fingerprint, dan coverage metadata.
-- SQLite: migration awal, satu task aktif, sesi append-only, bukti, kelulusan mandiri, ekspor JSON.
+- Progres memakai SQLite lokal atau Cloudflare D1: satu task aktif, sesi append-only, bukti, kelulusan mandiri, dan ekspor JSON.
 - API transaksi dengan revision conflict, idempotensi, validasi body, dan pemeriksaan Origin.
 
-Belum tersedia: integrasi sumber curriculum, eksekusi generator otomatis, review engine/jadwal, pencarian isi, auth multiuser, backup otomatis, dan deployment pipeline. Checklist penerimaan pada dokumen desain tetap menjadi target implementasi, bukan klaim seluruh fitur sudah selesai.
+Belum tersedia: integrasi sumber curriculum, eksekusi generator otomatis, review engine/jadwal, pencarian isi, auth multiuser, dan backup otomatis. Checklist penerimaan pada dokumen desain tetap menjadi target implementasi, bukan klaim seluruh fitur sudah selesai.
 
 ## Menambah curriculum dan lesson
 
 1. Isi `curriculum/manifest.json` sesuai `src/domain/curriculum.ts`. Task memiliki kriteria ber-ID unik; ID `challenge` digunakan untuk bukti challenge.
 2. Pakai skill `.agents/skill/course-generator/SKILL.md` untuk menghasilkan satu lesson dan memeriksa sumbernya.
 3. Simpan MDX di `src/content/lessons/`. Frontmatter: `taskId`, `title`, `description`, `curriculumFingerprint`. Demo menjadi acuan import komponen.
-4. Dapatkan fingerprint dengan `npx tsx scripts/fingerprint.ts <TASK-ID>`; simpan metadata sesuai `generation/README.md`.
+4. Dapatkan fingerprint dengan `pnpm exec tsx scripts/fingerprint.ts <TASK-ID>`; simpan metadata sesuai `generation/README.md`.
 5. Jalankan validasi, check, dan build. Review isi serta sumber sebelum menerima MDX sebagai kode tepercaya.
 
 Tidak ada task asli yang dibuat otomatis. Curriculum kosong memang menampilkan empty state. Task tanpa lesson tetap terlihat di Progres.
@@ -70,4 +86,4 @@ src/pages/               halaman Astro dan API
 tests/                   transaksi, retry, restart, curriculum, HTTP
 ```
 
-Desain UI: [design.md](design.md). Arsitektur target: [engineering-design.md](engineering-design.md).
+Desain UI: [.agents/design.md](.agents/design.md). Arsitektur target: [.agents/engineering-design.md](.agents/engineering-design.md).

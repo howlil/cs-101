@@ -1,0 +1,10 @@
+.root { margin-top: .75rem; }
+.tasks { display: grid; gap: .25rem; margin: 0; padding: .5rem 0 .75rem; list-style: none; }
+.tasks a { display: grid; gap: .2rem; min-height: 44px; align-content: center; border-radius: .5rem; padding: .55rem .625rem; color: var(--text-secondary); font-size: var(--text-sm); text-decoration: none; }
+.tasks a:hover { background: var(--surface-muted); color: var(--foreground); }
+.tasks a[aria-current="page"] { background: var(--accent-subtle); color: var(--accent-strong); }
+.code { color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: var(--text-xs); }
+.empty { display: grid; gap: .35rem; margin-top: 1rem; padding: .875rem 0; border-top: 1px solid var(--border); color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.5; }
+.empty p { margin: 0; }
+.empty a { width: fit-content; color: var(--accent-strong); font-weight: 550; text-underline-offset: 3px; }
+.empty a[aria-current="page"] { border-radius: .25rem; background: var(--accent-subtle); padding: .2rem .35rem; }

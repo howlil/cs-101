@@ -5,6 +5,10 @@ function readDraft(taskId: string): SessionFields | undefined {
 }
 function removeDraft(taskId: string) { try { localStorage.removeItem(`cs101:draft:${taskId}`); } catch {} }
 
+function announce(scope: string, title: string, message: string, tone: 'info' | 'success' | 'warning' | 'danger' = 'info') {
+  window.dispatchEvent(new CustomEvent('cs101:feedback', { detail: { scope, title, message, tone } }));
+}
+
 function sender() {
   let previous = '';
   let requestId = '';
@@ -21,7 +25,6 @@ function sender() {
 
 document.querySelectorAll<HTMLFormElement>('.session-form').forEach((form) => {
   const taskId = form.dataset.taskId!;
-  const feedback = form.querySelector<HTMLElement>('.feedback')!;
   const send = sender();
   const read = (kind: 'progress' | 'passed' = 'progress'): SessionFields => {
     const data = new FormData(form);
@@ -36,7 +39,7 @@ document.querySelectorAll<HTMLFormElement>('.session-form').forEach((form) => {
       const input = form.elements.namedItem(`evidence:${item.criterionId}`);
       if (input instanceof HTMLTextAreaElement) input.value = item.text;
     }
-    feedback.textContent = 'Draft lokal dipulihkan. Belum tersimpan sebagai sesi.';
+    announce(`session:${taskId}`, 'Draft dipulihkan', 'Draft lokal dipulihkan. Belum tersimpan sebagai sesi.');
   }
   form.addEventListener('input', () => { try { localStorage.setItem(`cs101:draft:${taskId}`, JSON.stringify(read())); } catch {} });
   form.addEventListener('submit', async (event) => {
@@ -44,13 +47,13 @@ document.querySelectorAll<HTMLFormElement>('.session-form').forEach((form) => {
     const button = (event as SubmitEvent).submitter as HTMLButtonElement | null;
     const buttons = form.querySelectorAll<HTMLButtonElement>('button');
     buttons.forEach((item) => item.disabled = true);
-    feedback.textContent = 'Menyimpan…';
+    announce(`session:${taskId}`, 'Menyimpan sesi', 'Perubahan sedang disimpan.');
     try {
       const state = await send('/api/sessions', { ...read(button?.value === 'passed' ? 'passed' : 'progress'), revision: Number(form.dataset.revision) });
       form.dataset.revision = String(state.revision);
       removeDraft(taskId);
-      feedback.textContent = 'Sesi tersimpan.';
-    } catch (error) { feedback.textContent = error instanceof Error ? error.message : 'Sesi belum tersimpan. Coba lagi.'; }
+      announce(`session:${taskId}`, 'Sesi tersimpan', 'Catatan sesi sudah tersimpan.', 'success');
+    } catch (error) { announce(`session:${taskId}`, 'Sesi belum tersimpan', error instanceof Error ? error.message : 'Sesi belum tersimpan. Coba lagi.', 'danger'); }
     finally { buttons.forEach((item) => item.disabled = false); }
   });
 });
@@ -58,8 +61,8 @@ document.querySelectorAll<HTMLFormElement>('.session-form').forEach((form) => {
 document.querySelectorAll<HTMLButtonElement>('[data-activate]').forEach((button) => {
   const send = sender();
   button.addEventListener('click', async () => {
-    const feedback = button.parentElement!.querySelector<HTMLElement>('[role=status]')!;
     button.disabled = true;
+    announce(`activate:${button.dataset.activate}`, 'Mengubah task aktif', 'Progres sedang diperbarui.');
     try {
       const response = await fetch('/api/learning');
       if (!response.ok) throw new Error('Progres belum dapat dibaca. Coba lagi.');
@@ -68,6 +71,6 @@ document.querySelectorAll<HTMLButtonElement>('[data-activate]').forEach((button)
       await send('/api/active-task', { taskId: button.dataset.activate, revision: Number(button.dataset.revision), ...(previousSession ? { previousSession } : {}) });
       if (state.activeTaskId) removeDraft(state.activeTaskId);
       location.reload();
-    } catch (error) { feedback.textContent = error instanceof Error ? error.message : 'Task belum diubah.'; button.disabled = false; }
+    } catch (error) { announce(`activate:${button.dataset.activate}`, 'Task belum diubah', error instanceof Error ? error.message : 'Task belum diubah.', 'danger'); button.disabled = false; }
   });
 });

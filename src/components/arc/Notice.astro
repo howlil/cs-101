@@ -1,0 +1,6 @@
+---
+import { Alert, type AlertTone } from './alert/alert';
+interface Props { title: string; message: string; tone?: AlertTone }
+const { title, message, tone = 'info' } = Astro.props;
+---
+<Alert title={title} tone={tone}>{message}</Alert>

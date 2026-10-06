@@ -1,23 +1,44 @@
 ---
 import '../styles/global.css';
+import { Badge } from '../components/arc/badge/badge';
+import CurriculumMenu from '../components/arc/CurriculumMenu';
+import SidebarToggle from '../components/arc/SidebarToggle';
+import ThemePreference from '../components/arc/ThemePreference';
+import { Heart, Star } from 'lucide-react';
 import { tasks } from '../server/curriculum';
 import { learning } from '../server/runtime';
 interface Props { title: string; description?: string }
 const { title, description = 'Materi, latihan, dan bukti belajar CS-101.' } = Astro.props;
-const state = (await learning()).snapshot();
+const state = await (await learning()).snapshot();
 const path = Astro.url.pathname;
 const tracks = [...new Set(tasks.map((task) => task.track))];
+const menuTracks = tracks.map((track) => ({
+  title: track,
+  active: tasks.some((task) => task.track === track && path === `/learn/${task.taskId}`),
+  tasks: tasks.filter((task) => task.track === track).map((task) => ({
+    taskId: task.taskId,
+    title: task.title,
+    href: `/learn/${task.taskId}`,
+    active: path === `/learn/${task.taskId}`,
+  })),
+}));
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---
 <!doctype html>
-<html lang="id">
+<html lang="id" data-accent="blue">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <title>{title} · CS-101</title>
     <script is:inline>
-      try { document.documentElement.dataset.theme = localStorage.getItem('cs101:theme') || 'system'; } catch {}
+      try {
+        const preference = localStorage.getItem('cs101:theme') || 'system';
+        document.documentElement.dataset.themePreference = preference;
+        document.documentElement.dataset.theme = preference === 'system'
+          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : preference;
+      } catch {}
     </script>
   </head>
   <body>
@@ -29,32 +50,27 @@ Astro.response.headers.set('Cache-Control', 'no-store');
         <a href={state.activeTaskId ? `/learn/${state.activeTaskId}` : '/progress'} aria-current={path.startsWith('/learn/') || path === '/demo' ? 'page' : undefined}>Materi</a>
         <a href="/progress" aria-current={path === '/progress' ? 'page' : undefined}>Progres</a>
       </nav>
-      <label class="theme-control"><span class="sr-only">Tema</span><select id="theme" aria-label="Tema"><option value="system">Sistem</option><option value="light">Terang</option><option value="dark">Gelap</option></select></label>
+      <div class="header-actions">
+        <a class="header-cta header-cta--star" href="https://github.com/howlil/cs-101" target="_blank" rel="noopener noreferrer" aria-label="Star this repo on GitHub" title="Star this repo">
+          <Star size={16} strokeWidth={1.8} aria-hidden="true" /><span>Star this repo</span>
+        </a>
+        <a class="header-cta header-cta--support" href="https://github.com/sponsors/howlil" target="_blank" rel="noopener noreferrer" aria-label="Donasi lewat GitHub Sponsors" title="Donasi lewat GitHub Sponsors">
+          <Heart size={16} strokeWidth={1.8} aria-hidden="true" /><span>Donate</span>
+        </a>
+        <SidebarToggle client:load />
+        <ThemePreference client:load />
+      </div>
     </header>
     <div class="shell">
-      <aside class="sidebar" aria-label="Daftar materi">
-        <div class="eyebrow">WORKSPACE / CS-101</div>
-        <details class="curriculum-menu" open>
-          <summary>Curriculum</summary>
-          <nav aria-label="Curriculum">
-            {tracks.map((track) => <section class="track"><h2>{track}</h2>{tasks.filter((task) => task.track === track).map((task) => <a href={`/learn/${task.taskId}`} aria-current={path === `/learn/${task.taskId}` ? 'page' : undefined}><span class="task-code">{task.taskId}</span>{task.title}</a>)}</section>)}
-            {!tasks.length && <p class="muted small">Belum ada task.</p>}
-          </nav>
-        </details>
-        <div class="sidebar-bottom"><span class="eyebrow">REFERENSI</span><a href="/demo" aria-current={path === '/demo' ? 'page' : undefined}>Contoh tampilan <span class="tag">Demo</span></a><p class="muted small">Pahami. Praktikkan. Simpan bukti.</p></div>
+      <aside id="course-sidebar" class="sidebar" aria-label="Daftar materi">
+        <div class="sidebar-heading"><h2>Materi</h2><span class="eyebrow">CS-101</span></div>
+        <CurriculumMenu client:load tracks={menuTracks} currentPath={path} />
+        {tasks.length > 0 && <div class="sidebar-bottom"><span class="eyebrow">REFERENSI</span><a href="/demo" aria-current={path === '/demo' ? 'page' : undefined}>Contoh tampilan <Badge tone="info" size="sm">Demo</Badge></a><p class="muted small">Pahami. Praktikkan. Simpan bukti.</p></div>}
       </aside>
       <main id="main" tabindex="-1"><slot /></main>
     </div>
     <script>
       import '../scripts/learning';
-      const theme = document.querySelector<HTMLSelectElement>('#theme');
-      if (theme) {
-        theme.value = document.documentElement.dataset.theme || 'system';
-        theme.addEventListener('change', () => {
-          document.documentElement.dataset.theme = theme.value;
-          try { localStorage.setItem('cs101:theme', theme.value); } catch {}
-        });
-      }
     </script>
   </body>
 </html>

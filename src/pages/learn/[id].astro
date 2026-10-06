@@ -3,6 +3,10 @@ import { getCollection, render } from 'astro:content';
 import AppLayout from '../../layouts/AppLayout.astro';
 import LessonLayout from '../../layouts/LessonLayout.astro';
 import SessionLogger from '../../components/course/SessionLogger.astro';
+import Notice from '../../components/arc/Notice.astro';
+import EmptyAction from '../../components/arc/EmptyAction';
+import Feedback from '../../components/arc/Feedback';
+import { Button } from '../../components/arc/button/button';
 import { tasks } from '../../server/curriculum';
 import { learning } from '../../server/runtime';
 import { fingerprint } from '../../domain/curriculum';
@@ -13,15 +17,15 @@ const lesson = lessons.find((item) => item.data.taskId === task.taskId && !item.
 const rendered = lesson ? await render(lesson) : null;
 const Content = rendered?.Content;
 const stale = !!lesson && lesson.data.curriculumFingerprint !== fingerprint(task);
-const state = (await learning()).snapshot();
+const state = await (await learning()).snapshot();
 const progress = state.progress.find((item) => item.taskId === task.taskId);
 ---
 {lesson && Content ? <LessonLayout title={task.title} description={lesson.data.description} taskId={task.taskId} headings={rendered?.headings}>
   <div slot="before">
-    {stale && <p class="notice">Materi perlu diperbarui. Bukti sebelumnya tetap tersimpan.</p>}
-    {progress?.continueFrom && <p class="notice">Lanjut dari: {progress.continueFrom}</p>}
-    {state.activeTaskId !== task.taskId && <div class="actions"><button class="primary" data-activate={task.taskId} data-revision={state.revision}>Jadikan task aktif</button><span role="status"></span></div>}
+    {stale && <Notice title="Materi perlu diperbarui" message="Bukti sebelumnya tetap tersimpan." tone="warning" />}
+    {progress?.continueFrom && <Notice title="Lanjut dari" message={progress.continueFrom} />}
+    {state.activeTaskId !== task.taskId && <div class="actions"><Button type="button" variant="primary" data-activate={task.taskId} data-revision={state.revision}>Jadikan task aktif</Button><Feedback client:load scope={`activate:${task.taskId}`} /></div>}
   </div>
   <Content />
   <div slot="after">{state.activeTaskId === task.taskId && <SessionLogger task={task} revision={state.revision} continueFrom={progress?.continueFrom} lastAnchor={progress?.lastAnchor} />}</div>
-</LessonLayout> : <AppLayout title={task.title}><div class="content"><p class="eyebrow">{task.taskId}</p><h1>{task.title}</h1><section class="empty"><h2>Materi belum tersedia.</h2><p class="muted">Lesson untuk task ini belum dibuat.</p><a href="/progress">Kembali ke daftar task</a></section></div></AppLayout>}
+</LessonLayout> : <AppLayout title={task.title}><div class="content"><p class="eyebrow">{task.taskId}</p><h1>{task.title}</h1><EmptyAction client:load title="Materi belum tersedia." description="Lesson untuk task ini belum dibuat." href="/progress" actionLabel="Kembali ke daftar task" /></div></AppLayout>}
