@@ -1,0 +1,5 @@
+---
+interface Props { title: string; brief: string; acceptanceCriteria: string[] }
+const { title, brief, acceptanceCriteria } = Astro.props;
+---
+<section><h2 id="challenge">{title}</h2><p>{brief}</p><h3>Kriteria selesai</h3><ul>{acceptanceCriteria.map((item) => <li>{item}</li>)}</ul><slot /></section>

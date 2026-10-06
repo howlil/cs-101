@@ -1,0 +1,14 @@
+---
+interface Props { items: { question: string; options: string[]; answer: number; explanation: string }[] }
+---
+{Astro.props.items.map((item) => <form class="quiz-form" data-answer={item.answer} data-explanation={item.explanation}><fieldset class="quiz"><legend>{item.question}</legend>{item.options.map((option, index) => <label><input type="radio" name="answer" value={index} required />{option}</label>)}<button type="submit">Cek jawaban</button><p class="feedback" role="status"></p></fieldset></form>)}
+<script>
+  document.querySelectorAll<HTMLFormElement>('.quiz-form').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const correct = new FormData(form).get('answer') === form.dataset.answer;
+      const feedback = form.querySelector<HTMLElement>('.feedback');
+      if (feedback) feedback.textContent = `${correct ? 'Jawaban benar.' : 'Belum tepat.'} ${form.dataset.explanation}`;
+    });
+  });
+</script>

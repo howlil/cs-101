@@ -1,0 +1,5 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+Astro.response.status = 404;
+---
+<AppLayout title="Halaman tidak ditemukan"><div class="content"><p class="eyebrow">404</p><h1>Halaman tidak ditemukan.</h1><p class="muted">Cek Task ID atau kembali ke daftar materi.</p><a href="/progress">Lihat daftar task</a></div></AppLayout>

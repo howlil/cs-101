@@ -1,0 +1,30 @@
+{
+  "name": "cs-101",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "check": "astro check",
+    "validate:content": "tsx scripts/validate-content.ts",
+    "build": "npm run validate:content && astro build",
+    "start": "node scripts/start.mjs",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "8.0.3",
+    "@astrojs/node": "11.1.7",
+    "astro": "7.3.6",
+    "yaml": "^2.9.1",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

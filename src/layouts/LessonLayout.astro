@@ -1,0 +1,18 @@
+---
+import AppLayout from './AppLayout.astro';
+interface Props { title: string; description: string; taskId: string; demo?: boolean; headings?: { depth: number; slug: string; text: string }[] }
+const { title, description, taskId, demo = false, headings = [] } = Astro.props;
+---
+<AppLayout title={title} description={description}>
+  <div class="lesson-grid">
+    <article class="prose">
+      <p class="eyebrow">{taskId} {demo && ' / DEMO'}</p>
+      <h1>{title}</h1><p class="lede">{description}</p>
+      {demo && <p class="notice">Contoh tampilan. Materi ini tidak masuk curriculum atau progres.</p>}
+      <slot name="before" />
+      <slot />
+      <slot name="after" />
+    </article>
+    {headings.length > 0 && <nav class="toc" aria-label="Di halaman ini"><span class="eyebrow">DI HALAMAN INI</span>{headings.filter((heading) => heading.depth === 2).map((heading) => <a href={`#${heading.slug}`}>{heading.text}</a>)}</nav>}
+  </div>
+</AppLayout>

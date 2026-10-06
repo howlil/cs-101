@@ -1,0 +1,7 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { tasks } from '../../server/curriculum';
+const task = tasks.find((item) => item.taskId === Astro.params.id);
+if (!task) return Astro.redirect('/404');
+---
+<AppLayout title={`Review · ${task.title}`}><div class="content"><p class="eyebrow">{task.taskId} / REVIEW</p><h1>{task.title}</h1><section class="empty"><h2>Review belum tersedia.</h2><p class="muted">Bank soal, penilaian, dan jadwal review belum diimplementasikan.</p><a href={`/learn/${task.taskId}`}>Buka materi</a></section></div></AppLayout>

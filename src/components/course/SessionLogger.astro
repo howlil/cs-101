@@ -1,0 +1,14 @@
+---
+import { fingerprint, requiredEvidence, type Task } from '../../domain/curriculum';
+interface Props { task: Task; revision: number; continueFrom?: string; lastAnchor?: string }
+const { task, revision, continueFrom = '', lastAnchor = '' } = Astro.props;
+---
+<form class="session-form" data-task-id={task.taskId} data-fingerprint={fingerprint(task)} data-revision={revision}>
+  <h2 id="simpan-sesi">Simpan sesi</h2>
+  <p class="muted small">Bukti dinilai mandiri. Simpan catatan untuk melanjutkan sesi berikutnya.</p>
+  <fieldset><legend>Bukti per kriteria</legend>{requiredEvidence(task).map((criterion) => <label>{criterion.text}<textarea name={`evidence:${criterion.id}`} rows="2" maxlength="8000"></textarea></label>)}</fieldset>
+  <label>Lanjut dari mana?<textarea name="continueFrom" rows="3" maxlength="4000">{continueFrom}</textarea></label>
+  <input type="hidden" name="lastAnchor" value={lastAnchor} />
+  <div class="actions"><button type="submit" class="primary" value="progress">Simpan sesi</button><button type="submit" value="passed">Ajukan lulus</button></div>
+  <p class="feedback" role="status" aria-live="polite"></p>
+</form>

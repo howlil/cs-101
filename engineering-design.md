@@ -2,7 +2,7 @@
 
 Draft arsitektur · 6 Oktober 2026 · Mengikuti [product design](design.md)
 
-**V1: satu aplikasi Astro + MDX, SQLite untuk progres, generation lewat agent/CLI.** Target awal satu learner pada satu server dengan disk persisten. Ini spesifikasi; aplikasi belum diimplementasikan. Skill `engineering design` belum tersedia, sehingga rancangan disusun langsung dari kontrak course-generator dan product design.
+**V1: satu aplikasi Astro + MDX, SQLite untuk progres, generation lewat agent/CLI.** Target awal satu learner pada satu server dengan disk persisten. Fondasi halaman, konten, dan API sesi sudah diimplementasikan; review engine dan pipeline generation masih menjadi target. Status fitur dan cara menjalankan ada di [README.md](README.md). Skill `engineering design` belum tersedia, sehingga rancangan disusun langsung dari kontrak course-generator dan product design.
 
 ## Gambaran sistem
 

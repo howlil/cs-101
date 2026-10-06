@@ -1,0 +1,8 @@
+---
+import { getEntry, render } from 'astro:content';
+import LessonLayout from '../layouts/LessonLayout.astro';
+const lesson = await getEntry('lessons', 'demo');
+if (!lesson) throw new Error('Demo lesson missing');
+const { Content, headings } = await render(lesson);
+---
+<LessonLayout {...lesson.data} headings={headings}><Content /></LessonLayout>

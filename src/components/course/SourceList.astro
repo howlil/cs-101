@@ -1,0 +1,5 @@
+---
+interface Props { sources: { title: string; url: string }[] }
+const sources = Astro.props.sources.filter((source) => { try { return ['http:', 'https:'].includes(new URL(source.url).protocol); } catch { return false; } });
+---
+<section><h2 id="sumber">Sumber</h2><ul>{sources.map((source) => <li><a href={source.url} rel="noreferrer">{source.title}</a></li>)}</ul></section>
