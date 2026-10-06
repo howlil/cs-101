@@ -1,0 +1,15 @@
+{
+  "taskId": "{{TASK_ID}}",
+  "curriculumFingerprint": "{{CURRICULUM_FINGERPRINT}}",
+  "generatedAt": "{{GENERATED_AT}}",
+  "sources": [],
+  "exitCriteriaCoverage": [],
+  "build": {
+    "passed": false,
+    "command": "npm run build"
+  },
+  "validator": {
+    "passed": false,
+    "issues": []
+  }
+}
