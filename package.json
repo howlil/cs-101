@@ -21,7 +21,10 @@
     "migrate:cloudflare": "wrangler d1 migrations apply LEARNING_DB --remote",
     "import:curriculum": "tsx scripts/import-curriculum.ts",
     "validate:curriculum": "tsx scripts/validate-curriculum.ts",
-    "validate:reviews": "tsx scripts/validate-review-banks.ts"
+    "validate:reviews": "tsx scripts/validate-review-banks.ts",
+    "generation:prepare": "tsx scripts/prepare-generation.ts",
+    "generation:validate": "tsx scripts/validate-generation.ts",
+    "generation:promote": "tsx scripts/promote-generation.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",
