@@ -76,7 +76,7 @@ const nextProjectBase = {
     { id: 'inherit', text: 'Includes every Project 1 requirement' },
     { id: 'project-proof-2', text: 'New invariant terbukti' },
   ],
-  prerequisites: ['TEST-P01'],
+  prerequisites: ['TEST-002'],
 };
 
 const project = fp(projectBase);
@@ -91,7 +91,7 @@ const manifest: CurriculumManifestV2 = {
     { from: 'TEST-001', to: 'TEST-003', type: 'prerequisite' },
     { from: 'TEST-001', to: 'TEST-P01', type: 'prerequisite' },
     { from: 'TEST-001', to: 'TEST-P01', type: 'contributes_to' },
-    { from: 'TEST-P01', to: 'TEST-P02', type: 'prerequisite' },
+    { from: 'TEST-002', to: 'TEST-P02', type: 'prerequisite' },
     { from: 'TEST-P01', to: 'TEST-P02', type: 'project_parent' },
   ],
 };
@@ -439,6 +439,36 @@ test('checkpoint mengikuti locked → ready → active → passed dan membuka pr
       completed.availability.find((entry) => entry.itemId === nextProject.id)?.status,
       'ready',
     );
+  } finally {
+    db.close();
+  }
+});
+
+
+test('parent checkpoint memblokir project berikutnya walau explicit prerequisite sudah passed', () => {
+  const db = openDatabase(':memory:');
+  try {
+    const service = new LearningService(db, graph, () => true);
+
+    // TEST-002 adalah explicit prerequisite TEST-P02, tetapi parent TEST-P01 belum passed.
+    service.setActiveItem({ ...envelope(0), itemId: next.id });
+    const nextEvidence = requiredEvidenceForItem(next).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence next unit',
+    }));
+    const nextPassed = service.saveSession({
+      ...envelope(1),
+      itemId: next.id,
+      fingerprint: next.fingerprint,
+      kind: 'passed',
+      evidence: nextEvidence,
+      continueFrom: '',
+      lastAnchor: '',
+    });
+
+    const availability = nextPassed.availability.find((entry) => entry.itemId === nextProject.id);
+    assert.equal(availability?.status, 'locked');
+    assert.deepEqual(availability?.missingPrerequisites, ['TEST-P01']);
   } finally {
     db.close();
   }

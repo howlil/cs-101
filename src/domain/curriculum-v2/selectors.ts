@@ -1,4 +1,5 @@
 import type { CurriculumGraph } from './graph';
+import type { ProjectCheckpoint } from './schema';
 export function getTrackExplorer(graph:CurriculumGraph,trackId:string){const track=graph.tracksById.get(trackId);if(!track)throw new Error('Track tidak ditemukan: '+trackId);const modules=[...graph.modulesById.values()].filter(x=>x.trackId===trackId).sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id)).map(module=>({...module,items:(graph.moduleItems.get(module.id)??[]).map(id=>graph.itemsById.get(id)!)}));return{track,modules};}
 export function getItemConnections(graph:CurriculumGraph,itemId:string){if(!graph.itemsById.has(itemId))throw new Error('Item tidak ditemukan: '+itemId);return{prerequisites:graph.prerequisites.get(itemId)??[],dependents:graph.dependents.get(itemId)??[],outgoing:graph.relationsFrom.get(itemId)??[],incoming:graph.relationsTo.get(itemId)??[]};}
 const normalizeRequirement=(text:string)=>text.toLowerCase().replace(/\s+/g,' ').trim();
@@ -41,7 +42,7 @@ export function getProjectNavigation(graph:CurriculumGraph,projectId:string){
   const parent=project.parentProjectId?graph.itemsById.get(project.parentProjectId):undefined;
   const children=(graph.projectChildren.get(project.id)??[])
     .map(id=>graph.itemsById.get(id))
-    .filter((item):item is Extract<NonNullable<typeof item>,{kind:'checkpoint'}>=>item?.kind==='checkpoint')
+    .filter((item):item is ProjectCheckpoint=>item?.kind==='checkpoint')
     .sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
   return{
     project,

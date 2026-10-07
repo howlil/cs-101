@@ -40,6 +40,14 @@ export function withCurrentCompletion(
   });
 }
 
+export function blockingPrerequisites(item: CurriculumItem): string[] {
+  const ids = [
+    ...item.prerequisites,
+    ...(item.kind === 'checkpoint' && item.parentProjectId ? [item.parentProjectId] : []),
+  ];
+  return [...new Set(ids)];
+}
+
 export function deriveAvailability(
   graph: CurriculumGraph,
   progress: ItemProgressState[],
@@ -50,7 +58,7 @@ export function deriveAvailability(
   );
 
   return graph.manifest.items.map((item) => {
-    const missingPrerequisites = item.prerequisites.filter((id) => !passed.has(id));
+    const missingPrerequisites = blockingPrerequisites(item).filter((id) => !passed.has(id));
     return {
       itemId: item.id,
       status: missingPrerequisites.length ? 'locked' : 'ready',
@@ -70,5 +78,5 @@ export function missingPrerequisites(
   const passed = new Set(
     current.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId),
   );
-  return item.prerequisites.filter((id) => !passed.has(id));
+  return blockingPrerequisites(item).filter((id) => !passed.has(id));
 }
