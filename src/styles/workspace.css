@@ -1,0 +1,455 @@
+/* Spatial contract for non-curriculum workspaces.
+   The page frame uses the available desktop width; reading measure is constrained inside the frame. */
+
+.app-main:not(.app-main--flush) {
+  padding-inline: 20px;
+}
+
+.content {
+  width: min(920px, 100%);
+  max-width: none;
+  margin-inline: auto;
+}
+
+.today-page,
+.progress-page,
+.project-workspace,
+.integration-workspace,
+.review-workspace,
+.lesson-grid {
+  width: min(var(--workspace-max), 100%);
+  max-width: none;
+  margin-inline: auto;
+}
+
+/* Today */
+.today-header,
+.progress-page > .compact-page-header {
+  max-width: var(--workspace-readable);
+}
+
+.today-workbench,
+.progress-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
+  gap: var(--workspace-gap);
+  align-items: start;
+}
+
+.today-workbench:not(.has-review),
+.progress-workbench:not(:has(.progress-sidecar)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.today-primary,
+.progress-primary {
+  min-width: 0;
+}
+
+.today-focus {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  column-gap: 28px;
+  align-items: start;
+}
+
+.today-path,
+.today-title-line {
+  grid-column: 1 / -1;
+}
+
+.today-why {
+  grid-column: 1;
+}
+
+.today-next-step {
+  grid-column: 2;
+}
+
+.today-focus:not(:has(.today-why)) .today-next-step {
+  grid-column: 1 / -1;
+  max-width: var(--workspace-readable);
+}
+
+.today-focus > a {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 10px;
+}
+
+.today-sidecar,
+.progress-sidecar {
+  position: sticky;
+  top: calc(var(--app-topbar-height) + 18px);
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+
+.today-sidecar .today-review-heading {
+  margin-bottom: 8px;
+}
+
+.today-sidecar .today-review-row {
+  grid-template-columns: 18px minmax(0, 1fr);
+  padding: 9px 0;
+}
+
+.today-sidecar .today-review-cta {
+  grid-column: 2;
+  justify-self: start;
+}
+
+/* Progress */
+.progress-modules {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.progress-sidecar {
+  display: grid;
+  gap: 22px;
+}
+
+.progress-sidecar .progress-review-queue,
+.progress-sidecar .progress-integrations {
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+}
+
+.progress-sidecar .progress-review-items,
+.progress-sidecar .progress-integration-items {
+  gap: 0;
+}
+
+.progress-sidecar .progress-review-items a,
+.progress-sidecar .progress-integration-items a {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+
+.progress-sidecar .progress-review-items a:hover,
+.progress-sidecar .progress-integration-items a:hover {
+  background: transparent;
+}
+
+.progress-integration-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.progress-integration-copy strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-history {
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+
+.progress-history > .progress-section-heading,
+.progress-history > .empty-state {
+  grid-column: 1 / -1;
+}
+
+/* Lesson: prose remains readable, right side becomes a real context region. */
+.lesson-grid {
+  display: grid;
+  grid-template-columns: minmax(0, var(--content-measure)) minmax(320px, 1fr);
+  grid-template-areas: "main side";
+  gap: var(--workspace-gap);
+  align-items: start;
+}
+
+.lesson-grid > .prose {
+  grid-area: main;
+  width: 100%;
+  max-width: var(--content-measure);
+}
+
+.lesson-sidecar {
+  grid-area: side;
+  position: sticky;
+  top: calc(var(--app-topbar-height) + 18px);
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(180px, .72fr);
+  gap: 20px;
+  align-items: start;
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
+}
+
+.lesson-sidecar:not(:has(.toc)) {
+  grid-template-columns: minmax(0, 420px);
+}
+
+.lesson-sidecar .lesson-execution-context {
+  margin: 0;
+}
+
+.lesson-sidecar .lesson-why,
+.lesson-sidecar .lesson-small-step {
+  padding: 9px 0;
+}
+
+.lesson-sidecar .lesson-why {
+  border-top: 0;
+}
+
+.lesson-sidecar .lesson-why ul {
+  margin: 6px 0 0;
+  padding-left: 17px;
+  font-size: 11px;
+}
+
+.lesson-sidecar .lesson-small-step strong {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.lesson-sidecar .lesson-stuck {
+  border-bottom: 1px solid var(--line);
+}
+
+.lesson-sidecar .toc {
+  position: static;
+  display: block;
+  margin: 0;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 11px;
+}
+
+.lesson-sidecar .toc a {
+  padding: 4px 0;
+}
+
+/* Project / Integration: page frame fills the workbench.
+   Long-form children keep a readable measure while rules/dividers span the primary region. */
+.project-header,
+.integration-header {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
+  column-gap: var(--workspace-gap);
+}
+
+.project-header > :not(.project-status-row),
+.integration-header > :not(.integration-status-row) {
+  grid-column: 1;
+}
+
+.project-status-row,
+.integration-status-row {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  align-self: end;
+  justify-self: start;
+  margin: 0 0 4px;
+}
+
+.project-header h1,
+.integration-header h1,
+.project-problem,
+.integration-brief {
+  max-width: var(--workspace-readable);
+}
+
+.project-body,
+.integration-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
+  grid-template-areas: "main side";
+  gap: var(--workspace-gap);
+  align-items: start;
+}
+
+.project-main,
+.integration-main {
+  grid-area: main;
+  min-width: 0;
+}
+
+.project-sidecar,
+.integration-sidecar {
+  grid-area: side;
+  position: sticky;
+  top: calc(var(--app-topbar-height) + 18px);
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+
+.project-section,
+.project-evidence-section,
+.integration-section,
+.integration-evidence-section {
+  max-width: none;
+}
+
+.project-section > *,
+.integration-section > * {
+  max-width: var(--workspace-readable);
+}
+
+.project-evidence-form,
+.integration-evidence-form {
+  max-width: 980px;
+}
+
+/* Review */
+.review-header {
+  max-width: none;
+}
+
+.review-header h1,
+.review-instruction-line {
+  max-width: var(--workspace-readable);
+}
+
+.review-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
+  grid-template-areas: "main side";
+  gap: var(--workspace-gap);
+  align-items: start;
+}
+
+.review-main {
+  grid-area: main;
+  min-width: 0;
+}
+
+.review-sidecar {
+  grid-area: side;
+  position: sticky;
+  top: calc(var(--app-topbar-height) + 18px);
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+
+.review-attempt,
+.review-main > .arc-alert,
+.review-main > .empty-state {
+  max-width: 980px;
+}
+
+/* Keep the full desktop workbench balanced instead of leaving all spare width on the right. */
+@media (min-width: 1180px) {
+  .today-page,
+  .progress-page,
+  .project-workspace,
+  .integration-workspace,
+  .review-workspace,
+  .lesson-grid {
+    padding-inline: 4px;
+  }
+}
+
+@media (max-width: 1240px) {
+  .lesson-sidecar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lesson-sidecar .toc {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 1100px) {
+  .today-workbench,
+  .progress-workbench,
+  .project-body,
+  .integration-body,
+  .review-body {
+    grid-template-columns: 1fr;
+    grid-template-areas: none;
+    gap: 20px;
+  }
+
+  .today-focus {
+    grid-template-columns: 1fr;
+  }
+
+  .today-path,
+  .today-title-line,
+  .today-why,
+  .today-next-step,
+  .today-focus:not(:has(.today-why)) .today-next-step,
+  .today-focus > a {
+    grid-column: 1;
+  }
+
+  .today-sidecar,
+  .progress-sidecar,
+  .project-sidecar,
+  .integration-sidecar,
+  .review-sidecar {
+    position: static;
+    padding: 16px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .project-header,
+  .integration-header {
+    display: block;
+  }
+
+  .project-status-row,
+  .integration-status-row {
+    margin-top: 12px;
+  }
+
+  .lesson-grid {
+    width: min(var(--content-measure), 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .lesson-sidecar {
+    order: 0;
+    position: static;
+    width: 100%;
+    display: block;
+    padding: 0 0 12px;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lesson-grid > .prose {
+    order: 1;
+    width: 100%;
+  }
+
+  .lesson-sidecar .toc {
+    display: none;
+  }
+
+  .progress-history {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-main:not(.app-main--flush) {
+    padding-inline: 14px;
+  }
+
+  .today-workbench,
+  .progress-workbench {
+    gap: 16px;
+  }
+}

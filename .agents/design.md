@@ -199,11 +199,12 @@ Item row cukup berisi status marker, ID, dan judul pendek. Metadata detail tetap
 
 ### Main workspace
 
-- Shell memakai ruang horizontal yang tersedia; jangan membatasi semua halaman ke 720 px.
-- Jangan menyelesaikan whitespace desktop dengan melebarkan prose. Lebar baca utama tetap sekitar 72–76ch.
-- Desktop lebar memakai pola **adaptive workbench**: primary work area 680–860 px + context rail 260–320 px bila ada konteks sekunder yang benar-benar membantu keputusan.
+- Shell memakai ruang horizontal yang tersedia; jangan membatasi page frame ke ukuran artikel.
+- **Page frame dan reading measure adalah dua hal berbeda.** Workbench desktop boleh sampai ±1500 px dan harus centered; prose tetap sekitar 72–76ch.
+- Jangan meninggalkan semua surplus width di kanan karena container max-width yang menempel kiri. Sisa ruang desktop harus seimbang melalui centered workbench.
+- Desktop lebar memakai pola **adaptive workbench**: primary region elastis + context rail sekitar 300–320 px bila ada konteks sekunder yang membantu keputusan.
+- Primary region boleh melebar untuk matrix, rows, evidence, requirement, dan progress; paragraph/readable children tetap dibatasi ±860 px.
 - Context rail hanya untuk state/action, next step, readiness/prerequisite, TOC, review, lineage, atau connections. Jangan mengisinya dengan dekorasi agar ruang terlihat penuh.
-- Today/Progress/Project/Integration/Review boleh memakai workspace sampai sekitar 1360 px karena ruang tambahan dipakai oleh context rail, bukan prose.
 - Header halaman compact: breadcrumb/ID/title hanya jika informasinya mengubah orientasi.
 - Hapus subtitle generik, helper copy yang mengulang CTA, dan panel dekoratif.
 - Tidak ada hero marketing atau stat cards generic di Hari ini.
@@ -211,10 +212,12 @@ Item row cukup berisi status marker, ID, dan judul pendek. Metadata detail tetap
 Pola desktop:
 
 ```text
-Primary task / reading               Context rail
-680–860 px                           260–320 px
-───────────────────────────────      ─────────────────
-content yang sedang dikerjakan       state / next / dependency / TOC
+Centered workbench ≤1500 px
+┌──────────────────────────────────────────────────────────────┐
+│ Primary region, elastic              Context rail 300–320px │
+│ ├─ readable prose ≤76ch              state / next / deps    │
+│ └─ rows/matrix/evidence may expand   TOC / review / lineage │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 Jika tidak ada konteks sekunder yang berguna, primary area tidak perlu dipaksa memiliki rail kosong.
