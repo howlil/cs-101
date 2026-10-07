@@ -45,8 +45,8 @@
   height: 34px;
   display: inline-grid;
   place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--muted);
   text-decoration: none;
@@ -88,7 +88,7 @@
   position: relative;
   display: grid;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   color: var(--muted);
   text-decoration: none;
   transition: color 140ms ease, background-color 140ms ease;
