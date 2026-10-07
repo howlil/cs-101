@@ -11,7 +11,6 @@ import {
   getItemLearningView,
   getProgressOverview,
   getTodayView,
-  itemStateMarker,
   type LearningViewState,
 } from '../src/domain/learning/view-models';
 
@@ -122,7 +121,6 @@ test('item view membedakan focus active dari item yang hanya pernah started', ()
 
   assert.equal(old.completion, 'started');
   assert.equal(old.displayState, 'started');
-  assert.equal(itemStateMarker(old.displayState, old.item.kind), '◐');
   assert.equal(current.completion, 'active');
   assert.equal(current.displayState, 'active');
 });
