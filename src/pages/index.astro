@@ -18,6 +18,7 @@ const hrefFor = (itemId: string) => {
   const item = curriculumGraph.itemsById.get(itemId);
   if (item?.kind === 'unit') return `/learn/${itemId}`;
   if (item?.kind === 'checkpoint') return `/project/${itemId}`;
+  if (item?.kind === 'integration') return `/integration/${itemId}`;
   return `/curriculum?item=${encodeURIComponent(itemId)}`;
 };
 ---

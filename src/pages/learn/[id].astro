@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import AppLayout from '../../layouts/AppLayout.astro';
+import Connections from '../../components/curriculum/Connections.astro';
 import LessonLayout from '../../layouts/LessonLayout.astro';
 import SessionLogger from '../../components/course/SessionLogger.astro';
 import Notice from '../../components/arc/Notice.astro';
@@ -49,6 +50,7 @@ const progress = state.progress.find((entry) => entry.itemId === item.id);
     </div>
     <Content />
     <div slot="after">
+      <Connections graph={curriculumGraph} itemId={item.id} compact />
       {state.activeItemId === item.id && (
         <SessionLogger
           itemId={item.id}

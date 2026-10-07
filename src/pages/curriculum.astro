@@ -69,7 +69,7 @@ const stateMarker = (itemId: string, kind: string) => {
 const itemHref = (itemId: string) => {
   const location = getItemLocation(graph, itemId);
   if (location.item.kind === 'checkpoint') return `/project/${encodeURIComponent(itemId)}`;
-  if (location.item.kind === 'integration') return `/curriculum?item=${encodeURIComponent(itemId)}`;
+  if (location.item.kind === 'integration') return `/integration/${encodeURIComponent(itemId)}`;
   return `/curriculum?track=${encodeURIComponent(location.track!.id)}&item=${encodeURIComponent(itemId)}`;
 };
 
@@ -277,20 +277,15 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
           )}
 
           {selectedItem.kind === 'integration' && (
-            <>
-              <section class="item-section">
-                <h3>Brief</h3>
-                <p>{selectedItem.brief}</p>
-              </section>
-              <section class="item-section">
-                <h3>Scope</h3>
-                <ul class="compact-list">{selectedItem.scope.map((scope) => <li>{scope}</li>)}</ul>
-              </section>
-              <section class="item-section">
-                <h3>Definition of Done</h3>
-                <ol class="criteria-list">{selectedItem.criteria.map((criterion) => <li>{criterion.text}</li>)}</ol>
-              </section>
-            </>
+            <section class="item-section">
+              <h3>Cross-track integration</h3>
+              <p>{selectedItem.brief}</p>
+              <p>
+                <a class="workspace-action" href={`/integration/${selectedItem.id}`}>
+                  Buka integration workspace
+                </a>
+              </p>
+            </section>
           )}
 
           <section class="item-section item-meta">

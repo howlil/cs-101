@@ -1,5 +1,3 @@
-@import './connections.css';
-
 .integration-workspace {
   width: min(920px,100%);
 }
