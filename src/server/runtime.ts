@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { curriculumGraph } from './curriculum';
 import { LearningService } from './learning';
 import { CloudflareLearningService, type D1Database } from './cloudflare-learning';
+import { reviewBankFor } from './review-bank';
 
 let service: LearningService | undefined;
 
@@ -24,13 +25,13 @@ export async function learning() {
   } catch {}
 
   if (database) {
-    return new CloudflareLearningService(database, curriculumGraph, lessonReady);
+    return new CloudflareLearningService(database, curriculumGraph, lessonReady, reviewBankFor);
   }
 
   if (!service) {
     const { openDatabase } = await import('./storage');
     const db = openDatabase(resolve(process.env.CS101_DB_PATH ?? '.data/learning.sqlite'));
-    service = new LearningService(db, curriculumGraph, lessonReady);
+    service = new LearningService(db, curriculumGraph, lessonReady, reviewBankFor);
   }
   return service;
 }
