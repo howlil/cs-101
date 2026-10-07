@@ -16,7 +16,7 @@
     "start": "node scripts/start.mjs",
     "test": "tsx --test tests/*.test.ts",
     "deploy:cloudflare": "wrangler deploy && wrangler d1 migrations apply LEARNING_DB --remote",
-    "preview:cloudflare": "pnpm run build:cloudflare && wrangler dev"
+    "preview:cloudflare": "wrangler dev"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",
