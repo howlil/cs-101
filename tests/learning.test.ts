@@ -315,3 +315,20 @@ test('restart mempertahankan sesi dan active item dari SQLite disk', () => {
     rmSync(directory, { recursive: true });
   }
 });
+
+test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () => {
+  const db = openDatabase(':memory:');
+  try {
+    db.prepare('INSERT INTO item_progress(item_id,status,passed_fingerprint,last_anchor,continue_from) VALUES(?,?,?,?,?)')
+      .run(unit.id, 'passed', `sha256:${'0'.repeat(64)}`, '', '');
+    const service = new LearningService(db, graph, () => true);
+    const snapshot = service.snapshot();
+    assert.equal(snapshot.progress.find((entry) => entry.itemId === unit.id)?.status, 'stale');
+    assert.equal(
+      snapshot.availability.find((entry) => entry.itemId === locked.id)?.status,
+      'locked',
+    );
+  } finally {
+    db.close();
+  }
+});
