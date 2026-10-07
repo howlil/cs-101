@@ -2,9 +2,8 @@
 import source from '../../curriculum/manifest.v2.json';
 import '../styles/curriculum.css';
 import AppLayout from '../layouts/AppLayout.astro';
-import Feedback from '../components/arc/Feedback';
+import ActivateItem from '../components/learning/ActivateItem';
 import CurriculumExplorer from '../components/curriculum/CurriculumExplorer';
-import { Button } from '../components/arc/button/button';
 import { learning } from '../server/runtime';
 import { buildCurriculumGraph } from '../domain/curriculum-v2/graph';
 import {
@@ -148,17 +147,11 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
                   ) : view.displayState === 'active' ? (
                     <a class="workspace-action" href={view.href}>Lanjutkan</a>
                   ) : view.displayState === 'ready' || view.displayState === 'started' ? (
-                    <>
-                      <Button
-                        type="button"
-                        variant="primary"
-                        data-activate-item={selectedItem.id}
-                        data-revision={learningState.revision}
-                      >
-                        {view.displayState === 'started' ? 'Lanjutkan item' : 'Jadikan aktif'}
-                      </Button>
-                      <Feedback client:load scope={`activate:${selectedItem.id}`} />
-                    </>
+                    <ActivateItem
+                      client:load
+                      itemId={selectedItem.id}
+                      label={view.displayState === 'started' ? 'Lanjutkan item' : 'Jadikan aktif'}
+                    />
                   ) : view.displayState === 'locked' ? (
                     <span class="state-label state-label--locked">
                       Terkunci · selesaikan {view.missingPrerequisites.join(', ')}
