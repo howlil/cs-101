@@ -1,11 +1,10 @@
 ---
 import '../styles/global.css';
 import '../styles/app-shell.css';
-import ThemePreference from '../components/arc/ThemePreference';
-import CurriculumSearch from '../components/search/CurriculumSearch';
+import { ClientRouter } from 'astro:transitions';
+import AppShell from '../components/app/AppShell';
 import { curriculumGraph } from '../server/curriculum';
 import { buildCurriculumSearchIndex, itemHref } from '../domain/curriculum-v2/selectors';
-import { BarChart3, BookOpen, Heart, Home, Star } from 'lucide-react';
 
 interface Props {
   title: string;
@@ -25,13 +24,6 @@ const searchEntries = buildCurriculumSearchIndex(curriculumGraph).map((entry) =>
   href: itemHref(curriculumGraph, entry.itemId),
 }));
 
-const materialActive =
-  path === '/curriculum' ||
-  path.startsWith('/learn/') ||
-  path.startsWith('/project/') ||
-  path.startsWith('/integration/') ||
-  path === '/demo';
-
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---
 <!doctype html>
@@ -41,6 +33,7 @@ Astro.response.headers.set('Cache-Control', 'no-store');
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <title>{title} · CS-101</title>
+    <ClientRouter />
     <script is:inline>
       try {
         const preference = localStorage.getItem('cs101:theme') || 'system';
@@ -52,77 +45,14 @@ Astro.response.headers.set('Cache-Control', 'no-store');
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Langsung ke isi</a>
-
-    <header class="topbar">
-      <a class="brand" href="/">
-        CS-101
-        <span class="brand-sub">Catatan belajar</span>
-      </a>
-
-      <div class="header-actions">
-        <CurriculumSearch client:load entries={searchEntries} />
-        <a
-          class="top-action"
-          href="https://github.com/howlil/cs-101"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Star CS-101 di GitHub"
-          title="Star this repo"
-        >
-          <Star size={15} strokeWidth={1.8} aria-hidden="true" />
-        </a>
-        <a
-          class="top-action"
-          href="https://github.com/sponsors/howlil"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Donasi lewat GitHub Sponsors"
-          title="Donate"
-        >
-          <Heart size={15} strokeWidth={1.8} aria-hidden="true" />
-        </a>
-        <ThemePreference client:load />
-      </div>
-    </header>
-
-    <div class="app-shell">
-      <aside class="global-rail" aria-label="Navigasi utama">
-        <nav class="global-nav">
-          <a
-            class="rail-link"
-            href="/"
-            aria-current={path === '/' ? 'page' : undefined}
-            data-label="Hari ini"
-          >
-            <Home size={19} strokeWidth={1.8} aria-hidden="true" />
-            <span class="sr-only">Hari ini</span>
-          </a>
-          <a
-            class="rail-link"
-            href="/curriculum"
-            aria-current={materialActive ? 'page' : undefined}
-            data-label="Materi"
-          >
-            <BookOpen size={19} strokeWidth={1.8} aria-hidden="true" />
-            <span class="sr-only">Materi</span>
-          </a>
-          <a
-            class="rail-link"
-            href="/progress"
-            aria-current={path === '/progress' ? 'page' : undefined}
-            data-label="Progres"
-          >
-            <BarChart3 size={19} strokeWidth={1.8} aria-hidden="true" />
-            <span class="sr-only">Progres</span>
-          </a>
-        </nav>
-      </aside>
-
-      <main id="main" class:list={['app-main', { 'app-main--flush': flush }]} tabindex="-1">
-        <slot />
-      </main>
-    </div>
-
+    <AppShell
+      client:load
+      transition:persist="cs101-app-shell"
+      currentPath={path}
+      flush={flush}
+      searchEntries={searchEntries}
+    >
+      <slot />
+    </AppShell>
   </body>
 </html>

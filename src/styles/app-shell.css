@@ -15,6 +15,9 @@
 
 .brand {
   min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   color: var(--text);
   text-decoration: none;
   font-size: 14px;
@@ -205,4 +208,16 @@
   background: var(--surface-muted);
   border-color: var(--border-strong);
   outline: none;
+}
+
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-control);
+  background: var(--foreground);
+  color: var(--background);
+  font: 700 10px/1 var(--font-body);
+  letter-spacing: -.03em;
 }
