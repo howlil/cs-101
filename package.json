@@ -15,7 +15,7 @@
     "build:cloudflare": "pnpm run build",
     "start": "node scripts/start.mjs",
     "test": "tsx --test tests/*.test.ts",
-    "deploy:cloudflare": "pnpm run build && wrangler deploy",
+    "deploy:cloudflare": "wrangler d1 migrations apply LEARNING_DB --remote && wrangler deploy",
     "preview:cloudflare": "pnpm run build && wrangler dev",
     "build:node": "pnpm run validate:content && astro build --config astro.node.config.mjs",
     "migrate:cloudflare": "wrangler d1 migrations apply LEARNING_DB --remote"

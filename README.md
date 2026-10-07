@@ -42,7 +42,7 @@ Gunakan konfigurasi dashboard berikut:
 
 ```text
 Build command:  pnpm run build
-Deploy command: npx wrangler deploy
+Deploy command: pnpm run deploy:cloudflare
 Root directory: /
 Production branch: master
 ```
@@ -61,8 +61,9 @@ Untuk deploy manual dari terminal:
 
 ```sh
 pnpm run deploy:cloudflare
-pnpm run migrate:cloudflare
 ```
+
+Script deploy menerapkan migration D1 yang belum terpasang terlebih dahulu, lalu menjalankan `wrangler deploy`. `pnpm run migrate:cloudflare` tetap tersedia untuk menjalankan migration tanpa deploy.
 
 `astro.config.mjs` adalah konfigurasi production Cloudflare. `pnpm dev` dan `pnpm run build:node` memakai `astro.node.config.mjs` untuk runtime Node + `node:sqlite` lokal.
 
