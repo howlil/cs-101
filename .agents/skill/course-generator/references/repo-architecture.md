@@ -40,7 +40,7 @@ cs-101/
 │  │     ├─ ExitCriteria.astro
 │  │     ├─ SourceList.astro
 │  │     ├─ ContinueFrom.astro
-│  │     ├─ SessionLogger.astro
+│  │     ├─ SessionLogger.tsx
 │  │     ├─ ReviewMode.astro
 │  │     └─ Reveal.astro
 │  ├─ layouts/

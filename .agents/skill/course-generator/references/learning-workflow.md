@@ -77,7 +77,7 @@ Recommended components:
 
 - `ActiveTask.astro`
 - `ContinueFrom.astro`
-- `SessionLogger.astro`
+- `SessionLogger.tsx`
 - `EvidencePanel.astro`
 - `ReviewMode.astro`
 - `ExitCriteria.astro`
