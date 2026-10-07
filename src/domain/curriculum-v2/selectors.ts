@@ -3,3 +3,60 @@ export function getTrackExplorer(graph:CurriculumGraph,trackId:string){const tra
 export function getItemConnections(graph:CurriculumGraph,itemId:string){if(!graph.itemsById.has(itemId))throw new Error('Item tidak ditemukan: '+itemId);return{prerequisites:graph.prerequisites.get(itemId)??[],dependents:graph.dependents.get(itemId)??[],outgoing:graph.relationsFrom.get(itemId)??[],incoming:graph.relationsTo.get(itemId)??[]};}
 const normalizeRequirement=(text:string)=>text.toLowerCase().replace(/\s+/g,' ').trim();
 export function getProjectDelta(graph:CurriculumGraph,projectId:string){const project=graph.itemsById.get(projectId);if(!project||project.kind!=='checkpoint')throw new Error('Checkpoint tidak ditemukan: '+projectId);if(!project.parentProjectId)return{project,parent:undefined,inherited:[],added:project.requirements};const parent=graph.itemsById.get(project.parentProjectId);if(!parent||parent.kind!=='checkpoint')throw new Error('Project parent tidak valid: '+projectId);const previous=new Set(parent.requirements.map(x=>normalizeRequirement(x.text)));return{project,parent,inherited:project.requirements.filter(x=>previous.has(normalizeRequirement(x.text))),added:project.requirements.filter(x=>!previous.has(normalizeRequirement(x.text)))};}
+
+export function getItemLocation(graph:CurriculumGraph,itemId:string){
+  const item=graph.itemsById.get(itemId);
+  if(!item)throw new Error('Item tidak ditemukan: '+itemId);
+  if(item.kind==='integration')return{item,track:undefined,module:undefined};
+  const track=graph.tracksById.get(item.trackId);
+  const module=graph.modulesById.get(item.moduleId);
+  if(!track||!module)throw new Error('Lokasi item tidak valid: '+itemId);
+  return{item,track,module};
+}
+
+export type CurriculumSearchEntry={
+  itemId:string;
+  title:string;
+  kind:'unit'|'checkpoint'|'integration';
+  trackId?:string;
+  trackTitle?:string;
+  moduleId?:string;
+  moduleTitle?:string;
+  searchText:string;
+};
+
+export function buildCurriculumSearchIndex(graph:CurriculumGraph):CurriculumSearchEntry[]{
+  return graph.manifest.items.map((item)=>{
+    const location=getItemLocation(graph,item.id);
+    const searchable=item.kind==='unit'
+      ? item.scope
+      : item.kind==='integration'
+        ? item.scope
+        : [];
+    const searchText=[
+      item.id,
+      item.title,
+      location.track?.title??'',
+      location.module?.title??'',
+      ...searchable,
+    ].join(' ').toLocaleLowerCase('id-ID');
+    return{
+      itemId:item.id,
+      title:item.title,
+      kind:item.kind,
+      trackId:location.track?.id,
+      trackTitle:location.track?.title,
+      moduleId:location.module?.id,
+      moduleTitle:location.module?.title,
+      searchText,
+    };
+  }).sort((a,b)=>{
+    const trackA=a.trackId?graph.tracksById.get(a.trackId)?.order??999:999;
+    const trackB=b.trackId?graph.tracksById.get(b.trackId)?.order??999:999;
+    if(trackA!==trackB)return trackA-trackB;
+    const moduleA=a.moduleId?graph.modulesById.get(a.moduleId)?.order??999:999;
+    const moduleB=b.moduleId?graph.modulesById.get(b.moduleId)?.order??999:999;
+    if(moduleA!==moduleB)return moduleA-moduleB;
+    return a.itemId.localeCompare(b.itemId);
+  });
+}

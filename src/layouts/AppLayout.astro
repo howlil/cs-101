@@ -1,27 +1,29 @@
 ---
 import '../styles/global.css';
-import { Badge } from '../components/arc/badge/badge';
-import CurriculumMenu from '../components/arc/CurriculumMenu';
-import SidebarToggle from '../components/arc/SidebarToggle';
+import '../styles/app-shell.css';
 import ThemePreference from '../components/arc/ThemePreference';
-import { Heart, Star } from 'lucide-react';
-import { tasks } from '../server/curriculum';
-import { learning } from '../server/runtime';
-interface Props { title: string; description?: string }
-const { title, description = 'Materi, latihan, dan bukti belajar CS-101.' } = Astro.props;
-const state = await (await learning()).snapshot();
+import { BarChart3, BookOpen, Heart, Home, Star } from 'lucide-react';
+
+interface Props {
+  title: string;
+  description?: string;
+  flush?: boolean;
+}
+
+const {
+  title,
+  description = 'Materi, latihan, dan bukti belajar CS-101.',
+  flush = false,
+} = Astro.props;
+
 const path = Astro.url.pathname;
-const tracks = [...new Set(tasks.map((task) => task.track))];
-const menuTracks = tracks.map((track) => ({
-  title: track,
-  active: tasks.some((task) => task.track === track && path === `/learn/${task.taskId}`),
-  tasks: tasks.filter((task) => task.track === track).map((task) => ({
-    taskId: task.taskId,
-    title: task.title,
-    href: `/learn/${task.taskId}`,
-    active: path === `/learn/${task.taskId}`,
-  })),
-}));
+const materialActive =
+  path === '/curriculum' ||
+  path.startsWith('/learn/') ||
+  path.startsWith('/project/') ||
+  path.startsWith('/integration/') ||
+  path === '/demo';
+
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---
 <!doctype html>
@@ -43,32 +45,76 @@ Astro.response.headers.set('Cache-Control', 'no-store');
   </head>
   <body>
     <a class="skip-link" href="#main">Langsung ke isi</a>
+
     <header class="topbar">
-      <a class="brand" href="/">CS-101<span class="brand-sub">Catatan belajar</span></a>
-      <nav aria-label="Navigasi utama">
-        <a href="/" aria-current={path === '/' ? 'page' : undefined}>Hari ini</a>
-        <a href={state.activeTaskId ? `/learn/${state.activeTaskId}` : '/progress'} aria-current={path.startsWith('/learn/') || path === '/demo' ? 'page' : undefined}>Materi</a>
-        <a href="/progress" aria-current={path === '/progress' ? 'page' : undefined}>Progres</a>
-      </nav>
+      <a class="brand" href="/">
+        CS-101
+        <span class="brand-sub">Catatan belajar</span>
+      </a>
+
       <div class="header-actions">
-        <a class="header-cta header-cta--star" href="https://github.com/howlil/cs-101" target="_blank" rel="noopener noreferrer" aria-label="Star this repo on GitHub" title="Star this repo">
-          <Star size={16} strokeWidth={1.8} aria-hidden="true" /><span>Star this repo</span>
+        <a
+          class="top-action"
+          href="https://github.com/howlil/cs-101"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Star CS-101 di GitHub"
+          title="Star this repo"
+        >
+          <Star size={15} strokeWidth={1.8} aria-hidden="true" />
         </a>
-        <a class="header-cta header-cta--support" href="https://github.com/sponsors/howlil" target="_blank" rel="noopener noreferrer" aria-label="Donasi lewat GitHub Sponsors" title="Donasi lewat GitHub Sponsors">
-          <Heart size={16} strokeWidth={1.8} aria-hidden="true" /><span>Donate</span>
+        <a
+          class="top-action"
+          href="https://github.com/sponsors/howlil"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Donasi lewat GitHub Sponsors"
+          title="Donate"
+        >
+          <Heart size={15} strokeWidth={1.8} aria-hidden="true" />
         </a>
-        <SidebarToggle client:load />
         <ThemePreference client:load />
       </div>
     </header>
-    <div class="shell">
-      <aside id="course-sidebar" class="sidebar" aria-label="Daftar materi">
-        <div class="sidebar-heading"><h2>Materi</h2><span class="eyebrow">CS-101</span></div>
-        <CurriculumMenu client:load tracks={menuTracks} currentPath={path} />
-        {tasks.length > 0 && <div class="sidebar-bottom"><span class="eyebrow">REFERENSI</span><a href="/demo" aria-current={path === '/demo' ? 'page' : undefined}>Contoh tampilan <Badge tone="info" size="sm">Demo</Badge></a><p class="muted small">Pahami. Praktikkan. Simpan bukti.</p></div>}
+
+    <div class="app-shell">
+      <aside class="global-rail" aria-label="Navigasi utama">
+        <nav class="global-nav">
+          <a
+            class="rail-link"
+            href="/"
+            aria-current={path === '/' ? 'page' : undefined}
+            data-label="Hari ini"
+          >
+            <Home size={19} strokeWidth={1.8} aria-hidden="true" />
+            <span class="sr-only">Hari ini</span>
+          </a>
+          <a
+            class="rail-link"
+            href="/curriculum"
+            aria-current={materialActive ? 'page' : undefined}
+            data-label="Materi"
+          >
+            <BookOpen size={19} strokeWidth={1.8} aria-hidden="true" />
+            <span class="sr-only">Materi</span>
+          </a>
+          <a
+            class="rail-link"
+            href="/progress"
+            aria-current={path === '/progress' ? 'page' : undefined}
+            data-label="Progres"
+          >
+            <BarChart3 size={19} strokeWidth={1.8} aria-hidden="true" />
+            <span class="sr-only">Progres</span>
+          </a>
+        </nav>
       </aside>
-      <main id="main" tabindex="-1"><slot /></main>
+
+      <main id="main" class:list={['app-main', { 'app-main--flush': flush }]} tabindex="-1">
+        <slot />
+      </main>
     </div>
+
     <script>
       import '../scripts/learning';
     </script>

@@ -1,0 +1,200 @@
+.topbar {
+  min-height: 56px;
+  padding: 0 14px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--canvas) 94%, transparent);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.brand {
+  min-width: 0;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 680;
+  line-height: 1.05;
+  letter-spacing: -.025em;
+}
+
+.brand-sub {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 450;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+
+.top-action {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.top-action:hover {
+  color: var(--text);
+  background: var(--surface-muted);
+  border-color: var(--border-strong);
+}
+
+.app-shell {
+  min-height: calc(100vh - 56px);
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+}
+
+.global-rail {
+  position: sticky;
+  top: 56px;
+  align-self: start;
+  height: calc(100vh - 56px);
+  padding: 10px 8px;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  z-index: 20;
+}
+
+.global-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rail-link {
+  width: 43px;
+  height: 43px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+
+.rail-link:hover {
+  color: var(--text);
+  background: var(--surface-muted);
+}
+
+.rail-link[aria-current="page"] {
+  color: var(--accent-strong);
+  background: var(--accent-subtle);
+}
+
+.rail-link::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 51px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-3px);
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 50;
+}
+
+.rail-link:hover::after,
+.rail-link:focus-visible::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.app-main {
+  min-width: 0;
+  width: 100%;
+  padding: 32px 32px 56px;
+}
+
+.app-main--flush {
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .app-main:not(.app-main--flush) {
+    padding-inline: 22px;
+  }
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    min-height: 52px;
+    padding-inline: 14px 10px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .app-shell {
+    display: block;
+    min-height: calc(100vh - 52px);
+  }
+
+  .global-rail {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 58px;
+    padding: 6px 10px;
+    border-right: 0;
+    border-top: 1px solid var(--line);
+    background: color-mix(in oklab, var(--surface) 96%, transparent);
+    backdrop-filter: blur(12px);
+    z-index: 40;
+  }
+
+  .global-nav {
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .rail-link {
+    width: min(72px, 28vw);
+    height: 44px;
+  }
+
+  .rail-link::after {
+    display: none;
+  }
+
+  .app-main {
+    padding: 24px 16px 82px;
+  }
+
+  .app-main--flush {
+    padding: 0 0 58px;
+  }
+}

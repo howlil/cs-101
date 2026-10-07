@@ -1,0 +1,301 @@
+---
+import source from '../../curriculum/manifest.v2.json';
+import '../styles/curriculum.css';
+import AppLayout from '../layouts/AppLayout.astro';
+import { buildCurriculumGraph } from '../domain/curriculum-v2/graph';
+import {
+  buildCurriculumSearchIndex,
+  getItemConnections,
+  getItemLocation,
+  getTrackExplorer,
+} from '../domain/curriculum-v2/selectors';
+
+const graph = buildCurriculumGraph(source);
+const tracks = [...graph.manifest.tracks].sort((a, b) => a.order - b.order);
+const integrations = graph.manifest.items
+  .filter((item) => item.kind === 'integration')
+  .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+
+const requestedItemId = Astro.url.searchParams.get('item');
+const requestedItem = requestedItemId ? graph.itemsById.get(requestedItemId) : undefined;
+const requestedTrackId = Astro.url.searchParams.get('track');
+
+let activeTrackId =
+  requestedItem && requestedItem.kind !== 'integration'
+    ? requestedItem.trackId
+    : tracks.some((track) => track.id === requestedTrackId)
+      ? requestedTrackId!
+      : tracks[0]?.id;
+
+const explorer = activeTrackId ? getTrackExplorer(graph, activeTrackId) : undefined;
+const defaultItem = explorer?.modules.flatMap((module) => module.items)[0] ?? integrations[0];
+const selectedItem = requestedItem ?? defaultItem;
+const selectedLocation = selectedItem ? getItemLocation(graph, selectedItem.id) : undefined;
+const selectedModuleId = selectedLocation?.module?.id;
+const connections = selectedItem ? getItemConnections(graph, selectedItem.id) : undefined;
+const searchIndex = buildCurriculumSearchIndex(graph);
+
+const itemHref = (itemId: string) => {
+  const location = getItemLocation(graph, itemId);
+  if (location.item.kind === 'integration') return `/curriculum?item=${encodeURIComponent(itemId)}`;
+  return `/curriculum?track=${encodeURIComponent(location.track!.id)}&item=${encodeURIComponent(itemId)}`;
+};
+
+const kindLabel = (kind: string) =>
+  kind === 'checkpoint' ? 'Project checkpoint' : kind === 'integration' ? 'Integration' : 'Unit';
+
+const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'integration' ? '◇' : '○';
+---
+<AppLayout title="Materi" description="Browse curriculum CS-101 berdasarkan track, module, dan dependency." flush>
+  <div class="curriculum-shell">
+    <aside class="curriculum-explorer" aria-label="Curriculum explorer">
+      <div class="explorer-heading">
+        <div>
+          <p class="eyebrow">CURRICULUM</p>
+          <h1>Materi</h1>
+        </div>
+        <span class="explorer-count">{graph.manifest.items.length}</span>
+      </div>
+
+      <label class="curriculum-search">
+        <span class="sr-only">Cari curriculum</span>
+        <input
+          id="curriculum-search"
+          type="search"
+          placeholder="Cari ID atau topik…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </label>
+
+      <div id="curriculum-search-results" class="search-results" hidden>
+        <p class="explorer-label">HASIL</p>
+        <div id="curriculum-search-list">
+          {searchIndex.map((entry) => (
+            <a
+              class="search-row"
+              href={itemHref(entry.itemId)}
+              data-search-row
+              data-search={entry.searchText}
+              hidden
+            >
+              <span class="item-marker" aria-hidden="true">{itemMarker(entry.kind)}</span>
+              <span>
+                <strong>{entry.itemId}</strong>
+                <small>{entry.title}</small>
+              </span>
+            </a>
+          ))}
+        </div>
+        <p id="curriculum-search-empty" class="search-empty" hidden>Tidak ada materi yang cocok.</p>
+      </div>
+
+      <div id="curriculum-browse">
+        <div class="track-switcher" aria-label="Pilih track">
+          <p class="explorer-label">TRACK</p>
+          {tracks.map((track) => {
+            const total = graph.manifest.items.filter((item) => item.kind !== 'integration' && item.trackId === track.id).length;
+            return (
+              <a
+                href={`/curriculum?track=${track.id}`}
+                aria-current={track.id === activeTrackId ? 'true' : undefined}
+              >
+                <span>{track.title}</span>
+                <small>{total}</small>
+              </a>
+            );
+          })}
+        </div>
+
+        {explorer && (
+          <div class="module-tree">
+            <p class="explorer-label">MODULE</p>
+            {explorer.modules.map((module, index) => (
+              <details open={module.id === selectedModuleId || (!selectedModuleId && index === 0)}>
+                <summary>
+                  <span>{module.title}</span>
+                  <small>{module.items.length}</small>
+                </summary>
+                <nav aria-label={module.title}>
+                  {module.items.map((item) => (
+                    <a
+                      class="item-row"
+                      href={itemHref(item.id)}
+                      aria-current={item.id === selectedItem?.id ? 'page' : undefined}
+                    >
+                      <span class="item-marker" aria-hidden="true">{itemMarker(item.kind)}</span>
+                      <span class="item-copy">
+                        <span class="item-id">{item.id}</span>
+                        <span class="item-title">{item.title}</span>
+                      </span>
+                    </a>
+                  ))}
+                </nav>
+              </details>
+            ))}
+          </div>
+        )}
+
+        {integrations.length > 0 && (
+          <div class="integration-list">
+            <p class="explorer-label">INTEGRATION</p>
+            {integrations.map((item) => (
+              <a
+                class="item-row"
+                href={itemHref(item.id)}
+                aria-current={item.id === selectedItem?.id ? 'page' : undefined}
+              >
+                <span class="item-marker" aria-hidden="true">◇</span>
+                <span class="item-copy">
+                  <span class="item-id">{item.id}</span>
+                  <span class="item-title">{item.title}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </aside>
+
+    <section class="curriculum-workspace">
+      {selectedItem && selectedLocation ? (
+        <>
+          <header class="item-header">
+            <p class="breadcrumb">
+              {selectedLocation.track?.title ?? 'Cross-track'}
+              {selectedLocation.module && <> / {selectedLocation.module.title}</>}
+            </p>
+            <div class="item-kicker">
+              <span>{kindLabel(selectedItem.kind)}</span>
+              <code>{selectedItem.id}</code>
+            </div>
+            <h2>{selectedItem.title}</h2>
+          </header>
+
+          {connections && connections.prerequisites.length > 0 && (
+            <section class="item-section">
+              <h3>Requires</h3>
+              <div class="connection-list">
+                {connections.prerequisites.map((id) => {
+                  const prerequisite = graph.itemsById.get(id)!;
+                  return <a href={itemHref(id)}><code>{id}</code><span>{prerequisite.title}</span></a>;
+                })}
+              </div>
+            </section>
+          )}
+
+          {selectedItem.kind === 'unit' && (
+            <>
+              <section class="item-section">
+                <h3>Scope</h3>
+                <ul class="compact-list">{selectedItem.scope.map((scope) => <li>{scope}</li>)}</ul>
+              </section>
+              <section class="item-section challenge-preview">
+                <p class="eyebrow">MINI CHALLENGE</p>
+                <h3>{selectedItem.challenge.title}</h3>
+                <ul class="compact-list">{selectedItem.challenge.steps.map((step) => <li>{step}</li>)}</ul>
+              </section>
+              <section class="item-section">
+                <h3>Definition of Done</h3>
+                <ol class="criteria-list">{selectedItem.criteria.map((criterion) => <li>{criterion.text}</li>)}</ol>
+              </section>
+            </>
+          )}
+
+          {selectedItem.kind === 'checkpoint' && (
+            <>
+              <section class="item-section">
+                <h3>Problem</h3>
+                <p>{selectedItem.problemStatement}</p>
+              </section>
+              <section class="item-section">
+                <h3>Project requirements</h3>
+                <ol class="criteria-list">{selectedItem.requirements.map((criterion) => <li>{criterion.text}</li>)}</ol>
+              </section>
+              {selectedItem.parentProjectId && (
+                <section class="item-section">
+                  <h3>Built on</h3>
+                  <div class="connection-list">
+                    <a href={itemHref(selectedItem.parentProjectId)}>
+                      <code>{selectedItem.parentProjectId}</code>
+                      <span>{graph.itemsById.get(selectedItem.parentProjectId)?.title}</span>
+                    </a>
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+
+          {selectedItem.kind === 'integration' && (
+            <>
+              <section class="item-section">
+                <h3>Brief</h3>
+                <p>{selectedItem.brief}</p>
+              </section>
+              <section class="item-section">
+                <h3>Scope</h3>
+                <ul class="compact-list">{selectedItem.scope.map((scope) => <li>{scope}</li>)}</ul>
+              </section>
+              <section class="item-section">
+                <h3>Definition of Done</h3>
+                <ol class="criteria-list">{selectedItem.criteria.map((criterion) => <li>{criterion.text}</li>)}</ol>
+              </section>
+            </>
+          )}
+
+          <section class="item-section item-meta">
+            <div>
+              <span class="explorer-label">SOURCE</span>
+              {selectedItem.source.url
+                ? <a href={selectedItem.source.url} target="_blank" rel="noopener noreferrer">{selectedItem.source.title}</a>
+                : <span>{selectedItem.source.title}</span>}
+            </div>
+            {selectedItem.estimatedMinutes && (
+              <div>
+                <span class="explorer-label">ESTIMATE</span>
+                <span>{Math.round(selectedItem.estimatedMinutes / 60 * 10) / 10}h</span>
+              </div>
+            )}
+          </section>
+        </>
+      ) : (
+        <div class="curriculum-empty">
+          <h2>Curriculum belum tersedia.</h2>
+          <p>Tidak ada item yang dapat ditampilkan.</p>
+        </div>
+      )}
+    </section>
+  </div>
+
+  <script>
+    const input = document.querySelector<HTMLInputElement>('#curriculum-search');
+    const browse = document.querySelector<HTMLElement>('#curriculum-browse');
+    const results = document.querySelector<HTMLElement>('#curriculum-search-results');
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-search-row]')];
+    const empty = document.querySelector<HTMLElement>('#curriculum-search-empty');
+
+    const updateSearch = () => {
+      if (!input || !browse || !results || !empty) return;
+      const query = input.value.trim().toLocaleLowerCase('id-ID');
+      if (!query) {
+        browse.hidden = false;
+        results.hidden = true;
+        rows.forEach((row) => { row.hidden = true; });
+        empty.hidden = true;
+        return;
+      }
+
+      browse.hidden = true;
+      results.hidden = false;
+      let visible = 0;
+      rows.forEach((row) => {
+        const matches = visible < 16 && (row.dataset.search ?? '').includes(query);
+        row.hidden = !matches;
+        if (matches) visible += 1;
+      });
+      empty.hidden = visible > 0;
+    };
+
+    input?.addEventListener('input', updateSearch);
+  </script>
+</AppLayout>
