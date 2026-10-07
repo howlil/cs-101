@@ -1,13 +1,12 @@
 ---
 import '../../styles/integration.css';
+import '../../styles/connections.css';
 import AppLayout from '../../layouts/AppLayout.astro';
-import ActivateItem from '../../components/learning/ActivateItem';
-import Connections from '../../components/curriculum/Connections.astro';
-import IntegrationEvidence from '../../components/course/IntegrationEvidence.tsx';
+import IntegrationPage from '../../components/pages/IntegrationPage';
 import { curriculumGraph } from '../../server/curriculum';
 import { learning } from '../../server/runtime';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
-import { itemHref } from '../../domain/curriculum-v2/selectors';
+import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
 
 const integration = curriculumGraph.itemsById.get(Astro.params.id ?? '');
 if (!integration || integration.kind !== 'integration') return Astro.redirect('/404');
@@ -18,143 +17,56 @@ const availability = state.availability.find((entry) => entry.itemId === integra
 const active = state.activeItemId === integration.id;
 const passed = progress?.status === 'passed';
 const stale = progress?.status === 'stale';
-
 const prerequisites = integration.prerequisites.map((id) => {
   const item = curriculumGraph.itemsById.get(id)!;
   const itemProgress = state.progress.find((entry) => entry.itemId === id);
-  return {
-    item,
-    passed: itemProgress?.status === 'passed',
-  };
+  return { id, title: item.title, href: itemHref(curriculumGraph, id), passed: itemProgress?.status === 'passed' };
 });
-
 const challengeCriterion = requiredEvidenceForItem(integration).find((entry) => entry.id === 'challenge')!;
+const serializeConnections = (itemId: string) => {
+  const groups = getConnectionGroups(curriculumGraph, itemId);
+  const source = [
+    ['Requires', groups.requires],
+    ['Used later by', groups.usedLaterBy],
+    ['Related', groups.related],
+    ['Deep dive', groups.deepDive],
+    ['Built on foundation', groups.builtOnFoundation],
+    ['Foundation for', groups.foundationFor],
+    ['Contributes to', groups.contributesTo],
+  ] as const;
+  return source
+    .filter(([, items]) => items.length)
+    .map(([label, items]) => ({
+      label,
+      items: items.map(({ item }) => ({
+        id: item.id,
+        title: item.title,
+        href: itemHref(curriculumGraph, item.id),
+      })),
+    }));
+};
 ---
 <AppLayout title={integration.title} description={integration.brief}>
-  <article class="integration-workspace">
-    <header class="integration-header">
-      <a class="integration-back" href="/curriculum">← Curriculum</a>
-      <p class="eyebrow">CROSS-TRACK INTEGRATION</p>
-      <div class="integration-kicker">
-        <code>{integration.id}</code>
-        <span>{integration.prerequisites.length} prerequisite</span>
-      </div>
-      <h1>{integration.title}</h1>
-      <p class="integration-brief">{integration.brief}</p>
-
-      <div class="integration-status-row">
-        {passed ? (
-          <span class="integration-state integration-state--passed">Lulus</span>
-        ) : stale && !active ? (
-          <>
-            <span class="integration-state integration-state--stale">Perlu validasi ulang</span>
-            {availability?.status === 'ready' && (
-              <ActivateItem client:load itemId={integration.id} label="Validasi ulang" />
-            )}
-          </>
-        ) : active ? (
-          <span class="integration-state integration-state--active">Aktif</span>
-        ) : availability?.status === 'ready' ? (
-          <ActivateItem client:load itemId={integration.id} label="Mulai integration" />
-        ) : (
-          <span class="integration-state integration-state--locked">
-            Terkunci · selesaikan {availability?.missingPrerequisites.join(', ') || 'prerequisite'}
-          </span>
-        )}
-      </div>
-    </header>
-
-    <section class="integration-section">
-      <div class="integration-section-heading">
-        <div>
-          <p class="eyebrow">READINESS</p>
-          <h2>Cross-track prerequisite</h2>
-        </div>
-        <span>{prerequisites.filter((entry) => entry.passed).length}/{prerequisites.length}</span>
-      </div>
-      <div class="integration-prerequisites">
-        {prerequisites.map(({ item, passed }) => (
-          <a href={itemHref(curriculumGraph, item.id)}>
-            <span class:list={['integration-prerequisite-state', { 'is-passed': passed }]} aria-hidden="true">
-              {passed ? '✓' : '○'}
-            </span>
-            <code>{item.id}</code>
-            <span>{item.title}</span>
-          </a>
-        ))}
-      </div>
-    </section>
-
-    <section class="integration-section">
-      <p class="eyebrow">SCOPE</p>
-      <h2>Apa yang diintegrasikan</h2>
-      <ul class="integration-list">
-        {integration.scope.map((scope) => <li>{scope}</li>)}
-      </ul>
-    </section>
-
-    <section class="integration-section integration-challenge">
-      <p class="eyebrow">CHALLENGE</p>
-      <h2>{integration.challenge.title}</h2>
-      {integration.challenge.steps.length > 0 && (
-        <ol class="integration-list">
-          {integration.challenge.steps.map((step) => <li>{step}</li>)}
-        </ol>
-      )}
-    </section>
-
-    <section class="integration-section">
-      <div class="integration-section-heading">
-        <div>
-          <p class="eyebrow">DONE</p>
-          <h2>Definition of Done</h2>
-        </div>
-        <span>{integration.criteria.length}</span>
-      </div>
-      <ol class="integration-list">
-        {integration.criteria.map((criterion) => <li>{criterion.text}</li>)}
-      </ol>
-    </section>
-
-    {integration.requirements.length > 0 && (
-      <section class="integration-section">
-        <div class="integration-section-heading">
-          <div>
-            <p class="eyebrow">OUTPUT</p>
-            <h2>Artifact yang harus dibawa</h2>
-          </div>
-          <span>{integration.requirements.length}</span>
-        </div>
-        <ol class="integration-list">
-          {integration.requirements.map((criterion) => <li>{criterion.text}</li>)}
-        </ol>
-      </section>
-    )}
-
-    <Connections graph={curriculumGraph} itemId={integration.id} />
-
-    {active && !passed ? (
-      <IntegrationEvidence
-        client:load
-        itemId={integration.id}
-        fingerprint={integration.fingerprint}
-        criteria={integration.criteria}
-        requirements={integration.requirements}
-        challengeCriterion={challengeCriterion}
-        revision={state.revision}
-        continueFrom={progress?.continueFrom}
-        lastAnchor={progress?.lastAnchor}
-      />
-    ) : !passed && (
-      <section class="integration-section integration-evidence-placeholder">
-        <p class="eyebrow">EVIDENCE</p>
-        <h2>{availability?.status === 'ready' ? 'Aktifkan integration untuk mulai mencatat evidence.' : 'Evidence belum dapat dicatat.'}</h2>
-        <p class="muted">
-          {availability?.status === 'ready'
-            ? 'Integration memakai active-item contract yang sama dengan unit dan project.'
-            : 'Selesaikan seluruh hard prerequisite terlebih dahulu.'}
-        </p>
-      </section>
-    )}
-  </article>
+  <IntegrationPage
+    client:load
+    id={integration.id}
+    title={integration.title}
+    brief={integration.brief}
+    fingerprint={integration.fingerprint}
+    prerequisites={prerequisites}
+    scope={integration.scope}
+    challenge={integration.challenge}
+    criteria={integration.criteria}
+    requirements={integration.requirements}
+    challengeCriterion={challengeCriterion}
+    passed={passed}
+    stale={stale}
+    active={active}
+    ready={availability?.status === 'ready'}
+    missingPrerequisites={availability?.missingPrerequisites ?? []}
+    revision={state.revision}
+    continueFrom={progress?.continueFrom}
+    lastAnchor={progress?.lastAnchor}
+    connections={serializeConnections(integration.id)}
+  />
 </AppLayout>

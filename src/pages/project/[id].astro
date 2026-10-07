@@ -1,17 +1,17 @@
 ---
 import '../../styles/project.css';
+import '../../styles/connections.css';
 import AppLayout from '../../layouts/AppLayout.astro';
-import ActivateItem from '../../components/learning/ActivateItem';
-import GuaranteeAccordion from '../../components/project/GuaranteeAccordion';
-import Connections from '../../components/curriculum/Connections.astro';
-import ProjectEvidence from '../../components/course/ProjectEvidence.tsx';
+import ProjectPage from '../../components/pages/ProjectPage';
 import { curriculumGraph } from '../../server/curriculum';
 import { learning } from '../../server/runtime';
 import {
+  getConnectionGroups,
   getItemConnections,
   getItemLocation,
   getProjectDelta,
   getProjectNavigation,
+  itemHref,
 } from '../../domain/curriculum-v2/selectors';
 
 const project = curriculumGraph.itemsById.get(Astro.params.id ?? '');
@@ -20,11 +20,11 @@ if (!project || project.kind !== 'checkpoint') return Astro.redirect('/404');
 const location = getItemLocation(curriculumGraph, project.id);
 const delta = getProjectDelta(curriculumGraph, project.id);
 const navigation = getProjectNavigation(curriculumGraph, project.id);
-const connections = getItemConnections(curriculumGraph, project.id);
-const contributors = connections.incoming
+const rawConnections = getItemConnections(curriculumGraph, project.id);
+const contributors = rawConnections.incoming
   .filter((relation) => relation.type === 'contributes_to')
   .map((relation) => curriculumGraph.itemsById.get(relation.from))
-  .filter(Boolean);
+  .filter((item): item is NonNullable<typeof item> => !!item);
 
 const state = await (await learning()).snapshot();
 const progress = state.progress.find((entry) => entry.itemId === project.id);
@@ -32,184 +32,59 @@ const availability = state.availability.find((entry) => entry.itemId === project
 const active = state.activeItemId === project.id;
 const passed = progress?.status === 'passed';
 const stale = progress?.status === 'stale';
-
 const inheritanceCriteria = delta.inheritanceClauses.length
   ? delta.inheritanceClauses
   : delta.inherited.filter((criterion) =>
       project.requirements.some((candidate) => candidate.id === criterion.id)
     );
-
-const newRequirements = delta.added;
-const projectHref = (id: string) => `/project/${encodeURIComponent(id)}`;
+const serializeConnections = (itemId: string) => {
+  const groups = getConnectionGroups(curriculumGraph, itemId);
+  const source = [
+    ['Requires', groups.requires],
+    ['Used later by', groups.usedLaterBy],
+    ['Related', groups.related],
+    ['Deep dive', groups.deepDive],
+    ['Built on foundation', groups.builtOnFoundation],
+    ['Foundation for', groups.foundationFor],
+    ['Contributes to', groups.contributesTo],
+  ] as const;
+  return source
+    .filter(([, items]) => items.length)
+    .map(([label, items]) => ({
+      label,
+      items: items.map(({ item }) => ({
+        id: item.id,
+        title: item.title,
+        href: itemHref(curriculumGraph, item.id),
+      })),
+    }));
+};
+const projectHref = (id: string) => '/project/' + encodeURIComponent(id);
 ---
 <AppLayout title={project.title} description={project.problemStatement}>
-  <article class="project-workspace">
-    <header class="project-header">
-      <a
-        class="project-back"
-        href={`/curriculum?track=${encodeURIComponent(project.trackId)}&item=${encodeURIComponent(project.id)}`}
-      >
-        ← Curriculum
-      </a>
-      <p class="project-breadcrumb">{location.track?.title} / {location.module?.title}</p>
-      <div class="project-kicker">
-        <span>Project checkpoint</span>
-        <code>{project.id}</code>
-      </div>
-      <h1>{project.title}</h1>
-      <p class="project-problem">{project.problemStatement}</p>
-
-      <div class="project-status-row">
-        {passed ? (
-          <span class="project-state project-state--passed">Lulus</span>
-        ) : stale && !active ? (
-          <>
-            <span class="project-state project-state--stale">Perlu validasi ulang</span>
-            {availability?.status === 'ready' && (
-              <ActivateItem client:load itemId={project.id} label="Validasi ulang" />
-            )}
-          </>
-        ) : active ? (
-          <span class="project-state project-state--active">Aktif</span>
-        ) : availability?.status === 'ready' ? (
-          <ActivateItem client:load itemId={project.id} label="Mulai checkpoint" />
-        ) : (
-          <span class="project-state project-state--locked">
-            Terkunci · selesaikan {availability?.missingPrerequisites.join(', ') || 'prerequisite'}
-          </span>
-        )}
-      </div>
-    </header>
-
-    <section class="project-context-grid">
-      <div class="project-context-card">
-        <span class="eyebrow">BUILT ON</span>
-        {navigation.parent ? (
-          <a href={projectHref(navigation.parent.id)}>
-            <code>{navigation.parent.id}</code>
-            <span>{navigation.parent.title}</span>
-          </a>
-        ) : (
-          <span class="muted small">Checkpoint pertama di lineage ini.</span>
-        )}
-      </div>
-
-      <div class="project-context-card">
-        <span class="eyebrow">CONTRIBUTING UNITS</span>
-        <strong>{contributors.length}</strong>
-        <span class="muted small">Unit yang memberi fondasi langsung ke checkpoint ini.</span>
-      </div>
-
-      <div class="project-context-card">
-        <span class="eyebrow">NEXT CHECKPOINT</span>
-        {navigation.next ? (
-          <a href={projectHref(navigation.next.id)}>
-            <code>{navigation.next.id}</code>
-            <span>{navigation.next.title}</span>
-          </a>
-        ) : (
-          <span class="muted small">Ini checkpoint terakhir pada lineage ini.</span>
-        )}
-      </div>
-    </section>
-
-    <section class="project-section">
-      <div class="project-section-heading">
-        <div>
-          <p class="eyebrow">DELTA</p>
-          <h2>New in this checkpoint</h2>
-        </div>
-        <span>{newRequirements.length}</span>
-      </div>
-      {newRequirements.length ? (
-        <ol class="project-requirement-list">
-          {newRequirements.map((criterion) => <li>{criterion.text}</li>)}
-        </ol>
-      ) : (
-        <p class="muted">Tidak ada requirement baru yang terdeteksi.</p>
-      )}
-    </section>
-
-    {delta.parent && (
-      <section class="project-section">
-        <div class="project-section-heading">
-          <div>
-            <p class="eyebrow">INHERITED</p>
-            <h2>Guarantee yang harus tetap hidup</h2>
-          </div>
-          <span>{delta.inherited.length}</span>
-        </div>
-        <div class="project-inherited-summary">
-          <GuaranteeAccordion
-            client:visible
-            title={delta.inheritanceClauses[0]?.text ?? `Warisan dari ${delta.parent.id}`}
-            items={delta.inherited.map((criterion) => criterion.text)}
-          />
-        </div>
-      </section>
-    )}
-
-    {contributors.length > 0 && (
-      <section class="project-section">
-        <div class="project-section-heading">
-          <div>
-            <p class="eyebrow">FOUNDATION</p>
-            <h2>Unit yang membentuk checkpoint</h2>
-          </div>
-          <span>{contributors.length}</span>
-        </div>
-        <div class="project-contributors">
-          {contributors.map((item) => item && (
-            <a href={item.kind === 'unit' ? `/learn/${item.id}` : `/curriculum?item=${item.id}`}>
-              <code>{item.id}</code>
-              <span>{item.title}</span>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <Connections graph={curriculumGraph} itemId={project.id} compact />
-
-    {active && !passed && (
-      <ProjectEvidence
-        client:load
-        itemId={project.id}
-        fingerprint={project.fingerprint}
-        newRequirements={newRequirements}
-        inheritanceCriteria={inheritanceCriteria}
-        inheritedGuarantees={delta.inherited}
-        revision={state.revision}
-        continueFrom={progress?.continueFrom}
-        lastAnchor={progress?.lastAnchor}
-      />
-    )}
-
-    {!active && !passed && (
-      <section class="project-section project-evidence-placeholder">
-        <p class="eyebrow">EVIDENCE</p>
-        <h2>{availability?.status === 'ready' ? 'Aktifkan checkpoint untuk mulai mencatat evidence.' : 'Evidence belum dapat dicatat.'}</h2>
-        <p class="muted">
-          {availability?.status === 'ready'
-            ? 'Satu active item dijaga agar continuation point dan evidence tidak bercampur.'
-            : 'Selesaikan prerequisite terlebih dahulu.'}
-        </p>
-      </section>
-    )}
-
-    <nav class="project-lineage-nav" aria-label="Navigasi checkpoint">
-      {navigation.parent ? (
-        <a href={projectHref(navigation.parent.id)}>
-          <span>← Sebelumnya</span>
-          <strong>{navigation.parent.id}</strong>
-        </a>
-      ) : <span />}
-      {navigation.next ? (
-        <a href={projectHref(navigation.next.id)}>
-          <span>Berikutnya →</span>
-          <strong>{navigation.next.id}</strong>
-        </a>
-      ) : <span />}
-    </nav>
-  </article>
+  <ProjectPage
+    client:load
+    id={project.id}
+    title={project.title}
+    problemStatement={project.problemStatement}
+    breadcrumb={[location.track?.title, location.module?.title].filter(Boolean).join(' / ')}
+    curriculumHref={'/curriculum?track=' + encodeURIComponent(project.trackId) + '&item=' + encodeURIComponent(project.id)}
+    fingerprint={project.fingerprint}
+    passed={passed}
+    stale={stale}
+    active={active}
+    ready={availability?.status === 'ready'}
+    missingPrerequisites={availability?.missingPrerequisites ?? []}
+    revision={state.revision}
+    continueFrom={progress?.continueFrom}
+    lastAnchor={progress?.lastAnchor}
+    parent={navigation.parent ? { id: navigation.parent.id, title: navigation.parent.title, href: projectHref(navigation.parent.id) } : undefined}
+    next={navigation.next ? { id: navigation.next.id, title: navigation.next.title, href: projectHref(navigation.next.id) } : undefined}
+    contributors={contributors.map((item) => ({ id: item.id, title: item.title, href: itemHref(curriculumGraph, item.id) }))}
+    newRequirements={delta.added}
+    inherited={delta.inherited}
+    inheritanceCriteria={inheritanceCriteria}
+    inheritanceTitle={delta.inheritanceClauses[0]?.text ?? (delta.parent ? 'Warisan dari ' + delta.parent.id : undefined)}
+    connections={serializeConnections(project.id)}
+  />
 </AppLayout>

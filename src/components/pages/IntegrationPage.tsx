@@ -1,0 +1,187 @@
+"use client";
+
+import {
+  ArrowLeft,
+  Boxes,
+  Check,
+  CheckCircle2,
+  Circle,
+  LockKeyhole,
+  PackageCheck,
+  Target,
+  TriangleAlert,
+} from 'lucide-react';
+import type { Criterion } from '../../domain/curriculum-v2/schema';
+import ActivateItem from '../learning/ActivateItem';
+import IntegrationEvidence from '../course/IntegrationEvidence';
+import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
+
+type Prerequisite = { id: string; title: string; href: string; passed: boolean };
+
+export default function IntegrationPage({
+  id,
+  title,
+  brief,
+  fingerprint,
+  prerequisites,
+  scope,
+  challenge,
+  criteria,
+  requirements,
+  challengeCriterion,
+  passed,
+  stale,
+  active,
+  ready,
+  missingPrerequisites,
+  revision,
+  continueFrom,
+  lastAnchor,
+  connections,
+}: {
+  id: string;
+  title: string;
+  brief: string;
+  fingerprint: string;
+  prerequisites: Prerequisite[];
+  scope: string[];
+  challenge: { title: string; steps: string[] };
+  criteria: Criterion[];
+  requirements: Criterion[];
+  challengeCriterion: Criterion;
+  passed: boolean;
+  stale: boolean;
+  active: boolean;
+  ready: boolean;
+  missingPrerequisites: string[];
+  revision: number;
+  continueFrom?: string;
+  lastAnchor?: string;
+  connections: ConnectionGroupData[];
+}) {
+  return <article className="integration-workspace">
+    <header className="integration-header">
+      <a className="integration-back" href="/curriculum">
+        <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
+        <span>Curriculum</span>
+      </a>
+      <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> CROSS-TRACK INTEGRATION</p>
+      <div className="integration-kicker">
+        <code>{id}</code>
+        <span>{prerequisites.length} prerequisite</span>
+      </div>
+      <h1>{title}</h1>
+      <p className="integration-brief">{brief}</p>
+
+      <div className="integration-status-row">
+        {passed ? (
+          <span className="integration-state integration-state--passed">
+            <CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" /> Lulus
+          </span>
+        ) : stale && !active ? (
+          <>
+            <span className="integration-state integration-state--stale">
+              <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Perlu validasi ulang
+            </span>
+            {ready && <ActivateItem itemId={id} label="Validasi ulang" />}
+          </>
+        ) : active ? (
+          <span className="integration-state integration-state--active">
+            <Boxes size={14} strokeWidth={1.8} aria-hidden="true" /> Aktif
+          </span>
+        ) : ready ? (
+          <ActivateItem itemId={id} label="Mulai integration" />
+        ) : (
+          <span className="integration-state integration-state--locked">
+            <LockKeyhole size={14} strokeWidth={1.8} aria-hidden="true" />
+            Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prerequisite'}
+          </span>
+        )}
+      </div>
+    </header>
+
+    <section className="integration-section">
+      <div className="integration-section-heading">
+        <div>
+          <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> READINESS</p>
+          <h2>Cross-track prerequisite</h2>
+        </div>
+        <span>{prerequisites.filter((entry) => entry.passed).length}/{prerequisites.length}</span>
+      </div>
+      <div className="integration-prerequisites">
+        {prerequisites.map((item) => (
+          <a href={item.href} key={item.id}>
+            <span className={['integration-prerequisite-state', item.passed ? 'is-passed' : ''].filter(Boolean).join(' ')} aria-hidden="true">
+              {item.passed ? <Check size={14} strokeWidth={1.8} /> : <Circle size={14} strokeWidth={1.8} />}
+            </span>
+            <code>{item.id}</code>
+            <span>{item.title}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section className="integration-section">
+      <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> SCOPE</p>
+      <h2>Apa yang diintegrasikan</h2>
+      <ul className="integration-list">{scope.map((entry) => <li key={entry}>{entry}</li>)}</ul>
+    </section>
+
+    <section className="integration-section integration-challenge">
+      <p className="eyebrow"><Target size={13} strokeWidth={1.8} aria-hidden="true" /> CHALLENGE</p>
+      <h2>{challenge.title}</h2>
+      {challenge.steps.length > 0 && (
+        <ol className="integration-list">{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+      )}
+    </section>
+
+    <section className="integration-section">
+      <div className="integration-section-heading">
+        <div>
+          <p className="eyebrow"><CheckCircle2 size={13} strokeWidth={1.8} aria-hidden="true" /> DONE</p>
+          <h2>Definition of Done</h2>
+        </div>
+        <span>{criteria.length}</span>
+      </div>
+      <ol className="integration-list">{criteria.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
+    </section>
+
+    {requirements.length > 0 && (
+      <section className="integration-section">
+        <div className="integration-section-heading">
+          <div>
+            <p className="eyebrow"><PackageCheck size={13} strokeWidth={1.8} aria-hidden="true" /> OUTPUT</p>
+            <h2>Artifact yang harus dibawa</h2>
+          </div>
+          <span>{requirements.length}</span>
+        </div>
+        <ol className="integration-list">{requirements.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
+      </section>
+    )}
+
+    <ConnectionsPanel groups={connections} />
+
+    {active && !passed ? (
+      <IntegrationEvidence
+        itemId={id}
+        fingerprint={fingerprint}
+        criteria={criteria}
+        requirements={requirements}
+        challengeCriterion={challengeCriterion}
+        revision={revision}
+        continueFrom={continueFrom}
+        lastAnchor={lastAnchor}
+      />
+    ) : !passed && (
+      <section className="integration-section integration-evidence-placeholder">
+        <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
+        <h2>{ready ? 'Aktifkan integration untuk mulai mencatat evidence.' : 'Evidence belum dapat dicatat.'}</h2>
+        <p className="muted">
+          {ready
+            ? 'Integration memakai active-item contract yang sama dengan unit dan project.'
+            : 'Selesaikan seluruh hard prerequisite terlebih dahulu.'}
+        </p>
+      </section>
+    )}
+  </article>;
+}
