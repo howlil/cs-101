@@ -116,7 +116,7 @@ test('generation plan harus menutup seluruh criterion, source, dan review covera
 
   const validated = validateGenerationPlan(graph, unit.id, sourcePack, spec);
   const record = buildGenerationRecord(validated.sourcePack, validated.lessonSpec);
-  const bank = buildReviewBank(validated.sourcePack, validated.lessonSpec);
+  const bank = buildReviewBank(validated.lessonSpec);
 
   assert.equal(record.itemId, unit.id);
   assert.equal(record.coverage.length, expected.length);

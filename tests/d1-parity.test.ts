@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
+import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 
 import { curriculumItemFingerprint, type CurriculumManifestV2 } from '../src/domain/curriculum-v2/schema';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
@@ -55,7 +55,7 @@ const graph = buildCurriculumGraph(manifest);
 
 type BoundStatement = {
   sql: string;
-  values: unknown[];
+  values: SQLInputValue[];
   bind(...values: unknown[]): BoundStatement;
   first<T>(): Promise<T | null>;
   all<T>(): Promise<{ results: T[]; success: boolean }>;
@@ -63,10 +63,10 @@ type BoundStatement = {
 };
 
 function sqliteD1(db: DatabaseSync): D1Database {
-  const make = (sql: string, values: unknown[] = []): BoundStatement => ({
+  const make = (sql: string, values: SQLInputValue[] = []): BoundStatement => ({
     sql,
     values,
-    bind: (...next) => make(sql, next),
+    bind: (...next) => make(sql, next as SQLInputValue[]),
     async first<T>() {
       return (db.prepare(sql).get(...values) as T | undefined) ?? null;
     },

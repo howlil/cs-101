@@ -78,7 +78,6 @@ export function buildGenerationRecord(
 }
 
 export function buildReviewBank(
-  sourcePack: SourcePack,
   lessonSpec: LessonSpec,
 ): ReviewBank {
   return reviewBankSchema.parse({

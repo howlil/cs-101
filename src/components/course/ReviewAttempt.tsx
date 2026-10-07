@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type SyntheticEvent } from 'react';
 import { Alert } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { RadioGroup } from '../arc/radio-group/radio-group';
@@ -33,7 +33,7 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
   const [error, setError] = useState('');
   const complete = useMemo(() => answers.every((answer) => answer !== ''), [answers]);
 
-  const submit = async (event: FormEvent) => {
+  const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!complete || submitting) return;
     setSubmitting(true);

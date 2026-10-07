@@ -84,7 +84,7 @@ writeFileSync(
 );
 writeFileSync(
   resolve(derivedDirectory, 'review-bank.json'),
-  JSON.stringify(buildReviewBank(sourcePack, lessonSpec), null, 2) + '\n',
+  JSON.stringify(buildReviewBank(lessonSpec), null, 2) + '\n',
 );
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 writeFileSync(

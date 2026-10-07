@@ -120,7 +120,13 @@ export class CloudflareLearningService {
         .map(({ payload, ...row }) => {
           const parsed = JSON.parse(payload) as Record<string, unknown>;
           const itemId = row.itemId ?? String(parsed.itemId ?? parsed.taskId ?? '');
-          return { ...row, ...parsed, itemId, taskId: itemId };
+          return {
+            ...row,
+            ...parsed,
+            itemId,
+            taskId: itemId,
+            continueFrom: typeof parsed.continueFrom === 'string' ? parsed.continueFrom : '',
+          };
         }),
       reviewAttempts: (attemptsResult.results as Array<{
         id: string;
