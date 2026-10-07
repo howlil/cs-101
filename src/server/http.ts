@@ -8,9 +8,9 @@ export function json(data: unknown, status = 200) {
 export async function mutation(request: Request, action: (input: unknown) => Promise<unknown>) {
   try {
     const url = new URL(request.url);
-    const allowedOrigin = process.env.CS101_ORIGIN;
-    const local = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname);
-    if ((!allowedOrigin && !local) || (allowedOrigin && url.origin !== allowedOrigin) || request.headers.get('origin') !== (allowedOrigin ?? url.origin)) {
+    const configuredOrigin = process.env.CS101_ORIGIN;
+    const expectedOrigin = configuredOrigin ? new URL(configuredOrigin).origin : url.origin;
+    if ((configuredOrigin && url.origin !== expectedOrigin) || request.headers.get('origin') !== expectedOrigin) {
       return json({ error: 'Origin tidak diizinkan.' }, 403);
     }
     if (request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') return json({ error: 'Gunakan application/json.' }, 415);

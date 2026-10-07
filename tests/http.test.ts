@@ -1,12 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mutation } from '../src/server/http';
-const request = (origin = 'http://127.0.0.1:4321', body = '{}') => new Request('http://127.0.0.1:4321/api/sessions', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body });
+const request = (origin = 'http://127.0.0.1:4321', body = '{}', url = 'http://127.0.0.1:4321/api/sessions') => new Request(url, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body });
 test('origin asing ditolak sebelum action dijalankan', async () => {
   let called = false;
   const result = await mutation(request('https://unrelated.example'), async () => { called = true; });
   assert.equal(result.status, 403);
   assert.equal(called, false);
+});
+test('host production same-origin tidak memerlukan CS101_ORIGIN', async () => {
+  const origin = 'https://cs101.example';
+  const result = await mutation(request(origin, '{}', `${origin}/api/sessions`), async () => ({ revision: 1 }));
+  assert.equal(result.status, 200);
 });
 test('JSON rusak dan payload terlalu besar ditolak', async () => {
   assert.equal((await mutation(request(undefined, '{broken'), async () => ({}))).status, 422);

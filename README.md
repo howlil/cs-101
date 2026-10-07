@@ -20,21 +20,31 @@ pnpm start
 
 `pnpm start` menjalankan hasil build pada host dan port yang sama. Jika port dev sedang dipakai, hentikan dev terlebih dahulu. `HOST` dan `PORT` dapat diatur untuk deployment private. Production membaca environment process; jika memakai `.env`, muat lewat service manager atau `node --env-file=.env scripts/start.mjs`.
 
-## Deploy ke Cloudflare Pages lewat GitHub
+## Deploy ke Cloudflare Workers lewat GitHub
 
-1. Push repository ke GitHub, lalu di Cloudflare buka **Workers & Pages → Create application → Pages → Import an existing Git repository** dan pilih repository ini.
-2. Isi build command `pnpm build:cloudflare`, build output directory `dist/client`, dan environment variable build `NODE_VERSION=24`.
-3. Buat database D1 bernama `cs101-learning`. Pada project Pages, buka **Settings → Bindings**, tambahkan D1 binding dengan variable name `LEARNING_DB`, pilih database tersebut, lalu simpan.
-4. Terapkan schema satu kali dari terminal yang sudah login ke Cloudflare:
+Cloudflare memakai `wrangler.jsonc` sebagai source of truth. Build Astro menghasilkan Worker di `dist/_worker.js/index.js` dan static assets di `dist`; D1 tersedia sebagai binding `LEARNING_DB`.
 
-   ```sh
-   pnpm exec wrangler login
-   pnpm exec wrangler d1 execute cs101-learning --remote --file=migrations/0001_initial.sql
+1. Di Cloudflare **Workers & Pages**, buat Worker dari repository GitHub ini dan pilih branch production `master`.
+2. Gunakan build settings berikut:
+
+   ```text
+   Build command:  pnpm build:cloudflare
+   Deploy command: pnpm run deploy:cloudflare
+   Root directory: /
    ```
 
-5. Deploy ulang Pages. Setelah koneksi GitHub aktif, commit baru ke branch production akan memicu build dan deploy; pull request mendapat preview deployment.
+   Tidak perlu mengisi output directory seperti Pages. Workers membaca entrypoint dan assets dari `wrangler.jsonc`. `.node-version` mengunci Node 24 untuk build.
+3. `wrangler.jsonc` mendeklarasikan D1 binding `LEARNING_DB`. Wrangler 4.x dapat membuat dan menautkan resource D1 saat deployment pertama jika binding tersebut belum memiliki resource.
+4. `pnpm run deploy:cloudflare` menjalankan `wrangler deploy`, lalu menerapkan semua migration yang belum dijalankan dari folder `migrations/` ke `LEARNING_DB`.
+5. Untuk aplikasi pribadi, pasang Cloudflare Access sebelum membuka hostname production ke publik. Pemeriksaan Origin melindungi mutation dari cross-origin request, tetapi bukan autentikasi.
 
-Runtime Pages memakai Astro Cloudflare adapter dan D1 untuk progres dan riwayat. `pnpm dev`/`pnpm start` tetap memakai Node + `node:sqlite` lokal. Isi database D1 tidak ikut dibawa oleh GitHub.
+Untuk uji lokal runtime Cloudflare:
+
+```sh
+pnpm run preview:cloudflare
+```
+
+`pnpm dev`/`pnpm start` tetap memakai Node + `node:sqlite` lokal. Runtime Cloudflare memakai Astro Cloudflare adapter + D1; database lokal tidak dibawa ke Cloudflare.
 
 ## Yang sudah tersedia
 
@@ -69,7 +79,7 @@ Database default: `.data/learning.sqlite`, diabaikan Git. Atur `CS101_DB_PATH` k
 
 Mutasi memerlukan `Content-Type: application/json`, header `Origin` yang sama dengan server, UUID `requestId`, dan `revision` terakhir. Schema payload ada di `src/domain/learning/schema.ts`. Retry memakai ID dan payload yang sama. Conflict `409` memerlukan rekonsiliasi/reload; input tidak valid `422`. Snapshot kosong dimulai dari revision `0`.
 
-Untuk private hostname, atur `CS101_ORIGIN` tepat ke origin aplikasi saat build dan runtime, lalu pasang autentikasi pada reverse proxy sebelum membuka akses. Uji header/protocol proxy sesuai hosting. Origin check bukan autentikasi. Server harus tetap satu instance dengan disk persisten. SQLite tidak cocok disimpan pada filesystem serverless sementara.
+`CS101_ORIGIN` hanya diperlukan sebagai override saat aplikasi berada di balik reverse proxy dengan origin eksplisit. Di Cloudflare Workers, mutation menerima origin request yang sama secara default sehingga `*.workers.dev` dan custom domain tidak perlu hard-code origin. Origin check bukan autentikasi; gunakan Cloudflare Access untuk aplikasi pribadi. Deployment Node tetap membutuhkan satu instance dengan disk persisten karena SQLite tidak cocok pada filesystem serverless sementara.
 
 ## Peta kode
 
