@@ -5,135 +5,164 @@ Use staged generation so each stage has a narrow responsibility and a testable o
 ## Chain
 
 ```text
-TARGET
+ITEM-ID
   ↓
-[1] Context Resolver
-  ↓ curriculum_packet.json
+[1] Graph Context Resolver
+  ↓ generation/staging/<ITEM-ID>/context.json
 [2] Source Researcher
-  ↓ source_pack.json
+  ↓ source-pack.json
 [3] Lesson Architect
-  ↓ lesson_spec.json
+  ↓ lesson-spec.json
 [4] Course Writer
-  ↓ <TASK-ID>.mdx
+  ↓ lesson.mdx
 [5] Assessment Builder
-  ↓ quiz/challenge sections or structured data
+  ↓ reviewQuestions inside lesson-spec.json
 [6] Validator
-  ↓ validation_report.json
-[7] Persist
+  ↓ derived generation record + review bank + validation report
+[7] Promote
+  ↓ final lesson + metadata + review bank
 ```
 
-Do not pass raw browser/search dumps downstream. Pass compact structured outputs.
+Do not pass the full curriculum or raw browser/search dumps downstream. Pass compact structured artifacts.
 
-## 1. Context Resolver
+## 1. Graph Context Resolver
 
-Goal: answer “what exactly must this learner master now?”
+Run:
 
-Output:
-
-```json
-{
-  "taskId": "SQL-001",
-  "track": "db&sql",
-  "topic": "Relational model + PostgreSQL fundamentals",
-  "paretoScope": [],
-  "exitCriteria": [],
-  "challenge": "...",
-  "prerequisites": [],
-  "crossReferences": [],
-  "project": null
-}
+```sh
+pnpm generation:prepare SQL-001
 ```
 
-Failure condition: target cannot be uniquely resolved.
+The context packet is deterministic and bounded. It contains:
+
+- target unit;
+- scope, market expectation, criteria, challenge, duration;
+- direct hard prerequisites with compact prior-scope signals;
+- nearby module items;
+- nearest contributing checkpoint;
+- project lineage;
+- bounded related/deep-dive/foundation/contributes-to context;
+- curriculum source.
+
+Failure conditions:
+
+- item ID does not exist;
+- target is checkpoint/integration instead of unit.
 
 ## 2. Source Researcher
 
-Goal: support the curriculum packet with authoritative evidence.
+Goal: support the exact curriculum scope without expanding it.
+
+Write `source-pack.json`.
 
 Questions:
 
 - What is implementation-independent?
-- What is specific to the named technology/version?
-- What misconception would cause the learner to fail the challenge?
-- What mechanism must be understood rather than memorized?
+- What is technology/version-specific?
+- What mechanism is necessary to debug or predict behavior?
+- Which misconception would cause the learner to fail the challenge?
 
-Output: 2-5 source records + concept-to-source map.
+Use 1–5 sources. Inspect the curriculum-provided source first and prefer official/primary material. Keep unresolved facts in `unsupportedClaims`; validation fails while that list is non-empty.
 
 ## 3. Lesson Architect
 
-Goal: create the smallest learning graph that can satisfy all exit criteria.
+Create `lesson-spec.json` before prose.
 
 Build:
 
 ```text
 payoff
   ↓
-central mental model
+central predictive mental model
   ↓
 core relationships/mechanisms
   ↓
-prediction / worked example
+worked trace / prediction
   ↓
-learner practice
+guided practice
   ↓
 challenge
   ↓
-exit-criteria proof
+criterion evidence
 ```
 
-Output must include an `exitCriteriaCoverage` map before prose is generated.
+The spec must include:
+
+- learning outcomes;
+- mental model;
+- relationship graph;
+- concepts + source URLs;
+- misconception traps;
+- practice;
+- coverage matrix for every curriculum criterion plus challenge;
+- exactly five review questions.
+
+Every curriculum criterion must appear in at least one review-question `criterionIds`.
 
 ## 4. Course Writer
 
-Goal: teach the lesson in the planned order.
+Write `lesson.mdx` using the canonical template.
 
-Default section order:
+Default order:
 
-1. Brief / why this matters
-2. What you must be able to do
-3. Mental model
-4. Core concepts and mechanisms
-5. Worked example / trace
-6. Common wrong models
-7. Guided practice
-8. Quiz
-9. Micro challenge
-10. Project bridge (only if applicable)
-11. Exit checklist + evidence
-12. Sources
+1. payoff;
+2. learning outcomes;
+3. mental model;
+4. prerequisite links;
+5. core concepts/mechanisms;
+6. worked example/trace;
+7. misconception traps;
+8. guided practice;
+9. quiz;
+10. micro challenge;
+11. project bridge when relevant;
+12. exit criteria/evidence;
+13. sources.
 
-The writer may compress or merge sections when the lesson is small.
+Direct prerequisites are linked, not re-taught in full.
 
 ## 5. Assessment Builder
 
-Map questions to exit criteria. Avoid trivia.
+Quiz and review must test reasoning used by the challenge, not trivia.
 
-Use a mix of:
+Use mixes of:
 
 - prediction;
 - explain-why;
 - debugging;
 - design choice;
-- code/query output;
-- state-transition reasoning.
+- output/state-transition reasoning.
 
-Provide answers in a collapsible/reveal component where the course UI supports it.
+Review answer keys remain server-side at runtime. The generated review bank is derived from `lesson-spec.json`; do not maintain a second independent assessment definition.
 
 ## 6. Validator
 
-Check:
+Run:
 
-- curriculum coverage;
-- source coverage;
-- factual consistency;
-- assessment alignment;
-- challenge fidelity;
-- MDX/frontmatter schema;
-- internal links/prerequisites;
-- build success.
+```sh
+pnpm generation:validate SQL-001
+```
 
-The validator can request a targeted repair from stages 3-5. Do not regenerate unrelated content.
+Validation checks:
 
-## 7. Persist
+- active curriculum fingerprint;
+- zero unsupported claims;
+- concept sources exist in source pack;
+- full criterion/challenge coverage;
+- review coverage;
+- Astro frontmatter contract;
+- required components;
+- prerequisite references;
+- source links.
 
-Store the generated lesson and metadata. Never change curriculum state to “complete” just because the artifact exists.
+It writes hashed derived artifacts. Targeted repairs should modify only the failing upstream stage.
+
+## 7. Promote
+
+Run:
+
+```sh
+pnpm generation:promote SQL-001
+```
+
+Promotion refuses a bundle changed since validation and writes the final lesson, generation record, and review bank. Generation never changes learner completion state.

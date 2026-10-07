@@ -1,61 +1,91 @@
 # Curriculum Contract
 
-The curriculum is the learning specification. Generated content may explain it, but must not redefine it.
+Curriculum Manifest V2 is the learning specification. Generated content may explain it, but must not redefine it.
 
 ## Canonical identity
 
-Use `Task ID` as the stable identity everywhere. Titles are display labels and may change.
+Use **Item ID** as stable identity everywhere.
 
 Examples:
 
-- `JAV-001`
-- `SQL-001`
-- `JAV-P01`
+- `JAV-001` — unit
+- `SQL-P01` — checkpoint
+- `INT-001` — integration
 
-## Canonical fields
+Historical code may still expose `taskId` as a compatibility field, but generation targets use Item ID.
 
-A normal material row can contain:
+## Canonical source fields
 
-- Phase
-- Skill / Topic
-- Market Expectation
-- Learn Now (Pareto 20%)
-- Training KPI / Exit Criteria
-- Duration
-- Status
-- Micro Challenge
-- Retrospective
-- Project Checkpoint
-- Problem Statement
-- Project Requirements
-- Learning Source
-- Source URL
-- Cross-Module Reference
-- Task ID
+Manifest V2 normalizes source workbook data into explicit item types.
 
-The workflow sheets may additionally provide active task, prerequisites, previous evidence, review state, and queue ordering.
+A unit contains:
+
+- Item ID;
+- track + module;
+- title;
+- market expectation;
+- scope;
+- Definition of Done criteria;
+- challenge;
+- direct prerequisites;
+- curriculum source;
+- estimated minutes;
+- typed cross-module relations;
+- fingerprint.
+
+Checkpoint and integration have their own schemas. They are not converted into ordinary unit lessons.
 
 ## Precedence
 
-When fields conflict:
+When information conflicts:
 
-1. Task ID + current curriculum row
-2. Explicit project requirements / exit criteria
-3. Pareto scope
-4. Micro challenge
-5. Cross-module references
-6. Generated content
+1. active Item ID + current Manifest V2 item;
+2. explicit criteria / project requirements;
+3. scope;
+4. challenge/problem statement;
+5. typed curriculum relations;
+6. generated lesson/spec.
 
-Generated content never overrides levels 1-5.
+Generated content never overrides levels 1–5.
 
-## On-demand rule
+## Graph context rule
 
-Read and generate only the smallest curriculum slice needed for the requested Task ID:
+For one unit, use the deterministic packet produced by:
 
-`target + direct prerequisites + active checkpoint + relevant cross-reference`
+```sh
+pnpm generation:prepare <ITEM-ID>
+```
 
-Do not load the full curriculum into the generation prompt unless a curriculum-wide operation is requested.
+The packet contains only:
+
+`target + direct prerequisites + local module neighborhood + nearest checkpoint/lineage + bounded contextual relations + curriculum source`
+
+Do not load the full manifest into the model for a one-unit generation request.
+
+Contextual relations such as `related`, `deep_dive`, `foundation`, and `contributes_to` do not become hard prerequisites.
+
+## Artifact rule
+
+Unit generation produces three final artifacts:
+
+- lesson MDX;
+- generation provenance record;
+- review bank.
+
+Checkpoint and integration stay in their dedicated runtime workflows.
+
+Generated artifacts are derived/cache-like outputs. Manifest V2 remains source of truth.
 
 ## Staleness
 
-Store a `curriculum_fingerprint` in generation metadata. If the source fields for a Task ID change, mark the generated lesson stale and regenerate that lesson on demand.
+All generation artifacts bind to the active item fingerprint.
+
+If the curriculum item changes:
+
+- the existing lesson is stale;
+- generation metadata is stale;
+- review bank is stale;
+- historical learner evidence remains historical;
+- regenerate that unit on demand.
+
+Do not silently rewrite historical IDs or evidence.

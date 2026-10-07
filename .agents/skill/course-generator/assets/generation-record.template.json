@@ -1,15 +1,22 @@
 {
-  "taskId": "{{TASK_ID}}",
-  "curriculumFingerprint": "{{CURRICULUM_FINGERPRINT}}",
-  "generatedAt": "{{GENERATED_AT}}",
-  "sources": [],
-  "exitCriteriaCoverage": [],
-  "build": {
-    "passed": false,
-    "command": "npm run build"
-  },
+  "itemId": "{{ITEM_ID}}",
+  "fingerprint": "{{CURRICULUM_FINGERPRINT}}",
+  "sources": [
+    {
+      "title": "{{SOURCE_TITLE}}",
+      "url": "{{SOURCE_URL}}"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "{{CRITERION_ID}}",
+      "taughtAt": "{{SECTION}}",
+      "assessedAt": "{{ASSESSMENT}}",
+      "evidenceExpected": "{{EVIDENCE}}"
+    }
+  ],
   "validator": {
-    "passed": false,
+    "passed": true,
     "issues": []
   }
 }
