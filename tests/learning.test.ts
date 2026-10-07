@@ -76,7 +76,7 @@ const nextProjectBase = {
     { id: 'inherit', text: 'Includes every Project 1 requirement' },
     { id: 'project-proof-2', text: 'New invariant terbukti' },
   ],
-  prerequisites: ['TEST-002'],
+  prerequisites: ['TEST-001'],
 };
 
 const project = fp(projectBase);
@@ -91,7 +91,7 @@ const manifest: CurriculumManifestV2 = {
     { from: 'TEST-001', to: 'TEST-003', type: 'prerequisite' },
     { from: 'TEST-001', to: 'TEST-P01', type: 'prerequisite' },
     { from: 'TEST-001', to: 'TEST-P01', type: 'contributes_to' },
-    { from: 'TEST-002', to: 'TEST-P02', type: 'prerequisite' },
+    { from: 'TEST-001', to: 'TEST-P02', type: 'prerequisite' },
     { from: 'TEST-P01', to: 'TEST-P02', type: 'project_parent' },
   ],
 };
@@ -450,23 +450,19 @@ test('parent checkpoint memblokir project berikutnya walau explicit prerequisite
   try {
     const service = new LearningService(db, graph, () => true);
 
-    // TEST-002 adalah explicit prerequisite TEST-P02, tetapi parent TEST-P01 belum passed.
-    service.setActiveItem({ ...envelope(0), itemId: next.id });
-    const nextEvidence = requiredEvidenceForItem(next).map((criterion) => ({
+    // TEST-001 adalah explicit prerequisite TEST-P02, tetapi parent TEST-P01 belum passed.
+    service.setActiveItem({ ...envelope(0), itemId: unit.id });
+    const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
       criterionId: criterion.id,
-      text: 'Evidence next unit',
+      text: 'Evidence unit',
     }));
-    const nextPassed = service.saveSession({
-      ...envelope(1),
-      itemId: next.id,
-      fingerprint: next.fingerprint,
+    const unitPassed = service.saveSession({
+      ...session(1),
       kind: 'passed',
-      evidence: nextEvidence,
-      continueFrom: '',
-      lastAnchor: '',
+      evidence: unitEvidence,
     });
 
-    const availability = nextPassed.availability.find((entry) => entry.itemId === nextProject.id);
+    const availability = unitPassed.availability.find((entry) => entry.itemId === nextProject.id);
     assert.equal(availability?.status, 'locked');
     assert.deepEqual(availability?.missingPrerequisites, ['TEST-P01']);
   } finally {

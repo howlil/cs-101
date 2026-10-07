@@ -1,3 +1,4 @@
+import actualManifest from '../curriculum/manifest.v2.json';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { curriculumItemFingerprint,parseManifestV2 } from '../src/domain/curriculum-v2/schema';
@@ -12,3 +13,20 @@ const integration={id:'INT-001',kind:'integration' as const,order:1,title:'Integ
 const manifest={version:2 as const,tracks:[{id:'java',title:'Java',order:1}],modules:[{id:'java-core',trackId:'java',title:'Java Core',order:1}],items:[fp(unit),fp(p1),fp(p2),fp(integration)],relations:[{from:'JAV-001',to:'JAV-P01',type:'prerequisite' as const},{from:'JAV-001',to:'JAV-P02',type:'prerequisite' as const},{from:'JAV-P01',to:'JAV-P02',type:'project_parent' as const},{from:'JAV-001',to:'INT-001',type:'prerequisite' as const},{from:'JAV-001',to:'JAV-P01',type:'contributes_to' as const}]};
 test('Manifest V2 memvalidasi hierarchy, graph, checkpoint, dan integration',()=>{const parsed=parseManifestV2(manifest),graph=buildCurriculumGraph(parsed);assert.equal(parsed.items.length,4);assert.deepEqual(getTrackExplorer(graph,'java').modules[0].items.map(x=>x.id),['JAV-001','JAV-P01','JAV-P02']);assert.deepEqual(getItemConnections(graph,'JAV-P01').prerequisites,['JAV-001']);const delta=getProjectDelta(graph,'JAV-P02');assert.deepEqual(delta.inherited.map(x=>x.text),['Requirement A']);assert.deepEqual(delta.inheritanceClauses.map(x=>x.id),['inherit']);assert.deepEqual(delta.added.map(x=>x.text),['Requirement B']);const navigation=getProjectNavigation(graph,'JAV-P01');assert.equal(navigation.next?.id,'JAV-P02');assert.equal(toLegacyManifestV1(graph).tasks.length,4);assert.equal(getItemLocation(graph,'JAV-P01').module?.title,'Java Core');const search=buildCurriculumSearchIndex(graph);assert.equal(search.find(x=>x.itemId==='JAV-001')?.searchText.includes('toolchain'),true);assert.equal(search.find(x=>x.itemId==='INT-001')?.trackId,undefined);});
 test('Manifest V2 menolak prerequisite hilang dan siklus',()=>{const missing={...unit,prerequisites:['JAV-999']};assert.throws(()=>parseManifestV2({...manifest,items:manifest.items.map(x=>x.id==='JAV-001'?fp(missing):x),relations:[...manifest.relations,{from:'JAV-999',to:'JAV-001',type:'prerequisite' as const}]}),/Prerequisite tidak ditemukan|Relation item tidak ditemukan/);const cycled={...unit,prerequisites:['JAV-P02']};assert.throws(()=>parseManifestV2({...manifest,items:manifest.items.map(x=>x.id==='JAV-001'?fp(cycled):x),relations:[...manifest.relations,{from:'JAV-P02',to:'JAV-001',type:'prerequisite' as const}]}),/Siklus prerequisite/);});
+
+
+test('semua cumulative checkpoint aktual punya inheritance clause yang dikenali', () => {
+  const graph = buildCurriculumGraph(actualManifest);
+  const cumulative = graph.manifest.items.filter(
+    (item) => item.kind === 'checkpoint' && item.parentProjectId,
+  );
+  assert.ok(cumulative.length > 0);
+  for (const project of cumulative) {
+    const delta = getProjectDelta(graph, project.id);
+    assert.ok(
+      delta.inheritanceClauses.length > 0,
+      `${project.id} tidak memiliki inheritance clause yang dikenali`,
+    );
+    assert.ok(delta.inherited.length > 0, `${project.id} tidak membawa guarantee parent`);
+  }
+});
