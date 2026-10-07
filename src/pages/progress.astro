@@ -1,9 +1,8 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import ProgressPage from '../components/pages/ProgressPage';
 import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
-import EmptyAction from '../components/arc/EmptyAction';
-import { Button } from '../components/arc/button/button';
 import { getProgressOverview, type ItemLearningView } from '../domain/learning/view-models';
 
 const state = await (await learning()).export();
@@ -26,112 +25,38 @@ const stateLabel = (view: ItemLearningView) => {
   if (view.displayState === 'ready') return 'Ready';
   return 'Belum';
 };
+
+const reviews = overview.actionableReviews.map(({ review, item }) => ({
+  id: item.item.id,
+  title: item.item.title,
+  state: review.state === 'retry' ? 'retry' as const : 'due' as const,
+}));
+
+const tracks = overview.tracks.map((track) => ({
+  ...track,
+  modules: track.modules.map((module) => ({ ...module })),
+}));
+
+const integrations = overview.integrations.map((item) => ({
+  id: item.item.id,
+  title: item.item.title,
+  href: item.href,
+  stateLabel: stateLabel(item),
+  reviewLabel: reviewLabel(item.review),
+  passed: item.completion === 'passed',
+}));
+
+const sessions = state.sessions.slice().reverse().map((session) => ({
+  id: session.itemId || session.taskId,
+  recordedAt: session.recordedAt,
+  continueFrom: session.continueFrom || '',
+}));
 ---
 <AppLayout title="Progres">
-  <div class="progress-page">
-    <div class="content">
-      <p class="eyebrow">BELAJAR / PROGRES</p>
-      <h1>Posisi curriculum.</h1>
-      <p class="lede">Completion berasal dari evidence. Review adalah retention state yang terpisah.</p>
-    </div>
-
-    {overview.actionableReviews.length > 0 && (
-      <section class="progress-review-queue">
-        <div class="progress-section-heading">
-          <div>
-            <p class="eyebrow">ACTION</p>
-            <h2>Review yang perlu dikerjakan</h2>
-          </div>
-          <span>{overview.actionableReviews.length}</span>
-        </div>
-        <div class="progress-review-items">
-          {overview.actionableReviews.map(({ review, item }) => (
-            <a href={'/review/' + item.item.id}>
-              <code>{item.item.id}</code>
-              <span>{item.item.title}</span>
-              <small>{review.state === 'retry' ? 'Retry' : 'Due'}</small>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <div class="progress-tracks">
-      {overview.tracks.map((track) => (
-        <section class="progress-track">
-          <div class="progress-track-heading">
-            <a href={track.href}>{track.title}</a>
-            <span>
-              {track.completed}/{track.total}
-              {track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''}
-            </span>
-          </div>
-          <div class="progress-modules">
-            {track.modules.map((module) => (
-              <a href={module.href}>
-                <span>{module.title}</span>
-                <small>
-                  {module.active ? 'Aktif · ' : ''}
-                  {module.completed}/{module.total}
-                  {module.reviewActions ? ' · ' + module.reviewActions + 'R' : ''}
-                </small>
-              </a>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-
-    {overview.integrations.length > 0 && (
-      <section class="progress-integrations">
-        <div class="progress-section-heading">
-          <div>
-            <p class="eyebrow">CROSS-TRACK</p>
-            <h2>Integration</h2>
-          </div>
-          <span>
-            {overview.integrations.filter((item) => item.completion === 'passed').length}/{overview.integrations.length}
-          </span>
-        </div>
-        <div class="progress-integration-items">
-          {overview.integrations.map((item) => (
-            <a href={item.href}>
-              <code>{item.item.id}</code>
-              <span>{item.item.title}</span>
-              <small>
-                {stateLabel(item)}
-                {reviewLabel(item.review) ? ' · ' + reviewLabel(item.review) : ''}
-              </small>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <section class="progress-history">
-      <h2>Riwayat sesi</h2>
-      {state.sessions.length ? (
-        state.sessions.slice().reverse().map((session) => (
-          <article class="history-entry">
-            <p class="small muted">
-              {session.itemId || session.taskId} · <time datetime={session.recordedAt}>{session.recordedAt}</time>
-            </p>
-            <p>{session.continueFrom || 'Evidence tersimpan.'}</p>
-          </article>
-        ))
-      ) : (
-        <EmptyAction
-          client:load
-          title="Belum ada sesi tersimpan."
-          description="Catatan sesi akan tampil di sini setelah disimpan."
-        />
-      )}
-    </section>
-
-    <div class="actions">
-      <form action="/api/export" method="get">
-        <Button type="submit" variant="secondary">Ekspor progres</Button>
-      </form>
-    </div>
-  </div>
+  <ProgressPage
+    reviews={reviews}
+    tracks={tracks}
+    integrations={integrations}
+    sessions={sessions}
+  />
 </AppLayout>
