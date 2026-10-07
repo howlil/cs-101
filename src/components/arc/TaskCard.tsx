@@ -1,5 +1,5 @@
 import { Card } from './card/card';
-import styles from './task-card.module.css';
+import ActionLink from './ActionLink';
 
 interface Props {
   taskId: string;
@@ -16,6 +16,6 @@ export default function TaskCard({ taskId, title, description, href, actionLabel
     description={description}
     meta={taskId}
     status={status}
-    action={<a className={styles.action} href={href}>{actionLabel}</a>}
+    action={<ActionLink href={href} label={actionLabel} />}
   />;
 }

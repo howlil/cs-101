@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Button, type ButtonVariant } from '../arc/button/button';
+import { Play, RefreshCw } from 'lucide-react';
 import { Alert, type AlertTone } from '../arc/alert/alert';
 import { postJson, readDraft, removeDraft } from './client';
 
@@ -58,7 +59,10 @@ export default function ActivateItem({
 
   return <div className="react-action-stack">
     <Button type="button" variant={variant} loading={loading} onClick={activate}>
-      {loading ? 'Memperbarui…' : label}
+      {label.toLocaleLowerCase('id-ID').includes('validasi')
+        ? <RefreshCw size={15} strokeWidth={1.8} aria-hidden="true" />
+        : <Play size={15} strokeWidth={1.8} aria-hidden="true" />}
+      <span>{loading ? 'Memperbarui…' : label}</span>
     </Button>
     {feedback && (
       <Alert open title={feedback.title} tone={feedback.tone}>

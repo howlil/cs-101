@@ -7,6 +7,7 @@ import { Accordion } from '../arc/accordion/accordion';
 import { Alert, type AlertTone } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { Textarea } from '../arc/textarea/textarea';
+import { CheckCircle2, Save } from 'lucide-react';
 import { postJson, readDraft, removeDraft, writeDraft } from './client';
 
 export type EvidenceGroup = {
@@ -187,7 +188,8 @@ export default function EvidenceForm({
           disabled={Boolean(loadingKind)}
           onClick={() => void submit('progress')}
         >
-          {saveLabel}
+          <Save size={15} strokeWidth={1.8} aria-hidden="true" />
+          <span>{saveLabel}</span>
         </Button>
         <Button
           type="button"
@@ -196,7 +198,8 @@ export default function EvidenceForm({
           disabled={Boolean(loadingKind)}
           onClick={() => void submit('passed')}
         >
-          {passLabel}
+          <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+          <span>{passLabel}</span>
         </Button>
       </div>
       {feedback && (
