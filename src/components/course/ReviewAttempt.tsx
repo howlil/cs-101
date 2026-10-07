@@ -4,6 +4,8 @@ import { useMemo, useState, type SyntheticEvent } from 'react';
 import { Alert } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { RadioGroup } from '../arc/radio-group/radio-group';
+import ActionLink from '../arc/ActionLink';
+import { Send } from 'lucide-react';
 
 type PublicReviewQuestion = {
   id: string;
@@ -93,8 +95,8 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
       </div>
 
       <div className="actions">
-        <a className="review-link" href="/">Kembali ke Hari ini</a>
-        <a className="review-link" href={'/review/' + itemId}>Muat status review</a>
+        <ActionLink href="/" label="Kembali ke Hari ini" />
+        <ActionLink href={'/review/' + itemId} label="Muat status review" />
       </div>
     </div>;
   }
@@ -127,7 +129,8 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
     {error && <Alert title="Review belum tersimpan" tone="danger">{error}</Alert>}
 
     <Button type="submit" variant="primary" disabled={!complete || submitting}>
-      {submitting ? 'Menyimpan…' : 'Submit 5 jawaban'}
+      <Send size={15} strokeWidth={1.8} aria-hidden="true" />
+      <span>{submitting ? 'Menyimpan…' : 'Submit 5 jawaban'}</span>
     </Button>
   </form>;
 }

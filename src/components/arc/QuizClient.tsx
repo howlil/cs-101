@@ -4,6 +4,7 @@ import { useState, type SubmitEvent } from 'react';
 import { Alert } from './alert/alert';
 import { Button } from './button/button';
 import { RadioGroup } from './radio-group/radio-group';
+import { CheckCircle2 } from 'lucide-react';
 import styles from './quiz.module.css';
 
 interface QuizItem {
@@ -26,7 +27,10 @@ function QuizQuestion({ item, index }: { item: QuizItem; index: number }) {
 
   return <form className={styles.question} onSubmit={submit}>
     <RadioGroup label={item.question} name={`answer-${index}`} options={options} value={value} onValueChange={(next) => { setValue(next); setResult(undefined); }} />
-    <Button type="submit" variant="primary" disabled={value === ''}>Cek jawaban</Button>
+    <Button type="submit" variant="primary" disabled={value === ''}>
+      <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+      <span>Cek jawaban</span>
+    </Button>
     {result && <Alert title={result.correct ? 'Jawaban benar.' : 'Belum tepat.'} tone={result.correct ? 'success' : 'warning'}>{result.explanation}</Alert>}
   </form>;
 }
