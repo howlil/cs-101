@@ -373,3 +373,16 @@ hr { margin: 24px 0; }
   .today-page > h1,
   .compact-page-header h1 { margin-bottom: 10px; }
 }
+
+
+/* Keep every scroll container scrollable while removing scrollbar chrome. */
+:where(html, body, *) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:where(*::-webkit-scrollbar) {
+  width: 0;
+  height: 0;
+  display: none;
+}
