@@ -49,7 +49,7 @@ Production branch: master
 
 Jangan tambahkan `build.command` ke `wrangler.jsonc`. Astro 7 memakai Vite dan build harus sudah selesai sebelum `wrangler deploy` dijalankan. `wrangler.jsonc` hanya menyimpan kontrak runtime: Worker entrypoint, assets, compatibility flag, observability, dan binding D1.
 
-Untuk Astro 6+ / `@astrojs/cloudflare` v14, Worker entrypoint menggunakan `@astrojs/cloudflare/entrypoints/server`. Aplikasi ini tidak memakai Astro Sessions, jadi `session: false` dipakai dan tidak membutuhkan binding KV `SESSION`.
+Untuk Astro 6+ / `@astrojs/cloudflare` v14, Worker entrypoint menggunakan `@astrojs/cloudflare/entrypoints/server`. Konfigurasi Cloudflare sekarang menjadi `astro.config.mjs` default, sama seperti project Astro Cloudflare yang dibuat oleh tooling resmi. Aplikasi ini tidak memakai Astro Sessions, jadi `session: false` dipakai dan tidak membutuhkan binding KV `SESSION`.
 
 D1 tersedia sebagai binding `LEARNING_DB`. Setelah deployment pertama atau ketika ada migration baru, jalankan:
 
@@ -64,7 +64,7 @@ pnpm run deploy:cloudflare
 pnpm run migrate:cloudflare
 ```
 
-`pnpm dev` tetap memakai konfigurasi Node lokal + `node:sqlite`; `pnpm run build` dikhususkan sebagai production build Cloudflare agar Workers Builds dan repository memiliki satu kontrak deployment.
+`astro.config.mjs` adalah konfigurasi production Cloudflare. `pnpm dev` dan `pnpm run build:node` memakai `astro.node.config.mjs` untuk runtime Node + `node:sqlite` lokal.
 
 ## Yang sudah tersedia
 
