@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 
-export const taskIdSchema = z.string().regex(/^[A-Z]+-(?:P)?\d{3}$/);
+export const taskIdSchema = z.string().regex(/^[A-Z]+-(?:P\d{2,3}|\d{3})$/);
 const criterion = z.object({ id: z.string().min(1), text: z.string().min(1) });
 export const taskSchema = z.object({
   taskId: taskIdSchema,

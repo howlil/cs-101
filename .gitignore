@@ -9,3 +9,4 @@ dist/
 *.log
 coverage/
 .dev.vars*
+curriculum/raw/*.xlsx

@@ -34,7 +34,7 @@ for (const file of readdirSync('src/content/lessons', { recursive: true, withFil
   for (const criterion of requiredEvidence(task)) {
     if (!record.coverage.some((entry) => entry.criterionId === criterion.id)) throw new Error(`Coverage hilang: ${task.taskId}/${criterion.id}`);
   }
-  for (const match of content.matchAll(/\/learn\/([A-Z]+-(?:P)?\d{3})/g)) {
+  for (const match of content.matchAll(/\/learn\/([A-Z]+-(?:P\d{2,3}|\d{3}))/g)) {
     if (!manifest.tasks.some((task) => task.taskId === match[1])) throw new Error(`Link task tidak dikenal: ${match[1]}`);
   }
 }
