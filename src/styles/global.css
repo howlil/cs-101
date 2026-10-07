@@ -4,7 +4,6 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--canvas); color: var(--text); font: 16px/1.65 var(--font-body); }
 a { color: var(--accent-strong); text-underline-offset: 3px; }
-html[data-accent] :focus-visible { outline: 2px solid var(--accent) !important; outline-offset: 3px; }
 :target, h2, h3 { scroll-margin-top: 68px; }
 h1, h2, h3 { line-height: 1.25; font-weight: 600; letter-spacing: -.025em; }
 h1 { font-size: 28px; margin: 8px 0; }
@@ -135,3 +134,12 @@ html[data-sidebar-collapsed="true"] .sidebar { display: none; }
   .progress-review-items a, .progress-integration-items a { grid-template-columns: auto minmax(0,1fr); }
   .progress-review-items small, .progress-integration-items small { grid-column: 2; }
 }
+
+.react-action-stack { display: grid; gap: var(--space-2); align-items: start; }
+.evidence-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-3); }
+.evidence-heading .eyebrow { margin: 0 0 var(--space-1); }
+.evidence-heading h2 { margin: 0; font-size: var(--text-lg); }
+.evidence-heading > span { color: var(--text-muted); font: 600 var(--text-xs)/1 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.evidence-reference { margin: var(--space-4) 0; }
+.evidence-reference ol { margin: 0; padding-left: var(--space-6); }
+.evidence-continuation { padding-top: var(--space-5); border-top: 1px solid var(--border); }

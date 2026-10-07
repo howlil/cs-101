@@ -198,3 +198,11 @@
     padding: 0 0 58px;
   }
 }
+
+.top-action:focus-visible,
+.rail-link:focus-visible {
+  color: var(--foreground);
+  background: var(--surface-muted);
+  border-color: var(--border-strong);
+  outline: none;
+}
