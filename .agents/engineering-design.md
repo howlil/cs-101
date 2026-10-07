@@ -815,7 +815,7 @@ runtime render
 | P4 Cross-module graph | typed relations + Connections selector/UI | Related/deep-dive terlihat tanpa menjadi prerequisite |
 | P5 Review engine ✅ | attempts + schedule + retention | Review due/retry/retained konsisten |
 | P6 Generator context ✅ | graph-aware staged generation + review bank | Generator menerima bounded prerequisite/project context; bundle tervalidasi sebelum promotion |
-| P7 Progress + search | hierarchical progress + local search | User dapat menemukan dan memahami posisi di curriculum besar |
+| P7 Progress + search ✅ | view-model driven progress + ranked global/local search | User dapat menemukan dan memahami posisi di curriculum besar tanpa business logic di page |
 
 ## Engineering acceptance
 
@@ -844,3 +844,26 @@ runtime render
 - Tidak menjadikan project sebagai unit lesson biasa.
 - Tidak mengganti historical ID ketika berpindah ke Manifest V2.
 - Tidak menambah multi-user/auth model sampai kebutuhan itu menjadi scope produk.
+
+
+## P7 view-model boundary
+
+### Learning view models
+
+`src/domain/learning/view-models.ts` menjadi boundary presentation untuk Today, Curriculum state marker, dan Progress.
+
+Page tidak menghitung ulang:
+
+- current focus;
+- passed/stale;
+- ready/locked;
+- actionable review;
+- module/track completion.
+
+`started` adalah derived presentation state untuk row progress lama yang pernah aktif tetapi bukan `activeItemId` saat ini. Storage schema tetap `active|passed` selama compatibility window.
+
+### Search
+
+`buildCurriculumSearchIndex()` menghasilkan index lokal dari Item ID, title, track, module, dan scope. `searchCurriculum()` melakukan deterministic ranking tanpa service eksternal.
+
+Global palette di AppLayout memakai `Ctrl/⌘ K`; Curriculum memiliki inline filter lokal tanpa shortcut global.

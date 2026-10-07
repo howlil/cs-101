@@ -80,6 +80,15 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
             <Search size={17} strokeWidth={1.8} aria-hidden="true" />
             <input
               ref={inputRef}
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={open}
+              aria-controls="curriculum-search-options"
+              aria-activedescendant={
+                results[activeIndex]
+                  ? "curriculum-search-option-" + results[activeIndex].itemId
+                  : undefined
+              }
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(event) => {
@@ -110,7 +119,12 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
             </Dialog.Close>
           </div>
 
-          <div className={styles.results} role="listbox" aria-label="Hasil pencarian">
+          <div
+            id="curriculum-search-options"
+            className={styles.results}
+            role="listbox"
+            aria-label="Hasil pencarian"
+          >
             {!query.trim() ? (
               <p className={styles.hint}>Ketik ID, judul, scope, track, atau module.</p>
             ) : results.length ? (
@@ -119,6 +133,7 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
                 return (
                   <a
                     key={item.itemId}
+                    id={"curriculum-search-option-" + item.itemId}
                     href={item.href}
                     role="option"
                     aria-selected={index === activeIndex}

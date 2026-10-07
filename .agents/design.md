@@ -287,6 +287,8 @@ Dengan 163 unit + 40 checkpoint + integration, search sudah menjadi kebutuhan in
 
 Tidak perlu external search service. Search lokal dari manifest cukup.
 
+Global search palette tersedia dari seluruh app melalui `Ctrl/⌘ K`. Ranking memprioritaskan exact Item ID, lalu title, module/track, kemudian scope keyword. Inline search pada Curriculum tetap ada sebagai filter lokal dan tidak memiliki global keyboard shortcut sendiri.
+
 ## Unit page
 
 Unit tetap menggunakan lesson MDX, tetapi anatomy wajib mengikuti curriculum.
@@ -433,6 +435,8 @@ review       = due
 ```
 
 Jangan membuat satu enum besar yang mencampur ketiganya.
+
+Derived presentation state `started` boleh dipakai di UI untuk item yang sudah punya session/progress lama tetapi bukan `activeItemId` saat ini. `started` bukan persisted completion enum baru; hanya mencegah UI menampilkan beberapa item sebagai focus aktif.
 
 Mode `Connections` boleh ditambahkan di Progress untuk melihat dependency/cross-track graph, tetapi Overview hierarchical tetap default.
 
