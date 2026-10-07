@@ -11,8 +11,8 @@
     "dev": "astro dev --config astro.node.config.mjs --host 127.0.0.1",
     "check": "astro check",
     "validate:content": "tsx scripts/validate-content.ts",
-    "build": "pnpm run validate && astro build",
-    "build:cloudflare": "pnpm run migrate:cloudflare && pnpm run build",
+    "build": "node scripts/build.mjs",
+    "build:cloudflare": "pnpm run migrate:cloudflare && pnpm run build:app",
     "start": "node scripts/start.mjs",
     "test": "tsx --test tests/*.test.ts",
     "deploy:cloudflare": "pnpm run build:cloudflare && wrangler deploy",
@@ -26,7 +26,8 @@
     "generation:validate": "tsx scripts/validate-generation.ts",
     "generation:promote": "tsx scripts/promote-generation.ts",
     "validate": "pnpm run validate:curriculum && pnpm run validate:content && pnpm run validate:reviews",
-    "ci": "pnpm run test && pnpm run check && pnpm run build:node"
+    "ci": "pnpm run test && pnpm run check && pnpm run build:node",
+    "build:app": "pnpm run validate && astro build"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",

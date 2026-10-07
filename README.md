@@ -58,7 +58,7 @@ pnpm run migrate:cloudflare
 
 Cloudflare menjalankan preparation release lewat `pnpm run build:cloudflare`: migration D1 yang belum terpasang lalu build yang tervalidasi. Deploy command tetap `npx wrangler deploy` dan hanya mengirim artifact yang sudah siap.
 
-`pnpm run build` sengaja **tidak** menjalankan migration remote. Ini membuat build lokal/CI reproducible dan mencegah validation/build biasa memodifikasi production database.
+`pnpm run build` mendeteksi Cloudflare Workers Builds melalui `WORKERS_CI=1`. Di Workers Builds ia menjalankan migration D1 sebelum build; di local dan GitHub CI ia tetap pure build tanpa mutation remote. `pnpm run build:cloudflare` tersedia sebagai explicit release preparation.
 
 Untuk deploy manual dari terminal:
 

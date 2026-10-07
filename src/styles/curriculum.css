@@ -423,3 +423,36 @@
 }
 
 .state-label--stale { color: var(--warning); }
+
+
+/* Curriculum controls use UIArc primitives. Only one track is visible at rest. */
+.curriculum-controls { display: grid; gap: 18px; }
+.curriculum-search-uiarc label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+.curriculum-search-uiarc input {
+  min-height: 38px;
+  background: var(--canvas);
+}
+.track-select-uiarc { padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.track-select-uiarc label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .11em;
+}
+.track-select-uiarc button { min-height: 38px; }
+.module-tree--uiarc { margin-top: 0; }
+.module-tree--uiarc > .explorer-label { margin-bottom: 2px; }
+.module-tree--uiarc .module-items {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 4px;
+}
+.module-tree--uiarc .item-row { padding-inline: 5px; }
