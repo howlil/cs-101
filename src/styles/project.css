@@ -198,9 +198,6 @@
     grid-template-columns: 1fr;
   }
 
-  .project-context-card {
-    min-height: 0;
-  }
 
   .project-contributors {
     grid-template-columns: 1fr;

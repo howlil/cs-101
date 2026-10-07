@@ -42,26 +42,6 @@
   font: 600 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
-.curriculum-search {
-  display: block;
-  margin-bottom: 18px;
-}
-
-.curriculum-search input {
-  width: 100%;
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-control);
-  background: var(--canvas);
-  color: var(--text);
-  padding: 0 10px;
-  font: 13px/1 var(--font-body);
-}
-
-.curriculum-search input::placeholder {
-  color: var(--muted);
-}
-
 .explorer-label {
   display: block;
   margin: 0 0 7px;
@@ -71,82 +51,9 @@
   letter-spacing: .11em;
 }
 
-.track-switcher {
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-
-.track-switcher > a {
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 5px 8px;
-  border-radius: var(--radius-control);
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 12px;
-}
-
-.track-switcher > a:hover {
-  color: var(--text);
-  background: var(--surface-muted);
-}
-
-.track-switcher > a[aria-current="true"] {
-  color: var(--accent-strong);
-  background: var(--accent-subtle);
-  font-weight: 650;
-}
-
-.track-switcher small,
-.module-tree summary small {
-  color: var(--muted);
-  font: 500 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
-}
-
 .module-tree,
 .integration-list {
   margin-top: 16px;
-}
-
-.module-tree details {
-  border-bottom: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
-}
-
-.module-tree summary {
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  cursor: pointer;
-  list-style: none;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 650;
-  padding: 7px 5px;
-}
-
-.module-tree summary::-webkit-details-marker {
-  display: none;
-}
-
-.module-tree summary::before {
-  content: '›';
-  width: 12px;
-  color: var(--muted);
-  transform: rotate(0);
-  transition: transform 120ms ease;
-}
-
-.module-tree details[open] summary::before {
-  transform: rotate(90deg);
-}
-
-.module-tree summary > span:first-of-type {
-  flex: 1;
 }
 
 .item-row,

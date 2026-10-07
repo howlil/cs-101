@@ -21,26 +21,6 @@
   font-size: 32px;
 }
 
-.review-status-card {
-  margin-top: 24px;
-  padding: 16px 18px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-panel);
-  background: var(--surface);
-  box-shadow: var(--shadow-resting);
-}
-
-.review-status-card h2 {
-  margin: 4px 0 6px;
-  font-size: 17px;
-}
-
-.review-status-card p:last-child {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
 .review-status-line {
   display: flex;
   align-items: center;
@@ -110,19 +90,6 @@
 
 .review-result {
   margin-top: 24px;
-}
-
-.review-link {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-control);
-  color: var(--text);
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
 }
 
 .review-feedback-list { display: grid; gap: 7px; margin-top: 16px; }
