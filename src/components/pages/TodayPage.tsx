@@ -1,4 +1,4 @@
-import { RotateCcw } from 'lucide-react';
+import { Home, RotateCcw } from 'lucide-react';
 import EmptyAction from '../arc/EmptyAction';
 import TaskCard from '../arc/TaskCard';
 
@@ -20,7 +20,7 @@ export default function TodayPage({
   reviewCount?: number;
 }) {
   return <div className="content">
-    <p className="eyebrow">BELAJAR / HARI INI</p>
+    <p className="eyebrow"><Home size={13} strokeWidth={1.8} aria-hidden="true" /> BELAJAR / HARI INI</p>
     <h1>Lanjut dari sini.</h1>
     <p className="lede">Satu item. Satu langkah berikutnya.</p>
 

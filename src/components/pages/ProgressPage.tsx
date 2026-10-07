@@ -55,7 +55,7 @@ export default function ProgressPage({
 }) {
   return <div className="progress-page">
     <div className="content">
-      <p className="eyebrow">BELAJAR / PROGRES</p>
+      <p className="eyebrow"><BarChart3 size={13} strokeWidth={1.8} aria-hidden="true" /> BELAJAR / PROGRES</p>
       <h1>Posisi curriculum.</h1>
       <p className="lede">Completion berasal dari evidence. Review adalah retention state yang terpisah.</p>
     </div>
