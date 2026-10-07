@@ -42,7 +42,7 @@ Gunakan konfigurasi dashboard berikut:
 
 ```text
 Build command:  pnpm run build
-Deploy command: pnpm run deploy:cloudflare
+Deploy command: npx wrangler deploy
 Root directory: /
 Production branch: master
 ```
@@ -57,13 +57,15 @@ D1 tersedia sebagai binding `LEARNING_DB`. Setelah deployment pertama atau ketik
 pnpm run migrate:cloudflare
 ```
 
+Cloudflare menjalankan semua preparation pada Build command: validasi konten, migration D1 yang belum terpasang, lalu Astro Cloudflare build. Deploy command tetap `npx wrangler deploy` dan hanya mengirim artifact yang sudah siap.
+
 Untuk deploy manual dari terminal:
 
 ```sh
 pnpm run deploy:cloudflare
 ```
 
-Script deploy menerapkan migration D1 yang belum terpasang terlebih dahulu, lalu menjalankan `wrangler deploy`. `pnpm run migrate:cloudflare` tetap tersedia untuk menjalankan migration tanpa deploy.
+`pnpm run deploy:cloudflare` hanya convenience script lokal yang menjalankan build workflow yang sama lalu `wrangler deploy`.
 
 `astro.config.mjs` adalah konfigurasi production Cloudflare. `pnpm dev` dan `pnpm run build:node` memakai `astro.node.config.mjs` untuk runtime Node + `node:sqlite` lokal.
 
