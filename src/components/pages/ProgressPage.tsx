@@ -5,6 +5,7 @@ import {
   BrainCircuit,
   Download,
   History,
+  Check,
 } from 'lucide-react';
 import EmptyAction from '../arc/EmptyAction';
 import { Button } from '../arc/button/button';
@@ -62,7 +63,7 @@ function RetentionSteps({ step }: { step: number }) {
         key={day}
         className={index < step ? 'is-done' : index === step ? 'is-current' : ''}
       >
-        {index < step ? '✓ ' : ''}D{day}
+        {index < step && <Check size={10} strokeWidth={2} aria-hidden="true" />}D{day}
       </span>
     ))}
   </div>;
