@@ -7,6 +7,7 @@ const privateOrigin = process.env.CS101_ORIGIN ? new URL(process.env.CS101_ORIGI
 
 export default defineConfig({
   output: 'server',
+  session: false,
   adapter: node({ mode: 'standalone' }),
   integrations: [mdx(), react()],
   server: { host: '127.0.0.1', port: 4321 },

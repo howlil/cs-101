@@ -7,6 +7,7 @@ const privateOrigin = process.env.CS101_ORIGIN ? new URL(process.env.CS101_ORIGI
 
 export default defineConfig({
   output: 'server',
+  session: false,
   adapter: cloudflare({ imageService: 'passthrough' }),
   integrations: [mdx(), react()],
   security: {

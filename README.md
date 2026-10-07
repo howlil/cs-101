@@ -14,37 +14,57 @@ Gunakan Node 24 sesuai `.node-version`. Server dev bind ke `127.0.0.1:4321`. Hal
 ```sh
 pnpm test
 pnpm check
-pnpm build
+pnpm run build:node
 pnpm start
 ```
 
-`pnpm start` menjalankan hasil build pada host dan port yang sama. Jika port dev sedang dipakai, hentikan dev terlebih dahulu. `HOST` dan `PORT` dapat diatur untuk deployment private. Production membaca environment process; jika memakai `.env`, muat lewat service manager atau `node --env-file=.env scripts/start.mjs`.
+`pnpm run build:node` membuat build Node lokal; `pnpm start` menjalankan hasil build tersebut pada host dan port yang sama. Jika port dev sedang dipakai, hentikan dev terlebih dahulu. `HOST` dan `PORT` dapat diatur untuk deployment private. Production membaca environment process; jika memakai `.env`, muat lewat service manager atau `node --env-file=.env scripts/start.mjs`.
 
 ## Deploy ke Cloudflare Workers lewat GitHub
 
-Cloudflare memakai `wrangler.jsonc` sebagai source of truth. Untuk Astro 6+ / `@astrojs/cloudflare` v14, Wrangler memakai unified entrypoint `@astrojs/cloudflare/entrypoints/server`; static assets tetap dibangun ke `dist`, dan D1 tersedia sebagai binding `LEARNING_DB`.
+Deployment mengikuti pola yang sama dengan `modu-app`: **Cloudflare Workers Builds melakukan build lebih dulu, lalu Wrangler hanya deploy artifact yang sudah selesai**.
 
-1. Di Cloudflare **Workers & Pages**, buat Worker dari repository GitHub ini dan pilih branch production `master`.
-2. Gunakan build settings berikut:
-
-   ```text
-   Build command:  (kosong)
-   Deploy command: pnpm run deploy:cloudflare
-   Root directory: /
-   ```
-
-   Tidak perlu mengisi output directory seperti Pages. `wrangler.jsonc` memiliki custom build `pnpm run build:cloudflare`, jadi setiap `wrangler deploy` membangun Astro Cloudflare lebih dulu. Entrypoint Worker berasal dari package adapter (`@astrojs/cloudflare/entrypoints/server`), bukan dari file output yang belum ada. Jangan duplikasi Build command di dashboard; `.node-version` mengunci Node 24 untuk build.
-3. `wrangler.jsonc` mendeklarasikan D1 binding `LEARNING_DB`. Wrangler 4.x dapat membuat dan menautkan resource D1 saat deployment pertama jika binding tersebut belum memiliki resource.
-4. `pnpm run deploy:cloudflare` menjalankan `wrangler deploy`. Wrangler memicu custom build dari `wrangler.jsonc`, mem-provision binding D1 bila perlu, lalu script menerapkan semua migration yang belum dijalankan dari folder `migrations/` ke `LEARNING_DB`.
-5. Untuk aplikasi pribadi, pasang Cloudflare Access sebelum membuka hostname production ke publik. Pemeriksaan Origin melindungi mutation dari cross-origin request, tetapi bukan autentikasi.
-
-Untuk uji lokal runtime Cloudflare:
-
-```sh
-pnpm run preview:cloudflare
+```text
+push master
+  ↓
+pnpm run build
+  ↓
+Astro + @astrojs/cloudflare
+  ↓
+dist/
+  ↓
+npx wrangler deploy
+  ↓
+Cloudflare Worker + D1
 ```
 
-`pnpm dev`/`pnpm start` tetap memakai Node + `node:sqlite` lokal. Runtime Cloudflare memakai Astro Cloudflare adapter + D1; database lokal tidak dibawa ke Cloudflare.
+Gunakan konfigurasi dashboard berikut:
+
+```text
+Build command:  pnpm run build
+Deploy command: npx wrangler deploy
+Root directory: /
+Production branch: master
+```
+
+Jangan tambahkan `build.command` ke `wrangler.jsonc`. Astro 7 memakai Vite dan build harus sudah selesai sebelum `wrangler deploy` dijalankan. `wrangler.jsonc` hanya menyimpan kontrak runtime: Worker entrypoint, assets, compatibility flag, observability, dan binding D1.
+
+Untuk Astro 6+ / `@astrojs/cloudflare` v14, Worker entrypoint menggunakan `@astrojs/cloudflare/entrypoints/server`. Aplikasi ini tidak memakai Astro Sessions, jadi `session: false` dipakai dan tidak membutuhkan binding KV `SESSION`.
+
+D1 tersedia sebagai binding `LEARNING_DB`. Setelah deployment pertama atau ketika ada migration baru, jalankan:
+
+```sh
+pnpm run migrate:cloudflare
+```
+
+Untuk deploy manual dari terminal:
+
+```sh
+pnpm run deploy:cloudflare
+pnpm run migrate:cloudflare
+```
+
+`pnpm dev` tetap memakai konfigurasi Node lokal + `node:sqlite`; `pnpm run build` dikhususkan sebagai production build Cloudflare agar Workers Builds dan repository memiliki satu kontrak deployment.
 
 ## Yang sudah tersedia
 

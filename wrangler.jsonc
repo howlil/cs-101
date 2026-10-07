@@ -26,8 +26,5 @@
     "traces": {
       "enabled": false
     }
-  },
-  "build": {
-    "command": "pnpm run build:cloudflare"
   }
 }
