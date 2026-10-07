@@ -44,9 +44,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .skip-link { position: fixed; top: -100px; left: 16px; z-index: 5; padding: 8px 16px; background: var(--surface); }
 .skip-link:focus { top: 8px; }
 
-  .topbar nav { order: 3; width: 100%; justify-content: center; margin: 0; padding: 0 0 6px; border-top: 1px solid var(--line); }
-  .sidebar { top: 108px; height: calc(100vh - 108px); }
-}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
 
 .progress-tracks { display: grid; gap: 18px; margin-top: 24px; }
