@@ -1,127 +1,521 @@
 # CS-101 — Product design
 
-Draft · 6 Oktober 2026
+Updated · 7 Oktober 2026
 
-Course pribadi untuk memahami konsep, mengerjakan challenge, dan menyimpan bukti belajar. Halaman pertama menjawab: **lanjut belajar dari mana?**
+CS-101 adalah **learning execution workspace** untuk curriculum engineering yang besar dan saling terhubung. Produk bukan sekadar course reader atau daftar lesson. Tugas utamanya adalah menjawab tiga pertanyaan:
 
-## Dasar keputusan
+1. **Apa yang harus dikerjakan sekarang?**
+2. **Materi ini berada di mana dan bergantung pada apa?**
+3. **Apa bukti bahwa materi atau project benar-benar selesai?**
 
-- Arahan Howlil yang terkonfirmasi dari percakapan: compact, clean, minimalis, tanpa verbosity dan AI slop.
-- Profil preferensi Howlil terpisah belum tersedia. Palet, ukuran, dan layout di bawah adalah usulan.
-- Kontrak produk berasal dari `course-generator`: satu task aktif, curriculum sebagai spesifikasi, lesson dibuat per task, kelulusan berdasarkan bukti.
-- Skill `product design` belum ditemukan. Dokumen ini disusun langsung dari kontrak course dan sumber primer di bagian Riset.
-- Repository belum berisi aplikasi atau curriculum. Task dan teks pada wireframe adalah contoh; belum menjadi materi resmi.
+Curriculum sumber saat ini berisi 163 unit materi, 40 project checkpoint, dan 3 latihan integrasi lintas jalur. Karena itu desain harus tetap compact ketika curriculum bertambah, tanpa mengubah semua item menjadi flat sidebar atau graph visual yang sulit dibaca.
 
-## Prinsip
+## Product thesis
 
-1. **Materi langsung terlihat.** Judul, manfaat satu kalimat, lalu konsep pertama. Pembuka maksimal satu paragraf.
-2. **Ringkas lewat struktur.** Satu gagasan per paragraf; penjelasan wajib tetap lengkap. Jangan menghapus exit criteria demi halaman pendek.
-3. **Satu representasi utama.** Gunakan kode, tabel, atau diagram sesuai konsep. Hindari mengulang penjelasan yang sama dalam ketiganya.
-4. **Satu aksi utama per konteks.** Lanjutkan, cek jawaban, atau simpan sesi. Aksi lain tampil sebagai link atau tombol sekunder.
-5. **Status punya bukti.** Materi tersedia, task sedang dikerjakan, dan task lulus adalah status berbeda.
-6. **Dekorasi dibatasi.** Tanpa gradient hero, kartu statistik kosong, emoji dekoratif, confetti, streak, atau slogan motivasi.
+Gunakan tiga model yang berbeda untuk tiga kebutuhan berbeda:
 
-## Struktur produk
+```text
+Hierarchy  → menemukan materi
+Graph      → dependency dan hubungan lintas materi
+State      → menentukan pekerjaan berikutnya
+```
 
-| Halaman | Isi utama | Aksi utama |
+Hierarchy adalah representasi utama di UI. Graph adalah model domain di belakang layar dan hanya divisualisasikan ketika hubungan memang perlu dijelaskan. State menentukan ready/active/passed/review tanpa mengubah hierarchy.
+
+Produk mengikuti loop:
+
+```text
+Orientasi
+  ↓
+Pilih / lanjutkan item
+  ↓
+Pahami konsep
+  ↓
+Kerjakan challenge / project
+  ↓
+Simpan evidence
+  ↓
+Lulus
+  ↓
+Review
+  ↓
+Item berikutnya menjadi ready
+```
+
+## Vocabulary produk
+
+Gunakan istilah berikut secara konsisten di UI, domain, dan dokumentasi.
+
+| Entitas | Contoh | Makna |
 | --- | --- | --- |
-| `/` · Hari ini | Task aktif, catatan terakhir, review jatuh tempo | Lanjutkan |
-| `/learn/<TASK-ID>` · Materi | Konsep, contoh, latihan, challenge, bukti | Lanjut ke bagian terakhir; simpan sesi di akhir |
-| `/review/<TASK-ID>` · Review | Lima soal recall, jawaban, perbaikan terarah | Periksa jawaban |
-| `/progress` · Progres | Daftar task, status, riwayat sesi dan bukti | Buka task |
+| Track | Java, DB & SQL, Networking | Bidang besar |
+| Module | Java Core, Testing, Network Foundations | Kelompok kompetensi di dalam track |
+| Unit | Collections + Generics | Satu unit belajar |
+| Scope | List, Set, Map, generics | Materi yang harus dipahami |
+| Challenge | One-pass Settlement Index | Mini-case di dalam unit |
+| Criterion | Top-K benar, complexity benar | Definition of Done unit |
+| Checkpoint | Adversarial Ledger Kernel | Project kumulatif setelah sekumpulan unit |
+| Integration | Cross-track exercise | Latihan yang membutuhkan beberapa track |
+| Relation | prerequisite, related, deep dive | Hubungan antar-item |
+| Evidence | test, repo, output, note, URL | Bukti terhadap criterion/requirement |
 
-Navigasi utama: **Hari ini · Materi · Progres**. Materi menuju task aktif; jika belum ada, menuju daftar task pada Progres. Review masuk dari daftar jatuh tempo.
+Istilah `task` boleh tetap muncul sementara pada kompatibilitas implementasi lama, tetapi model produk baru memakai **item** sebagai istilah generik untuk unit, checkpoint, dan integration.
 
-Sidebar mengelompokkan task berdasarkan track dan fase dari curriculum. Buka kelompok task aktif secara default. Urutan memakai field curriculum, bukan alfabet judul. Gunakan judul sebagai label dan Task ID sebagai metadata.
+## Struktur curriculum
 
-V1 memuat navigasi tersebut, lesson, latihan, pencatatan bukti, dan review. Pencarian seluruh isi ditambahkan ketika daftar materi sulit dipindai; filter Task ID/judul cukup untuk awal.
-
-## Layout
-
-Desktop ≥ 1200 px: sidebar 224 px, area baca maksimal 68ch, daftar isi 176 px; gap 32 px. Shell maksimal 1440 px, dipusatkan.
-
-Tablet 768–1199 px: sidebar 200 px, area baca fleksibel, daftar isi menjadi disclosure di atas artikel. Mobile < 768 px: satu kolom, padding 20 px; menu materi berupa drawer. Di 320 px padding boleh turun ke 16 px.
-
-Header 56 px. Sidebar dan daftar isi boleh sticky pada layar lebar. `scroll-margin-top` menjaga heading dan fokus tetap terlihat. Hindari sticky footer yang menutup isi pada mobile.
+Curriculum bukan silo per track.
 
 ```text
-CS-101                  Hari ini   Materi   Progres       Tema
-────────────────────────────────────────────────────────────
-DATABASE               SQL-001 · Fase 1            Di halaman ini
-  Model relasional     Model relasional            Konsep
-  Query dasar                                      Contoh
-  Relasi tabel         Pahami hubungan baris,       Latihan
-                       kolom, dan kunci.            Challenge
-JAVA                                               Bukti
-  …                    Lanjut dari: latihan 2
-                       [Lanjutkan]
+Track
+  └─ Module
+      ├─ Unit
+      ├─ Unit
+      ├─ Unit
+      └─ Checkpoint
 
-                       Konsep
-                       Satu penjelasan inti.
+Track A Unit ─────┐
+Track B Unit ─────┼─→ Integration
+Track C Unit ─────┘
 
-                       Contoh → prediksi → hasil
-                       [Cek jawaban]
+Unit ─ related/deep-dive ─→ Unit di track lain
+Checkpoint 1 ─ parent ─→ Checkpoint 2 ─→ Checkpoint 3
 ```
+
+Urutan visual tetap memakai hierarchy Track → Module → Item. Dependency dan cross-module relation tidak mengubah urutan navigasi.
+
+### Cumulative project
+
+Checkpoint adalah project yang berkembang, bukan project baru dari nol.
 
 ```text
-☰  CS-101                         Tema
-──────────────────────────────────────
-SQL-001 · Fase 1
-Model relasional
-Pahami hubungan baris, kolom, dan kunci.
-
-Lanjut dari: latihan 2      [Lanjutkan]
-Di halaman ini                       ▾
-
-Konsep
-Penjelasan → contoh → latihan
+P1
+ ↓
+P2 = P1 guarantees + requirement baru
+ ↓
+P3 = P2 guarantees + requirement baru
+ ↓
+...
 ```
 
-Halaman Hari ini memakai satu blok task aktif dan daftar review sederhana. Task baru dipilih dari curriculum; jangan mengisi halaman dengan data atau progres contoh yang terlihat nyata.
+UI project harus membedakan:
 
-## Anatomi lesson
+- **New in this checkpoint**
+- **Inherited guarantees**
+- prerequisite yang membuka checkpoint
+- evidence untuk requirement aktif
+- checkpoint sebelum dan sesudahnya
 
-| Bagian | Tampilan dan perilaku |
+Jangan menampilkan semua requirement warisan berulang kali dalam satu blok panjang. Requirement asli tetap disimpan utuh, tetapi UI boleh melakukan progressive disclosure.
+
+## Prinsip desain
+
+1. **Next action lebih penting daripada dashboard.** Halaman pertama menunjukkan satu item aktif atau satu item berikutnya yang ready.
+2. **Hierarchy untuk navigasi, graph untuk penjelasan.** Jangan jadikan dependency graph sebagai navigasi utama.
+3. **Progressive disclosure.** Jangan expand 200+ item sekaligus. Buka track dan module yang sedang relevan.
+4. **Satu aksi utama per konteks.** Continue, mulai item, simpan sesi, atau submit evidence.
+5. **Status tidak disimpulkan dari waktu atau scroll.** Completion berasal dari evidence terhadap Definition of Done.
+6. **Project adalah first-class entity.** Project tidak dirender seperti lesson panjang biasa.
+7. **Cross-track relation terlihat saat dibutuhkan.** Tampilkan Requires, Used later by, Related, dan Deep dive di context section.
+8. **Compact bukan berarti kecil.** Kurangi chrome dan whitespace berlebih, bukan target klik atau readability.
+9. **Tidak ada gamification palsu.** Hindari streak, XP, badge dekoratif, confetti, progress angka yang tidak membantu keputusan.
+10. **Sumber curriculum tidak dikaburkan oleh lesson.** Lesson menjelaskan curriculum; lesson tidak boleh mengubah scope/criteria.
+
+## Information architecture
+
+Navigasi global hanya tiga tujuan:
+
+| Route | Label | Job |
+| --- | --- | --- |
+| `/` | Hari ini | Apa yang perlu dikerjakan sekarang |
+| `/curriculum` | Materi | Browse hierarchy curriculum |
+| `/progress` | Progres | Melihat state keseluruhan |
+
+Route item:
+
+| Route | Isi |
 | --- | --- |
-| Judul | Task ID + fase kecil; H1; manfaat satu kalimat; prasyarat sebagai link |
-| Target belajar | 3–7 hasil konkret, diturunkan dari exit criteria |
-| Mental model | Satu pernyataan inti; diagram hanya jika relasinya membantu |
-| Materi | Konsep dalam urutan dependensi, mekanisme dan contoh berdekatan |
-| Latihan | Prediksi sebelum hasil; petunjuk dan jawaban dibuka terpisah |
-| Kuis | Feedback setelah submit; jelaskan penyebab salah dan link bagian terkait |
-| Challenge | Brief, acceptance criteria, bukti yang diminta; project bridge jika relevan |
-| Bukti | Setiap exit criterion memiliki rujukan bukti; catatan lanjut dan simpan sesi |
-| Sumber | Judul, penerbit, versi bila relevan, link langsung; daftar lengkap di akhir |
+| `/learn/<ITEM-ID>` | Unit lesson |
+| `/project/<ITEM-ID>` | Project checkpoint |
+| `/integration/<ITEM-ID>` | Cross-track integration |
+| `/review/<ITEM-ID>` | Recall/review |
 
-Seluruh slot wajib template MDX tetap tersedia. Pengelompokan visual dan heading boleh dirapikan tanpa melemahkan scope, challenge, atau coverage. Detail opsional dan solusi boleh dilipat; materi wajib dan acceptance criteria tetap terlihat.
+**Materi tidak lagi berarti active lesson.** Active lesson dibuka dari Hari ini melalui Continue. Materi berarti curriculum explorer.
 
-Kode memakai label bahasa, tombol Salin, syntax highlighting tenang, dan scroll lokal jika diperlukan. Tabel lebar memiliki container sendiri. Diagram menyertakan teks yang menjelaskan relasi penting.
+Review dan Project tidak perlu menjadi global navigation. Keduanya masuk dari workflow yang relevan.
 
-## Interaksi dan state
+## App shell
 
-**Lanjut belajar.** Simpan Task ID, anchor bagian, dan catatan `continueFrom`. Lanjutkan membuka anchor terakhir; jika anchor berubah, buka awal task dan tampilkan catatan sebelumnya. Membuka lesson tidak otomatis membuat sesi atau meluluskan task.
+Desktop memakai tiga layer:
 
-**Simpan sesi.** Form berisi bukti, catatan lanjut, dan durasi opsional. Bukti wajib untuk mengajukan kelulusan; sesi progress cukup punya catatan lanjut atau bukti. Setelah berhasil tersimpan, tampilkan “Sesi tersimpan”. Kegagalan mempertahankan input dan menawarkan “Coba lagi”.
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│ CS-101                                      Star  Donate  Theme │
+├────┬───────────────────────┬────────────────────────────────────┤
+│ 🏠 │ Contextual explorer   │ Main workspace                     │
+│ 📚 │                       │                                    │
+│ 📈 │                       │                                    │
+└────┴───────────────────────┴────────────────────────────────────┘
+ 60px        ~240px
+```
 
-**Tandai lulus.** Validasi semua exit criteria, challenge, dan project requirement yang berlaku, lalu simpan bukti. V1 menggunakan penilaian mandiri yang diberi label jelas; checklist dan URL tidak membuktikan kebenaran teknis secara otomatis. Jika bukti belum lengkap, jelaskan bagian yang kurang. Membaca atau scrolling sampai akhir tidak mengubah status menjadi lulus.
+### Global rail
 
-**Review.** Lima soal recall sebelum catatan/solusi. Pilihan ganda bisa dinilai otomatis; jawaban terbuka menggunakan rubrik dan penilaian mandiri. Skor ≥ 4/5 = review lulus; sisanya tampilkan konsep untuk dipelajari ulang. Melihat jawaban sebelum penilaian menyelesaikan attempt sebagai latihan berbantuan, bukan review lulus. Jadwal interval berasal dari learning-state layer; jangan mengarang tanggal jika belum dikonfigurasi.
+- Lebar sekitar 56–64 px.
+- Icon-only untuk Hari ini, Materi, Progres.
+- Tooltip dan accessible name wajib.
+- Active state jelas.
+- Tidak menaruh daftar materi di rail.
+- Utility seperti settings hanya jika benar-benar ada fungsi.
 
-**Ganti task aktif.** Browsing task lain tetap diperbolehkan. “Jadikan task aktif” menyimpan draft sesi terlebih dahulu; perubahan batal jika penyimpanan gagal. Hanya satu task aktif.
+### Contextual explorer
+
+Panel kedua hanya muncul saat konteks membutuhkan hierarchy, terutama `/curriculum`, `/learn/*`, `/project/*`, dan `/integration/*`.
+
+Explorer menunjukkan **satu track aktif** secara penuh. Track lain dipilih dari track switcher; jangan expand semua track sekaligus.
+
+Contoh:
+
+```text
+Java                                      2/21
+
+Java Core                                 2/5
+  ✓ JAV-001
+  ● JAV-002
+  ○ JAV-003
+  ○ JAV-004
+  ○ JAV-005
+  ◆ Project 1
+
+Java Design                               0/1
+Testing                                   0/3
+Runtime                                   0/3
+...
+```
+
+Item row cukup berisi status marker, ID, dan judul pendek. Metadata detail tetap di workspace.
+
+### Main workspace
+
+- Lebar baca lesson maksimal sekitar 68–72ch.
+- Project workspace boleh lebih lebar karena requirement/evidence matrix.
+- Header halaman compact: breadcrumb, ID, title, satu subtitle.
+- Tidak ada hero marketing.
+- Tidak ada stat cards generic di Hari ini.
+
+### Responsive
+
+- Desktop ≥1200 px: rail + explorer + workspace.
+- Tablet 768–1199 px: rail tetap; explorer menjadi drawer atau collapsible panel.
+- Mobile <768 px: top bar + drawer curriculum; content satu kolom.
+- 320 px dan zoom 200–400% tetap usable.
+- Target kontrol minimal mengikuti WCAG; compactness berasal dari pengurangan chrome, bukan target kecil.
+
+## Halaman Hari ini
+
+Hari ini menjawab **apa next action sekarang**, bukan menampilkan analytics.
+
+Jika ada active item:
+
+```text
+Hari ini
+
+SQL-001
+Relational model + PostgreSQL fundamentals
+
+DB & SQL / SQL Core
+Lanjut dari: NULL semantics
+
+[Continue]
+
+Project context
+SQL Project 1 · 2 unit lagi sebelum checkpoint
+
+Review
+JAV-001 · jatuh tempo
+[Review]
+```
+
+Jika tidak ada active item:
+
+```text
+Tidak ada item aktif.
+
+Next ready
+JAV-002 · OOP + object contracts
+[Mulai]
+```
+
+Jangan menampilkan kartu `0 task`, `0 review`, `0 selesai` jika angka tersebut tidak mengubah keputusan user.
+
+## Curriculum explorer
+
+Curriculum explorer harus mendukung curriculum ratusan item tanpa berubah menjadi tree tanpa batas.
+
+### Track switcher
+
+Tampilkan daftar ringkas:
+
+```text
+Java                    2/21
+DB & SQL                0/20
+Networking              0/27
+OS & Linux              0/23
+Distributed Systems     0/23
+Software Design         0/24
+Production Engineering  0/25
+```
+
+Jumlah completion adalah secondary metadata, bukan visual utama.
+
+### Module
+
+Module adalah grouping navigasi utama di dalam track. Hanya module aktif dibuka otomatis. Module lain collapsed dengan ringkasan completion.
+
+Identitas module harus stabil dan terpisah dari label source. Nomor phase dari spreadsheet tidak boleh dianggap identifier unik.
+
+### Search
+
+Dengan 163 unit + 40 checkpoint + integration, search sudah menjadi kebutuhan inti.
+
+`Cmd/Ctrl + K` mencari:
+
+- ID
+- title
+- track
+- module
+- keyword dari scope
+
+Tidak perlu external search service. Search lokal dari manifest cukup.
+
+## Unit page
+
+Unit tetap menggunakan lesson MDX, tetapi anatomy wajib mengikuti curriculum.
+
+```text
+Breadcrumb / ID
+Title
+Why this matters
+
+Mental model
+Concept
+Mechanism
+Example
+Practice
+
+Mini challenge
+
+Definition of Done
+Evidence
+
+Connections
+Sources
+```
+
+| Bagian | Aturan |
+| --- | --- |
+| Header | ID, module, title, prerequisite penting |
+| Target belajar | Turunan exit criteria; konkret |
+| Mental model | Satu model inti; diagram hanya jika relasi membantu |
+| Materi | Konsep → mekanisme → contoh, dalam urutan dependency |
+| Practice | Prediksi sebelum hasil; feedback dekat dengan latihan |
+| Challenge | Brief asli dipertahankan; acceptance tidak dipangkas |
+| Definition of Done | Criteria terlihat sebagai target evidence, bukan decorative checklist |
+| Evidence | Evidence dapat mendukung satu atau beberapa criteria secara eksplisit |
+| Connections | Requires, Used later by, Related, Deep dive |
+| Sources | Sumber asli + versi jika ada |
+
+Membuka lesson, scroll ke bawah, atau menghabiskan waktu tidak pernah otomatis meluluskan unit.
+
+## Project checkpoint page
+
+Project bukan lesson.
+
+Contoh struktur:
+
+```text
+◆ Project 2
+Rule Explosion Gauntlet
+
+Built on
+Project 1 · Adversarial Ledger Kernel
+
+New in this checkpoint
++ requirement baru
++ requirement baru
++ requirement baru
+
+Inherited guarantees
+12 requirement dari Project 1
+[Show inherited]
+
+Evidence
+□ repository
+□ tests
+□ benchmark / report
+...
+```
+
+Project workspace harus membantu user melihat delta terhadap checkpoint sebelumnya. Jangan menulis ulang seluruh project history sebagai satu halaman panjang.
+
+Status project hanya `passed` jika semua requirement aktif memiliki evidence yang valid menurut aturan produk.
+
+## Integration page
+
+Integration adalah item lintas track.
+
+```text
+INT-001 · Bootstrap Integration
+
+Requires
+Java foundation     ✓
+SQL foundation      ✓
+Linux foundation    ○
+
+Locked
+LIN-001 belum lulus
+```
+
+Begitu seluruh hard prerequisite passed, state berubah menjadi Ready secara otomatis.
+
+Integration mempunyai brief, criteria, dan evidence sendiri; bukan child dari satu track tertentu.
+
+## Connections
+
+Cross-module reference penting, tetapi jangan diubah menjadi hard prerequisite secara otomatis.
+
+Tipe relation:
+
+| Relation | Memblokir availability |
+| --- | --- |
+| prerequisite | Ya |
+| foundation | Tidak secara default |
+| related | Tidak |
+| deep_dive | Tidak |
+| contributes_to | Tidak |
+| project_parent | Menentukan lineage, bukan learning lock umum |
+
+Default UI menampilkan relation sebagai compact list. Graph visualization bersifat secondary view, bukan navigation default.
+
+## Progress
+
+Progress menjawab: **secara keseluruhan gue ada di mana?**
+
+Default view hierarchical:
+
+```text
+Java
+  Java Core        2/5
+  ◆ Project 1      Ready
+  Testing          0/3
+
+DB & SQL
+  SQL Core         1/4
+  ◆ Project 1      Locked
+```
+
+Progress tidak dihitung dari menit. Minutes adalah telemetry.
+
+Satu item memiliki tiga axis state yang terpisah:
+
+| Axis | Nilai contoh |
+| --- | --- |
+| Availability | locked, ready |
+| Completion | not_started, active, passed, stale |
+| Review | none, scheduled, due, retry, retained |
+
+Contoh:
+
+```text
+JAV-001
+availability = ready
+completion   = passed
+review       = due
+```
+
+Jangan membuat satu enum besar yang mencampur ketiganya.
+
+Mode `Connections` boleh ditambahkan di Progress untuk melihat dependency/cross-track graph, tetapi Overview hierarchical tetap default.
+
+## Evidence dan completion
+
+Aturan produk:
+
+```text
+READING ≠ COMPLETE
+TIME ≠ COMPLETE
+SCROLL ≠ COMPLETE
+
+Evidence
+  +
+Challenge
+  +
+Exit criteria
+  =
+Passed
+```
+
+Untuk checkpoint:
+
+```text
+all active project requirements evidenced
+→ Passed
+```
+
+Untuk integration:
+
+```text
+all integration criteria evidenced
+→ Passed
+```
+
+Evidence dan session adalah konsep berbeda:
+
+- **Session**: apa yang dikerjakan, kapan, titik lanjut, durasi opsional.
+- **Evidence**: artefak/hasil yang membuktikan criterion atau requirement.
+
+Satu evidence boleh mendukung beberapa criteria.
+
+## Review
+
+Review menguji recall setelah completion, bukan menggantikan evidence.
+
+- Lima soal per attempt sebagai default saat ini.
+- Skor ≥4/5 dapat lulus jika attempt tidak dibantu.
+- Reveal sebelum submit memberi `assisted=true`.
+- Review failure tidak membatalkan historical evidence/completion.
+- Schedule berasal dari learning-state layer; jangan mengarang tanggal.
+
+Review due muncul di Hari ini dan Progress; tidak perlu global navigation sendiri.
+
+## Interaksi utama
+
+**Continue.** Menyimpan `activeItemId`, anchor, dan `continueFrom`. Jika anchor sudah tidak ada setelah content berubah, buka awal item dan tetap tampilkan catatan terakhir.
+
+**Ganti active item.** Browsing item lain tetap boleh. Menjadikan item baru aktif harus menyimpan draft session sebelumnya terlebih dahulu. Hanya satu active item.
+
+**Simpan session.** Input dipertahankan saat gagal. Success hanya setelah commit storage.
+
+**Submit evidence.** Evidence dipetakan eksplisit ke criterion/requirement. URL atau checklist tidak otomatis membuktikan correctness.
+
+**Curriculum stale.** Historical evidence tetap ada dengan fingerprint asal. Completion baru mengikuti curriculum aktif.
+
+## Empty dan error state
 
 | Kondisi | Respons UI |
 | --- | --- |
-| Curriculum kosong | “Curriculum belum tersedia.” Tanpa angka progres atau task buatan |
-| Belum ada task aktif | Tampilkan urutan curriculum; aksi “Mulai task” |
-| Materi belum dibuat | “Materi belum tersedia.” Task tetap terlihat; jangan tampilkan tombol generator yang belum berfungsi |
-| Materi berubah/stale | “Materi perlu diperbarui.” Bukti lama tetap tersimpan bersama fingerprint asal; kelulusan baru memakai kriteria terkini |
-| Tidak ada review | “Belum ada review terjadwal.” |
-| Penyimpanan gagal | Input tetap ada, pesan dekat form, opsi coba lagi atau ekspor draft |
-| Link task tidak ditemukan | Pesan singkat + kembali ke daftar materi |
+| Curriculum kosong | “Curriculum belum tersedia.” |
+| Tidak ada active item | Tampilkan next ready item |
+| Item locked | Tampilkan prerequisite yang belum passed |
+| Lesson belum tersedia | Item tetap terlihat; “Materi belum tersedia.” |
+| Curriculum stale | “Materi perlu diperbarui.” Evidence historis tetap terlihat |
+| Tidak ada review | Jangan buat section besar kosong |
+| Save gagal | Pertahankan input + “Coba lagi” |
+| Item ID tidak ditemukan | Pesan singkat + kembali ke curriculum |
+| Relation unresolved | Jangan crash UI; tandai sebagai validation issue saat build |
 
-## Visual tokens — usulan
+## Visual direction
 
-Tampilan awal mengikuti tema perangkat, dengan pilihan Terang/Gelap/Sistem yang tersimpan. Warna aksen hanya untuk link, fokus, dan aksi utama.
+Tampilan tetap minimal dan utilitarian.
 
 | Token | Terang | Gelap |
 | --- | --- | --- |
@@ -129,65 +523,86 @@ Tampilan awal mengikuti tema perangkat, dengan pilihan Terang/Gelap/Sistem yang 
 | Surface | `#FFFFFF` | `#1C1C1A` |
 | Teks | `#1C1C1A` | `#F5F5F4` |
 | Teks sekunder | `#575752` | `#B7B7AD` |
-| Divider dekoratif | `#E5E5E1` | `#343430` |
-| Outline kontrol | `#73736B` | `#85857B` |
-| Link/fokus | `#1D4ED8` | `#93C5FD` |
-| Tombol utama | `#1D4ED8` + teks putih | `#93C5FD` + teks `#111110` |
+| Divider | `#E5E5E1` | `#343430` |
+| Outline | `#73736B` | `#85857B` |
+| Accent | `#1D4ED8` | `#93C5FD` |
 
-- Font: system sans; monospace sistem untuk kode dan Task ID. Belum perlu font eksternal.
-- Body: 16 px / 1.65. UI: 14 px / 1.4. Metadata: 13 px / 1.5. H1: 30 px / 1.2, mobile 26 px. H2: 22 px / 1.3.
-- Spacing: 4, 8, 12, 16, 24, 32, 48 px. Antarbagian 32 px; antarparagraf 12–16 px.
-- Radius 6 px, border 1 px. Shadow hanya pada elemen overlay.
-- Kontrol utama tinggi minimal 40 px desktop, 44 px mobile. Ikon selalu punya accessible name.
-- Status memakai label teks dan penanda sederhana. Warna saja tidak menyampaikan status.
-- Gerak hanya feedback singkat, 120–160 ms. Hormati `prefers-reduced-motion`.
+- System sans; monospace untuk ID/kode.
+- Body lesson 16px/1.65; UI 13–14px.
+- Spacing utama 4, 8, 12, 16, 24, 32.
+- Radius 6–10px; shadow hanya overlay.
+- Utility Star/Donate secondary; tidak boleh mengalahkan learning action.
+- Empty state compact, horizontal bila ruang cukup.
+- Status selalu punya label/shape; warna saja tidak cukup.
+- Motion 120–160ms dan hormati `prefers-reduced-motion`.
 
 ## Copy
 
-Bahasa Indonesia langsung, istilah teknis tetap presisi. Suara lesson boleh memakai “lo” sesuai template; label UI cukup kata kerja. Judul menyebut topik; tombol menyebut hasil tindakan.
+Bahasa Indonesia langsung. Istilah teknis tetap presisi.
 
 | Hindari | Pakai |
 | --- | --- |
-| Mulai perjalanan belajarmu | Mulai task |
-| Unlock your potential | Lanjutkan |
-| Selamat! Kamu luar biasa! | Jawaban benar. [Alasan singkat] |
+| Mulai perjalanan belajarmu | Mulai unit |
+| Unlock your potential | Continue |
+| Selamat! Kamu luar biasa! | Jawaban benar. [alasan] |
 | Terjadi kesalahan | Sesi belum tersimpan. Coba lagi. |
-| Mari kita menyelami dunia SQL | Query mengambil baris yang memenuhi kondisi. |
+| Progress 73% karena waktu | 3 dari 5 criteria terbukti |
 
-Hapus pembuka generik, pujian otomatis, rekap yang mengulang isi, dan klaim tanpa sumber. Batas kata bukan ukuran kualitas; satu exit criterion harus tetap diajarkan dan diuji.
+Hindari pembuka generik, motivasi otomatis, angka vanity, dan rekap yang tidak menambah keputusan.
 
-## Batas implementasi
+## Batas implementasi produk
 
-Gunakan Astro + MDX sesuai skill. `LessonLayout` mengatur shell; lesson memasok konten. Komponen awal: `ContinueFrom`, `MentalModel`, `Reveal`, `Quiz`, `Challenge`, `ExitCriteria`, `SourceList`, `SessionLogger`, `ReviewMode`.
+Astro + MDX tetap cocok untuk lesson. Curriculum hierarchy dan graph berasal dari manifest yang tervalidasi, bukan dari struktur folder MDX. Learning state berasal dari storage runtime, bukan dari keberadaan content file.
 
-Curriculum menyimpan scope dan urutan. Generation metadata menyimpan sumber, fingerprint, dan coverage. Learning state menyimpan status; session log append-only menyimpan bukti. Jangan menyimpulkan status belajar dari keberadaan MDX.
+Artifact berbeda berdasarkan item:
 
-Usulan V1: aplikasi pribadi dengan server Astro dan SQLite melalui storage adapter. Sesi, bukti, dan status disimpan dalam satu transaksi dengan request ID idempoten; JSON/JSONL tersedia sebagai ekspor. Browser menulis melalui endpoint tervalidasi. Rincian komponen, kontrak API, dan deployment ada di [engineering-design.md](engineering-design.md). Render statis hanya mendukung membaca sampai persistence adapter tersedia. Hosting publik dan akun multiuser memerlukan rancangan penyimpanan/auth terpisah.
+| Item | Artifact utama |
+| --- | --- |
+| Unit | Lesson MDX |
+| Checkpoint | Project workspace/brief |
+| Integration | Integration workspace/brief |
+| Review | Assessment attempt |
 
-## Riset dan penerapan
+Graph tidak membutuhkan graph database atau visualisasi selalu aktif. Data curriculum cukup kecil untuk di-index sebagai struktur in-memory saat build/runtime.
 
-Sumber dibaca pada 6 Oktober 2026 melalui file resmi di GitHub karena domain situs dokumentasinya menolak akses environment. Observasi ini berdasarkan isi dokumentasi/source, bukan audit visual browser atau uji pengguna. Ukuran, palet, dan komposisi di atas adalah keputusan desain untuk brief ini.
+## Acceptance product
 
-| Sumber primer | Yang diamati | Penerapan |
-| --- | --- | --- |
-| [Astro tutorial](https://docs.astro.build/en/tutorial/0-introduction/) · [source yang dibaca](https://github.com/withastro/docs/blob/main/src/content/docs/en/tutorial/0-introduction/index.mdx) | Hasil proyek dan daftar kemampuan dikenalkan sebelum langkah tutorial | Payoff dan target belajar sebelum isi |
-| [React Learn](https://react.dev/learn) · [source yang dibaca](https://github.com/reactjs/react.dev/blob/main/src/content/learn/index.md) | Tujuan belajar, contoh interaktif, diagram relasi, lalu arah praktik | Konsep dekat contoh; diagram menjelaskan mekanisme |
-| [Starlight sidebar](https://starlight.astro.build/guides/sidebar/) · [source yang dibaca](https://github.com/withastro/starlight/blob/main/docs/src/content/docs/guides/sidebar.mdx) | Label dan kelompok navigasi dapat diatur eksplisit | Kelompok track/fase dan urutan curriculum |
-| [WCAG target size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html) · [source yang dibaca](https://github.com/w3c/wcag/blob/main/understanding/22/target-size-minimum.html) | Minimum 24×24 CSS px atau memenuhi pengecualian ukuran/spacing | Kontrol produk dibuat 40–44 px; kepadatan tidak mengecilkan target |
-| [WCAG reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) · [source yang dibaca](https://github.com/w3c/wcag/blob/main/understanding/21/reflow.html) | Isi umum harus reflow pada lebar setara 320 CSS px; konten dua dimensi punya pengecualian | Mobile satu kolom; overflow tabel/kode dilokalkan |
-| [WCAG contrast](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) · [source yang dibaca](https://github.com/w3c/wcag/blob/main/understanding/20/contrast-minimum.html) | Rasio 4.5:1 untuk teks normal; 3:1 untuk teks besar | Teks sekunder tetap terbaca pada kedua tema |
+- [ ] Hari ini menunjukkan satu next action tanpa hero atau dashboard statistik.
+- [ ] Global navigation hanya Hari ini, Materi, Progres.
+- [ ] Curriculum explorer dapat menavigasi track → module → item tanpa expand seluruh curriculum.
+- [ ] Unit, checkpoint, dan integration punya presentation berbeda.
+- [ ] Cumulative project membedakan requirement baru vs inherited guarantee.
+- [ ] Hard prerequisite mengontrol Ready/Locked; related/deep-dive tidak memblokir.
+- [ ] Search menemukan item melalui ID, title, track, module, dan scope keyword.
+- [ ] Semua exit criteria/project requirement memiliki tempat evidence.
+- [ ] Availability, completion, dan review state tidak dicampur.
+- [ ] Membaca, scroll, atau waktu tidak mengubah item menjadi passed.
+- [ ] Historical evidence tetap dapat ditelusuri saat curriculum berubah.
+- [ ] Keyboard, focus, screen reader, contrast, 320px reflow, dan zoom tetap memenuhi acceptance desain sebelumnya.
+- [ ] Empty/error state compact dan tidak memenuhi layar tanpa alasan.
 
-## Acceptance sebelum implementasi dinyatakan selesai
+## Prioritas implementasi
 
-- [ ] Task aktif dan langkah lanjut terlihat tanpa melewati hero atau dashboard statistik.
-- [ ] Semua exit criteria memiliki materi, assessment, dan tempat menyimpan bukti.
-- [ ] Materi belum dibuat, kosong, stale, dan gagal simpan punya state nyata.
-- [ ] Reload mengembalikan catatan tersimpan; retry tidak menggandakan session log.
-- [ ] Membuka lesson atau reveal jawaban tidak otomatis meluluskan task/review.
-- [ ] Keyboard dapat mengoperasikan menu, kuis, reveal, dan form; fokus terlihat dan kembali setelah drawer ditutup.
-- [ ] Lebar 320, 768, dan 1440 px serta zoom 200%/400% tidak memotong isi atau kontrol penting.
-- [ ] Kontras teks memenuhi 4.5:1, teks besar 3:1; outline kontrol dan indikator fokus memenuhi kebutuhan kontras nonteks.
-- [ ] Pembaca layar memperoleh heading berurutan, label form, feedback jawaban, dan status penyimpanan.
-- [ ] Setiap paragraf menambah informasi; tidak ada CTA ganda, klaim sumber palsu, atau angka progres contoh.
+```text
+NOW
+Curriculum V2 domain
+→ Track / Module / Item
+→ Checkpoint / Integration
+→ Relation graph
+→ validator
 
-Status: kerangka UI dan demo lesson sudah diimplementasikan. Browser smoke check mencakup kuis, tema, layout 320–1440 px, serta alur simpan bukti dengan fixture terpisah. Checklist di atas tetap menjadi target lengkap; review engine dan curriculum asli belum tersedia. Lihat [README.md](../README.md) untuk status fitur.
+NEXT
+Curriculum Explorer
+→ icon rail
+→ contextual panel
+→ hierarchical progress
+→ project workspace
+
+LATER
+Review engine
+→ cross-track Connections view
+→ generator context graph
+→ richer evidence/search
+```
+
+Jangan polish sidebar lama sebelum Curriculum V2 tersedia; UI yang dibangun di atas flat task model akan perlu dibongkar lagi.
