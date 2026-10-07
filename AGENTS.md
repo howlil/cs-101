@@ -34,6 +34,7 @@ Aturan implementasi:
 - Jangan membuat max-width page yang menempel kiri sehingga seluruh surplus width jatuh di sisi kanan. Semua non-curriculum workbench desktop harus centered.
 - Jika ada secondary context, gunakan primary region elastis + context rail 300–320 px. Primary boleh melebar untuk rows, matrix, evidence, requirement, dan progress; paragraf tetap bounded.
 - Jika tidak ada secondary context, primary boleh memakai page frame penuh untuk struktur non-prose (mis. Today next-step grid atau Progress modules), tetapi jangan membuat rail kosong/dekoratif.
+- Route `/learn/*`, `/project/*`, dan `/integration/*` wajib memakai contextual curriculum explorer dari AppShell pada desktop. Jangan menghapus hierarchy ketika user membuka artifact; current item harus ter-highlight dan item links membuka artifact langsung.
 - Scrollbar chrome boleh disembunyikan pada app panes/popup list yang tetap scrollable. Jangan menghilangkan scroll behavior atau membuat wheel/keyboard scrolling gagal.
 - Icon-only navigation wajib punya accessible name dan Tooltip primitive Arc.
 - Product composition seperti `ActionLink`, `EmptyAction`, atau wrapper domain tinggal di `src/components/ui`/feature folder, bukan di root `arc/`.

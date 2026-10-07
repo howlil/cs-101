@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { BarChart3, BookOpen, Home } from 'lucide-react';
 import CurriculumSearch from '../search/CurriculumSearch';
+import ContextualCurriculumSidebar, { type ContextualCurriculumData } from '../curriculum/ContextualCurriculumSidebar';
 import ThemePreference from '../ui/ThemePreference';
 import { Tooltip } from '../arc/tooltip/tooltip';
 import type { CurriculumSearchEntry } from '../../domain/curriculum-v2/selectors';
@@ -15,12 +16,14 @@ export default function AppShell({
   navigationKey,
   flush = false,
   searchEntries,
+  contextualExplorer,
   children,
 }: {
   currentPath: string;
   navigationKey: string;
   flush?: boolean;
   searchEntries: SearchEntry[];
+  contextualExplorer?: ContextualCurriculumData;
   children: ReactNode;
 }) {
   const reduce = useReducedMotion() ?? false;
@@ -46,7 +49,7 @@ export default function AppShell({
       </div>
     </header>
 
-    <div className="app-shell">
+    <div className={['app-shell', contextualExplorer ? 'app-shell--with-context' : ''].filter(Boolean).join(' ')}>
       <aside className="global-rail" aria-label="Navigasi utama">
         <nav className="global-nav">
           <Tooltip content="Hari ini">
@@ -81,6 +84,8 @@ export default function AppShell({
           </Tooltip>
         </nav>
       </aside>
+
+      {contextualExplorer && <ContextualCurriculumSidebar data={contextualExplorer} />}
 
       <motion.main
         id="main"

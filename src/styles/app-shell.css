@@ -38,6 +38,32 @@
   grid-template-columns: var(--app-rail-width) minmax(0, 1fr);
 }
 
+.app-shell--with-context {
+  grid-template-columns: var(--app-rail-width) var(--curriculum-explorer-width) minmax(0, 1fr);
+}
+
+.contextual-curriculum-rail {
+  position: sticky;
+  top: var(--app-topbar-height);
+  align-self: start;
+  height: calc(100dvh - var(--app-topbar-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 18;
+}
+
+.contextual-curriculum-title {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -.015em;
+}
+
+.contextual-curriculum-title:hover {
+  color: var(--accent-strong);
+}
+
 .global-rail {
   position: sticky;
   top: var(--app-topbar-height);
@@ -105,6 +131,14 @@
 }
 
 @media (max-width: 900px) {
+  .app-shell--with-context {
+    grid-template-columns: var(--app-rail-width) minmax(0, 1fr);
+  }
+
+  .contextual-curriculum-rail {
+    display: none;
+  }
+
   .app-main:not(.app-main--flush) { padding-inline: 18px; }
 }
 

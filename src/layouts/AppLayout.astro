@@ -2,9 +2,18 @@
 import '../styles/global.css';
 import '../styles/app-shell.css';
 import '../styles/workspace.css';
+import '../styles/curriculum.css';
 import AppShell from '../components/app/AppShell';
+import type { ContextualCurriculumData } from '../components/curriculum/ContextualCurriculumSidebar';
 import { curriculumGraph } from '../server/curriculum';
-import { buildCurriculumSearchIndex, itemHref } from '../domain/curriculum-v2/selectors';
+import { learning } from '../server/runtime';
+import {
+  buildCurriculumSearchIndex,
+  getItemLocation,
+  getTrackExplorer,
+  itemHref,
+} from '../domain/curriculum-v2/selectors';
+import { getItemLearningView } from '../domain/learning/view-models';
 
 interface Props {
   title: string;
@@ -20,10 +29,76 @@ const {
 
 const path = Astro.url.pathname;
 const navigationKey = Astro.url.pathname + Astro.url.search;
-const searchEntries = buildCurriculumSearchIndex(curriculumGraph).map((entry) => ({
+const searchIndex = buildCurriculumSearchIndex(curriculumGraph);
+const searchEntries = searchIndex.map((entry) => ({
   ...entry,
   href: itemHref(curriculumGraph, entry.itemId),
 }));
+
+let contextualExplorer: ContextualCurriculumData | undefined;
+const contextualMatch = path.match(/^\/(learn|project|integration)\/([^/]+)$/);
+
+if (contextualMatch) {
+  const currentItemId = decodeURIComponent(contextualMatch[2]);
+  const currentItem = curriculumGraph.itemsById.get(currentItemId);
+
+  if (currentItem) {
+    const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
+    const integrations = curriculumGraph.manifest.items
+      .filter((item) => item.kind === 'integration')
+      .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+
+    const location = getItemLocation(curriculumGraph, currentItem.id);
+    let activeTrackId = location.track?.id;
+
+    if (!activeTrackId && currentItem.kind === 'integration') {
+      const anchor = currentItem.prerequisites
+        .map((id) => curriculumGraph.itemsById.get(id))
+        .find((item) => item && item.kind !== 'integration');
+      activeTrackId = anchor && anchor.kind !== 'integration' ? anchor.trackId : tracks[0]?.id;
+    }
+
+    let learningState: Awaited<ReturnType<Awaited<ReturnType<typeof learning>>['snapshot']>> | undefined;
+    try { learningState = await (await learning()).snapshot(); } catch { learningState = undefined; }
+
+    const stateFor = (id: string) =>
+      learningState ? getItemLearningView(curriculumGraph, learningState, id).displayState : 'unknown';
+
+    const explorerItem = (item: typeof curriculumGraph.manifest.items[number]) => ({
+      id: item.id,
+      title: item.title,
+      href: itemHref(curriculumGraph, item.id),
+      kind: item.kind,
+      state: stateFor(item.id),
+      active: item.id === currentItem.id,
+    });
+
+    const explorer = activeTrackId ? getTrackExplorer(curriculumGraph, activeTrackId) : undefined;
+
+    contextualExplorer = {
+      total: curriculumGraph.manifest.items.length,
+      activeTrackId: activeTrackId ?? '',
+      selectedModuleId: location.module?.id,
+      tracks: tracks.map((track) => ({
+        id: track.id,
+        title: track.title,
+        total: curriculumGraph.manifest.items.filter(
+          (item) => item.kind !== 'integration' && item.trackId === track.id,
+        ).length,
+      })),
+      modules: (explorer?.modules ?? []).map((module) => ({
+        id: module.id,
+        title: module.title,
+        items: module.items.map(explorerItem),
+      })),
+      integrations: integrations.map(explorerItem),
+      searchEntries: searchIndex.map((entry) => ({
+        ...explorerItem(curriculumGraph.itemsById.get(entry.itemId)!),
+        searchText: entry.searchText,
+      })),
+    };
+  }
+}
 
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---
@@ -51,6 +126,7 @@ Astro.response.headers.set('Cache-Control', 'no-store');
       navigationKey={navigationKey}
       flush={flush}
       searchEntries={searchEntries}
+      contextualExplorer={contextualExplorer}
     >
       <slot />
     </AppShell>

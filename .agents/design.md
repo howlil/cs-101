@@ -170,9 +170,11 @@ Desktop memakai tiga layer:
 
 ### Contextual explorer
 
-Panel kedua hanya muncul saat konteks membutuhkan hierarchy, terutama `/curriculum`, `/learn/*`, `/project/*`, dan `/integration/*`.
+Panel kedua muncul saat konteks membutuhkan hierarchy: `/curriculum`, `/learn/*`, `/project/*`, dan `/integration/*`. Pada route item, contextual explorer adalah bagian dari AppShell, bukan komponen lokal halaman.
 
-Pada desktop, explorer dan workspace adalah dua scroll container independen. Explorer mempertahankan posisi scroll ketika user membuka item lain; workspace detail selalu dapat dibaca tanpa menggeser hierarchy.
+Pada desktop, explorer **visible by default** dan current item harus ter-highlight. Link item dari contextual explorer membuka artifact aslinya (`/learn`, `/project`, atau `/integration`), bukan kembali ke preview Curriculum.
+
+Explorer dan workspace adalah dua scroll container independen. Explorer mempertahankan posisi scroll ketika user membuka item lain; workspace detail selalu dapat dibaca tanpa menggeser hierarchy. Di viewport ≤900 px contextual explorer boleh disembunyikan sampai drawer/collapsible navigation tersedia.
 
 Explorer menunjukkan **satu track aktif** secara penuh. Track lain dipilih dari track switcher; jangan expand semua track sekaligus.
 
@@ -633,6 +635,7 @@ Graph tidak membutuhkan graph database atau visualisasi selalu aktif. Data curri
 - [ ] Hari ini menunjukkan satu next action tanpa hero atau dashboard statistik.
 - [ ] Global navigation hanya Hari ini, Materi, Progres.
 - [ ] Curriculum explorer dapat menavigasi track → module → item tanpa expand seluruh curriculum.
+- [ ] Contextual curriculum explorer tetap terlihat di desktop pada `/learn/*`, `/project/*`, dan `/integration/*`, dengan current item ter-highlight.
 - [ ] Unit, checkpoint, dan integration punya presentation berbeda.
 - [ ] Cumulative project membedakan requirement baru vs inherited guarantee.
 - [ ] Hard prerequisite mengontrol Ready/Locked; related/deep-dive tidak memblokir.
