@@ -108,3 +108,91 @@ export function buildCurriculumSearchIndex(graph:CurriculumGraph):CurriculumSear
     return a.itemId.localeCompare(b.itemId);
   });
 }
+
+
+export type ConnectionEntry={
+  item:import('./schema').CurriculumItem;
+  relationType:'prerequisite'|'foundation'|'related'|'deep_dive'|'contributes_to'|'project_parent';
+};
+
+function uniqueConnectionEntries(entries:ConnectionEntry[]){
+  const seen=new Set<string>();
+  return entries.filter((entry)=>{
+    const key=entry.item.id+'\0'+entry.relationType;
+    if(seen.has(key))return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export function getConnectionGroups(graph:CurriculumGraph,itemId:string){
+  const item=graph.itemsById.get(itemId);
+  if(!item)throw new Error('Item tidak ditemukan: '+itemId);
+
+  const resolve=(id:string,type:ConnectionEntry['relationType']):ConnectionEntry|undefined=>{
+    const target=graph.itemsById.get(id);
+    return target?{item:target,relationType:type}:undefined;
+  };
+
+  const requires=(graph.prerequisites.get(itemId)??[])
+    .map(id=>resolve(id,'prerequisite'))
+    .filter((entry):entry is ConnectionEntry=>!!entry);
+
+  const usedLaterBy=(graph.dependents.get(itemId)??[])
+    .map(id=>resolve(id,'prerequisite'))
+    .filter((entry):entry is ConnectionEntry=>!!entry);
+
+  const outgoing=graph.relationsFrom.get(itemId)??[];
+  const incoming=graph.relationsTo.get(itemId)??[];
+
+  const related=uniqueConnectionEntries([
+    ...outgoing.filter(r=>r.type==='related').map(r=>resolve(r.to,'related')),
+    ...incoming.filter(r=>r.type==='related').map(r=>resolve(r.from,'related')),
+  ].filter((entry):entry is ConnectionEntry=>!!entry));
+
+  const deepDive=uniqueConnectionEntries(
+    outgoing
+      .filter(r=>r.type==='deep_dive')
+      .map(r=>resolve(r.to,'deep_dive'))
+      .filter((entry):entry is ConnectionEntry=>!!entry)
+  );
+
+  const foundationFor=uniqueConnectionEntries(
+    outgoing
+      .filter(r=>r.type==='foundation')
+      .map(r=>resolve(r.to,'foundation'))
+      .filter((entry):entry is ConnectionEntry=>!!entry)
+  );
+
+  const builtOnFoundation=uniqueConnectionEntries(
+    incoming
+      .filter(r=>r.type==='foundation')
+      .map(r=>resolve(r.from,'foundation'))
+      .filter((entry):entry is ConnectionEntry=>!!entry)
+  );
+
+  const contributesTo=uniqueConnectionEntries(
+    outgoing
+      .filter(r=>r.type==='contributes_to')
+      .map(r=>resolve(r.to,'contributes_to'))
+      .filter((entry):entry is ConnectionEntry=>!!entry)
+  );
+
+  return{
+    requires,
+    usedLaterBy,
+    related,
+    deepDive,
+    foundationFor,
+    builtOnFoundation,
+    contributesTo,
+  };
+}
+
+export function itemHref(graph:CurriculumGraph,itemId:string){
+  const item=graph.itemsById.get(itemId);
+  if(!item)throw new Error('Item tidak ditemukan: '+itemId);
+  if(item.kind==='unit')return '/learn/'+encodeURIComponent(item.id);
+  if(item.kind==='checkpoint')return '/project/'+encodeURIComponent(item.id);
+  return '/integration/'+encodeURIComponent(item.id);
+}

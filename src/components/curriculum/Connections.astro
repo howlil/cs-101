@@ -1,0 +1,53 @@
+---
+import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
+import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
+
+interface Props {
+  graph: CurriculumGraph;
+  itemId: string;
+  compact?: boolean;
+}
+
+const { graph, itemId, compact = false } = Astro.props;
+const groups = getConnectionGroups(graph, itemId);
+const sections = [
+  { key: 'requires', label: 'Requires', items: groups.requires, tone: 'blocking' },
+  { key: 'used', label: 'Used later by', items: groups.usedLaterBy, tone: 'neutral' },
+  { key: 'related', label: 'Related', items: groups.related, tone: 'neutral' },
+  { key: 'deep', label: 'Deep dive', items: groups.deepDive, tone: 'neutral' },
+  { key: 'built-on', label: 'Built on foundation', items: groups.builtOnFoundation, tone: 'neutral' },
+  { key: 'foundation-for', label: 'Foundation for', items: groups.foundationFor, tone: 'neutral' },
+  { key: 'contributes', label: 'Contributes to', items: groups.contributesTo, tone: 'neutral' },
+].filter((section) => section.items.length > 0);
+---
+{sections.length > 0 && (
+  <section class:list={['connections-panel', { 'connections-panel--compact': compact }]} aria-labelledby={`connections-${itemId}`}>
+    <div class="connections-heading">
+      <div>
+        <p class="eyebrow">CONNECTIONS</p>
+        <h2 id={`connections-${itemId}`}>Hubungan materi</h2>
+      </div>
+      <span>{sections.reduce((total, section) => total + section.items.length, 0)}</span>
+    </div>
+
+    <div class="connection-groups">
+      {sections.map((section) => (
+        <div class="connection-group">
+          <h3>{section.label}</h3>
+          <div class="connection-items">
+            {section.items.map(({ item }) => (
+              <a href={itemHref(graph, item.id)}>
+                <code>{item.id}</code>
+                <span>{item.title}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <p class="connections-note">
+      Hanya <strong>Requires</strong> yang memblokir readiness. Relation lain adalah konteks belajar.
+    </p>
+  </section>
+)}
