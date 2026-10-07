@@ -29,10 +29,8 @@ cs-101/
 │  ├─ content.config.ts
 │  ├─ content/
 │  │  └─ lessons/
-│  │     ├─ java/
-│  │     │  └─ JAV-001.mdx
-│  │     └─ db-sql/
-│  │        └─ SQL-001.mdx
+│  │     ├─ JAV-001.mdx
+│  │     └─ SQL-001.mdx
 │  ├─ components/
 │  │  └─ course/
 │  │     ├─ MentalModel.astro
@@ -86,16 +84,11 @@ This prevents each generated lesson from inventing its own:
 ## Suggested content frontmatter
 
 ```yaml
-id: SQL-001
-track: db-sql
-phase: 1
-order: 1
+taskId: SQL-001
 title: Relational model + PostgreSQL fundamentals
-status: generated
-prerequisites: []
-sourceVersion: postgresql-18
+description: Mental model relational + PostgreSQL fundamentals.
+demo: false
 curriculumFingerprint: sha256:...
-generatedAt: 2026-10-06T00:00:00Z
 ```
 
 ## Generation metadata

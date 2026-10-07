@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
 
@@ -35,8 +36,17 @@ const frontmatter = lesson.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 if (!frontmatter) throw new Error('lesson.mdx tidak punya frontmatter.');
 
 const data = parse(frontmatter[1]) as Record<string, unknown>;
-if (data.taskId !== item.id && data.id !== item.id) {
-  throw new Error('Lesson frontmatter menunjuk item yang berbeda.');
+if (data.taskId !== item.id) {
+  throw new Error('Lesson frontmatter taskId harus sama dengan Item ID.');
+}
+if (data.demo !== false) {
+  throw new Error('Generated curriculum lesson harus demo: false.');
+}
+if (typeof data.title !== 'string' || !data.title.trim()) {
+  throw new Error('Lesson frontmatter title wajib ada.');
+}
+if (typeof data.description !== 'string' || !data.description.trim()) {
+  throw new Error('Lesson frontmatter description wajib ada.');
 }
 if (data.curriculumFingerprint !== item.fingerprint) {
   throw new Error('Lesson frontmatter stale.');
@@ -76,12 +86,20 @@ writeFileSync(
   resolve(derivedDirectory, 'review-bank.json'),
   JSON.stringify(buildReviewBank(sourcePack, lessonSpec), null, 2) + '\n',
 );
+const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 writeFileSync(
   resolve(derivedDirectory, 'validation-report.json'),
   JSON.stringify({
     itemId,
     curriculumFingerprint: item.fingerprint,
     passed: true,
+    artifactHashes: {
+      lesson: sha256(lesson),
+      sourcePack: sha256(readFileSync(sourcePackPath, 'utf8')),
+      lessonSpec: sha256(readFileSync(specPath, 'utf8')),
+      generationRecord: sha256(readFileSync(resolve(derivedDirectory, 'generation-record.json'), 'utf8')),
+      reviewBank: sha256(readFileSync(resolve(derivedDirectory, 'review-bank.json'), 'utf8')),
+    },
     checks: [
       'curriculum-fingerprint',
       'source-pack',

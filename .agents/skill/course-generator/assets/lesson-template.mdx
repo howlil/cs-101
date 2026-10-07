@@ -1,13 +1,9 @@
 ---
-id: "{{TASK_ID}}"
-track: "{{TRACK}}"
-phase: "{{PHASE}}"
-order: {{ORDER}}
+taskId: "{{ITEM_ID}}"
 title: "{{TITLE}}"
-status: "generated"
-prerequisites: {{PREREQUISITES}}
+description: "{{DESCRIPTION}}"
+demo: false
 curriculumFingerprint: "{{CURRICULUM_FINGERPRINT}}"
-generatedAt: "{{GENERATED_AT}}"
 ---
 
 import MentalModel from '../../components/course/MentalModel.astro';
@@ -33,6 +29,10 @@ import Reveal from '../../components/course/Reveal.astro';
 <ConceptGraph>
 {{RELATIONSHIP_GRAPH}}
 </ConceptGraph>
+
+## Prasyarat
+
+{{PREREQUISITE_LINKS}}
 
 ## Core
 

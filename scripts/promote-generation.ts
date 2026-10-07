@@ -1,4 +1,5 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { parse } from 'yaml';
 
@@ -26,6 +27,13 @@ const validation = JSON.parse(readFileSync(report, 'utf8')) as {
   itemId?: string;
   curriculumFingerprint?: string;
   passed?: boolean;
+  artifactHashes?: {
+    lesson?: string;
+    sourcePack?: string;
+    lessonSpec?: string;
+    generationRecord?: string;
+    reviewBank?: string;
+  };
 };
 if (
   validation.passed !== true ||
@@ -33,6 +41,22 @@ if (
   validation.curriculumFingerprint !== item.fingerprint
 ) {
   throw new Error('Validation report tidak cocok dengan curriculum aktif.');
+}
+
+const sha256File = (path: string) =>
+  createHash('sha256').update(readFileSync(path)).digest('hex');
+const sourcePack = resolve(staging, 'source-pack.json');
+const lessonSpec = resolve(staging, 'lesson-spec.json');
+const hashes = validation.artifactHashes;
+if (
+  !hashes ||
+  hashes.lesson !== sha256File(lesson) ||
+  hashes.sourcePack !== sha256File(sourcePack) ||
+  hashes.lessonSpec !== sha256File(lessonSpec) ||
+  hashes.generationRecord !== sha256File(record) ||
+  hashes.reviewBank !== sha256File(review)
+) {
+  throw new Error('Artifact staging berubah setelah validation. Jalankan generation:validate ulang.');
 }
 
 const lessonText = readFileSync(lesson, 'utf8');
@@ -43,7 +67,7 @@ if (data.curriculumFingerprint !== item.fingerprint) {
   throw new Error('Lesson berubah setelah validation.');
 }
 
-const lessonDestination = resolve('src', 'content', 'lessons', item.trackId, item.id + '.mdx');
+const lessonDestination = resolve('src', 'content', 'lessons', item.id + '.mdx');
 const recordDestination = resolve('generation', item.id + '.json');
 const reviewDestination = resolve('review-banks', item.id + '.json');
 
