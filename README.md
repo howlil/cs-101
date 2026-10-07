@@ -22,7 +22,7 @@ pnpm start
 
 ## Deploy ke Cloudflare Workers lewat GitHub
 
-Cloudflare memakai `wrangler.jsonc` sebagai source of truth. Build Astro menghasilkan Worker di `dist/_worker.js/index.js` dan static assets di `dist`; D1 tersedia sebagai binding `LEARNING_DB`.
+Cloudflare memakai `wrangler.jsonc` sebagai source of truth. Untuk Astro 6+ / `@astrojs/cloudflare` v14, Wrangler memakai unified entrypoint `@astrojs/cloudflare/entrypoints/server`; static assets tetap dibangun ke `dist`, dan D1 tersedia sebagai binding `LEARNING_DB`.
 
 1. Di Cloudflare **Workers & Pages**, buat Worker dari repository GitHub ini dan pilih branch production `master`.
 2. Gunakan build settings berikut:
@@ -33,7 +33,7 @@ Cloudflare memakai `wrangler.jsonc` sebagai source of truth. Build Astro menghas
    Root directory: /
    ```
 
-   Tidak perlu mengisi output directory seperti Pages. `wrangler.jsonc` memiliki custom build `pnpm run build:cloudflare`, jadi setiap `wrangler deploy` akan membangun Astro lebih dulu sebelum membaca `dist/_worker.js/index.js`. Jangan duplikasi Build command di dashboard. `.node-version` mengunci Node 24 untuk build.
+   Tidak perlu mengisi output directory seperti Pages. `wrangler.jsonc` memiliki custom build `pnpm run build:cloudflare`, jadi setiap `wrangler deploy` membangun Astro Cloudflare lebih dulu. Entrypoint Worker berasal dari package adapter (`@astrojs/cloudflare/entrypoints/server`), bukan dari file output yang belum ada. Jangan duplikasi Build command di dashboard; `.node-version` mengunci Node 24 untuk build.
 3. `wrangler.jsonc` mendeklarasikan D1 binding `LEARNING_DB`. Wrangler 4.x dapat membuat dan menautkan resource D1 saat deployment pertama jika binding tersebut belum memiliki resource.
 4. `pnpm run deploy:cloudflare` menjalankan `wrangler deploy`. Wrangler memicu custom build dari `wrangler.jsonc`, mem-provision binding D1 bila perlu, lalu script menerapkan semua migration yang belum dijalankan dari folder `migrations/` ke `LEARNING_DB`.
 5. Untuk aplikasi pribadi, pasang Cloudflare Access sebelum membuka hostname production ke publik. Pemeriksaan Origin melindungi mutation dari cross-origin request, tetapi bukan autentikasi.
