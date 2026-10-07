@@ -14,7 +14,10 @@ const nextReady = curriculumGraph.manifest.items.find((item) => {
   return state.availability.find((entry) => entry.itemId === item.id)?.status === 'ready';
 });
 const actionableReviews = state.reviews
-  .filter((review) => review.state === 'due' || review.state === 'retry')
+  .filter((review) =>
+    (review.state === 'due' || review.state === 'retry') &&
+    state.progress.find((entry) => entry.itemId === review.itemId)?.status === 'passed'
+  )
   .map((review) => ({
     review,
     item: curriculumGraph.itemsById.get(review.itemId),

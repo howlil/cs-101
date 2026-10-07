@@ -12,7 +12,10 @@ const progressById = new Map(state.progress.map((entry) => [entry.itemId, entry]
 const reviewById = new Map(state.reviews.map((entry) => [entry.itemId, entry]));
 const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
 const actionableReviews = state.reviews
-  .filter((review) => review.state === 'due' || review.state === 'retry')
+  .filter((review) =>
+    (review.state === 'due' || review.state === 'retry') &&
+    progressById.get(review.itemId)?.status === 'passed'
+  )
   .map((review) => ({ review, item: curriculumGraph.itemsById.get(review.itemId) }))
   .filter((entry) => entry.item);
 const integrations = curriculumGraph.manifest.items.filter((item) => item.kind === 'integration');
@@ -66,7 +69,8 @@ const reviewLabel = (itemId: string) => {
         const completed = trackItems.filter((item) => passed.has(item.id)).length;
         const trackReviewAction = trackItems.filter((item) => {
           const review = reviewById.get(item.id);
-          return review?.state === 'due' || review?.state === 'retry';
+          return progressById.get(item.id)?.status === 'passed' &&
+            (review?.state === 'due' || review?.state === 'retry');
         }).length;
 
         return (
@@ -85,7 +89,8 @@ const reviewLabel = (itemId: string) => {
                 const active = itemIds.includes(state.activeItemId ?? '');
                 const reviewCount = itemIds.filter((id) => {
                   const review = reviewById.get(id);
-                  return review?.state === 'due' || review?.state === 'retry';
+                  return progressById.get(id)?.status === 'passed' &&
+                    (review?.state === 'due' || review?.state === 'retry');
                 }).length;
                 return (
                   <a href={'/curriculum?track=' + track.id + '&item=' + encodeURIComponent(itemIds[0] ?? '')}>
