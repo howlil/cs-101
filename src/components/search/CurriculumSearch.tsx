@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { BookOpen, Boxes, FolderKanban, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, Boxes, CornerDownLeft, FolderKanban, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   searchCurriculum,
@@ -184,9 +184,9 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
           </div>
 
           <div className={styles.footer}>
-            <span>↑↓ pilih</span>
-            <span>Enter buka</span>
-            <span>Esc tutup</span>
+            <span><ArrowUp size={12} strokeWidth={1.8} aria-hidden="true" /><ArrowDown size={12} strokeWidth={1.8} aria-hidden="true" /> pilih</span>
+            <span><CornerDownLeft size={12} strokeWidth={1.8} aria-hidden="true" /> buka</span>
+            <span><X size={12} strokeWidth={1.8} aria-hidden="true" /> tutup</span>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
