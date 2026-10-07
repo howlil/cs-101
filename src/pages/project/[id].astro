@@ -2,6 +2,7 @@
 import '../../styles/project.css';
 import AppLayout from '../../layouts/AppLayout.astro';
 import ActivateItem from '../../components/learning/ActivateItem';
+import GuaranteeAccordion from '../../components/project/GuaranteeAccordion';
 import Connections from '../../components/curriculum/Connections.astro';
 import ProjectEvidence from '../../components/course/ProjectEvidence.tsx';
 import { curriculumGraph } from '../../server/curriculum';
@@ -138,14 +139,13 @@ const projectHref = (id: string) => `/project/${encodeURIComponent(id)}`;
           </div>
           <span>{delta.inherited.length}</span>
         </div>
-        <details class="inherited-guarantees project-inherited-summary">
-          <summary>
-            {delta.inheritanceClauses[0]?.text ?? `Warisan dari ${delta.parent.id}`}
-          </summary>
-          <ol>
-            {delta.inherited.map((criterion) => <li>{criterion.text}</li>)}
-          </ol>
-        </details>
+        <div class="project-inherited-summary">
+          <GuaranteeAccordion
+            client:visible
+            title={delta.inheritanceClauses[0]?.text ?? `Warisan dari ${delta.parent.id}`}
+            items={delta.inherited.map((criterion) => criterion.text)}
+          />
+        </div>
       </section>
     )}
 
