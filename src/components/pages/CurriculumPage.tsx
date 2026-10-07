@@ -15,6 +15,8 @@ import {
 import CurriculumExplorer, { type ExplorerItem } from '../curriculum/CurriculumExplorer';
 import ActivateItem from '../learning/ActivateItem';
 import ActionLink from '../arc/ActionLink';
+import { Badge } from '../arc/badge/badge';
+import { Card } from '../arc/card/card';
 
 type Criterion = { id: string; text: string };
 type SelectedItem = {
@@ -86,9 +88,9 @@ export default function CurriculumPage({
 
           {selected.state && <div className="item-state-actions">
             {selected.state === 'passed' ? (
-              <span className="state-label state-label--passed"><CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" /> Lulus</span>
+              <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Lulus</Badge>
             ) : selected.state === 'stale' ? (
-              <span className="state-label state-label--stale"><TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Perlu validasi ulang</span>
+              <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu validasi ulang</Badge>
             ) : selected.state === 'active' ? (
               <ActionLink href={selected.href} label="Lanjutkan" />
             ) : selected.state === 'ready' || selected.state === 'started' ? (
@@ -97,10 +99,9 @@ export default function CurriculumPage({
                 label={selected.state === 'started' ? 'Lanjutkan item' : 'Jadikan aktif'}
               />
             ) : selected.state === 'locked' ? (
-              <span className="state-label state-label--locked">
-                <LockKeyhole size={14} strokeWidth={1.8} aria-hidden="true" />
+              <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
                 Terkunci · selesaikan {selected.missingPrerequisites.join(', ')}
-              </span>
+              </Badge>
             ) : null}
           </div>}
         </header>
@@ -125,11 +126,15 @@ export default function CurriculumPage({
             <h3><ListTree size={16} strokeWidth={1.8} aria-hidden="true" /> Scope</h3>
             <ul className="compact-list">{selected.scope?.map((scope) => <li key={scope}>{scope}</li>)}</ul>
           </section>
-          <section className="item-section challenge-preview">
-            <p className="eyebrow"><Target size={13} strokeWidth={1.8} aria-hidden="true" /> MINI CHALLENGE</p>
-            <h3>{selected.challenge?.title}</h3>
-            <ul className="compact-list">{selected.challenge?.steps.map((step) => <li key={step}>{step}</li>)}</ul>
-          </section>
+          <div className="item-section challenge-preview">
+            <Card
+              title={selected.challenge?.title ?? 'Mini challenge'}
+              status="Mini challenge"
+              meta={<Target size={14} strokeWidth={1.8} aria-hidden="true" />}
+            >
+              <ul className="compact-list">{selected.challenge?.steps.map((step) => <li key={step}>{step}</li>)}</ul>
+            </Card>
+          </div>
           <section className="item-section">
             <h3><CheckCircle2 size={16} strokeWidth={1.8} aria-hidden="true" /> Definition of Done</h3>
             <ol className="criteria-list">{selected.criteria?.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>

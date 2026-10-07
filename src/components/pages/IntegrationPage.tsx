@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import ActivateItem from '../learning/ActivateItem';
+import { Badge } from '../arc/badge/badge';
+import { Card } from '../arc/card/card';
 import IntegrationEvidence from '../course/IntegrationEvidence';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
@@ -75,27 +77,20 @@ export default function IntegrationPage({
 
       <div className="integration-status-row">
         {passed ? (
-          <span className="integration-state integration-state--passed">
-            <CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" /> Lulus
-          </span>
+          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Lulus</Badge>
         ) : stale && !active ? (
           <>
-            <span className="integration-state integration-state--stale">
-              <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Perlu validasi ulang
-            </span>
+            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu validasi ulang</Badge>
             {ready && <ActivateItem itemId={id} label="Validasi ulang" />}
           </>
         ) : active ? (
-          <span className="integration-state integration-state--active">
-            <Boxes size={14} strokeWidth={1.8} aria-hidden="true" /> Aktif
-          </span>
+          <Badge tone="info" icon={<Boxes size={14} strokeWidth={1.8} />}>Aktif</Badge>
         ) : ready ? (
           <ActivateItem itemId={id} label="Mulai integration" />
         ) : (
-          <span className="integration-state integration-state--locked">
-            <LockKeyhole size={14} strokeWidth={1.8} aria-hidden="true" />
+          <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
             Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prerequisite'}
-          </span>
+          </Badge>
         )}
       </div>
     </header>
@@ -127,13 +122,17 @@ export default function IntegrationPage({
       <ul className="integration-list">{scope.map((entry) => <li key={entry}>{entry}</li>)}</ul>
     </section>
 
-    <section className="integration-section integration-challenge">
-      <p className="eyebrow"><Target size={13} strokeWidth={1.8} aria-hidden="true" /> CHALLENGE</p>
-      <h2>{challenge.title}</h2>
-      {challenge.steps.length > 0 && (
-        <ol className="integration-list">{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
-      )}
-    </section>
+    <div className="integration-section integration-challenge">
+      <Card
+        title={challenge.title}
+        status="Challenge"
+        meta={<Target size={14} strokeWidth={1.8} aria-hidden="true" />}
+      >
+        {challenge.steps.length > 0 && (
+          <ol className="integration-list">{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+        )}
+      </Card>
+    </div>
 
     <section className="integration-section">
       <div className="integration-section-heading">

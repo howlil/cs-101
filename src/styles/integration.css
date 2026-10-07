@@ -48,24 +48,6 @@
   margin-top: 18px;
 }
 
-.integration-state {
-  min-height: 34px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-control);
-  color: var(--muted);
-  background: var(--surface);
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.integration-state--passed { color: var(--success); }
-.integration-state--stale { color: var(--warning); }
-.integration-state--active { color: var(--accent-strong); }
-.integration-state--locked { max-width: 680px; }
-
 .integration-section,
 .integration-evidence-section {
   max-width: 820px;
@@ -131,12 +113,7 @@
   margin: 8px 0;
 }
 
-.integration-challenge {
-  margin-top: 4px;
-  padding-inline: 16px;
-  border-left: 2px solid var(--accent);
-  background: color-mix(in oklab,var(--accent-subtle) 45%,transparent);
-}
+.integration-challenge { margin-top: 4px; }
 
 .integration-evidence-form {
   max-width: 820px;

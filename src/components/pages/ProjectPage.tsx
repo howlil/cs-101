@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Card } from '../arc/card/card';
+import { Badge } from '../arc/badge/badge';
 import ActionLink from '../arc/ActionLink';
 import ActivateItem from '../learning/ActivateItem';
 import ProjectEvidence from '../course/ProjectEvidence';
@@ -84,27 +85,20 @@ export default function ProjectPage({
 
       <div className="project-status-row">
         {passed ? (
-          <span className="project-state project-state--passed">
-            <CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" /> Lulus
-          </span>
+          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Lulus</Badge>
         ) : stale && !active ? (
           <>
-            <span className="project-state project-state--stale">
-              <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Perlu validasi ulang
-            </span>
+            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu validasi ulang</Badge>
             {ready && <ActivateItem itemId={id} label="Validasi ulang" />}
           </>
         ) : active ? (
-          <span className="project-state project-state--active">
-            <FolderKanban size={14} strokeWidth={1.8} aria-hidden="true" /> Aktif
-          </span>
+          <Badge tone="info" icon={<FolderKanban size={14} strokeWidth={1.8} />}>Aktif</Badge>
         ) : ready ? (
           <ActivateItem itemId={id} label="Mulai checkpoint" />
         ) : (
-          <span className="project-state project-state--locked">
-            <LockKeyhole size={14} strokeWidth={1.8} aria-hidden="true" />
+          <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
             Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prerequisite'}
-          </span>
+          </Badge>
         )}
       </div>
     </header>
