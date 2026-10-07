@@ -82,17 +82,41 @@ const nextProjectBase = {
 const project = fp(projectBase);
 const nextProject = fp(nextProjectBase);
 
+const integrationBase = {
+  id: 'INT-001',
+  kind: 'integration' as const,
+  order: 1,
+  title: 'Cross-track fixture',
+  brief: 'Combine two foundations',
+  scope: ['Combine TEST-001 and TEST-002'],
+  challenge: {
+    title: 'Prove the integration',
+    steps: ['Run integrated flow'],
+    raw: 'Prove the integration',
+  },
+  criteria: [{ id: 'integration-proof', text: 'Integrated flow works' }],
+  requirements: [{ id: 'integration-artifact', text: 'Evidence transcript' }],
+  prerequisites: ['TEST-001', 'TEST-002'],
+  source: { title: 'Fixture source' },
+};
+
+const integration = fp(integrationBase);
+
 const manifest: CurriculumManifestV2 = {
   version: 2,
   tracks: [{ id: 'test', title: 'Test', order: 1 }],
   modules: [{ id: 'test-core', trackId: 'test', title: 'Test Core', order: 1 }],
-  items: [unit, next, locked, project, nextProject],
+  items: [unit, next, locked, project, nextProject, integration],
   relations: [
     { from: 'TEST-001', to: 'TEST-003', type: 'prerequisite' },
     { from: 'TEST-001', to: 'TEST-P01', type: 'prerequisite' },
     { from: 'TEST-001', to: 'TEST-P01', type: 'contributes_to' },
     { from: 'TEST-001', to: 'TEST-P02', type: 'prerequisite' },
     { from: 'TEST-P01', to: 'TEST-P02', type: 'project_parent' },
+    { from: 'TEST-001', to: 'INT-001', type: 'prerequisite' },
+    { from: 'TEST-002', to: 'INT-001', type: 'prerequisite' },
+    { from: 'TEST-001', to: 'INT-001', type: 'related' },
+    { from: 'TEST-002', to: 'INT-001', type: 'deep_dive' },
   ],
 };
 
@@ -465,6 +489,93 @@ test('parent checkpoint memblokir project berikutnya walau explicit prerequisite
     const availability = unitPassed.availability.find((entry) => entry.itemId === nextProject.id);
     assert.equal(availability?.status, 'locked');
     assert.deepEqual(availability?.missingPrerequisites, ['TEST-P01']);
+  } finally {
+    db.close();
+  }
+});
+
+
+test('integration menunggu semua hard prerequisite lalu dapat diselesaikan tanpa lesson MDX', () => {
+  const db = openDatabase(':memory:');
+  try {
+    const service = new LearningService(db, graph, () => true);
+
+    service.setActiveItem({ ...envelope(0), itemId: unit.id });
+    const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence unit',
+    }));
+    const firstPassed = service.saveSession({
+      ...session(1),
+      kind: 'passed',
+      evidence: unitEvidence,
+    });
+
+    const afterFirst = firstPassed.availability.find((entry) => entry.itemId === integration.id);
+    assert.equal(afterFirst?.status, 'locked');
+    assert.deepEqual(afterFirst?.missingPrerequisites, ['TEST-002']);
+
+    const nextActive = service.setActiveItem({
+      ...envelope(firstPassed.revision),
+      itemId: next.id,
+    });
+    const nextEvidence = requiredEvidenceForItem(next).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence second unit',
+    }));
+    const secondPassed = service.saveSession({
+      ...envelope(nextActive.revision),
+      itemId: next.id,
+      fingerprint: next.fingerprint,
+      kind: 'passed',
+      evidence: nextEvidence,
+      continueFrom: '',
+      lastAnchor: '',
+    });
+
+    assert.equal(
+      secondPassed.availability.find((entry) => entry.itemId === integration.id)?.status,
+      'ready',
+    );
+
+    const integrationActive = service.setActiveItem({
+      ...envelope(secondPassed.revision),
+      itemId: integration.id,
+    });
+    const integrationEvidence = requiredEvidenceForItem(integration).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Integration evidence',
+    }));
+    const completed = service.saveSession({
+      ...envelope(integrationActive.revision),
+      itemId: integration.id,
+      fingerprint: integration.fingerprint,
+      kind: 'passed',
+      evidence: integrationEvidence,
+      continueFrom: '',
+      lastAnchor: '',
+    });
+
+    assert.equal(
+      completed.progress.find((entry) => entry.itemId === integration.id)?.status,
+      'passed',
+    );
+  } finally {
+    db.close();
+  }
+});
+
+test('related dan deep_dive tidak memblokir readiness integration', () => {
+  const db = openDatabase(':memory:');
+  try {
+    const service = new LearningService(db, graph, () => true);
+    const snapshot = service.snapshot();
+    const availability = snapshot.availability.find((entry) => entry.itemId === integration.id);
+    assert.equal(availability?.status, 'locked');
+    assert.deepEqual(
+      availability?.missingPrerequisites,
+      ['TEST-001', 'TEST-002'],
+    );
   } finally {
     db.close();
   }
