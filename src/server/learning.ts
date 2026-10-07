@@ -157,8 +157,8 @@ export class LearningService {
       this.db.prepare('UPDATE learner_state SET revision=revision+1 WHERE id=1').run();
       const response = this.snapshot();
       this.db.prepare(
-        'INSERT INTO request_receipts(request_id,payload_hash,response,nonce) VALUES(?,?,?,?)',
-      ).run(input.requestId, hash, JSON.stringify(response), randomUUID());
+        'INSERT INTO request_receipts(request_id,payload_hash,response) VALUES(?,?,?)',
+      ).run(input.requestId, hash, JSON.stringify(response));
       this.db.exec('COMMIT');
       return response;
     } catch (error) {
