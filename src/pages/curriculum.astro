@@ -68,6 +68,7 @@ const stateMarker = (itemId: string, kind: string) => {
 
 const itemHref = (itemId: string) => {
   const location = getItemLocation(graph, itemId);
+  if (location.item.kind === 'checkpoint') return `/project/${encodeURIComponent(itemId)}`;
   if (location.item.kind === 'integration') return `/curriculum?item=${encodeURIComponent(itemId)}`;
   return `/curriculum?track=${encodeURIComponent(location.track!.id)}&item=${encodeURIComponent(itemId)}`;
 };
@@ -264,27 +265,15 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
           )}
 
           {selectedItem.kind === 'checkpoint' && (
-            <>
-              <section class="item-section">
-                <h3>Problem</h3>
-                <p>{selectedItem.problemStatement}</p>
-              </section>
-              <section class="item-section">
-                <h3>Project requirements</h3>
-                <ol class="criteria-list">{selectedItem.requirements.map((criterion) => <li>{criterion.text}</li>)}</ol>
-              </section>
-              {selectedItem.parentProjectId && (
-                <section class="item-section">
-                  <h3>Built on</h3>
-                  <div class="connection-list">
-                    <a href={itemHref(selectedItem.parentProjectId)}>
-                      <code>{selectedItem.parentProjectId}</code>
-                      <span>{graph.itemsById.get(selectedItem.parentProjectId)?.title}</span>
-                    </a>
-                  </div>
-                </section>
-              )}
-            </>
+            <section class="item-section">
+              <h3>Project checkpoint</h3>
+              <p>{selectedItem.problemStatement}</p>
+              <p>
+                <a class="workspace-action" href={`/project/${selectedItem.id}`}>
+                  Buka project workspace
+                </a>
+              </p>
+            </section>
           )}
 
           {selectedItem.kind === 'integration' && (

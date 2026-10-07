@@ -16,9 +16,9 @@ const nextReady = curriculumGraph.manifest.items.find((item) => {
 
 const hrefFor = (itemId: string) => {
   const item = curriculumGraph.itemsById.get(itemId);
-  return item?.kind === 'unit'
-    ? `/learn/${itemId}`
-    : `/curriculum?item=${encodeURIComponent(itemId)}`;
+  if (item?.kind === 'unit') return `/learn/${itemId}`;
+  if (item?.kind === 'checkpoint') return `/project/${itemId}`;
+  return `/curriculum?item=${encodeURIComponent(itemId)}`;
 };
 ---
 <AppLayout title="Hari ini">
@@ -40,7 +40,7 @@ const hrefFor = (itemId: string) => {
         taskId={nextReady.id}
         title={nextReady.title}
         description="Item berikutnya sudah siap dikerjakan."
-        href={`/curriculum?item=${encodeURIComponent(nextReady.id)}`}
+        href={hrefFor(nextReady.id)}
         actionLabel="Buka"
       />
     ) : (

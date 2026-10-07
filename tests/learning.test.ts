@@ -53,13 +53,46 @@ const unit = fp(unitBase);
 const next = fp(nextBase);
 const locked = fp(lockedBase);
 
+const projectBase = {
+  id: 'TEST-P01',
+  kind: 'checkpoint' as const,
+  trackId: 'test',
+  moduleId: 'test-core',
+  order: 4,
+  title: 'Project fixture',
+  problemStatement: 'Build the project',
+  requirements: [{ id: 'project-proof', text: 'Project invariant terbukti' }],
+  prerequisites: ['TEST-001'],
+  source: { title: 'Fixture source' },
+};
+
+const nextProjectBase = {
+  ...projectBase,
+  id: 'TEST-P02',
+  order: 5,
+  title: 'Next project fixture',
+  parentProjectId: 'TEST-P01',
+  requirements: [
+    { id: 'inherit', text: 'Includes every Project 1 requirement' },
+    { id: 'project-proof-2', text: 'New invariant terbukti' },
+  ],
+  prerequisites: ['TEST-P01'],
+};
+
+const project = fp(projectBase);
+const nextProject = fp(nextProjectBase);
+
 const manifest: CurriculumManifestV2 = {
   version: 2,
   tracks: [{ id: 'test', title: 'Test', order: 1 }],
   modules: [{ id: 'test-core', trackId: 'test', title: 'Test Core', order: 1 }],
-  items: [unit, next, locked],
+  items: [unit, next, locked, project, nextProject],
   relations: [
     { from: 'TEST-001', to: 'TEST-003', type: 'prerequisite' },
+    { from: 'TEST-001', to: 'TEST-P01', type: 'prerequisite' },
+    { from: 'TEST-001', to: 'TEST-P01', type: 'contributes_to' },
+    { from: 'TEST-P01', to: 'TEST-P02', type: 'prerequisite' },
+    { from: 'TEST-P01', to: 'TEST-P02', type: 'project_parent' },
   ],
 };
 
@@ -327,6 +360,84 @@ test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () 
     assert.equal(
       snapshot.availability.find((entry) => entry.itemId === locked.id)?.status,
       'locked',
+    );
+  } finally {
+    db.close();
+  }
+});
+
+
+test('checkpoint mengikuti locked → ready → active → passed dan membuka project berikutnya', () => {
+  const { db, service } = fixture(false);
+  try {
+    assert.equal(
+      service.snapshot().availability.find((entry) => entry.itemId === project.id)?.status,
+      'locked',
+    );
+
+    const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence unit',
+    }));
+    // Unit completion still requires lesson readiness; this fixture intentionally disables it.
+    assert.throws(
+      () => service.saveSession({
+        ...session(1),
+        kind: 'passed',
+        evidence: unitEvidence,
+      }),
+      /Materi valid belum tersedia/,
+    );
+  } finally {
+    db.close();
+  }
+
+  const db = openDatabase(':memory:');
+  try {
+    const service = new LearningService(db, graph, () => true);
+    service.setActiveItem({ ...envelope(0), itemId: unit.id });
+    const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence unit',
+    }));
+    const unitPassed = service.saveSession({
+      ...session(1),
+      kind: 'passed',
+      evidence: unitEvidence,
+    });
+
+    assert.equal(
+      unitPassed.availability.find((entry) => entry.itemId === project.id)?.status,
+      'ready',
+    );
+
+    const activated = service.setActiveItem({
+      ...envelope(unitPassed.revision),
+      itemId: project.id,
+    });
+    assert.equal(activated.activeItemId, project.id);
+
+    const projectEvidence = requiredEvidenceForItem(project).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Project evidence',
+    }));
+    const completed = service.saveSession({
+      ...envelope(activated.revision),
+      itemId: project.id,
+      fingerprint: project.fingerprint,
+      kind: 'passed',
+      evidence: projectEvidence,
+      continueFrom: '',
+      lastAnchor: '',
+    });
+
+    assert.equal(
+      completed.progress.find((entry) => entry.itemId === project.id)?.status,
+      'passed',
+    );
+    assert.equal(
+      completed.availability.find((entry) => entry.itemId === nextProject.id)?.status,
+      'ready',
     );
   } finally {
     db.close();
