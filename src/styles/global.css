@@ -375,13 +375,19 @@ hr { margin: 24px 0; }
 }
 
 
-/* Keep every scroll container scrollable while removing scrollbar chrome. */
-:where(html, body, *) {
+/* Hide visible scrollbar chrome without disabling scrolling. Keep code/text fields native. */
+html,
+body,
+.curriculum-explorer,
+.curriculum-workspace {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-:where(*::-webkit-scrollbar) {
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.curriculum-explorer::-webkit-scrollbar,
+.curriculum-workspace::-webkit-scrollbar {
   width: 0;
   height: 0;
   display: none;

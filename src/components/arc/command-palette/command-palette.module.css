@@ -29,8 +29,10 @@
 .results {
   max-height: min(342px, 56vh);
   overflow-y: auto;
+  scrollbar-width: none;
   padding: 5px;
 }
+.results::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .item {
   width: 100%;
   min-height: 40px;
