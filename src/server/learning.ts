@@ -341,7 +341,16 @@ export class LearningService {
       ).run(next.policyVersion, next.step, next.dueAt, next.storedState, input.itemId);
     });
 
-    return { ...response, reviewAttempt: grading };
+    return {
+      ...response,
+      reviewAttempt: grading,
+      reviewFeedback: bank.questions.map((question, index) => ({
+        id: question.id,
+        correct: input.answers[index] === question.answer,
+        answer: question.answer,
+        explanation: question.explanation,
+      })),
+    };
   }
 
   // Compatibility for old endpoint/client.

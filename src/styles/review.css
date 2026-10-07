@@ -122,3 +122,10 @@
   font-size: 12px;
   font-weight: 600;
 }
+
+.review-feedback-list { display: grid; gap: 7px; margin-top: 16px; }
+.review-feedback { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.review-feedback > div { display: grid; gap: 2px; }
+.review-feedback > div strong { font-size: 11px; }
+.review-feedback > div span { font-size: 12px; }
+.review-feedback p { margin: 7px 0 0; color: var(--muted); font-size: 12px; }

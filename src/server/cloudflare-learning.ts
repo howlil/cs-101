@@ -383,7 +383,16 @@ export class CloudflareLearningService {
     ).bind(input.requestId).first<StoredReceipt>();
     if (old) {
       if (old.payload_hash !== hash) throw new LearningError(409, 'Request ID sudah dipakai untuk data berbeda.');
-      return { ...(JSON.parse(old.response) as LearningSnapshot), reviewAttempt: grading };
+      return {
+        ...(JSON.parse(old.response) as LearningSnapshot),
+        reviewAttempt: grading,
+        reviewFeedback: bank.questions.map((question, index) => ({
+          id: question.id,
+          correct: input.answers[index] === question.answer,
+          answer: question.answer,
+          explanation: question.explanation,
+        })),
+      };
     }
 
     const current = await this.snapshot();
@@ -465,7 +474,16 @@ export class CloudflareLearningService {
     ).bind(input.requestId).first<StoredReceipt>();
     if (!receipt) throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
     if (receipt.payload_hash !== hash) throw new LearningError(409, 'Request ID sudah dipakai untuk data berbeda.');
-    return { ...(JSON.parse(receipt.response) as LearningSnapshot), reviewAttempt: grading };
+    return {
+      ...(JSON.parse(receipt.response) as LearningSnapshot),
+      reviewAttempt: grading,
+      reviewFeedback: bank.questions.map((question, index) => ({
+        id: question.id,
+        correct: input.answers[index] === question.answer,
+        answer: question.answer,
+        explanation: question.explanation,
+      })),
+    };
   }
 
   setActiveTask(raw: unknown) {

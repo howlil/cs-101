@@ -84,7 +84,7 @@ const canAttempt = review?.state === 'due' || review?.state === 'retry';
           itemId={item.id}
           version={bank.version}
           revision={state.revision}
-          questions={bank.questions}
+          questions={bank.questions.map(({ id, prompt, options }) => ({ id, prompt, options }))}
         />
       </>
     ) : null}
