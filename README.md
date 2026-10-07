@@ -28,14 +28,14 @@ Cloudflare memakai `wrangler.jsonc` sebagai source of truth. Build Astro menghas
 2. Gunakan build settings berikut:
 
    ```text
-   Build command:  pnpm build:cloudflare
+   Build command:  (kosong)
    Deploy command: pnpm run deploy:cloudflare
    Root directory: /
    ```
 
-   Tidak perlu mengisi output directory seperti Pages. Workers membaca entrypoint dan assets dari `wrangler.jsonc`. `.node-version` mengunci Node 24 untuk build.
+   Tidak perlu mengisi output directory seperti Pages. `wrangler.jsonc` memiliki custom build `pnpm run build:cloudflare`, jadi setiap `wrangler deploy` akan membangun Astro lebih dulu sebelum membaca `dist/_worker.js/index.js`. Jangan duplikasi Build command di dashboard. `.node-version` mengunci Node 24 untuk build.
 3. `wrangler.jsonc` mendeklarasikan D1 binding `LEARNING_DB`. Wrangler 4.x dapat membuat dan menautkan resource D1 saat deployment pertama jika binding tersebut belum memiliki resource.
-4. `pnpm run deploy:cloudflare` menjalankan `wrangler deploy`, lalu menerapkan semua migration yang belum dijalankan dari folder `migrations/` ke `LEARNING_DB`.
+4. `pnpm run deploy:cloudflare` menjalankan `wrangler deploy`. Wrangler memicu custom build dari `wrangler.jsonc`, mem-provision binding D1 bila perlu, lalu script menerapkan semua migration yang belum dijalankan dari folder `migrations/` ke `LEARNING_DB`.
 5. Untuk aplikasi pribadi, pasang Cloudflare Access sebelum membuka hostname production ke publik. Pemeriksaan Origin melindungi mutation dari cross-origin request, tetapi bukan autentikasi.
 
 Untuk uji lokal runtime Cloudflare:
