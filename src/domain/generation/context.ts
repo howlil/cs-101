@@ -1,13 +1,23 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
 import type { CurriculumItem, Criterion } from '../curriculum-v2/schema';
-import { getConnectionGroups, getItemLocation, getProjectNavigation } from '../curriculum-v2/selectors';
+import { getConnectionGroups, getItemLocation } from '../curriculum-v2/selectors';
 import type { GenerationContext } from './schema';
+
+const itemSignals = (item: CurriculumItem) => {
+  if (item.kind === 'unit') return item.scope.slice(0, 12);
+  if (item.kind === 'integration') return item.scope.slice(0, 12);
+  return [
+    item.problemStatement,
+    ...item.requirements.slice(0, 11).map((criterion) => criterion.text),
+  ];
+};
 
 const toContextItem = (item: CurriculumItem) => ({
   id: item.id,
   kind: item.kind,
   title: item.title,
   fingerprint: item.fingerprint,
+  signals: itemSignals(item),
 });
 
 function criteriaFor(item: CurriculumItem): Criterion[] {
@@ -90,6 +100,8 @@ export function resolveGenerationContext(
       moduleTitle: location.module?.title,
     },
     scope: scopeFor(target),
+    marketExpectation: target.kind === 'unit' ? target.marketExpectation : [],
+    estimatedMinutes: target.estimatedMinutes,
     criteria: criteriaFor(target),
     challenge: target.kind === 'unit' || target.kind === 'integration'
       ? target.challenge

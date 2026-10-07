@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import manifestSource from '../curriculum/manifest.v2.json';
@@ -46,6 +46,16 @@ if (!existsSync(sourceTemplatePath)) {
 
 const specTemplatePath = resolve(directory, 'lesson-spec.template.json');
 if (!existsSync(specTemplatePath)) {
+  const reviewCoverage = Array.from({ length: 5 }, (_, questionIndex) => {
+    const assigned = item.criteria
+      .filter((_criterion, criterionIndex) => criterionIndex % 5 === questionIndex)
+      .map((criterion) => criterion.id);
+    if (!assigned.length && item.criteria.length) {
+      assigned.push(item.criteria[questionIndex % item.criteria.length].id);
+    }
+    return assigned;
+  });
+
   writeFileSync(specTemplatePath, JSON.stringify({
     itemId: item.id,
     curriculumFingerprint: item.fingerprint,
@@ -81,7 +91,7 @@ if (!existsSync(specTemplatePath)) {
       options: ['<option A>', '<option B>'],
       answer: 0,
       explanation: '<repair misconception>',
-      criterionIds: [item.criteria[index % item.criteria.length]?.id].filter(Boolean),
+      criterionIds: reviewCoverage[index],
     })),
   }, null, 2) + '\n');
 }

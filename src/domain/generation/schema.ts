@@ -7,6 +7,7 @@ export const contextItemSchema = z.object({
   kind: z.enum(['unit', 'checkpoint', 'integration']),
   title: z.string().min(1),
   fingerprint: z.string().regex(/^sha256:[0-9a-f]{64}$/),
+  signals: z.array(z.string().min(1)).max(12),
 });
 
 export const generationContextSchema = z.object({
@@ -19,6 +20,8 @@ export const generationContextSchema = z.object({
     moduleTitle: z.string().optional(),
   }),
   scope: z.array(z.string().min(1)),
+  marketExpectation: z.array(z.string().min(1)),
+  estimatedMinutes: z.number().int().positive().optional(),
   criteria: z.array(criterionSchema),
   challenge: z.object({
     title: z.string().min(1),
@@ -71,7 +74,7 @@ export const lessonSpecSchema = z.object({
   itemId: itemIdSchema,
   curriculumFingerprint: z.string().regex(/^sha256:[0-9a-f]{64}$/),
   payoff: z.string().min(1),
-  learningOutcomes: z.array(z.string().min(1)).min(1).max(8),
+  learningOutcomes: z.array(z.string().min(1)).min(1).max(12),
   mentalModel: z.string().min(1),
   relationshipGraph: z.string().min(1),
   concepts: z.array(z.object({

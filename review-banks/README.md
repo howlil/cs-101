@@ -29,6 +29,8 @@ Aturan:
 - pertanyaan harus memetakan recall ke criterion/challenge, bukan trivia;
 - `curriculumFingerprint` harus sama dengan item aktif;
 - grading dilakukan server-side;
-- reveal sebelum submit membuat attempt `assisted`, sehingga tidak dapat lulus walaupun score 5/5.
+- answer key dan explanation tidak dikirim ke browser sebelum submit;
+- bank final diturunkan dari `lesson-spec.json` oleh `generation:validate`, bukan diedit manual;
+- setiap curriculum criterion harus tercakup minimal satu review question.
 
-Bank belum dibuat otomatis pada P5. Generator/context pipeline P6 yang akan menghasilkan dan memvalidasinya.
+P6 menghasilkan review bank sebagai derived artifact dari lesson spec yang sama dengan lesson, sehingga assessment tidak drift dari coverage lesson.
