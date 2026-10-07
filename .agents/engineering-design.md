@@ -607,6 +607,30 @@ Manifest dapat membangun search index lokal:
 
 Search dilakukan client-side atau server-side dari artifact kecil. Tidak perlu Algolia/Elasticsearch untuk ukuran curriculum ini.
 
+## Frontend runtime boundary
+
+Astro adalah content/server shell, bukan interaction runtime.
+
+```text
+Astro page/layout
+  ↓ serializable props
+React island
+  ↓ UIArc primitives
+HTTP API
+  ↓
+Learning service
+```
+
+Rules:
+
+- Astro: route, SSR fetch, manifest/content/MDX rendering.
+- React: seluruh stateful interaction, mutation, local draft, disclosure, search, theme, loading/error feedback.
+- UIArc: primitive control dan boxed-surface design language.
+- Tidak ada imperative DOM orchestration seperti `document.querySelector(...).addEventListener(...)` untuk application behavior.
+- Tidak ada native `<details>` untuk product disclosure; gunakan React + UIArc Accordion.
+- Focus ring/halo dilarang oleh product decision; focus-visible harus tetap dibedakan lewat border/background.
+- Astro dapat merender React component tanpa hydration bila benar-benar statis. Tambahkan `client:*` hanya jika component membutuhkan interaction.
+
 ## UI view models
 
 React/Astro component tidak membaca graph raw.
@@ -762,21 +786,18 @@ Jalankan behavior suite yang sama terhadap SQLite dan D1 adapter sejauh environm
 Build dan release sengaja dipisahkan:
 
 ```text
-CI / local verification
 pnpm run build
   ↓
-validate curriculum/content/review
-  ↓
-Astro Cloudflare build
-  ↓
-NO remote database mutation
+scripts/build.mjs
+  ├─ local / GitHub CI → build:app
+  │    └─ validate → Astro build
+  │       NO remote database mutation
+  │
+  └─ Cloudflare Workers Builds (WORKERS_CI=1) → build:cloudflare
+       └─ pending D1 migrations → validate → Astro build
 
-Cloudflare release preparation
+Manual release:
 pnpm run build:cloudflare
-  ↓
-apply pending D1 migrations
-  ↓
-validated Astro Cloudflare build
   ↓
 npx wrangler deploy
 ```
@@ -824,7 +845,7 @@ safe Node build
 HTTP smoke: /, /curriculum, /progress
 ```
 
-`pnpm run build` tidak boleh menjalankan remote D1 migration. Mutation production database hanya terjadi pada explicit Cloudflare release path `pnpm run build:cloudflare` / `pnpm run deploy:cloudflare`.
+`pnpm run build` memilih target berdasarkan environment. Pada local/GitHub CI ia menjalankan pure `build:app` tanpa remote mutation. Pada Cloudflare Workers Builds (`WORKERS_CI=1`) ia menjalankan `build:cloudflare`, yaitu pending D1 migration lalu validated app build. Explicit `pnpm run build:cloudflare` / `pnpm run deploy:cloudflare` tetap tersedia untuk release manual.
 
 SQLite dan D1 memiliki transaction implementation berbeda, tetapi behavior contract diuji dengan parity suite yang sama untuk activation, completion, idempotent retry, readiness, dan review.
 

@@ -558,6 +558,40 @@ Bahasa Indonesia langsung. Istilah teknis tetap presisi.
 
 Hindari pembuka generik, motivasi otomatis, angka vanity, dan rekap yang tidak menambah keputusan.
 
+## UI runtime boundary
+
+Gunakan boundary berikut secara konsisten:
+
+```text
+Astro
+├─ routing
+├─ SSR data loading
+├─ MDX/content composition
+└─ static semantic structure
+
+React
+├─ mutation
+├─ client state
+├─ search/select
+├─ disclosure/accordion/dialog
+├─ theme
+├─ draft persistence
+└─ feedback/loading transitions
+
+UIArc
+├─ Button
+├─ Input / Textarea / Radio / Select
+├─ Accordion / Alert / Badge
+├─ Card/surface language
+└─ motion + tokens
+```
+
+Jangan menambah `querySelector`, global `addEventListener` untuk feature interaction, atau native interactive disclosure baru di Astro. Native anchor/navigation tetap boleh karena itu semantic navigation, bukan client state.
+
+Product decision: **tidak memakai focus ring/halo**. Keyboard focus tetap harus terlihat melalui perubahan border/background/foreground pada primitive UIArc.
+
+Box/surface baru tidak boleh membuat radius, border, shadow, atau motion language sendiri. Gunakan primitive UIArc jika interaktif; untuk content statis gunakan token UIArc seperti `--radius-control`, `--radius-panel`, `--border`, `--surface`, dan `--shadow-resting`.
+
 ## Batas implementasi produk
 
 Astro + MDX tetap cocok untuk lesson. Curriculum hierarchy dan graph berasal dari manifest yang tervalidasi, bukan dari struktur folder MDX. Learning state berasal dari storage runtime, bukan dari keberadaan content file.
