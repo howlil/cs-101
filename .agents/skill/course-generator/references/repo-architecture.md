@@ -44,7 +44,7 @@ cs-101/
 │  │     ├─ ReviewMode.astro
 │  │     └─ Reveal.astro
 │  ├─ layouts/
-│  │  └─ LessonLayout.astro
+│  │  └─ LessonPage.tsx
 │  └─ pages/
 │     ├─ index.astro
 │     ├─ learn/[id].astro

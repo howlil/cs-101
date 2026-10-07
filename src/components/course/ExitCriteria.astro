@@ -1,4 +1,8 @@
 ---
+import { CheckCircle2 } from 'lucide-react';
 interface Props { items: string[] }
 ---
-<section><h2 id="exit-criteria">Bukti yang diperlukan</h2><ul>{Astro.props.items.map((item) => <li>{item}</li>)}</ul></section>
+<section>
+  <h2 id="exit-criteria"><CheckCircle2 size={18} strokeWidth={1.8} aria-hidden="true" /> Bukti yang diperlukan</h2>
+  <ul>{Astro.props.items.map((item) => <li>{item}</li>)}</ul>
+</section>

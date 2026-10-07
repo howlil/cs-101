@@ -24,6 +24,7 @@ export default function LessonPage({
   headings,
   connections,
   curriculumHref,
+  demo = false,
   children,
 }: {
   itemId: string;
@@ -40,6 +41,7 @@ export default function LessonPage({
   headings: Array<{ depth: number; slug: string; text: string }>;
   connections: ConnectionGroupData[];
   curriculumHref: string;
+  demo?: boolean;
   children?: ReactNode;
 }) {
   if (!available) {
@@ -62,6 +64,11 @@ export default function LessonPage({
       <h1>{title}</h1>
       {description && <p className="lede">{description}</p>}
 
+      {demo && (
+        <Alert title="Mode contoh" tone="info">
+          Contoh tampilan. Materi ini tidak masuk curriculum atau progres.
+        </Alert>
+      )}
       {stale && (
         <Alert title="Materi perlu diperbarui" tone="warning">
           <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Bukti sebelumnya tetap tersimpan.
@@ -69,7 +76,7 @@ export default function LessonPage({
       )}
       {continueFrom && <Alert title="Lanjut dari">{continueFrom}</Alert>}
 
-      {!active && (
+      {!demo && !active && (
         <div className="actions">
           <ActivateItem itemId={itemId} label="Jadikan item aktif" />
         </div>
@@ -79,7 +86,7 @@ export default function LessonPage({
 
       <ConnectionsPanel groups={connections} compact />
 
-      {active && (
+      {!demo && active && (
         <SessionLogger
           itemId={itemId}
           fingerprint={fingerprint}

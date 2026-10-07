@@ -1,8 +1,29 @@
 ---
 import { getEntry, render } from 'astro:content';
-import LessonLayout from '../layouts/LessonLayout.astro';
+import AppLayout from '../layouts/AppLayout.astro';
+import LessonPage from '../components/pages/LessonPage';
+
 const lesson = await getEntry('lessons', 'demo');
 if (!lesson) throw new Error('Demo lesson missing');
 const { Content, headings } = await render(lesson);
 ---
-<LessonLayout {...lesson.data} headings={headings}><Content /></LessonLayout>
+<AppLayout title={lesson.data.title} description={lesson.data.description}>
+  <LessonPage
+    client:load
+    itemId={lesson.data.taskId}
+    title={lesson.data.title}
+    description={lesson.data.description}
+    available
+    demo
+    stale={false}
+    active={false}
+    revision={0}
+    fingerprint={lesson.data.curriculumFingerprint}
+    criteria={[]}
+    headings={headings}
+    connections={[]}
+    curriculumHref="/curriculum"
+  >
+    <Content />
+  </LessonPage>
+</AppLayout>

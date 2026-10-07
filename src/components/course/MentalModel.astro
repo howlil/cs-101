@@ -1,5 +1,6 @@
 ---
+import { BrainCircuit } from 'lucide-react';
 interface Props { title?: string }
 const { title = 'Mental model' } = Astro.props;
 ---
-<aside class="mental-model"><h3>{title}</h3><slot /></aside>
+<aside class="mental-model"><h3><BrainCircuit size={16} strokeWidth={1.8} aria-hidden="true" /> {title}</h3><slot /></aside>

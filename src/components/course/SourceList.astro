@@ -1,5 +1,15 @@
 ---
+import { ExternalLink, Library } from 'lucide-react';
 interface Props { sources: { title: string; url: string }[] }
 const sources = Astro.props.sources.filter((source) => { try { return ['http:', 'https:'].includes(new URL(source.url).protocol); } catch { return false; } });
 ---
-<section><h2 id="sumber">Sumber</h2><ul>{sources.map((source) => <li><a href={source.url} rel="noreferrer">{source.title}</a></li>)}</ul></section>
+<section>
+  <h2 id="sumber"><Library size={18} strokeWidth={1.8} aria-hidden="true" /> Sumber</h2>
+  <ul>{sources.map((source) => (
+    <li>
+      <a href={source.url} rel="noreferrer">
+        {source.title} <ExternalLink size={13} strokeWidth={1.8} aria-hidden="true" />
+      </a>
+    </li>
+  ))}</ul>
+</section>

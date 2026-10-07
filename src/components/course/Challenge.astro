@@ -1,5 +1,12 @@
 ---
+import { CheckCircle2, Target } from 'lucide-react';
 interface Props { title: string; brief: string; acceptanceCriteria: string[] }
 const { title, brief, acceptanceCriteria } = Astro.props;
 ---
-<section><h2 id="challenge">{title}</h2><p>{brief}</p><h3>Kriteria selesai</h3><ul>{acceptanceCriteria.map((item) => <li>{item}</li>)}</ul><slot /></section>
+<section>
+  <h2 id="challenge"><Target size={18} strokeWidth={1.8} aria-hidden="true" /> {title}</h2>
+  <p>{brief}</p>
+  <h3><CheckCircle2 size={16} strokeWidth={1.8} aria-hidden="true" /> Kriteria selesai</h3>
+  <ul>{acceptanceCriteria.map((item) => <li>{item}</li>)}</ul>
+  <slot />
+</section>
