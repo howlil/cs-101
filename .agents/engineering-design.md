@@ -759,20 +759,26 @@ Jalankan behavior suite yang sama terhadap SQLite dan D1 adapter sejauh environm
 
 ## Deployment
 
-Production build:
+Build dan release sengaja dipisahkan:
 
 ```text
+CI / local verification
 pnpm run build
   ↓
-validate curriculum/content
-  ↓
-apply required D1 migration in deployment workflow
+validate curriculum/content/review
   ↓
 Astro Cloudflare build
-
-npx wrangler deploy
   ↓
-Worker + static assets
+NO remote database mutation
+
+Cloudflare release preparation
+pnpm run build:cloudflare
+  ↓
+apply pending D1 migrations
+  ↓
+validated Astro Cloudflare build
+  ↓
+npx wrangler deploy
 ```
 
 Deployment command tetap `npx wrangler deploy` pada Cloudflare. Preparation berada pada build workflow sesuai repository contract saat ini.
@@ -804,6 +810,26 @@ revision conflict
 runtime render
 ```
 
+## Production hardening
+
+CI memakai Node 24 dan menjalankan gate berikut pada push/PR ke `master`:
+
+```text
+pnpm test
+  ↓
+astro check
+  ↓
+safe Node build
+  ↓
+HTTP smoke: /, /curriculum, /progress
+```
+
+`pnpm run build` tidak boleh menjalankan remote D1 migration. Mutation production database hanya terjadi pada explicit Cloudflare release path `pnpm run build:cloudflare` / `pnpm run deploy:cloudflare`.
+
+SQLite dan D1 memiliki transaction implementation berbeda, tetapi behavior contract diuji dengan parity suite yang sama untuk activation, completion, idempotent retry, readiness, dan review.
+
+Compatibility V1 (`active_task_id`, `task_progress`, alias `taskId`, legacy endpoint) tetap sementara untuk migration safety. Jangan drop sampai ada migration/drop test yang membuktikan historical data dan old clients aman.
+
 ## Implementation roadmap
 
 | Phase | Outcome | Definition of done |
@@ -816,6 +842,7 @@ runtime render
 | P5 Review engine ✅ | attempts + schedule + retention | Review due/retry/retained konsisten |
 | P6 Generator context ✅ | graph-aware staged generation + review bank | Generator menerima bounded prerequisite/project context; bundle tervalidasi sebelum promotion |
 | P7 Progress + search ✅ | view-model driven progress + ranked global/local search | User dapat menemukan dan memahami posisi di curriculum besar tanpa business logic di page |
+| P8 Stabilization ✅ | Node 24 CI + safe build + SQLite/D1 parity + smoke | Test/check/build/runtime gate hijau tanpa build biasa memutasi production D1 |
 
 ## Engineering acceptance
 

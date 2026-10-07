@@ -72,23 +72,47 @@ pnpm run deploy:cloudflare
 
 ## Yang sudah tersedia
 
-- Halaman Hari ini, Progres, lesson dinamis, demo MDX, dan empty state review.
-- Tema terang/gelap/sistem, navigasi responsif, reveal, kuis lokal, challenge, dan form sesi.
-- Schema curriculum dengan validasi prerequisite, fingerprint, dan coverage metadata.
-- Progres memakai SQLite lokal atau Cloudflare D1: satu task aktif, sesi append-only, bukti, kelulusan mandiri, dan ekspor JSON.
-- API transaksi dengan revision conflict, idempotensi, validasi body, dan pemeriksaan Origin.
+- Curriculum Manifest V2: Track → Module → Unit / Project Checkpoint / Integration dengan typed relation dan fingerprint deterministic.
+- Curriculum Explorer untuk ratusan item, global search `Ctrl/⌘ K`, Today next-action, dan hierarchical Progress.
+- Generic learning state untuk unit/project/integration: locked/ready, active/passed/stale, evidence session, revision conflict, dan retry-safe mutation.
+- Cumulative project workflow dengan parent checkpoint, requirement delta, inherited guarantees, dan evidence.
+- Cross-track integration workspace dan Connections: prerequisite, related, deep-dive, foundation, contributes-to.
+- Review engine terpisah dari completion: scheduled/due/retry/retained dengan policy 1 → 3 → 7 → 14 → 30 hari.
+- Graph-aware staged course generator: context packet → source pack → lesson spec → MDX + review bank → validation → promotion.
+- SQLite local dan D1 production dengan contract parity test.
+- CI Node 24: test, Astro check, safe Node build, dan runtime smoke.
 
-Belum tersedia: integrasi sumber curriculum, eksekusi generator otomatis, review engine/jadwal, pencarian isi, auth multiuser, dan backup otomatis. Checklist penerimaan pada dokumen desain tetap menjadi target implementasi, bukan klaim seluruh fitur sudah selesai.
+Yang belum menjadi target selesai: auth multiuser, backup otomatis, dan lesson/review bank aktual untuk seluruh curriculum. Generator sudah siap, tetapi lesson tetap dihasilkan dan direview satu item pada satu waktu.
 
 ## Menambah curriculum dan lesson
 
-1. Isi `curriculum/manifest.json` sesuai `src/domain/curriculum.ts`. Task memiliki kriteria ber-ID unik; ID `challenge` digunakan untuk bukti challenge.
-2. Pakai skill `.agents/skill/course-generator/SKILL.md` untuk menghasilkan satu lesson dan memeriksa sumbernya.
-3. Simpan MDX di `src/content/lessons/`. Frontmatter: `taskId`, `title`, `description`, `curriculumFingerprint`. Demo menjadi acuan import komponen.
-4. Dapatkan fingerprint dengan `pnpm exec tsx scripts/fingerprint.ts <TASK-ID>`; simpan metadata sesuai `generation/README.md`.
-5. Jalankan validasi, check, dan build. Review isi serta sumber sebelum menerima MDX sebagai kode tepercaya.
+Curriculum canonical berada di `curriculum/manifest.v2.json`. Item ID seperti `JAV-001`, `SQL-P01`, dan `INT-001` adalah identity stabil.
 
-Tidak ada task asli yang dibuat otomatis. Curriculum kosong memang menampilkan empty state. Task tanpa lesson tetap terlihat di Progres.
+Untuk menghasilkan satu **unit**:
+
+```sh
+pnpm generation:prepare JAV-001
+# research dan isi generation/staging/JAV-001/source-pack.json
+# isi lesson-spec.json + lesson.mdx
+pnpm generation:validate JAV-001
+pnpm generation:promote JAV-001
+```
+
+Promotion menghasilkan:
+
+```text
+src/content/lessons/JAV-001.mdx
+generation/JAV-001.json
+review-banks/JAV-001.json
+```
+
+Checkpoint dan integration tidak digenerate sebagai lesson biasa; keduanya memakai workspace runtime masing-masing. Fingerprint dapat diperiksa dengan:
+
+```sh
+pnpm exec tsx scripts/fingerprint.ts JAV-001
+```
+
+Sebelum commit, jalankan `pnpm ci`. Generation tidak pernah mengubah learner completion state.
 
 ## Data dan API
 
@@ -96,10 +120,11 @@ Database default: `.data/learning.sqlite`, diabaikan Git. Atur `CS101_DB_PATH` k
 
 | Route | Fungsi |
 | --- | --- |
-| `GET /api/learning` | State dan revision saat ini |
-| `POST /api/active-task` | Aktifkan task; opsional simpan sesi task sebelumnya secara atomik |
-| `POST /api/sessions` | Simpan progress atau kelulusan mandiri |
-| `GET /api/export` | Unduh state dan riwayat sesi |
+| `GET /api/learning` | Snapshot active item, progress, availability, review, revision |
+| `POST /api/active-item` | Aktifkan item; opsional simpan draft item sebelumnya secara atomik |
+| `POST /api/sessions` | Simpan session/evidence atau completion request |
+| `POST /api/reviews` | Simpan review attempt dan advance/retry schedule |
+| `GET /api/export` | Ekspor state, session, dan review history |
 
 Mutasi memerlukan `Content-Type: application/json`, header `Origin` yang sama dengan server, UUID `requestId`, dan `revision` terakhir. Schema payload ada di `src/domain/learning/schema.ts`. Retry memakai ID dan payload yang sama. Conflict `409` memerlukan rekonsiliasi/reload; input tidak valid `422`. Snapshot kosong dimulai dari revision `0`.
 
