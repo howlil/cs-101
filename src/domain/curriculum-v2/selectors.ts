@@ -196,3 +196,46 @@ export function itemHref(graph:CurriculumGraph,itemId:string){
   if(item.kind==='checkpoint')return '/project/'+encodeURIComponent(item.id);
   return '/integration/'+encodeURIComponent(item.id);
 }
+
+
+export function searchCurriculum(
+  index: CurriculumSearchEntry[],
+  rawQuery: string,
+  limit = 12,
+) {
+  const query = rawQuery.trim().toLocaleLowerCase('id-ID');
+  if (!query) return [];
+
+  const terms = query.split(/\s+/).filter(Boolean);
+
+  return index
+    .map((entry) => {
+      const id = entry.itemId.toLocaleLowerCase('id-ID');
+      const title = entry.title.toLocaleLowerCase('id-ID');
+      const track = entry.trackTitle?.toLocaleLowerCase('id-ID') ?? '';
+      const module = entry.moduleTitle?.toLocaleLowerCase('id-ID') ?? '';
+      const haystack = entry.searchText;
+
+      if (!terms.every((term) => haystack.includes(term))) return undefined;
+
+      let score = 0;
+      if (id === query) score += 120;
+      else if (id.startsWith(query)) score += 100;
+      else if (id.includes(query)) score += 80;
+
+      if (title === query) score += 90;
+      else if (title.startsWith(query)) score += 70;
+      else if (title.includes(query)) score += 55;
+
+      if (module === query || track === query) score += 45;
+      else if (module.includes(query) || track.includes(query)) score += 30;
+
+      score += terms.reduce((sum, term) => sum + (haystack.includes(term) ? 5 : 0), 0);
+
+      return { entry, score };
+    })
+    .filter((result): result is { entry: CurriculumSearchEntry; score: number } => !!result)
+    .sort((a, b) => b.score - a.score || a.entry.itemId.localeCompare(b.entry.itemId))
+    .slice(0, limit)
+    .map((result) => result.entry);
+}
