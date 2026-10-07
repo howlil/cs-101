@@ -194,6 +194,7 @@
   --app-topbar-height: 48px;
   --app-rail-width: 56px;
   --curriculum-explorer-width: 236px;
-  --workspace-max: 1120px;
+  --workspace-max: 1360px;
   --content-measure: 76ch;
+  --context-rail-width: 296px;
 }

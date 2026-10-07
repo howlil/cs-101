@@ -86,123 +86,133 @@ export default function ProgressPage({
       <h1>Progres</h1>
     </header>
 
-    {reviews.length > 0 && (
-      <section className="progress-review-queue">
-        <div className="progress-section-heading">
-          <div>
-            <p className="eyebrow">PERLU AKSI</p>
-            <h2><BrainCircuit size={17} strokeWidth={1.8} aria-hidden="true" /> Review</h2>
-          </div>
-          <span>{reviews.length}</span>
-        </div>
-        <div className="progress-review-items">
-          {reviews.map((review) => (
-            <a key={review.id} href={'/review/' + review.id}>
-              <BrainCircuit size={14} strokeWidth={1.8} aria-hidden="true" />
-              <div className="progress-review-copy">
-                <span><code>{review.id}</code> {review.title}</span>
-                <RetentionSteps step={review.step} />
+    <div className="progress-workbench">
+      <main className="progress-primary">
+        <div className="progress-tracks">
+          {tracks.map((track) => (
+            <section className="progress-track" key={track.id}>
+              <div className="progress-track-heading">
+                <a href={track.href}><BarChart3 size={14} strokeWidth={1.8} aria-hidden="true" /> {track.title}</a>
+                <span>
+                  {track.completed}/{track.total}
+                  {track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''}
+                </span>
               </div>
-              <small>{review.state === 'retry' ? 'Ulangi' : 'Hari ini'}</small>
-            </a>
+              <div className="progress-modules">
+                {track.modules.map((module) => (
+                  <a href={module.href} key={module.id}>
+                    <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span>{module.title}</span>
+                    <small>
+                      {module.active ? 'Aktif · ' : ''}
+                      {module.completed}/{module.total}
+                      {module.reviewActions ? ' · ' + module.reviewActions + 'R' : ''}
+                    </small>
+                  </a>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
-      </section>
-    )}
 
-    <div className="progress-tracks">
-      {tracks.map((track) => (
-        <section className="progress-track" key={track.id}>
-          <div className="progress-track-heading">
-            <a href={track.href}><BarChart3 size={14} strokeWidth={1.8} aria-hidden="true" /> {track.title}</a>
-            <span>
-              {track.completed}/{track.total}
-              {track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''}
-            </span>
-          </div>
-          <div className="progress-modules">
-            {track.modules.map((module) => (
-              <a href={module.href} key={module.id}>
-                <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
-                <span>{module.title}</span>
-                <small>
-                  {module.active ? 'Aktif · ' : ''}
-                  {module.completed}/{module.total}
-                  {module.reviewActions ? ' · ' + module.reviewActions + 'R' : ''}
-                </small>
-              </a>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-
-    {integrations.length > 0 && (
-      <section className="progress-integrations">
-        <div className="progress-section-heading">
-          <div>
-            <p className="eyebrow">LINTAS JALUR</p>
-            <h2><Boxes size={17} strokeWidth={1.8} aria-hidden="true" /> Integrasi</h2>
-          </div>
-          <span>{integrations.filter((item) => item.passed).length}/{integrations.length}</span>
-        </div>
-        <div className="progress-integration-items">
-          {integrations.map((item) => (
-            <a href={item.href} key={item.id}>
-              <Boxes size={14} strokeWidth={1.8} aria-hidden="true" />
-              <code>{item.id}</code>
-              <span>{item.title}</span>
-              <small>
-                {item.stateLabel}
-                {item.reviewLabel ? ' · ' + item.reviewLabel : ''}
-              </small>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <section className="progress-history">
-      <div className="progress-section-heading">
-        <div>
-          <p className="eyebrow">SESI</p>
-          <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Terbaru</h2>
-        </div>
-      </div>
-      {sessions.length ? (
-        sessions.map((session) => (
-          <article className="history-entry" key={session.id + session.recordedAt}>
-            <div className="history-heading">
-              <div>
-                <code>{session.id}</code>
-                <strong>{session.title}</strong>
-              </div>
-              <span>{session.kind === 'passed' ? 'Selesai' : 'Sesi'}</span>
+        <section className="progress-history">
+          <div className="progress-section-heading">
+            <div>
+              <p className="eyebrow">SESI</p>
+              <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Terbaru</h2>
             </div>
-            <p className="small muted">
-              <time dateTime={session.recordedAt}>{new Date(session.recordedAt).toLocaleString('id-ID')}</time>
-              {session.minutes ? ' · ' + session.minutes + 'm' : ''}
-              {session.evidenceCount ? ' · ' + session.evidenceCount + ' bukti' : ''}
-            </p>
-            {session.reflectionSummary && <p className="history-reflection">{session.reflectionSummary}</p>}
-            {session.continueFrom && <p className="history-next"><strong>Lanjut:</strong> {session.continueFrom}</p>}
-          </article>
-        ))
-      ) : (
-        <EmptyAction
-          title="Belum ada sesi."
-          description="Simpan sesi pertama untuk mulai membentuk riwayat."
-        />
-      )}
-    </section>
+          </div>
+          {sessions.length ? (
+            sessions.map((session) => (
+              <article className="history-entry" key={session.id + session.recordedAt}>
+                <div className="history-heading">
+                  <div>
+                    <code>{session.id}</code>
+                    <strong>{session.title}</strong>
+                  </div>
+                  <span>{session.kind === 'passed' ? 'Selesai' : 'Sesi'}</span>
+                </div>
+                <p className="small muted">
+                  <time dateTime={session.recordedAt}>{new Date(session.recordedAt).toLocaleString('id-ID')}</time>
+                  {session.minutes ? ' · ' + session.minutes + 'm' : ''}
+                  {session.evidenceCount ? ' · ' + session.evidenceCount + ' bukti' : ''}
+                </p>
+                {session.reflectionSummary && <p className="history-reflection">{session.reflectionSummary}</p>}
+                {session.continueFrom && <p className="history-next"><strong>Lanjut:</strong> {session.continueFrom}</p>}
+              </article>
+            ))
+          ) : (
+            <EmptyAction
+              title="Belum ada sesi."
+              description="Simpan sesi pertama untuk mulai membentuk riwayat."
+            />
+          )}
+        </section>
 
-    <div className="actions">
-      <form action="/api/export" method="get" data-astro-reload="">
-        <Button type="submit" variant="secondary" size="sm">
-          <Download size={14} strokeWidth={1.8} aria-hidden="true" />
-          <span>Ekspor</span>
-        </Button>
-      </form>
+        <div className="actions">
+          <form action="/api/export" method="get" data-astro-reload="">
+            <Button type="submit" variant="secondary" size="sm">
+              <Download size={14} strokeWidth={1.8} aria-hidden="true" />
+              <span>Ekspor</span>
+            </Button>
+          </form>
+        </div>
+      </main>
+
+      {(reviews.length > 0 || integrations.length > 0) && (
+        <aside className="progress-sidecar" aria-label="Aksi progres">
+          {reviews.length > 0 && (
+            <section className="progress-review-queue">
+              <div className="progress-section-heading">
+                <div>
+                  <p className="eyebrow">PERLU AKSI</p>
+                  <h2><BrainCircuit size={17} strokeWidth={1.8} aria-hidden="true" /> Review</h2>
+                </div>
+                <span>{reviews.length}</span>
+              </div>
+              <div className="progress-review-items">
+                {reviews.map((review) => (
+                  <a key={review.id} href={'/review/' + review.id}>
+                    <BrainCircuit size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <div className="progress-review-copy">
+                      <span><code>{review.id}</code> {review.title}</span>
+                      <RetentionSteps step={review.step} />
+                    </div>
+                    <small>{review.state === 'retry' ? 'Ulangi' : 'Hari ini'}</small>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {integrations.length > 0 && (
+            <section className="progress-integrations">
+              <div className="progress-section-heading">
+                <div>
+                  <p className="eyebrow">LINTAS JALUR</p>
+                  <h2><Boxes size={17} strokeWidth={1.8} aria-hidden="true" /> Integrasi</h2>
+                </div>
+                <span>{integrations.filter((item) => item.passed).length}/{integrations.length}</span>
+              </div>
+              <div className="progress-integration-items">
+                {integrations.map((item) => (
+                  <a href={item.href} key={item.id}>
+                    <Boxes size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span className="progress-integration-copy">
+                      <code>{item.id}</code>
+                      <strong>{item.title}</strong>
+                    </span>
+                    <small>
+                      {item.stateLabel}
+                      {item.reviewLabel ? ' · ' + item.reviewLabel : ''}
+                    </small>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+        </aside>
+      )}
     </div>
   </div>;
 }

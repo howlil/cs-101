@@ -27,10 +27,7 @@ function RetentionTimeline({
   state: 'scheduled' | 'due' | 'retry' | 'retained';
 }) {
   return <section className="review-retention">
-    <div>
-      <p className="eyebrow">RETENTION</p>
-      <h2>Retention</h2>
-    </div>
+    <p className="eyebrow">RETENTION</p>
     <div className="retention-steps retention-steps--large">
       {REVIEW_DAYS.map((day, index) => {
         const done = state === 'retained' || index < step;
@@ -88,35 +85,11 @@ export default function ReviewPage({
         actionLabel="Buka progres"
       />
     ) : (
-      <>
-        <RetentionTimeline step={review.step} state={review.state} />
+      <div className="review-body">
+        <aside className="review-sidecar" aria-label="Status review">
+          <RetentionTimeline step={review.step} state={review.state} />
 
-        {review.state === 'retained' ? (
-          <Alert title="Teringat" tone="success">
-            Semua tahap review 1, 3, 7, 14, dan 30 hari sudah dilewati.
-          </Alert>
-        ) : review.state === 'scheduled' ? (
-          <Alert title="Belum waktunya review" tone="info">
-            {review.dueAt
-              ? 'Review berikutnya: ' + new Date(review.dueAt).toLocaleString('id-ID')
-              : 'Tanggal review berikutnya belum ditentukan.'}
-          </Alert>
-        ) : !bank ? (
-          <EmptyAction
-            title="Set review belum tersedia."
-            description="Review sudah jatuh tempo, tetapi bank soal untuk item ini belum dibuat."
-            href={itemHref}
-            actionLabel="Buka materi"
-          />
-        ) : !bank.current ? (
-          <EmptyAction
-            title="Set review perlu diperbarui."
-            description="Bank soal masih memakai versi kurikulum lama."
-            href={itemHref}
-            actionLabel="Buka materi terbaru"
-          />
-        ) : canAttempt ? (
-          <>
+          {canAttempt && (
             <section className="review-status-line">
               <Badge
                 tone={review.state === 'retry' ? 'warning' : 'info'}
@@ -128,17 +101,46 @@ export default function ReviewPage({
               </Badge>
               <span>Tahap {review.step + 1} dari {REVIEW_DAYS.length}</span>
             </section>
+          )}
+        </aside>
+
+        <main className="review-main">
+          {review.state === 'retained' ? (
+            <Alert title="Teringat" tone="success">
+              Semua tahap review 1, 3, 7, 14, dan 30 hari sudah dilewati.
+            </Alert>
+          ) : review.state === 'scheduled' ? (
+            <Alert title="Belum waktunya review" tone="info">
+              {review.dueAt
+                ? 'Review berikutnya: ' + new Date(review.dueAt).toLocaleString('id-ID')
+                : 'Tanggal review berikutnya belum ditentukan.'}
+            </Alert>
+          ) : !bank ? (
+            <EmptyAction
+              title="Set review belum tersedia."
+              description="Review sudah jatuh tempo, tetapi bank soal untuk item ini belum dibuat."
+              href={itemHref}
+              actionLabel="Buka materi"
+            />
+          ) : !bank.current ? (
+            <EmptyAction
+              title="Set review perlu diperbarui."
+              description="Bank soal masih memakai versi kurikulum lama."
+              href={itemHref}
+              actionLabel="Buka materi terbaru"
+            />
+          ) : canAttempt ? (
             <ReviewAttempt
               itemId={itemId}
               version={bank.version}
               revision={revision}
               questions={bank.questions}
             />
-          </>
-        ) : (
-          <ActionLink href={itemHref} label="Kembali ke materi" />
-        )}
-      </>
+          ) : (
+            <ActionLink href={itemHref} label="Kembali ke materi" />
+          )}
+        </main>
+      </div>
     )}
   </article>;
 }

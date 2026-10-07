@@ -63,20 +63,11 @@ export default function LessonPage({
     </div>;
   }
 
+  const toc = headings.filter((heading) => heading.depth === 2);
+
   return <div className="lesson-grid">
-    <article className="prose">
-      <p className="eyebrow"><BookOpen size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId}</p>
-      <h1>{title}</h1>
-
-      {demo && <Alert title="Mode contoh" tone="info">Tidak masuk progres.</Alert>}
-      {stale && (
-        <Alert title="Perlu diperbarui" tone="warning">
-          <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Bukti lama tetap tersimpan.
-        </Alert>
-      )}
-      {continueFrom && <Alert title="Lanjut dari">{continueFrom}</Alert>}
-
-      {!demo && (
+    {!demo && (
+      <aside className="lesson-sidecar" aria-label="Konteks belajar">
         <section className="lesson-execution-context">
           {marketExpectation.length > 0 && (
             <div className="lesson-why">
@@ -106,7 +97,27 @@ export default function LessonPage({
             />
           </div>
         </section>
+
+        {toc.length > 0 && (
+          <nav className="toc" aria-label="Di halaman ini">
+            <span className="eyebrow"><ListTree size={12} strokeWidth={1.8} aria-hidden="true" /> DI HALAMAN INI</span>
+            {toc.map((heading) => <a key={heading.slug} href={'#' + heading.slug}>{heading.text}</a>)}
+          </nav>
+        )}
+      </aside>
+    )}
+
+    <article className="prose">
+      <p className="eyebrow"><BookOpen size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId}</p>
+      <h1>{title}</h1>
+
+      {demo && <Alert title="Mode contoh" tone="info">Tidak masuk progres.</Alert>}
+      {stale && (
+        <Alert title="Perlu diperbarui" tone="warning">
+          <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Bukti lama tetap tersimpan.
+        </Alert>
       )}
+      {continueFrom && <Alert title="Lanjut dari">{continueFrom}</Alert>}
 
       {!demo && !active && (
         <div className="actions">
@@ -129,14 +140,5 @@ export default function LessonPage({
         />
       )}
     </article>
-
-    {headings.some((heading) => heading.depth === 2) && (
-      <nav className="toc" aria-label="Di halaman ini">
-        <span className="eyebrow"><ListTree size={12} strokeWidth={1.8} aria-hidden="true" /> DI HALAMAN INI</span>
-        {headings
-          .filter((heading) => heading.depth === 2)
-          .map((heading) => <a key={heading.slug} href={'#' + heading.slug}>{heading.text}</a>)}
-      </nav>
-    )}
   </div>;
 }

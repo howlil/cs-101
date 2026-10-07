@@ -30,6 +30,8 @@ Aturan implementasi:
 - Navigation tetap semantic: gunakan `<a href>` untuk perpindahan route. Jangan mengganti link menjadi Button hanya demi visual consistency.
 - Card/surface bukan default container. Gunakan Card hanya bila containment memang membawa makna; untuk content linear gunakan heading, spacing, divider, atau accent line.
 - Density default adalah `data-density="compact"`. Gunakan token layout/control; jangan hard-code versi density baru per halaman.
+- Jangan mengatasi ruang kosong desktop dengan melebarkan prose. Jika ada secondary context yang relevan, gunakan pola adaptive workbench: primary 680–860 px + context rail 260–320 px. Context rail hanya berisi state/action, next step, prerequisite/readiness, TOC, review, lineage, atau connections.
+- Jika tidak ada secondary context yang berguna, biarkan primary tetap bounded; jangan membuat rail kosong atau dekorasi pengisi ruang.
 - Scrollbar chrome boleh disembunyikan pada app panes/popup list yang tetap scrollable. Jangan menghilangkan scroll behavior atau membuat wheel/keyboard scrolling gagal.
 - Icon-only navigation wajib punya accessible name dan Tooltip primitive Arc.
 - Product composition seperti `ActionLink`, `EmptyAction`, atau wrapper domain tinggal di `src/components/ui`/feature folder, bukan di root `arc/`.

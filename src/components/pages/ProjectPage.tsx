@@ -70,12 +70,12 @@ export default function ProjectPage({
     <header className="project-header">
       <a className="project-back" href={curriculumHref}>
         <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
-        <span>Curriculum</span>
+        <span>Kurikulum</span>
       </a>
       <p className="project-breadcrumb">{breadcrumb}</p>
       <div className="project-kicker">
         <FolderKanban size={14} strokeWidth={1.8} aria-hidden="true" />
-        <span>Project checkpoint</span>
+        <span>Checkpoint</span>
         <code>{id}</code>
       </div>
       <h1>{title}</h1>
@@ -95,114 +95,120 @@ export default function ProjectPage({
           <ActivateItem itemId={id} label="Mulai checkpoint" />
         ) : (
           <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
-            Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prerequisite'}
+            Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prasyarat'}
           </Badge>
         )}
       </div>
     </header>
 
-    <section className="project-context-strip" aria-label="Konteks checkpoint">
-      <div>
-        <span>Built on</span>
-        {parent ? <a href={parent.href}><code>{parent.id}</code> {parent.title}</a> : <strong>Root</strong>}
-      </div>
-      <div>
-        <span>Units</span>
-        <strong>{contributors.length}</strong>
-      </div>
-      <div>
-        <span>Next</span>
-        {next ? <a href={next.href}><code>{next.id}</code> {next.title}</a> : <strong>End</strong>}
-      </div>
-    </section>
-
-    <section className="project-section">
-      <div className="project-section-heading">
-        <div>
-          <p className="eyebrow"><Layers3 size={13} strokeWidth={1.8} aria-hidden="true" /> DELTA</p>
-          <h2>New in this checkpoint</h2>
-        </div>
-        <span>{newRequirements.length}</span>
-      </div>
-      {newRequirements.length ? (
-        <ol className="project-requirement-list">
-          {newRequirements.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}
-        </ol>
-      ) : <p className="muted">Tidak ada requirement baru yang terdeteksi.</p>}
-    </section>
-
-    {parent && (
-      <section className="project-section">
-        <div className="project-section-heading">
+    <div className="project-body">
+      <aside className="project-sidecar" aria-label="Konteks checkpoint">
+        <section className="project-context-strip">
           <div>
-            <p className="eyebrow"><Link2 size={13} strokeWidth={1.8} aria-hidden="true" /> INHERITED</p>
-            <h2>Guarantee yang harus tetap hidup</h2>
+            <span>Built on</span>
+            {parent ? <a href={parent.href}><code>{parent.id}</code> {parent.title}</a> : <strong>Root</strong>}
           </div>
-          <span>{inherited.length}</span>
-        </div>
-        <GuaranteeAccordion
-          title={inheritanceTitle ?? 'Guarantee checkpoint sebelumnya'}
-          items={inherited.map((criterion) => criterion.text)}
-        />
-      </section>
-    )}
-
-    {contributors.length > 0 && (
-      <section className="project-section">
-        <div className="project-section-heading">
           <div>
-            <p className="eyebrow"><GitBranchIcon /> FOUNDATION</p>
-            <h2>Unit yang membentuk checkpoint</h2>
+            <span>Units</span>
+            <strong>{contributors.length}</strong>
           </div>
-          <span>{contributors.length}</span>
-        </div>
-        <div className="project-contributors">
-          {contributors.map((item) => (
-            <a href={item.href} key={item.id}>
-              <Link2 size={13} strokeWidth={1.8} aria-hidden="true" />
-              <code>{item.id}</code>
-              <span>{item.title}</span>
+          <div>
+            <span>Next</span>
+            {next ? <a href={next.href}><code>{next.id}</code> {next.title}</a> : <strong>End</strong>}
+          </div>
+        </section>
+
+        {contributors.length > 0 && (
+          <section className="project-side-section">
+            <div className="project-section-heading">
+              <div>
+                <p className="eyebrow"><GitBranchIcon /> FOUNDATION</p>
+                <h2>Unit terkait</h2>
+              </div>
+              <span>{contributors.length}</span>
+            </div>
+            <div className="project-contributors">
+              {contributors.map((item) => (
+                <a href={item.href} key={item.id}>
+                  <Link2 size={13} strokeWidth={1.8} aria-hidden="true" />
+                  <code>{item.id}</code>
+                  <span>{item.title}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <ConnectionsPanel groups={connections} compact />
+
+        <nav className="project-lineage-nav" aria-label="Navigasi checkpoint">
+          {parent ? (
+            <a href={parent.href}>
+              <span><ArrowLeft size={13} strokeWidth={1.8} aria-hidden="true" /> Sebelumnya</span>
+              <strong>{parent.id}</strong>
             </a>
-          ))}
-        </div>
-      </section>
-    )}
+          ) : <span />}
+          {next ? (
+            <a href={next.href}>
+              <span>Berikutnya <ArrowRight size={13} strokeWidth={1.8} aria-hidden="true" /></span>
+              <strong>{next.id}</strong>
+            </a>
+          ) : <span />}
+        </nav>
+      </aside>
 
-    <ConnectionsPanel groups={connections} compact />
+      <main className="project-main">
+        <section className="project-section">
+          <div className="project-section-heading">
+            <div>
+              <p className="eyebrow"><Layers3 size={13} strokeWidth={1.8} aria-hidden="true" /> DELTA</p>
+              <h2>Requirement baru</h2>
+            </div>
+            <span>{newRequirements.length}</span>
+          </div>
+          {newRequirements.length ? (
+            <ol className="project-requirement-list">
+              {newRequirements.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}
+            </ol>
+          ) : <p className="muted">Tidak ada requirement baru.</p>}
+        </section>
 
-    {active && !passed ? (
-      <ProjectEvidence
-        itemId={id}
-        fingerprint={fingerprint}
-        newRequirements={newRequirements}
-        inheritanceCriteria={inheritanceCriteria}
-        inheritedGuarantees={inherited}
-        revision={revision}
-        continueFrom={continueFrom}
-        lastAnchor={lastAnchor}
-      />
-    ) : !passed && (
-      <section className="project-section project-evidence-placeholder">
-        <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
-        <h2>{ready ? 'Mulai checkpoint untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
-        <p className="muted">{ready ? 'Mulai checkpoint untuk membuka form bukti.' : 'Selesaikan prasyarat terlebih dahulu.'}</p>
-      </section>
-    )}
+        {parent && (
+          <section className="project-section">
+            <div className="project-section-heading">
+              <div>
+                <p className="eyebrow"><Link2 size={13} strokeWidth={1.8} aria-hidden="true" /> INHERITED</p>
+                <h2>Guarantee yang harus tetap hidup</h2>
+              </div>
+              <span>{inherited.length}</span>
+            </div>
+            <GuaranteeAccordion
+              title={inheritanceTitle ?? 'Guarantee checkpoint sebelumnya'}
+              items={inherited.map((criterion) => criterion.text)}
+            />
+          </section>
+        )}
 
-    <nav className="project-lineage-nav" aria-label="Navigasi checkpoint">
-      {parent ? (
-        <a href={parent.href}>
-          <span><ArrowLeft size={13} strokeWidth={1.8} aria-hidden="true" /> Sebelumnya</span>
-          <strong>{parent.id}</strong>
-        </a>
-      ) : <span />}
-      {next ? (
-        <a href={next.href}>
-          <span>Berikutnya <ArrowRight size={13} strokeWidth={1.8} aria-hidden="true" /></span>
-          <strong>{next.id}</strong>
-        </a>
-      ) : <span />}
-    </nav>
+        {active && !passed ? (
+          <ProjectEvidence
+            itemId={id}
+            fingerprint={fingerprint}
+            newRequirements={newRequirements}
+            inheritanceCriteria={inheritanceCriteria}
+            inheritedGuarantees={inherited}
+            revision={revision}
+            continueFrom={continueFrom}
+            lastAnchor={lastAnchor}
+          />
+        ) : !passed && (
+          <section className="project-section project-evidence-placeholder">
+            <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
+            <h2>{ready ? 'Mulai checkpoint untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
+            {!ready && <p className="muted">Selesaikan prasyarat terlebih dahulu.</p>}
+          </section>
+        )}
+      </main>
+    </div>
   </article>;
 }
 

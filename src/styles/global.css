@@ -392,3 +392,226 @@ body::-webkit-scrollbar,
   height: 0;
   display: none;
 }
+
+
+/* Adaptive workbench: keep reading measure, use spare width for actionable context. */
+.today-page,
+.progress-page {
+  width: min(var(--workspace-max), 100%);
+  max-width: none;
+}
+
+.today-header,
+.progress-page > .compact-page-header {
+  max-width: 860px;
+}
+
+.today-workbench,
+.progress-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, var(--context-rail-width));
+  gap: 40px;
+  align-items: start;
+}
+
+.today-workbench:not(.has-review) {
+  grid-template-columns: minmax(0, 860px);
+}
+
+.today-primary {
+  min-width: 0;
+}
+
+.today-focus {
+  max-width: 860px;
+}
+
+.today-sidecar,
+.progress-sidecar {
+  position: sticky;
+  top: calc(var(--app-topbar-height) + 18px);
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+
+.today-sidecar .today-review-heading {
+  margin-bottom: 8px;
+}
+
+.today-sidecar .today-review-row {
+  grid-template-columns: 18px minmax(0, 1fr);
+  padding: 9px 0;
+}
+
+.today-sidecar .today-review-cta {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.lesson-grid {
+  width: min(1280px, 100%);
+  grid-template-columns: minmax(0, var(--content-measure)) minmax(240px, var(--context-rail-width));
+  grid-template-areas: "main side";
+  gap: 44px;
+  align-items: start;
+}
+
+.lesson-grid > .prose {
+  grid-area: main;
+  max-width: var(--content-measure);
+}
+
+.lesson-sidecar {
+  grid-area: side;
+  position: sticky;
+  top: calc(var(--app-topbar-height) + 18px);
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+
+.lesson-sidecar .lesson-execution-context {
+  margin: 0;
+}
+
+.lesson-sidecar .lesson-why,
+.lesson-sidecar .lesson-small-step {
+  padding: 9px 0;
+}
+
+.lesson-sidecar .lesson-why {
+  border-top: 0;
+}
+
+.lesson-sidecar .lesson-why ul {
+  margin: 6px 0 0;
+  padding-left: 17px;
+  font-size: 11px;
+}
+
+.lesson-sidecar .lesson-small-step strong {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.lesson-sidecar .lesson-stuck {
+  border-bottom: 1px solid var(--line);
+}
+
+.lesson-sidecar .toc {
+  position: static;
+  display: block;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.lesson-sidecar .toc a {
+  padding: 4px 0;
+}
+
+.progress-workbench {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 330px);
+}
+
+.progress-primary {
+  min-width: 0;
+}
+
+.progress-sidecar {
+  display: grid;
+  gap: 22px;
+}
+
+.progress-sidecar .progress-review-queue,
+.progress-sidecar .progress-integrations {
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+}
+
+.progress-sidecar .progress-review-items,
+.progress-sidecar .progress-integration-items {
+  gap: 0;
+}
+
+.progress-sidecar .progress-review-items a,
+.progress-sidecar .progress-integration-items a {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+
+.progress-sidecar .progress-review-items a:hover,
+.progress-sidecar .progress-integration-items a:hover {
+  background: transparent;
+}
+
+.progress-integration-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.progress-integration-copy strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-history {
+  max-width: 900px;
+}
+
+@media (max-width: 1100px) {
+  .today-workbench,
+  .progress-workbench {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .today-sidecar,
+  .progress-sidecar {
+    position: static;
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+
+  .lesson-grid {
+    width: min(var(--content-measure), 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .lesson-sidecar {
+    order: 0;
+    position: static;
+    width: 100%;
+    padding-left: 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+  }
+
+  .lesson-grid > .prose {
+    order: 1;
+    width: 100%;
+  }
+
+  .lesson-sidecar .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .today-workbench,
+  .progress-workbench {
+    gap: 18px;
+  }
+}

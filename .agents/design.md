@@ -200,15 +200,30 @@ Item row cukup berisi status marker, ID, dan judul pendek. Metadata detail tetap
 ### Main workspace
 
 - Shell memakai ruang horizontal yang tersedia; jangan membatasi semua halaman ke 720 px.
-- Lebar baca lesson sekitar 72–76ch, tetapi Today/Progress/Project boleh melebar sampai sekitar 1120 px.
+- Jangan menyelesaikan whitespace desktop dengan melebarkan prose. Lebar baca utama tetap sekitar 72–76ch.
+- Desktop lebar memakai pola **adaptive workbench**: primary work area 680–860 px + context rail 260–320 px bila ada konteks sekunder yang benar-benar membantu keputusan.
+- Context rail hanya untuk state/action, next step, readiness/prerequisite, TOC, review, lineage, atau connections. Jangan mengisinya dengan dekorasi agar ruang terlihat penuh.
+- Today/Progress/Project/Integration/Review boleh memakai workspace sampai sekitar 1360 px karena ruang tambahan dipakai oleh context rail, bukan prose.
 - Header halaman compact: breadcrumb/ID/title hanya jika informasinya mengubah orientasi.
 - Hapus subtitle generik, helper copy yang mengulang CTA, dan panel dekoratif.
 - Tidak ada hero marketing atau stat cards generic di Hari ini.
 
+Pola desktop:
+
+```text
+Primary task / reading               Context rail
+680–860 px                           260–320 px
+───────────────────────────────      ─────────────────
+content yang sedang dikerjakan       state / next / dependency / TOC
+```
+
+Jika tidak ada konteks sekunder yang berguna, primary area tidak perlu dipaksa memiliki rail kosong.
+
 ### Responsive
 
-- Desktop ≥1200 px: rail + explorer + workspace.
-- Tablet 768–1199 px: rail tetap; explorer menjadi drawer atau collapsible panel.
+- Desktop ≥1100 px: primary + context rail bila konteks sekunder tersedia; curriculum tetap explorer + detail workspace.
+- Tablet 768–1099 px: context rail turun menjadi block sebelum/di atas konten utama; jangan sisakan kolom kosong.
+- Curriculum explorer tetap independen; pada viewport sempit dapat berubah menjadi stacked/collapsible flow.
 - Mobile <768 px: top bar + drawer curriculum; content satu kolom.
 - 320 px dan zoom 200–400% tetap usable.
 - Target kontrol minimal mengikuti WCAG; compactness berasal dari pengurangan chrome, bukan target kecil.
