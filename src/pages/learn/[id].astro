@@ -75,6 +75,7 @@ const progress = state.progress.find((entry) => entry.itemId === item.id);
         href={`/curriculum?item=${encodeURIComponent(item.id)}`}
         actionLabel="Kembali ke curriculum"
       />
+      <Connections graph={curriculumGraph} itemId={item.id} compact />
     </div>
   </AppLayout>
 )}
