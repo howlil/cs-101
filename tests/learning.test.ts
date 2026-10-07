@@ -10,6 +10,7 @@ import { initialSchema } from '../migrations/001-initial';
 import { curriculumItemFingerprint, type CurriculumManifestV2 } from '../src/domain/curriculum-v2/schema';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { requiredEvidenceForItem } from '../src/domain/learning/rules';
+import { reviewBankSchema } from '../src/domain/review/schema';
 import { openDatabase } from '../src/server/storage';
 import { LearningService, LearningError } from '../src/server/learning';
 
@@ -170,7 +171,7 @@ test('migration V2 backfill active item, progress, dan session item id', () => {
     assert.equal(storedSession.itemId, unit.id);
     assert.equal(
       (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version,
-      2,
+      3,
     );
   } finally {
     db.close();
@@ -575,6 +576,171 @@ test('related dan deep_dive tidak memblokir readiness integration', () => {
     assert.deepEqual(
       availability?.missingPrerequisites,
       ['TEST-001', 'TEST-002'],
+    );
+  } finally {
+    db.close();
+  }
+});
+
+
+test('item passed membuat review schedule dan due state berasal dari waktu', () => {
+  const db = openDatabase(':memory:');
+  let clock = new Date('2026-10-07T00:00:00.000Z');
+  try {
+    const service = new LearningService(db, graph, () => true, () => undefined, () => clock);
+    service.setActiveItem({ ...envelope(0), itemId: unit.id });
+    const evidence = requiredEvidenceForItem(unit).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence',
+    }));
+    const passedState = service.saveSession({
+      ...session(1),
+      kind: 'passed',
+      evidence,
+    });
+
+    const scheduled = passedState.reviews.find((entry) => entry.itemId === unit.id);
+    assert.equal(scheduled?.state, 'scheduled');
+    assert.equal(scheduled?.dueAt, '2026-10-08T00:00:00.000Z');
+
+    clock = new Date('2026-10-08T00:00:01.000Z');
+    assert.equal(
+      service.snapshot().reviews.find((entry) => entry.itemId === unit.id)?.state,
+      'due',
+    );
+  } finally {
+    db.close();
+  }
+});
+
+test('assisted review 5/5 menjadi retry; unassisted pass maju interval dan completion tetap passed', () => {
+  const db = openDatabase(':memory:');
+  let clock = new Date('2026-10-07T00:00:00.000Z');
+  const bank = reviewBankSchema.parse({
+    itemId: unit.id,
+    version: 'unit-review-v1',
+    curriculumFingerprint: unit.fingerprint,
+    questions: Array.from({ length: 5 }, (_, index) => ({
+      id: 'q' + (index + 1),
+      prompt: 'Question ' + (index + 1),
+      options: ['correct', 'wrong'],
+      answer: 0,
+      explanation: 'Because.',
+      criterionIds: ['predict'],
+    })),
+  });
+
+  try {
+    const service = new LearningService(
+      db,
+      graph,
+      () => true,
+      (itemId) => itemId === unit.id ? bank : undefined,
+      () => clock,
+    );
+
+    service.setActiveItem({ ...envelope(0), itemId: unit.id });
+    const evidence = requiredEvidenceForItem(unit).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence',
+    }));
+    const passedState = service.saveSession({
+      ...session(1),
+      kind: 'passed',
+      evidence,
+    });
+
+    clock = new Date('2026-10-08T00:00:01.000Z');
+    const assisted = service.submitReview({
+      requestId: randomUUID(),
+      revision: passedState.revision,
+      itemId: unit.id,
+      questionSetVersion: bank.version,
+      answers: [0, 0, 0, 0, 0],
+      assisted: true,
+    });
+
+    assert.equal(assisted.reviewAttempt?.score, 5);
+    assert.equal(assisted.reviewAttempt?.result, 'again');
+    assert.equal(assisted.reviews.find((entry) => entry.itemId === unit.id)?.state, 'retry');
+    assert.equal(assisted.progress.find((entry) => entry.itemId === unit.id)?.status, 'passed');
+
+    const passedReview = service.submitReview({
+      requestId: randomUUID(),
+      revision: assisted.revision,
+      itemId: unit.id,
+      questionSetVersion: bank.version,
+      answers: [0, 0, 0, 0, 1],
+      assisted: false,
+    });
+
+    assert.equal(passedReview.reviewAttempt?.score, 4);
+    assert.equal(passedReview.reviewAttempt?.result, 'passed');
+    assert.equal(passedReview.reviews.find((entry) => entry.itemId === unit.id)?.state, 'scheduled');
+    assert.equal(passedReview.reviews.find((entry) => entry.itemId === unit.id)?.step, 1);
+    assert.equal(passedReview.reviews.find((entry) => entry.itemId === unit.id)?.dueAt, '2026-10-11T00:00:01.000Z');
+    assert.equal(passedReview.progress.find((entry) => entry.itemId === unit.id)?.status, 'passed');
+
+    const exported = service.export();
+    assert.equal(exported.reviewAttempts.length, 2);
+    assert.deepEqual(exported.reviewAttempts.map((attempt) => attempt.result), ['again', 'passed']);
+  } finally {
+    db.close();
+  }
+});
+
+test('review tidak boleh dilakukan sebelum due, tanpa bank, atau ketika completion stale', () => {
+  const db = openDatabase(':memory:');
+  let clock = new Date('2026-10-07T00:00:00.000Z');
+  const bank = reviewBankSchema.parse({
+    itemId: unit.id,
+    version: 'unit-review-v1',
+    curriculumFingerprint: unit.fingerprint,
+    questions: Array.from({ length: 5 }, (_, index) => ({
+      id: 'q' + (index + 1),
+      prompt: 'Question ' + (index + 1),
+      options: ['correct', 'wrong'],
+      answer: 0,
+      explanation: 'Because.',
+      criterionIds: [],
+    })),
+  });
+
+  try {
+    const service = new LearningService(db, graph, () => true, () => bank, () => clock);
+    service.setActiveItem({ ...envelope(0), itemId: unit.id });
+    const evidence = requiredEvidenceForItem(unit).map((criterion) => ({
+      criterionId: criterion.id,
+      text: 'Evidence',
+    }));
+    const passed = service.saveSession({ ...session(1), kind: 'passed', evidence });
+
+    assert.throws(
+      () => service.submitReview({
+        requestId: randomUUID(),
+        revision: passed.revision,
+        itemId: unit.id,
+        questionSetVersion: bank.version,
+        answers: [0, 0, 0, 0, 0],
+        assisted: false,
+      }),
+      /belum jatuh tempo/,
+    );
+
+    db.prepare('UPDATE item_progress SET passed_fingerprint=? WHERE item_id=?')
+      .run('sha256:' + '0'.repeat(64), unit.id);
+    clock = new Date('2026-10-09T00:00:00.000Z');
+
+    assert.throws(
+      () => service.submitReview({
+        requestId: randomUUID(),
+        revision: passed.revision,
+        itemId: unit.id,
+        questionSetVersion: bank.version,
+        answers: [0, 0, 0, 0, 0],
+        assisted: false,
+      }),
+      /sudah lulus dan tidak stale/,
     );
   } finally {
     db.close();
