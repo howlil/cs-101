@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { Search, X } from "lucide-react";
+import { BookOpen, Boxes, FolderKanban, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   searchCurriculum,
@@ -149,7 +149,11 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
                     onMouseEnter={() => setActiveIndex(index)}
                   >
                     <span className={styles.marker} aria-hidden="true">
-                      {item.kind === "checkpoint" ? "◆" : item.kind === "integration" ? "◇" : "○"}
+                      {item.kind === "checkpoint"
+                        ? <FolderKanban size={14} strokeWidth={1.8} />
+                        : item.kind === "integration"
+                          ? <Boxes size={14} strokeWidth={1.8} />
+                          : <BookOpen size={14} strokeWidth={1.8} />}
                     </span>
                     <span className={styles.copy}>
                       <span>

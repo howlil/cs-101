@@ -235,12 +235,3 @@ export function getProgressOverview(graph: CurriculumGraph, state: LearningViewS
   };
 }
 
-export function itemStateMarker(state: ItemDisplayState, kind: CurriculumItem['kind']) {
-  if (state === 'passed') return '✓';
-  if (state === 'active') return '●';
-  if (state === 'started') return '◐';
-  if (state === 'stale') return '!';
-  if (state === 'locked') return '×';
-  if (state === 'ready') return '○';
-  return kind === 'checkpoint' ? '◆' : kind === 'integration' ? '◇' : '○';
-}
