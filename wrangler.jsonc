@@ -3,7 +3,9 @@
   "name": "cs-101",
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-10-07",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
@@ -24,5 +26,8 @@
     "traces": {
       "enabled": false
     }
+  },
+  "build": {
+    "command": "pnpm run build:cloudflare"
   }
 }
