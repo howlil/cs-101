@@ -1,4 +1,5 @@
 ---
+import curriculumV2 from '../../curriculum/manifest.v2.json';
 import AppLayout from '../layouts/AppLayout.astro';
 import { tasks } from '../server/curriculum';
 import { learning } from '../server/runtime';
@@ -7,10 +8,11 @@ import TaskCard from '../components/arc/TaskCard';
 const state = await (await learning()).snapshot();
 const active = tasks.find((task) => task.taskId === state.activeTaskId);
 const progress = state.progress.find((item) => item.taskId === active?.taskId);
+const curriculumAvailable = curriculumV2.items.length > 0;
 ---
 <AppLayout title="Hari ini"><div class="content">
   <p class="eyebrow">BELAJAR / HARI INI</p><h1>Lanjut dari sini.</h1><p class="lede">Satu task. Satu langkah berikutnya.</p>
-  {active ? <TaskCard taskId={active.taskId} title={active.title} description={progress?.continueFrom || 'Mulai dari konsep pertama, lalu kerjakan latihannya.'} href={`/learn/${active.taskId}${progress?.lastAnchor ? `#${progress.lastAnchor}` : ''}`} actionLabel="Lanjutkan" /> : <EmptyAction client:load title={tasks.length ? 'Pilih task pertama.' : 'Curriculum belum tersedia.'} description={tasks.length ? 'Lihat urutan materi dan tentukan task yang mau dikerjakan.' : 'Task dan progres akan muncul setelah curriculum ditambahkan.'} href={tasks.length ? '/progress' : '/demo'} actionLabel={tasks.length ? 'Pilih task' : 'Lihat contoh tampilan'} />}
+  {active ? <TaskCard taskId={active.taskId} title={active.title} description={progress?.continueFrom || 'Mulai dari konsep pertama, lalu kerjakan latihannya.'} href={`/learn/${active.taskId}${progress?.lastAnchor ? `#${progress.lastAnchor}` : ''}`} actionLabel="Lanjutkan" /> : <EmptyAction client:load title={curriculumAvailable ? 'Pilih materi pertama.' : 'Curriculum belum tersedia.'} description={curriculumAvailable ? `${curriculumV2.items.length} item tersedia. Pilih satu unit dari curriculum untuk mulai.` : 'Materi akan muncul setelah curriculum ditambahkan.'} href={curriculumAvailable ? '/curriculum' : '/demo'} actionLabel={curriculumAvailable ? 'Buka curriculum' : 'Lihat contoh tampilan'} />}
   <h2>Review</h2><EmptyAction client:load title="Belum ada review terjadwal." description="Jadwal review akan muncul setelah ada materi yang perlu diulang." />
   <hr /><p class="muted small">Progres dihitung dari bukti yang lo simpan.</p>
 </div></AppLayout>
