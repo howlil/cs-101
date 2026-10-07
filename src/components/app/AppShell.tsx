@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { BarChart3, BookOpen, Home } from 'lucide-react';
 import CurriculumSearch from '../search/CurriculumSearch';
 import ThemePreference from '../ui/ThemePreference';
+import { Tooltip } from '../arc/tooltip/tooltip';
 import type { CurriculumSearchEntry } from '../../domain/curriculum-v2/selectors';
 
 type SearchEntry = CurriculumSearchEntry & { href: string };
@@ -48,36 +49,36 @@ export default function AppShell({
     <div className="app-shell">
       <aside className="global-rail" aria-label="Navigasi utama">
         <nav className="global-nav">
-          <a
-            className="rail-link"
-            href="/"
-            aria-label="Hari ini"
-            title="Hari ini"
-            data-label="Hari ini"
-            aria-current={currentPath === '/' ? 'page' : undefined}
-          >
-            <Home size={18} strokeWidth={1.8} aria-hidden="true" />
-          </a>
-          <a
-            className="rail-link"
-            href="/curriculum"
-            aria-label="Kurikulum"
-            title="Kurikulum"
-            data-label="Kurikulum"
-            aria-current={materialActive ? 'page' : undefined}
-          >
-            <BookOpen size={18} strokeWidth={1.8} aria-hidden="true" />
-          </a>
-          <a
-            className="rail-link"
-            href="/progress"
-            aria-label="Progres"
-            title="Progres"
-            data-label="Progres"
-            aria-current={currentPath === '/progress' ? 'page' : undefined}
-          >
-            <BarChart3 size={18} strokeWidth={1.8} aria-hidden="true" />
-          </a>
+          <Tooltip content="Hari ini">
+            <a
+              className="rail-link"
+              href="/"
+              aria-label="Hari ini"
+              aria-current={currentPath === '/' ? 'page' : undefined}
+            >
+              <Home size={18} strokeWidth={1.8} aria-hidden="true" />
+            </a>
+          </Tooltip>
+          <Tooltip content="Kurikulum">
+            <a
+              className="rail-link"
+              href="/curriculum"
+              aria-label="Kurikulum"
+              aria-current={materialActive ? 'page' : undefined}
+            >
+              <BookOpen size={18} strokeWidth={1.8} aria-hidden="true" />
+            </a>
+          </Tooltip>
+          <Tooltip content="Progres">
+            <a
+              className="rail-link"
+              href="/progress"
+              aria-label="Progres"
+              aria-current={currentPath === '/progress' ? 'page' : undefined}
+            >
+              <BarChart3 size={18} strokeWidth={1.8} aria-hidden="true" />
+            </a>
+          </Tooltip>
         </nav>
       </aside>
 

@@ -8,6 +8,56 @@ Instruksi ini berlaku untuk seluruh repository. Ikuti permintaan user dan instru
 - [`.agents/design.md`](.agents/design.md) memuat kontrak produk dan desain UI. [`.agents/engineering-design.md`](.agents/engineering-design.md) memuat target arsitektur. Keduanya berstatus draft; bedakan usulan dari perilaku yang sudah diterapkan.
 - Pertahankan perubahan lokal yang sudah ada. Jangan menimpa atau membuang pekerjaan yang tidak dibuat untuk tugas ini.
 
+## UI dan design system
+
+UI default adalah **compact, flat, dan source-owned**. Sebelum membuat komponen UI baru, cari primitive yang sudah ada di `src/components/arc`. Jika use case-nya adalah primitive umum yang tersedia di UIArc, gunakan/port source UIArc ke `src/components/arc/<primitive>`; jangan membuat implementasi paralel di feature folder.
+
+Boundary wajib:
+
+```text
+src/components/arc/      → primitive reusable, tanpa domain/product copy
+src/components/ui/       → composition reusable milik CS-101
+src/components/<feature> → composition domain/feature
+src/components/pages/    → page composition
+```
+
+Aturan implementasi:
+
+- Feature/page tidak boleh membuat native interactive control sendiri: tidak ada `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>`, atau `<details>` di luar `src/components/arc`.
+- Jangan import `@radix-ui/*` di luar `src/components/arc`. Radix adalah implementation detail primitive, bukan API feature.
+- Jangan membuat tooltip, dialog/modal, select/dropdown, accordion/disclosure, radio group, input, textarea, alert, badge, empty state, atau theme control baru jika primitive Arc sudah ada.
+- Icon memakai Lucide; jangan pakai glyph teks sebagai icon.
+- Navigation tetap semantic: gunakan `<a href>` untuk perpindahan route. Jangan mengganti link menjadi Button hanya demi visual consistency.
+- Card/surface bukan default container. Gunakan Card hanya bila containment memang membawa makna; untuk content linear gunakan heading, spacing, divider, atau accent line.
+- Density default adalah `data-density="compact"`. Gunakan token layout/control; jangan hard-code versi density baru per halaman.
+- Scrollbar chrome boleh disembunyikan pada app panes/popup list yang tetap scrollable. Jangan menghilangkan scroll behavior atau membuat wheel/keyboard scrolling gagal.
+- Icon-only navigation wajib punya accessible name dan Tooltip primitive Arc.
+- Product composition seperti `ActionLink`, `EmptyAction`, atau wrapper domain tinggal di `src/components/ui`/feature folder, bukan di root `arc/`.
+- Jika primitive Arc perlu dependency baru, gunakan pnpm dan commit `pnpm-lock.yaml`; jangan edit dependency tanpa lockfile yang sinkron.
+
+Sebelum menambah primitive baru:
+
+```text
+need
+↓
+cek src/components/arc
+↓ tidak ada
+cek registry/docs UIArc
+↓ tersedia
+port/install source → arc/
+↓ tidak tersedia
+buat primitive minimal di arc/ + dokumentasikan alasan
+```
+
+Gate UI wajib sebelum integrasi:
+
+```text
+pnpm validate:ui
+pnpm check
+pnpm test
+pnpm build:node
+```
+
 ## Pilih workflow sesuai risiko
 
 Mulai dengan memahami kebutuhan dan mengklasifikasikan perubahan:

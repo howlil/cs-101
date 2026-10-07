@@ -57,6 +57,11 @@ const forbiddenNativeControls = [
 
 const forbiddenGlyphIcons = ['←', '→', '◆', '◇', '○', '●', '◐', '✓', '×', '↑', '↓'];
 const forbiddenPrimitiveImports = ['@radix-ui/'];
+const forbiddenCustomPrimitiveMarkers = [
+  'role="tooltip"',
+  "role='tooltip'",
+  'data-tooltip=',
+];
 
 for (const path of componentFiles) {
   const source = readFileSync(path, 'utf8');
@@ -78,6 +83,12 @@ for (const path of componentFiles) {
       failures.push(relative(root, path) + ': primitive dependency must be wrapped in src/components/arc: ' + dependency);
     }
   }
+
+  for (const marker of forbiddenCustomPrimitiveMarkers) {
+    if (source.includes(marker)) {
+      failures.push(relative(root, path) + ': custom primitive marker outside UIArc boundary: ' + marker);
+    }
+  }
 }
 
 for (const name of readdirSync(arcRoot)) {
@@ -92,4 +103,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('UI boundary valid: Astro routes load data, Arc owns primitives, ui owns product composition.');
+console.log('UI boundary valid: Astro routes load data, Arc owns primitives, ui owns product composition, feature code does not recreate primitives.');
