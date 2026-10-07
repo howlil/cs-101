@@ -115,3 +115,5 @@
 }
 .connections-note { margin-top: 10px; }
 .connections-panel--compact { padding-top: 16px; }
+
+.connections-panel { max-width: 960px; }

@@ -187,3 +187,13 @@
     --control-height-lg: 3rem;
   }
 }
+
+
+/* Product density contract. Layout code consumes these instead of hard-coded shell sizes. */
+:root[data-density="compact"] {
+  --app-topbar-height: 48px;
+  --app-rail-width: 56px;
+  --curriculum-explorer-width: 236px;
+  --workspace-max: 1120px;
+  --content-measure: 76ch;
+}

@@ -36,10 +36,7 @@ export default function AppShell({
     <header className="topbar">
       <a className="brand" href="/" aria-label="CS-101 · Hari ini">
         <span className="brand-mark" aria-hidden="true">CS</span>
-        <span>
-          CS-101
-          <span className="brand-sub">Learning workspace</span>
-        </span>
+        <span>CS-101</span>
       </a>
 
       <div className="header-actions">
@@ -54,26 +51,32 @@ export default function AppShell({
           <a
             className="rail-link"
             href="/"
+            aria-label="Hari ini"
+            title="Hari ini"
+            data-label="Hari ini"
             aria-current={currentPath === '/' ? 'page' : undefined}
           >
             <Home size={18} strokeWidth={1.8} aria-hidden="true" />
-            <span className="rail-label">Hari ini</span>
           </a>
           <a
             className="rail-link"
             href="/curriculum"
+            aria-label="Kurikulum"
+            title="Kurikulum"
+            data-label="Kurikulum"
             aria-current={materialActive ? 'page' : undefined}
           >
             <BookOpen size={18} strokeWidth={1.8} aria-hidden="true" />
-            <span className="rail-label">Kurikulum</span>
           </a>
           <a
             className="rail-link"
             href="/progress"
+            aria-label="Progres"
+            title="Progres"
+            data-label="Progres"
             aria-current={currentPath === '/progress' ? 'page' : undefined}
           >
             <BarChart3 size={18} strokeWidth={1.8} aria-hidden="true" />
-            <span className="rail-label">Progres</span>
           </a>
         </nav>
       </aside>
@@ -83,9 +86,9 @@ export default function AppShell({
         tabIndex={-1}
         className={['app-main', flush ? 'app-main--flush' : ''].filter(Boolean).join(' ')}
         key={navigationKey}
-        initial={reduce ? false : { opacity: 0, y: 5 }}
+        initial={reduce ? false : { opacity: 0, y: 3 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={reduce ? { duration: 0 } : { duration: .18, ease: [0.16, 1, 0.3, 1] }}
+        transition={reduce ? { duration: 0 } : { duration: .14, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
       </motion.main>

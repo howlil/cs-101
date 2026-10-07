@@ -126,3 +126,10 @@
   border-radius: 0;
   background: transparent;
 }
+
+.review-workspace { width: min(860px, 100%); }
+.review-instruction-line {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}

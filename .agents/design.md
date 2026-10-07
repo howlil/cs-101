@@ -149,20 +149,21 @@ Desktop memakai tiga layer:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│ CS-101                                      Star  Donate  Theme │
-├────┬───────────────────────┬────────────────────────────────────┤
-│ 🏠 │ Contextual explorer   │ Main workspace                     │
-│ 📚 │                       │                                    │
-│ 📈 │                       │                                    │
-└────┴───────────────────────┴────────────────────────────────────┘
- 60px        ~240px
+│ CS-101                                  Search  Theme │
+├────┬───────────────────────┬──────────────────────────┤
+│ 🏠 │ Contextual explorer   │ Main workspace           │
+│ 📚 │ independent scroll    │ independent scroll       │
+│ 📈 │                       │                          │
+└────┴───────────────────────┴──────────────────────────┘
+ 56px        ~236px
 ```
 
 ### Global rail
 
-- Lebar sekitar 56–64 px.
-- Icon-only untuk Hari ini, Materi, Progres.
-- Tooltip dan accessible name wajib.
+- Compact density memakai `data-density="compact"`.
+- Lebar rail 56 px.
+- Icon-only untuk Hari ini, Kurikulum, Progres.
+- Tooltip, `title`, dan accessible name wajib.
 - Active state jelas.
 - Tidak menaruh daftar materi di rail.
 - Utility seperti settings hanya jika benar-benar ada fungsi.
@@ -170,6 +171,8 @@ Desktop memakai tiga layer:
 ### Contextual explorer
 
 Panel kedua hanya muncul saat konteks membutuhkan hierarchy, terutama `/curriculum`, `/learn/*`, `/project/*`, dan `/integration/*`.
+
+Pada desktop, explorer dan workspace adalah dua scroll container independen. Explorer mempertahankan posisi scroll ketika user membuka item lain; workspace detail selalu dapat dibaca tanpa menggeser hierarchy.
 
 Explorer menunjukkan **satu track aktif** secara penuh. Track lain dipilih dari track switcher; jangan expand semua track sekaligus.
 
@@ -196,11 +199,11 @@ Item row cukup berisi status marker, ID, dan judul pendek. Metadata detail tetap
 
 ### Main workspace
 
-- Lebar baca lesson maksimal sekitar 68–72ch.
-- Project workspace boleh lebih lebar karena requirement/evidence matrix.
-- Header halaman compact: breadcrumb, ID, title, satu subtitle.
-- Tidak ada hero marketing.
-- Tidak ada stat cards generic di Hari ini.
+- Shell memakai ruang horizontal yang tersedia; jangan membatasi semua halaman ke 720 px.
+- Lebar baca lesson sekitar 72–76ch, tetapi Today/Progress/Project boleh melebar sampai sekitar 1120 px.
+- Header halaman compact: breadcrumb/ID/title hanya jika informasinya mengubah orientasi.
+- Hapus subtitle generik, helper copy yang mengulang CTA, dan panel dekoratif.
+- Tidak ada hero marketing atau stat cards generic di Hari ini.
 
 ### Responsive
 

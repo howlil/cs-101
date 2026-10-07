@@ -29,7 +29,7 @@ function RetentionTimeline({
   return <section className="review-retention">
     <div>
       <p className="eyebrow">RETENTION</p>
-      <h2>Jadwal penguatan ingatan</h2>
+      <h2>Retention</h2>
     </div>
     <div className="retention-steps retention-steps--large">
       {REVIEW_DAYS.map((day, index) => {
@@ -70,7 +70,7 @@ export default function ReviewPage({
       </a>
       <p className="eyebrow"><BrainCircuit size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId} / REVIEW</p>
       <h1>{title}</h1>
-      <p className="lede">Jawab tanpa membuka catatan. Tujuannya mengecek apakah pemahaman masih bisa dipanggil kembali.</p>
+      <p className="review-instruction-line">Jawab tanpa catatan.</p>
     </header>
 
     {completion !== 'passed' ? (

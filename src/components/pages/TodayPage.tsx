@@ -26,24 +26,25 @@ export default function TodayPage({
   review?: CardData;
   reviewCount?: number;
 }) {
-  return <div className="content">
-    <p className="eyebrow"><Home size={13} strokeWidth={1.8} aria-hidden="true" /> BELAJAR / HARI INI</p>
-    <h1>Lanjut dari sini.</h1>
-    <p className="lede">Satu fokus utama. Satu langkah berikutnya.</p>
+  return <div className="content today-page">
+    <p className="eyebrow"><Home size={13} strokeWidth={1.8} aria-hidden="true" /> HARI INI</p>
+    <h1>Hari ini</h1>
 
     {primary ? (
       <section className="today-focus">
         <p className="today-path">{primary.breadcrumb}</p>
-        <code className="today-item-id">{primary.id}</code>
-        <h2>{primary.title}</h2>
+        <div className="today-title-line">
+          <code className="today-item-id">{primary.id}</code>
+          <h2>{primary.title}</h2>
+        </div>
         {primary.whyMatters && (
           <div className="today-why">
-            <span>Kenapa ini penting</span>
+            <span>Kenapa penting</span>
             <p>{primary.whyMatters}</p>
           </div>
         )}
         <div className="today-next-step">
-          <span>Kerjakan ini dulu</span>
+          <span>Berikutnya</span>
           <strong>{primary.nextStep}</strong>
           <small>{primary.whyNext}</small>
         </div>
@@ -62,7 +63,7 @@ export default function TodayPage({
       <section className="today-review">
         <div className="today-review-heading">
           <h2><RotateCcw size={15} strokeWidth={1.8} aria-hidden="true" /> Review</h2>
-          {reviewCount > 1 && <span>{reviewCount} perlu dikerjakan</span>}
+          {reviewCount > 1 && <span>{reviewCount}</span>}
         </div>
         <a className="today-review-row" href={review.href}>
           <RotateCcw size={14} strokeWidth={1.8} aria-hidden="true" />
@@ -73,11 +74,6 @@ export default function TodayPage({
           <span className="today-review-cta">{review.actionLabel}<ChevronRight size={13} strokeWidth={1.8} aria-hidden="true" /></span>
         </a>
       </section>
-    ) : (
-      <p className="today-review-empty">Tidak ada review yang perlu dikerjakan sekarang.</p>
-    )}
-
-    <hr />
-    <p className="muted small">Selesai ditentukan oleh bukti. Review menguji apakah pemahaman masih bisa dipanggil kembali.</p>
+    ) : null}
   </div>;
 }

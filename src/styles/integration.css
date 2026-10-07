@@ -148,3 +148,14 @@
   box-shadow: none;
 }
 .integration-list li { margin: 6px 0; }
+
+.integration-workspace { width: min(var(--workspace-max), 100%); }
+.integration-challenge { margin-top: 0; }
+.integration-challenge .integration-section-heading {
+  align-items: center;
+}
+.integration-challenge .integration-section-heading h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -81,11 +81,10 @@ export default function ProgressPage({
   sessions: SessionRow[];
 }) {
   return <div className="progress-page">
-    <div className="content">
-      <p className="eyebrow"><BarChart3 size={13} strokeWidth={1.8} aria-hidden="true" /> BELAJAR / PROGRES</p>
-      <h1>Posisi belajar.</h1>
-      <p className="lede">Lihat posisi sekarang, review yang perlu dikerjakan, dan jejak sesi terakhir.</p>
-    </div>
+    <header className="compact-page-header">
+      <p className="eyebrow"><BarChart3 size={13} strokeWidth={1.8} aria-hidden="true" /> PROGRES</p>
+      <h1>Progres</h1>
+    </header>
 
     {reviews.length > 0 && (
       <section className="progress-review-queue">
@@ -127,7 +126,7 @@ export default function ProgressPage({
                 <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
                 <span>{module.title}</span>
                 <small>
-                  {module.active ? 'Sedang dikerjakan · ' : ''}
+                  {module.active ? 'Aktif · ' : ''}
                   {module.completed}/{module.total}
                   {module.reviewActions ? ' · ' + module.reviewActions + 'R' : ''}
                 </small>
@@ -167,7 +166,7 @@ export default function ProgressPage({
       <div className="progress-section-heading">
         <div>
           <p className="eyebrow">SESI</p>
-          <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Riwayat terbaru</h2>
+          <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Terbaru</h2>
         </div>
       </div>
       {sessions.length ? (
@@ -178,30 +177,30 @@ export default function ProgressPage({
                 <code>{session.id}</code>
                 <strong>{session.title}</strong>
               </div>
-              <span>{session.kind === 'passed' ? 'Selesai' : 'Sesi belajar'}</span>
+              <span>{session.kind === 'passed' ? 'Selesai' : 'Sesi'}</span>
             </div>
             <p className="small muted">
               <time dateTime={session.recordedAt}>{new Date(session.recordedAt).toLocaleString('id-ID')}</time>
-              {session.minutes ? ' · ' + session.minutes + ' menit' : ''}
+              {session.minutes ? ' · ' + session.minutes + 'm' : ''}
               {session.evidenceCount ? ' · ' + session.evidenceCount + ' bukti' : ''}
             </p>
-            {session.reflectionSummary && <p className="history-reflection">Refleksi: {session.reflectionSummary}</p>}
+            {session.reflectionSummary && <p className="history-reflection">{session.reflectionSummary}</p>}
             {session.continueFrom && <p className="history-next"><strong>Lanjut:</strong> {session.continueFrom}</p>}
           </article>
         ))
       ) : (
         <EmptyAction
-          title="Belum ada sesi tersimpan."
-          description="Simpan titik lanjut setelah belajar agar sesi berikutnya tidak mulai dari nol."
+          title="Belum ada sesi."
+          description="Simpan sesi pertama untuk mulai membentuk riwayat."
         />
       )}
     </section>
 
     <div className="actions">
       <form action="/api/export" method="get" data-astro-reload="">
-        <Button type="submit" variant="secondary">
-          <Download size={15} strokeWidth={1.8} aria-hidden="true" />
-          <span>Ekspor progres</span>
+        <Button type="submit" variant="secondary" size="sm">
+          <Download size={14} strokeWidth={1.8} aria-hidden="true" />
+          <span>Ekspor</span>
         </Button>
       </form>
     </div>

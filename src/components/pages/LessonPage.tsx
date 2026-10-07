@@ -13,10 +13,8 @@ import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/Connec
 export default function LessonPage({
   itemId,
   title,
-  description,
   marketExpectation,
   nextSmallStep,
-  estimatedMinutes,
   available,
   stale,
   active,
@@ -57,7 +55,7 @@ export default function LessonPage({
       <h1>{title}</h1>
       <EmptyAction
         title="Materi belum tersedia."
-        description="Scope dan challenge tetap bisa dilihat dari kurikulum."
+        description="Buka kurikulum untuk melihat scope dan challenge."
         href={curriculumHref}
         actionLabel="Kembali ke kurikulum"
       />
@@ -69,16 +67,11 @@ export default function LessonPage({
     <article className="prose">
       <p className="eyebrow"><BookOpen size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId}</p>
       <h1>{title}</h1>
-      {description && <p className="lede">{description}</p>}
 
-      {demo && (
-        <Alert title="Mode contoh" tone="info">
-          Contoh tampilan. Materi ini tidak masuk kurikulum atau progres.
-        </Alert>
-      )}
+      {demo && <Alert title="Mode contoh" tone="info">Tidak masuk progres.</Alert>}
       {stale && (
-        <Alert title="Materi perlu diperbarui" tone="warning">
-          <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Bukti sebelumnya tetap tersimpan.
+        <Alert title="Perlu diperbarui" tone="warning">
+          <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Bukti lama tetap tersimpan.
         </Alert>
       )}
       {continueFrom && <Alert title="Lanjut dari">{continueFrom}</Alert>}
@@ -87,15 +80,14 @@ export default function LessonPage({
         <section className="lesson-execution-context">
           {marketExpectation.length > 0 && (
             <div className="lesson-why">
-              <span className="eyebrow">KENAPA INI PENTING</span>
-              <ul>{marketExpectation.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul>
+              <span className="eyebrow">KENAPA PENTING</span>
+              <ul>{marketExpectation.slice(0, 2).map((item) => <li key={item}>{item}</li>)}</ul>
             </div>
           )}
 
           <div className="lesson-small-step">
-            <span className="eyebrow">MULAI KECIL</span>
+            <span className="eyebrow">BERIKUTNYA</span>
             <strong>{nextSmallStep}</strong>
-            {estimatedMinutes && <small>Estimasi materi: {Math.round(estimatedMinutes / 60 * 10) / 10} jam. Durasi bukan syarat selesai.</small>}
           </div>
 
           <div className="lesson-stuck">
@@ -105,10 +97,10 @@ export default function LessonPage({
               items={[{
                 title: 'Saya macet',
                 content: <ol>
-                  <li>Kerjakan hanya langkah ini: <strong>{nextSmallStep}</strong></li>
-                  <li>Buat satu prediksi atau hipotesis sebelum mencoba.</li>
-                  <li>Jalankan satu eksperimen kecil yang hasilnya bisa diamati.</li>
-                  <li>Catat apa yang berbeda dari dugaanmu, lalu simpan titik lanjut.</li>
+                  <li>Kerjakan hanya: <strong>{nextSmallStep}</strong></li>
+                  <li>Buat satu prediksi sebelum mencoba.</li>
+                  <li>Jalankan satu eksperimen kecil.</li>
+                  <li>Catat hasil yang berbeda dari dugaan.</li>
                 </ol>,
               }]}
             />

@@ -11,9 +11,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
-import { Card } from '../arc/card/card';
 import { Badge } from '../arc/badge/badge';
-import ActionLink from '../ui/ActionLink';
 import ActivateItem from '../learning/ActivateItem';
 import ProjectEvidence from '../course/ProjectEvidence';
 import GuaranteeAccordion from '../project/GuaranteeAccordion';
@@ -103,24 +101,19 @@ export default function ProjectPage({
       </div>
     </header>
 
-    <section className="project-context-grid">
-      <Card
-        title="Built on"
-        description={parent ? parent.title : 'Checkpoint pertama di lineage ini.'}
-        meta={parent?.id ?? 'ROOT'}
-        action={parent ? <ActionLink href={parent.href} label="Buka checkpoint" /> : undefined}
-      />
-      <Card
-        title="Contributing units"
-        description="Unit yang memberi fondasi langsung ke checkpoint ini."
-        meta={String(contributors.length)}
-      />
-      <Card
-        title="Next checkpoint"
-        description={next ? next.title : 'Ini checkpoint terakhir pada lineage ini.'}
-        meta={next?.id ?? 'END'}
-        action={next ? <ActionLink href={next.href} label="Buka checkpoint" /> : undefined}
-      />
+    <section className="project-context-strip" aria-label="Konteks checkpoint">
+      <div>
+        <span>Built on</span>
+        {parent ? <a href={parent.href}><code>{parent.id}</code> {parent.title}</a> : <strong>Root</strong>}
+      </div>
+      <div>
+        <span>Units</span>
+        <strong>{contributors.length}</strong>
+      </div>
+      <div>
+        <span>Next</span>
+        {next ? <a href={next.href}><code>{next.id}</code> {next.title}</a> : <strong>End</strong>}
+      </div>
     </section>
 
     <section className="project-section">
@@ -192,11 +185,7 @@ export default function ProjectPage({
       <section className="project-section project-evidence-placeholder">
         <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
         <h2>{ready ? 'Mulai checkpoint untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
-        <p className="muted">
-          {ready
-            ? 'Fokus satu item agar titik lanjut dan bukti tidak bercampur.'
-            : 'Selesaikan prasyarat terlebih dahulu.'}
-        </p>
+        <p className="muted">{ready ? 'Mulai checkpoint untuk membuka form bukti.' : 'Selesaikan prasyarat terlebih dahulu.'}</p>
       </section>
     )}
 

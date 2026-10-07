@@ -127,6 +127,7 @@ export default function CurriculumExplorer({
           }))}
           onValueChange={(next) => {
             if (next !== activeTrackId) {
+              try { sessionStorage.removeItem('cs101:curriculum-explorer-scroll'); } catch {}
               window.location.assign('/curriculum?track=' + encodeURIComponent(next));
             }
           }}

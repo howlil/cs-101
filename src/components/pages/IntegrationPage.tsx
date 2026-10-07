@@ -14,7 +14,6 @@ import {
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import ActivateItem from '../learning/ActivateItem';
 import { Badge } from '../arc/badge/badge';
-import { Card } from '../arc/card/card';
 import IntegrationEvidence from '../course/IntegrationEvidence';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
@@ -122,17 +121,15 @@ export default function IntegrationPage({
       <ul className="integration-list">{scope.map((entry) => <li key={entry}>{entry}</li>)}</ul>
     </section>
 
-    <div className="integration-section integration-challenge">
-      <Card
-        title={challenge.title}
-        status="Challenge"
-        meta={<Target size={14} strokeWidth={1.8} aria-hidden="true" />}
-      >
-        {challenge.steps.length > 0 && (
-          <ol className="integration-list">{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
-        )}
-      </Card>
-    </div>
+    <section className="integration-section integration-challenge">
+      <div className="integration-section-heading">
+        <h2><Target size={14} strokeWidth={1.8} aria-hidden="true" /> {challenge.title}</h2>
+        <span>Challenge</span>
+      </div>
+      {challenge.steps.length > 0 && (
+        <ol className="integration-list">{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+      )}
+    </section>
 
     <section className="integration-section">
       <div className="integration-section-heading">
@@ -175,11 +172,7 @@ export default function IntegrationPage({
       <section className="integration-section integration-evidence-placeholder">
         <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
         <h2>{ready ? 'Mulai integrasi untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
-        <p className="muted">
-          {ready
-            ? 'Integrasi mengikuti fokus belajar yang sama dengan unit dan project.'
-            : 'Selesaikan seluruh prasyarat terlebih dahulu.'}
-        </p>
+        <p className="muted">{ready ? 'Mulai integrasi untuk membuka form bukti.' : 'Selesaikan seluruh prasyarat terlebih dahulu.'}</p>
       </section>
     )}
   </article>;
