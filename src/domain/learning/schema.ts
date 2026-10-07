@@ -49,3 +49,5 @@ export const activeTaskSchema = activeItemSchema;
 export type SessionInput = z.infer<typeof sessionSchema>;
 export type SessionFields = z.infer<typeof sessionFields>;
 export type ActiveItemInput = z.infer<typeof activeItemSchema>;
+
+export { reviewAttemptSchema, type ReviewAttemptInput } from '../review/schema';
