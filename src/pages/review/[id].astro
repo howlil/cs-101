@@ -1,8 +1,7 @@
 ---
 import '../../styles/review.css';
 import AppLayout from '../../layouts/AppLayout.astro';
-import EmptyAction from '../../components/arc/EmptyAction';
-import ReviewAttempt from '../../components/course/ReviewAttempt';
+import ReviewPage from '../../components/pages/ReviewPage';
 import { curriculumGraph } from '../../server/curriculum';
 import { learning } from '../../server/runtime';
 import { reviewBankFor } from '../../server/review-bank';
@@ -15,78 +14,29 @@ const state = await (await learning()).snapshot();
 const progress = state.progress.find((entry) => entry.itemId === item.id);
 const review = state.reviews.find((entry) => entry.itemId === item.id);
 const bank = reviewBankFor(item.id);
-const bankCurrent = bank?.curriculumFingerprint === item.fingerprint;
-const canAttempt = review?.state === 'due' || review?.state === 'retry';
+const completion = progress?.status === 'passed'
+  ? 'passed'
+  : progress?.status === 'stale'
+    ? 'stale'
+    : 'other';
 ---
 <AppLayout title={'Review · ' + item.title}>
-  <article class="review-workspace">
-    <header class="review-header">
-      <a class="review-back" href={itemHref(curriculumGraph, item.id)}>← Kembali ke item</a>
-      <p class="eyebrow">{item.id} / REVIEW</p>
-      <h1>{item.title}</h1>
-      <p class="lede">Recall-first. Completion dan review adalah dua state yang berbeda.</p>
-    </header>
-
-    {progress?.status !== 'passed' ? (
-      <EmptyAction
-        client:load
-        title={progress?.status === 'stale' ? 'Completion perlu divalidasi ulang.' : 'Item belum lulus.'}
-        description="Review hanya tersedia setelah item lulus terhadap curriculum aktif."
-        href={itemHref(curriculumGraph, item.id)}
-        actionLabel="Buka item"
-      />
-    ) : !review ? (
-      <EmptyAction
-        client:load
-        title="Review belum terjadwal."
-        description="Schedule dibuat ketika item pertama kali lulus."
-        href="/progress"
-        actionLabel="Buka progres"
-      />
-    ) : review.state === 'retained' ? (
-      <section class="review-status-card">
-        <p class="eyebrow">RETENTION</p>
-        <h2>Retained pada policy review saat ini.</h2>
-        <p>Seluruh interval review v1 sudah dilewati.</p>
-      </section>
-    ) : review.state === 'scheduled' ? (
-      <section class="review-status-card">
-        <p class="eyebrow">SCHEDULED</p>
-        <h2>Belum jatuh tempo.</h2>
-        <p>Review berikutnya: <time datetime={review.dueAt ?? undefined}>{review.dueAt ? new Date(review.dueAt).toLocaleString('id-ID') : 'belum ditentukan'}</time>.</p>
-      </section>
-    ) : !bank ? (
-      <EmptyAction
-        client:load
-        title="Review set belum tersedia."
-        description="Schedule sudah due, tetapi assessment bank terstruktur untuk item ini belum dibuat."
-        href={itemHref(curriculumGraph, item.id)}
-        actionLabel="Buka materi"
-      />
-    ) : !bankCurrent ? (
-      <EmptyAction
-        client:load
-        title="Review set perlu diperbarui."
-        description="Assessment bank masih memakai fingerprint curriculum lama."
-        href={itemHref(curriculumGraph, item.id)}
-        actionLabel="Buka materi terbaru"
-      />
-    ) : canAttempt ? (
-      <>
-        <section class="review-status-line">
-          <span class:list={['review-state', { 'review-state--retry': review.state === 'retry' }]}>
-            {review.state === 'retry' ? 'Retry' : 'Due'}
-          </span>
-          <span>Interval step {review.step + 1}</span>
-        </section>
-        <ReviewAttempt
-          client:load
-          itemId={item.id}
-          version={bank.version}
-          revision={state.revision}
-          questions={bank.questions.map(({ id, prompt, options }) => ({ id, prompt, options }))}
-        />
-      </>
-    ) : null}
-  </article>
+  <ReviewPage
+    client:load
+    itemId={item.id}
+    title={item.title}
+    itemHref={itemHref(curriculumGraph, item.id)}
+    completion={completion}
+    review={review ? {
+      state: review.state,
+      step: review.step,
+      dueAt: review.dueAt,
+    } : undefined}
+    bank={bank ? {
+      version: bank.version,
+      current: bank.curriculumFingerprint === item.fingerprint,
+      questions: bank.questions.map(({ id, prompt, options }) => ({ id, prompt, options })),
+    } : undefined}
+    revision={state.revision}
+  />
 </AppLayout>
