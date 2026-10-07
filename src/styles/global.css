@@ -111,3 +111,27 @@ html[data-sidebar-collapsed="true"] .sidebar { display: none; }
 .progress-modules a:hover { color: var(--text); background: var(--surface-muted); }
 .progress-modules small { white-space: nowrap; }
 @media (max-width: 767px) { .progress-modules { grid-template-columns: 1fr; } }
+
+.today-review { margin-top: 26px; }
+.today-review-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.today-review-heading h2 { margin-bottom: 8px; }
+.today-review-heading span, .today-review-empty { color: var(--muted); font-size: 12px; }
+.today-review-empty { margin-top: 24px; }
+
+.progress-page { width: min(900px,100%); }
+.progress-review-queue, .progress-integrations { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); }
+.progress-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+.progress-section-heading .eyebrow { margin: 0 0 3px; }
+.progress-section-heading h2 { margin: 0; font-size: 17px; }
+.progress-section-heading > span { color: var(--muted); font: 600 11px/1 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.progress-review-items, .progress-integration-items { display: grid; gap: 5px; }
+.progress-review-items a, .progress-integration-items a { min-width: 0; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 9px; align-items: baseline; padding: 8px 9px; border-radius: 8px; color: var(--text); text-decoration: none; }
+.progress-review-items a:hover, .progress-integration-items a:hover { background: var(--surface-muted); }
+.progress-review-items code, .progress-integration-items code { color: var(--muted); font-size: 10px; }
+.progress-review-items span, .progress-integration-items span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.progress-review-items small, .progress-integration-items small { color: var(--muted); white-space: nowrap; font-size: 10px; }
+.progress-history { margin-top: 30px; }
+@media (max-width: 600px) {
+  .progress-review-items a, .progress-integration-items a { grid-template-columns: auto minmax(0,1fr); }
+  .progress-review-items small, .progress-integration-items small { grid-column: 2; }
+}

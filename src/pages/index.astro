@@ -13,13 +13,25 @@ const nextReady = curriculumGraph.manifest.items.find((item) => {
   if (passed.has(item.id)) return false;
   return state.availability.find((entry) => entry.itemId === item.id)?.status === 'ready';
 });
+const actionableReviews = state.reviews
+  .filter((review) => review.state === 'due' || review.state === 'retry')
+  .map((review) => ({
+    review,
+    item: curriculumGraph.itemsById.get(review.itemId),
+  }))
+  .filter((entry) => entry.item)
+  .sort((a, b) => {
+    if (a.review.state !== b.review.state) return a.review.state === 'retry' ? -1 : 1;
+    return (a.review.dueAt ?? '').localeCompare(b.review.dueAt ?? '');
+  });
+const nextReview = actionableReviews[0];
 
 const hrefFor = (itemId: string) => {
   const item = curriculumGraph.itemsById.get(itemId);
-  if (item?.kind === 'unit') return `/learn/${itemId}`;
-  if (item?.kind === 'checkpoint') return `/project/${itemId}`;
-  if (item?.kind === 'integration') return `/integration/${itemId}`;
-  return `/curriculum?item=${encodeURIComponent(itemId)}`;
+  if (item?.kind === 'unit') return '/learn/' + itemId;
+  if (item?.kind === 'checkpoint') return '/project/' + itemId;
+  if (item?.kind === 'integration') return '/integration/' + itemId;
+  return '/curriculum?item=' + encodeURIComponent(itemId);
 };
 ---
 <AppLayout title="Hari ini">
@@ -54,14 +66,25 @@ const hrefFor = (itemId: string) => {
       />
     )}
 
-    <h2>Review</h2>
-    <EmptyAction
-      client:load
-      title="Belum ada review terjadwal."
-      description="Jadwal review akan muncul setelah review engine diaktifkan."
-    />
+    {nextReview ? (
+      <section class="today-review">
+        <div class="today-review-heading">
+          <h2>Review</h2>
+          {actionableReviews.length > 1 && <span>{actionableReviews.length} actionable</span>}
+        </div>
+        <TaskCard
+          taskId={nextReview.item!.id}
+          title={nextReview.item!.title}
+          description={nextReview.review.state === 'retry' ? 'Retry recall diperlukan.' : 'Review sudah jatuh tempo.'}
+          href={'/review/' + nextReview.item!.id}
+          actionLabel={nextReview.review.state === 'retry' ? 'Ulangi review' : 'Mulai review'}
+        />
+      </section>
+    ) : (
+      <p class="today-review-empty">Tidak ada review yang perlu dikerjakan sekarang.</p>
+    )}
 
     <hr />
-    <p class="muted small">Progres dihitung dari evidence, bukan durasi belajar.</p>
+    <p class="muted small">Progres dihitung dari evidence. Review mengukur retention setelah completion.</p>
   </div>
 </AppLayout>
