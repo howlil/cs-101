@@ -4,38 +4,29 @@ import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
 import EmptyAction from '../components/arc/EmptyAction';
 import TaskCard from '../components/arc/TaskCard';
+import { getTodayView } from '../domain/learning/view-models';
 
 const state = await (await learning()).snapshot();
-const active = state.activeItemId ? curriculumGraph.itemsById.get(state.activeItemId) : undefined;
-const activeProgress = active ? state.progress.find((entry) => entry.itemId === active.id) : undefined;
-const passed = new Set(state.progress.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId));
-const nextReady = curriculumGraph.manifest.items.find((item) => {
-  if (passed.has(item.id)) return false;
-  return state.availability.find((entry) => entry.itemId === item.id)?.status === 'ready';
-});
-const actionableReviews = state.reviews
-  .filter((review) =>
-    (review.state === 'due' || review.state === 'retry') &&
-    state.progress.find((entry) => entry.itemId === review.itemId)?.status === 'passed'
-  )
-  .map((review) => ({
-    review,
-    item: curriculumGraph.itemsById.get(review.itemId),
-  }))
-  .filter((entry) => entry.item)
-  .sort((a, b) => {
-    if (a.review.state !== b.review.state) return a.review.state === 'retry' ? -1 : 1;
-    return (a.review.dueAt ?? '').localeCompare(b.review.dueAt ?? '');
-  });
-const nextReview = actionableReviews[0];
+const today = getTodayView(curriculumGraph, state);
+const primary = today.primary;
 
-const hrefFor = (itemId: string) => {
-  const item = curriculumGraph.itemsById.get(itemId);
-  if (item?.kind === 'unit') return '/learn/' + itemId;
-  if (item?.kind === 'checkpoint') return '/project/' + itemId;
-  if (item?.kind === 'integration') return '/integration/' + itemId;
-  return '/curriculum?item=' + encodeURIComponent(itemId);
-};
+const primaryDescription = primary
+  ? today.primaryMode === 'continue'
+    ? primary.continueFrom || 'Lanjutkan item aktif.'
+    : primary.displayState === 'stale'
+      ? 'Curriculum berubah. Validasi ulang item ini.'
+      : primary.displayState === 'started'
+        ? primary.continueFrom || 'Lanjutkan pekerjaan sebelumnya.'
+        : 'Item berikutnya sudah siap dikerjakan.'
+  : '';
+
+const primaryAction = primary
+  ? today.primaryMode === 'continue' || primary.displayState === 'started'
+    ? 'Lanjutkan'
+    : primary.displayState === 'stale'
+      ? 'Validasi ulang'
+      : 'Buka'
+  : '';
 ---
 <AppLayout title="Hari ini">
   <div class="content">
@@ -43,21 +34,13 @@ const hrefFor = (itemId: string) => {
     <h1>Lanjut dari sini.</h1>
     <p class="lede">Satu item. Satu langkah berikutnya.</p>
 
-    {active ? (
+    {primary ? (
       <TaskCard
-        taskId={active.id}
-        title={active.title}
-        description={activeProgress?.continueFrom || 'Lanjutkan item aktif.'}
-        href={hrefFor(active.id)}
-        actionLabel="Lanjutkan"
-      />
-    ) : nextReady ? (
-      <TaskCard
-        taskId={nextReady.id}
-        title={nextReady.title}
-        description="Item berikutnya sudah siap dikerjakan."
-        href={hrefFor(nextReady.id)}
-        actionLabel="Buka"
+        taskId={primary.item.id}
+        title={primary.item.title}
+        description={primaryDescription}
+        href={primary.href}
+        actionLabel={primaryAction}
       />
     ) : (
       <EmptyAction
@@ -69,18 +52,18 @@ const hrefFor = (itemId: string) => {
       />
     )}
 
-    {nextReview ? (
+    {today.nextReview ? (
       <section class="today-review">
         <div class="today-review-heading">
           <h2>Review</h2>
-          {actionableReviews.length > 1 && <span>{actionableReviews.length} actionable</span>}
+          {today.actionableReviews.length > 1 && <span>{today.actionableReviews.length} actionable</span>}
         </div>
         <TaskCard
-          taskId={nextReview.item!.id}
-          title={nextReview.item!.title}
-          description={nextReview.review.state === 'retry' ? 'Retry recall diperlukan.' : 'Review sudah jatuh tempo.'}
-          href={'/review/' + nextReview.item!.id}
-          actionLabel={nextReview.review.state === 'retry' ? 'Ulangi review' : 'Mulai review'}
+          taskId={today.nextReview.item.item.id}
+          title={today.nextReview.item.item.title}
+          description={today.nextReview.review.state === 'retry' ? 'Retry recall diperlukan.' : 'Review sudah jatuh tempo.'}
+          href={'/review/' + today.nextReview.item.item.id}
+          actionLabel={today.nextReview.review.state === 'retry' ? 'Ulangi review' : 'Mulai review'}
         />
       </section>
     ) : (

@@ -12,6 +12,10 @@ import {
   getItemLocation,
   getTrackExplorer,
 } from '../domain/curriculum-v2/selectors';
+import {
+  getItemLearningView,
+  itemStateMarker,
+} from '../domain/learning/view-models';
 
 const graph = buildCurriculumGraph(source);
 const tracks = [...graph.manifest.tracks].sort((a, b) => a.order - b.order);
@@ -45,28 +49,15 @@ try {
   learningState = undefined;
 }
 
-const progressById = new Map(learningState?.progress.map((entry) => [entry.itemId, entry]) ?? []);
-const availabilityById = new Map(learningState?.availability.map((entry) => [entry.itemId, entry]) ?? []);
+const learningView = (itemId: string) =>
+  learningState ? getItemLearningView(graph, learningState, itemId) : undefined;
 
-const itemState = (itemId: string) => {
-  const progress = progressById.get(itemId);
-  if (progress?.status === 'passed') return 'passed';
-  if (progress?.status === 'stale' && learningState?.activeItemId !== itemId) return 'stale';
-  if (learningState?.activeItemId === itemId) return 'active';
-  return availabilityById.get(itemId)?.status ?? 'unknown';
+const stateMarker = (itemId: string, kind: 'unit' | 'checkpoint' | 'integration') => {
+  const view = learningView(itemId);
+  return view ? itemStateMarker(view.displayState, kind) : itemMarker(kind);
 };
 
-const stateMarker = (itemId: string, kind: string) => {
-  const state = itemState(itemId);
-  if (state === 'passed') return '✓';
-  if (state === 'active') return '●';
-  if (state === 'stale') return '!';
-  if (state === 'locked') return '×';
-  if (state === 'ready') return '○';
-  return itemMarker(kind);
-};
-
-const itemHref = (itemId: string) => {
+const explorerHref = (itemId: string) => {
   const location = getItemLocation(graph, itemId);
   if (location.item.kind === 'checkpoint') return `/project/${encodeURIComponent(itemId)}`;
   if (location.item.kind === 'integration') return `/integration/${encodeURIComponent(itemId)}`;
@@ -107,7 +98,7 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
           {searchIndex.map((entry) => (
             <a
               class="search-row"
-              href={itemHref(entry.itemId)}
+              href={explorerHref(entry.itemId)}
               data-search-row
               data-search={entry.searchText}
               hidden
@@ -153,7 +144,7 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
                   {module.items.map((item) => (
                     <a
                       class="item-row"
-                      href={itemHref(item.id)}
+                      href={explorerHref(item.id)}
                       aria-current={item.id === selectedItem?.id ? 'page' : undefined}
                     >
                       <span class="item-marker" aria-hidden="true">{stateMarker(item.id, item.kind)}</span>
@@ -175,7 +166,7 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
             {integrations.map((item) => (
               <a
                 class="item-row"
-                href={itemHref(item.id)}
+                href={explorerHref(item.id)}
                 aria-current={item.id === selectedItem?.id ? 'page' : undefined}
               >
                 <span class="item-marker" aria-hidden="true">{stateMarker(item.id, item.kind)}</span>
@@ -203,35 +194,36 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
               <code>{selectedItem.id}</code>
             </div>
             <h2>{selectedItem.title}</h2>
-            {learningState && (
-              <div class="item-state-actions">
-                {itemState(selectedItem.id) === 'passed' ? (
-                  <span class="state-label state-label--passed">Lulus</span>
-                ) : itemState(selectedItem.id) === 'stale' ? (
-                  <span class="state-label state-label--stale">Perlu validasi ulang</span>
-                ) : itemState(selectedItem.id) === 'active' ? (
-                  selectedItem.kind === 'unit'
-                    ? <a class="workspace-action" href={`/learn/${selectedItem.id}`}>Lanjutkan</a>
-                    : <span class="state-label">Aktif</span>
-                ) : itemState(selectedItem.id) === 'ready' ? (
-                  <>
-                    <Button
-                      type="button"
-                      variant="primary"
-                      data-activate-item={selectedItem.id}
-                      data-revision={learningState.revision}
-                    >
-                      Jadikan aktif
-                    </Button>
-                    <Feedback client:load scope={`activate:${selectedItem.id}`} />
-                  </>
-                ) : itemState(selectedItem.id) === 'locked' ? (
-                  <span class="state-label state-label--locked">
-                    Terkunci · selesaikan {availabilityById.get(selectedItem.id)?.missingPrerequisites.join(', ')}
-                  </span>
-                ) : null}
-              </div>
-            )}
+            {learningState && (() => {
+              const view = learningView(selectedItem.id)!;
+              return (
+                <div class="item-state-actions">
+                  {view.displayState === 'passed' ? (
+                    <span class="state-label state-label--passed">Lulus</span>
+                  ) : view.displayState === 'stale' ? (
+                    <span class="state-label state-label--stale">Perlu validasi ulang</span>
+                  ) : view.displayState === 'active' ? (
+                    <a class="workspace-action" href={view.href}>Lanjutkan</a>
+                  ) : view.displayState === 'ready' || view.displayState === 'started' ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        data-activate-item={selectedItem.id}
+                        data-revision={learningState.revision}
+                      >
+                        {view.displayState === 'started' ? 'Lanjutkan item' : 'Jadikan aktif'}
+                      </Button>
+                      <Feedback client:load scope={`activate:${selectedItem.id}`} />
+                    </>
+                  ) : view.displayState === 'locked' ? (
+                    <span class="state-label state-label--locked">
+                      Terkunci · selesaikan {view.missingPrerequisites.join(', ')}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })()}
           </header>
 
           {connections && connections.prerequisites.length > 0 && (
@@ -240,7 +232,7 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
               <div class="connection-list">
                 {connections.prerequisites.map((id) => {
                   const prerequisite = graph.itemsById.get(id)!;
-                  return <a href={itemHref(id)}><code>{id}</code><span>{prerequisite.title}</span></a>;
+                  return <a href={explorerHref(id)}><code>{id}</code><span>{prerequisite.title}</span></a>;
                 })}
               </div>
             </section>
