@@ -93,7 +93,7 @@ export default function CurriculumExplorer({
   return <div className="curriculum-controls">
     <div className="curriculum-search-uiarc">
       <Input
-        label="Cari curriculum"
+        label="Cari kurikulum"
         type="search"
         value={query}
         onChange={(event) => setQuery(event.currentTarget.value)}
@@ -119,7 +119,7 @@ export default function CurriculumExplorer({
     ) : <>
       <div className="track-select-uiarc">
         <Select
-          label="TRACK"
+          label="JALUR"
           value={activeTrackId}
           options={tracks.map((track) => ({
             value: track.id,
@@ -135,14 +135,14 @@ export default function CurriculumExplorer({
 
       {accordionItems.length > 0 && (
         <div className="module-tree module-tree--uiarc">
-          <p className="explorer-label"><FolderKanban size={12} strokeWidth={1.8} aria-hidden="true" /> MODULE</p>
+          <p className="explorer-label"><FolderKanban size={12} strokeWidth={1.8} aria-hidden="true" /> MODUL</p>
           <Accordion items={accordionItems} defaultOpen={defaultOpen} />
         </div>
       )}
 
       {integrations.length > 0 && (
         <div className="integration-list">
-          <p className="explorer-label"><Boxes size={12} strokeWidth={1.8} aria-hidden="true" /> INTEGRATION</p>
+          <p className="explorer-label"><Boxes size={12} strokeWidth={1.8} aria-hidden="true" /> INTEGRASI</p>
           {integrations.map((item) => <ItemRow key={item.id} item={item} />)}
         </div>
       )}

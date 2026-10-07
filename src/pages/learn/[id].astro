@@ -22,13 +22,13 @@ const progress = state.progress.find((entry) => entry.itemId === item.id);
 
 const groups = getConnectionGroups(curriculumGraph, item.id);
 const connections = [
-  ['Requires', groups.requires],
-  ['Used later by', groups.usedLaterBy],
-  ['Related', groups.related],
+  ['Prasyarat', groups.requires],
+  ['Dipakai nanti', groups.usedLaterBy],
+  ['Terkait', groups.related],
   ['Deep dive', groups.deepDive],
-  ['Built on foundation', groups.builtOnFoundation],
-  ['Foundation for', groups.foundationFor],
-  ['Contributes to', groups.contributesTo],
+  ['Fondasi dari', groups.builtOnFoundation],
+  ['Fondasi untuk', groups.foundationFor],
+  ['Berkontribusi ke', groups.contributesTo],
 ] as const;
 const connectionData = connections
   .filter(([, entries]) => entries.length)
@@ -40,6 +40,12 @@ const connectionData = connections
       href: itemHref(curriculumGraph, target.id),
     })),
   }));
+
+const nextSmallStep =
+  progress?.continueFrom ||
+  item.challenge.steps[0] ||
+  item.scope[0] ||
+  'Buka bagian pertama dan buat satu catatan yang bisa diuji.';
 ---
 <AppLayout title={item.title} description={lesson?.data.description}>
   <LessonPage
@@ -47,6 +53,9 @@ const connectionData = connections
     itemId={item.id}
     title={item.title}
     description={lesson?.data.description}
+    marketExpectation={item.marketExpectation}
+    nextSmallStep={nextSmallStep}
+    estimatedMinutes={item.estimatedMinutes}
     available={Boolean(lesson && Content)}
     stale={stale}
     active={state.activeItemId === item.id}

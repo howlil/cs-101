@@ -26,8 +26,8 @@ export default function SessionLogger({
     lastAnchor={lastAnchor}
     groups={[{
       key: 'criteria',
-      title: 'Simpan sesi',
-      description: 'Bukti dinilai mandiri. Simpan catatan untuk melanjutkan sesi berikutnya.',
+      title: 'Target selesai',
+      description: 'Tambahkan bukti hanya ketika kamu memang ingin menyelesaikan unit.',
       criteria,
     }]}
   />;

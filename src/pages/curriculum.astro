@@ -44,10 +44,15 @@ try { learningState = await (await learning()).snapshot(); } catch { learningSta
 const viewFor = (id: string) => learningState ? getItemLearningView(graph, learningState, id) : undefined;
 const stateFor = (id: string) => viewFor(id)?.displayState ?? 'unknown';
 
+const previewHref = (item: typeof graph.manifest.items[number]) =>
+  item.kind === 'integration'
+    ? '/curriculum?item=' + encodeURIComponent(item.id)
+    : '/curriculum?track=' + encodeURIComponent(item.trackId) + '&item=' + encodeURIComponent(item.id);
+
 const explorerItem = (item: typeof graph.manifest.items[number]) => ({
   id: item.id,
   title: item.title,
-  href: itemHref(graph, item.id),
+  href: previewHref(item),
   kind: item.kind,
   state: stateFor(item.id),
   active: item.id === selectedItem?.id,
@@ -62,6 +67,11 @@ const selected = selectedItem && selectedLocation ? {
   href: itemHref(graph, selectedItem.id),
   state: selectedView?.displayState,
   missingPrerequisites: selectedView?.missingPrerequisites ?? [],
+  marketExpectation: selectedItem.kind === 'unit' ? selectedItem.marketExpectation : undefined,
+  nextSmallStep: selectedView?.continueFrom ||
+    (selectedItem.kind === 'unit' || selectedItem.kind === 'integration'
+      ? selectedItem.challenge.steps[0] ?? selectedItem.scope[0]
+      : selectedItem.requirements[0]?.text),
   scope: selectedItem.kind === 'unit' || selectedItem.kind === 'integration' ? selectedItem.scope : undefined,
   challenge: selectedItem.kind === 'unit' || selectedItem.kind === 'integration' ? selectedItem.challenge : undefined,
   criteria: selectedItem.kind === 'unit' || selectedItem.kind === 'integration' ? selectedItem.criteria : undefined,
@@ -71,11 +81,11 @@ const selected = selectedItem && selectedLocation ? {
   estimatedHours: selectedItem.estimatedMinutes ? Math.round(selectedItem.estimatedMinutes / 60 * 10) / 10 : undefined,
   prerequisites: (connections?.prerequisites ?? []).map((id) => {
     const item = graph.itemsById.get(id)!;
-    return { id, title: item.title, href: itemHref(graph, id) };
+    return { id, title: item.title, href: previewHref(item) };
   }),
 } : undefined;
 ---
-<AppLayout title="Materi" description="Browse curriculum CS-101 berdasarkan track, module, dan dependency." flush>
+<AppLayout title="Kurikulum" description="Browse kurikulum CS-101 berdasarkan jalur, modul, dan dependency." flush>
   <CurriculumPage
     client:load
     total={graph.manifest.items.length}

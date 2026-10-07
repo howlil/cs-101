@@ -9,7 +9,7 @@ export const sourceRefSchema=z.object({title:z.string().min(1),url:z.url().refin
 export const trackSchema=z.object({id:curriculumSlugSchema,title:z.string().min(1),order:z.number().int().positive()});
 export const moduleSchema=z.object({id:curriculumSlugSchema,trackId:curriculumSlugSchema,title:z.string().min(1),sourceLabel:z.string().min(1).optional(),order:z.number().int().positive()});
 const baseItem=z.object({id:itemIdSchema,order:z.number().int().positive(),title:z.string().min(1),prerequisites:z.array(itemIdSchema),fingerprint:z.string().regex(/^sha256:[0-9a-f]{64}$/)});
-export const learningUnitSchema=baseItem.extend({kind:z.literal('unit'),trackId:curriculumSlugSchema,moduleId:curriculumSlugSchema,scope:z.array(z.string().min(1)).min(1),criteria:z.array(criterionSchema).min(1),challenge:challengeSchema,marketExpectation:z.array(z.string().min(1)),source:sourceRefSchema,estimatedMinutes:z.number().int().positive().optional(),crossModuleReferenceRaw:z.array(z.string().min(1))});
+export const learningUnitSchema=baseItem.extend({kind:z.literal('unit'),trackId:curriculumSlugSchema,moduleId:curriculumSlugSchema,scope:z.array(z.string().min(1)).min(1),criteria:z.array(criterionSchema).min(1),challenge:challengeSchema,marketExpectation:z.array(z.string().min(1)),reflectionPrompts:z.array(z.string().min(1)).optional(),source:sourceRefSchema,estimatedMinutes:z.number().int().positive().optional(),crossModuleReferenceRaw:z.array(z.string().min(1))});
 export const projectCheckpointSchema=baseItem.extend({kind:z.literal('checkpoint'),trackId:curriculumSlugSchema,moduleId:curriculumSlugSchema,problemStatement:z.string().min(1),requirements:z.array(criterionSchema).min(1),parentProjectId:itemIdSchema.optional(),source:sourceRefSchema,estimatedMinutes:z.number().int().positive().optional()});
 export const integrationExerciseSchema=baseItem.extend({kind:z.literal('integration'),brief:z.string().min(1),scope:z.array(z.string().min(1)).min(1),challenge:challengeSchema,criteria:z.array(criterionSchema).min(1),requirements:z.array(criterionSchema),source:sourceRefSchema,estimatedMinutes:z.number().int().positive().optional()});
 export const curriculumItemSchema=z.discriminatedUnion('kind',[learningUnitSchema,projectCheckpointSchema,integrationExerciseSchema]);
@@ -45,7 +45,7 @@ function canonicalJsonValue(value:unknown):unknown{
   return value;
 }
 export function curriculumItemFingerprint(item:object){
-  const{fingerprint:_fingerprint,...payload}=item as Record<string,unknown>;
+  const{fingerprint:_fingerprint,reflectionPrompts:_reflectionPrompts,...payload}=item as Record<string,unknown>;
   return 'sha256:'+createHash('sha256').update(JSON.stringify(canonicalJsonValue(payload))).digest('hex');
 }
 export function parseManifestV2(input:unknown):CurriculumManifestV2{

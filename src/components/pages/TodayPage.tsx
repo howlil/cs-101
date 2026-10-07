@@ -1,6 +1,7 @@
 import { Home, RotateCcw } from 'lucide-react';
 import EmptyAction from '../arc/EmptyAction';
 import TaskCard from '../arc/TaskCard';
+import ActionLink from '../arc/ActionLink';
 
 type CardData = {
   id: string;
@@ -10,34 +11,51 @@ type CardData = {
   actionLabel: string;
 };
 
+type PrimaryCardData = CardData & {
+  breadcrumb: string;
+  nextStep: string;
+  whyNext: string;
+  whyMatters?: string;
+};
+
 export default function TodayPage({
   primary,
   review,
   reviewCount = 0,
 }: {
-  primary?: CardData;
+  primary?: PrimaryCardData;
   review?: CardData;
   reviewCount?: number;
 }) {
   return <div className="content">
     <p className="eyebrow"><Home size={13} strokeWidth={1.8} aria-hidden="true" /> BELAJAR / HARI INI</p>
     <h1>Lanjut dari sini.</h1>
-    <p className="lede">Satu item. Satu langkah berikutnya.</p>
+    <p className="lede">Satu fokus utama. Satu langkah berikutnya.</p>
 
     {primary ? (
-      <TaskCard
-        taskId={primary.id}
-        title={primary.title}
-        description={primary.description}
-        href={primary.href}
-        actionLabel={primary.actionLabel}
-      />
+      <section className="today-focus">
+        <p className="today-path">{primary.breadcrumb}</p>
+        <code className="today-item-id">{primary.id}</code>
+        <h2>{primary.title}</h2>
+        {primary.whyMatters && (
+          <div className="today-why">
+            <span>Kenapa ini penting</span>
+            <p>{primary.whyMatters}</p>
+          </div>
+        )}
+        <div className="today-next-step">
+          <span>Kerjakan ini dulu</span>
+          <strong>{primary.nextStep}</strong>
+          <small>{primary.whyNext}</small>
+        </div>
+        <ActionLink href={primary.href} label={primary.actionLabel} />
+      </section>
     ) : (
       <EmptyAction
         title="Tidak ada item yang siap."
-        description="Periksa prerequisite di curriculum."
+        description="Periksa prasyarat di kurikulum."
         href="/curriculum"
-        actionLabel="Buka curriculum"
+        actionLabel="Buka kurikulum"
       />
     )}
 
@@ -45,7 +63,7 @@ export default function TodayPage({
       <section className="today-review">
         <div className="today-review-heading">
           <h2><RotateCcw size={16} strokeWidth={1.8} aria-hidden="true" /> Review</h2>
-          {reviewCount > 1 && <span>{reviewCount} actionable</span>}
+          {reviewCount > 1 && <span>{reviewCount} perlu dikerjakan</span>}
         </div>
         <TaskCard
           taskId={review.id}
@@ -60,6 +78,6 @@ export default function TodayPage({
     )}
 
     <hr />
-    <p className="muted small">Progres dihitung dari evidence. Review mengukur retention setelah completion.</p>
+    <p className="muted small">Selesai ditentukan oleh bukti. Review menguji apakah pemahaman masih bisa dipanggil kembali.</p>
   </div>;
 }

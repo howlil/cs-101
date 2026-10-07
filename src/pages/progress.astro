@@ -9,27 +9,29 @@ const state = await (await learning()).export();
 const overview = getProgressOverview(curriculumGraph, state);
 
 const reviewLabel = (review: ItemLearningView['review']) => {
-  if (review === 'due') return 'Review due';
-  if (review === 'retry') return 'Review retry';
-  if (review === 'retained') return 'Retained';
-  if (review === 'scheduled') return 'Review scheduled';
+  if (review === 'due') return 'Review hari ini';
+  if (review === 'retry') return 'Perlu diulang';
+  if (review === 'retained') return 'Teringat';
+  if (review === 'scheduled') return 'Terjadwal';
   return '';
 };
 
 const stateLabel = (view: ItemLearningView) => {
-  if (view.displayState === 'passed') return 'Lulus';
-  if (view.displayState === 'stale') return 'Stale';
-  if (view.displayState === 'active') return 'Aktif';
+  if (view.displayState === 'passed') return 'Selesai';
+  if (view.displayState === 'stale') return 'Perlu diperbarui';
+  if (view.displayState === 'active') return 'Sedang dikerjakan';
   if (view.displayState === 'started') return 'Pernah mulai';
-  if (view.displayState === 'locked') return 'Locked';
-  if (view.displayState === 'ready') return 'Ready';
-  return 'Belum';
+  if (view.displayState === 'locked') return 'Terkunci';
+  if (view.displayState === 'ready') return 'Siap';
+  return 'Belum mulai';
 };
 
 const reviews = overview.actionableReviews.map(({ review, item }) => ({
   id: item.item.id,
   title: item.item.title,
   state: review.state === 'retry' ? 'retry' as const : 'due' as const,
+  step: review.step,
+  dueAt: review.dueAt,
 }));
 
 const tracks = overview.tracks.map((track) => ({
@@ -46,11 +48,42 @@ const integrations = overview.integrations.map((item) => ({
   passed: item.completion === 'passed',
 }));
 
-const sessions = state.sessions.slice().reverse().map((session) => ({
-  id: session.itemId || session.taskId,
-  recordedAt: session.recordedAt,
-  continueFrom: session.continueFrom || '',
-}));
+type ExportSession = {
+  itemId?: string;
+  taskId?: string;
+  recordedAt: string;
+  continueFrom?: string;
+  kind?: string;
+  minutes?: number;
+  evidence?: unknown[];
+  reflection?: Record<string, string>;
+};
+
+const sessions = (state.sessions as ExportSession[])
+  .slice(-20)
+  .reverse()
+  .map((session) => {
+    const id = session.itemId || session.taskId || '';
+    const item = curriculumGraph.itemsById.get(id);
+    const reflection = session.reflection ?? {};
+    const reflectionSummary =
+      reflection.explainWithoutNotes ||
+      reflection.evidenceChangedMind ||
+      reflection.wrongAssumption ||
+      reflection.tradeoffChosen ||
+      reflection.monitorInProduction;
+
+    return {
+      id,
+      title: item?.title ?? 'Item curriculum',
+      recordedAt: session.recordedAt,
+      continueFrom: session.continueFrom || '',
+      kind: session.kind === 'passed' ? 'passed' as const : 'progress' as const,
+      minutes: typeof session.minutes === 'number' ? session.minutes : undefined,
+      evidenceCount: Array.isArray(session.evidence) ? session.evidence.length : 0,
+      reflectionSummary,
+    };
+  });
 ---
 <AppLayout title="Progres">
   <ProgressPage

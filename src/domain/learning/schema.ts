@@ -6,6 +6,14 @@ const envelope = {
   revision: z.number().int().nonnegative(),
 };
 
+export const sessionReflectionSchema = z.object({
+  wrongAssumption: z.string().trim().max(4000).default(''),
+  evidenceChangedMind: z.string().trim().max(4000).default(''),
+  tradeoffChosen: z.string().trim().max(4000).default(''),
+  explainWithoutNotes: z.string().trim().max(4000).default(''),
+  monitorInProduction: z.string().trim().max(4000).default(''),
+});
+
 const canonicalSessionFields = z.object({
   itemId: itemIdSchema,
   fingerprint: z.string().regex(/^sha256:[a-f0-9]{64}$/),
@@ -17,6 +25,7 @@ const canonicalSessionFields = z.object({
   continueFrom: z.string().trim().max(4000).default(''),
   lastAnchor: z.string().regex(/^[a-zA-Z0-9_-]*$/).max(200).default(''),
   minutes: z.number().int().min(0).max(1440).optional(),
+  reflection: sessionReflectionSchema.optional(),
 });
 
 function withLegacyItemId(value: unknown) {
@@ -46,6 +55,7 @@ export const activeItemSchema = z.preprocess(
 // Compatibility name while old clients/routes are being retired.
 export const activeTaskSchema = activeItemSchema;
 
+export type SessionReflection = z.infer<typeof sessionReflectionSchema>;
 export type SessionInput = z.infer<typeof sessionSchema>;
 export type SessionFields = z.infer<typeof sessionFields>;
 export type ActiveItemInput = z.infer<typeof activeItemSchema>;

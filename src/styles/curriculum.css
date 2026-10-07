@@ -324,3 +324,21 @@
   padding-bottom: 4px;
 }
 .module-tree--uiarc .item-row { padding-inline: 5px; }
+
+
+.item-why {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+}
+.item-why h3 { margin-top: 0; }
+
+.item-next-step {
+  padding: 16px 18px;
+  border-left: 3px solid var(--accent-strong);
+  background: var(--accent-subtle);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+}
+.item-next-step strong { display: block; font-size: 14px; line-height: 1.5; }
+.item-next-step p { margin: 6px 0 0; }

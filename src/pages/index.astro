@@ -4,42 +4,65 @@ import TodayPage from '../components/pages/TodayPage';
 import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
 import { getTodayView } from '../domain/learning/view-models';
+import { getItemLocation } from '../domain/curriculum-v2/selectors';
 
 const state = await (await learning()).snapshot();
 const today = getTodayView(curriculumGraph, state);
 const primary = today.primary;
 
-const primaryDescription = primary
-  ? today.primaryMode === 'continue'
-    ? primary.continueFrom || 'Lanjutkan item aktif.'
-    : primary.displayState === 'stale'
-      ? 'Curriculum berubah. Validasi ulang item ini.'
-      : primary.displayState === 'started'
-        ? primary.continueFrom || 'Lanjutkan pekerjaan sebelumnya.'
-        : 'Item berikutnya sudah siap dikerjakan.'
-  : '';
+const nextStepFor = (view: NonNullable<typeof primary>) => {
+  if (view.continueFrom) return view.continueFrom;
+  const item = view.item;
+  if (item.kind === 'unit' || item.kind === 'integration') {
+    return item.challenge.steps[0] ?? item.scope[0] ?? 'Buka materi dan kerjakan satu bagian kecil.';
+  }
+  return item.requirements[0]?.text ?? 'Buka checkpoint dan kerjakan requirement pertama.';
+};
 
 const primaryAction = primary
   ? today.primaryMode === 'continue' || primary.displayState === 'started'
-    ? 'Lanjutkan'
+    ? 'Lanjut belajar'
     : primary.displayState === 'stale'
-      ? 'Validasi ulang'
-      : 'Buka'
+      ? 'Perbarui & validasi'
+      : primary.item.kind === 'unit'
+        ? 'Mulai belajar'
+        : 'Buka workspace'
   : '';
 
-const primaryCard = primary ? {
-  id: primary.item.id,
-  title: primary.item.title,
-  description: primaryDescription,
-  href: primary.href,
-  actionLabel: primaryAction,
-} : undefined;
+const primaryCard = primary ? (() => {
+  const location = getItemLocation(curriculumGraph, primary.item.id);
+  const breadcrumb = [location.track?.title ?? 'Cross-track', location.module?.title]
+    .filter(Boolean)
+    .join(' / ');
+  const whyNext = today.primaryMode === 'continue'
+    ? 'Melanjutkan sesi aktif.'
+    : primary.item.prerequisites.length
+      ? 'Prasyarat sudah terpenuhi.'
+      : 'Item berikutnya yang siap di jalur ini.';
+  const whyMatters = primary.item.kind === 'unit'
+    ? primary.item.marketExpectation[0]
+    : primary.item.kind === 'checkpoint'
+      ? primary.item.problemStatement
+      : primary.item.brief;
+
+  return {
+    id: primary.item.id,
+    title: primary.item.title,
+    description: primary.continueFrom || 'Item siap dikerjakan.',
+    breadcrumb,
+    nextStep: nextStepFor(primary),
+    whyNext,
+    whyMatters,
+    href: primary.href,
+    actionLabel: primaryAction,
+  };
+})() : undefined;
 
 const reviewCard = today.nextReview ? {
   id: today.nextReview.item.item.id,
   title: today.nextReview.item.item.title,
   description: today.nextReview.review.state === 'retry'
-    ? 'Retry recall diperlukan.'
+    ? 'Recall sebelumnya belum cukup. Coba lagi tanpa catatan.'
     : 'Review sudah jatuh tempo.',
   href: '/review/' + today.nextReview.item.item.id,
   actionLabel: today.nextReview.review.state === 'retry' ? 'Ulangi review' : 'Mulai review',

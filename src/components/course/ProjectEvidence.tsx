@@ -52,6 +52,6 @@ export default function ProjectEvidence({
     lastAnchor={lastAnchor}
     groups={groups}
     className="project-evidence-form"
-    passLabel="Ajukan checkpoint selesai"
+    passLabel="Kirim bukti & selesaikan checkpoint"
   />;
 }

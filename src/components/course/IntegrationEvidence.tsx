@@ -55,6 +55,6 @@ export default function IntegrationEvidence({
     lastAnchor={lastAnchor}
     groups={groups}
     className="integration-evidence-form"
-    passLabel="Ajukan integration selesai"
+    passLabel="Kirim bukti & selesaikan integration"
   />;
 }

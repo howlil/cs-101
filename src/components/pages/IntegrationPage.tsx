@@ -77,14 +77,14 @@ export default function IntegrationPage({
 
       <div className="integration-status-row">
         {passed ? (
-          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Lulus</Badge>
+          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Selesai</Badge>
         ) : stale && !active ? (
           <>
-            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu validasi ulang</Badge>
-            {ready && <ActivateItem itemId={id} label="Validasi ulang" />}
+            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu diperbarui</Badge>
+            {ready && <ActivateItem itemId={id} label="Perbarui & validasi" />}
           </>
         ) : active ? (
-          <Badge tone="info" icon={<Boxes size={14} strokeWidth={1.8} />}>Aktif</Badge>
+          <Badge tone="info" icon={<Boxes size={14} strokeWidth={1.8} />}>Sedang dikerjakan</Badge>
         ) : ready ? (
           <ActivateItem itemId={id} label="Mulai integration" />
         ) : (
@@ -174,11 +174,11 @@ export default function IntegrationPage({
     ) : !passed && (
       <section className="integration-section integration-evidence-placeholder">
         <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
-        <h2>{ready ? 'Aktifkan integration untuk mulai mencatat evidence.' : 'Evidence belum dapat dicatat.'}</h2>
+        <h2>{ready ? 'Mulai integrasi untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
         <p className="muted">
           {ready
-            ? 'Integration memakai active-item contract yang sama dengan unit dan project.'
-            : 'Selesaikan seluruh hard prerequisite terlebih dahulu.'}
+            ? 'Integrasi mengikuti fokus belajar yang sama dengan unit dan project.'
+            : 'Selesaikan seluruh prasyarat terlebih dahulu.'}
         </p>
       </section>
     )}

@@ -216,8 +216,12 @@ export class LearningService {
       if (expected.some((id) => !provided.includes(id))) {
         throw new LearningError(422, 'Lengkapi bukti untuk semua kriteria dan challenge.');
       }
-    } else if (!input.evidence.length && !input.continueFrom) {
-      throw new LearningError(422, 'Isi bukti atau catatan lanjut.');
+    } else if (
+      !input.evidence.length &&
+      !input.continueFrom &&
+      !Object.values(input.reflection ?? {}).some((value) => value.trim())
+    ) {
+      throw new LearningError(422, 'Isi titik lanjut, bukti, atau refleksi sesi.');
     }
 
     const wasCurrentPass = before.progress.find((entry) => entry.itemId === item.id)?.status === 'passed';

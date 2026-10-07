@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { BarChart3, BookOpen, Heart, Home, Star } from 'lucide-react';
+import { BarChart3, BookOpen, Home } from 'lucide-react';
 import CurriculumSearch from '../search/CurriculumSearch';
 import ThemePreference from '../arc/ThemePreference';
 import type { CurriculumSearchEntry } from '../../domain/curriculum-v2/selectors';
@@ -38,32 +38,12 @@ export default function AppShell({
         <span className="brand-mark" aria-hidden="true">CS</span>
         <span>
           CS-101
-          <span className="brand-sub">Catatan belajar</span>
+          <span className="brand-sub">Learning workspace</span>
         </span>
       </a>
 
       <div className="header-actions">
         <CurriculumSearch entries={searchEntries} />
-        <a
-          className="top-action"
-          href="https://github.com/howlil/cs-101"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Star CS-101 di GitHub"
-          title="Star repository"
-        >
-          <Star size={15} strokeWidth={1.8} aria-hidden="true" />
-        </a>
-        <a
-          className="top-action"
-          href="https://github.com/sponsors/howlil"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Donasi lewat GitHub Sponsors"
-          title="Donate"
-        >
-          <Heart size={15} strokeWidth={1.8} aria-hidden="true" />
-        </a>
         <ThemePreference />
       </div>
     </header>
@@ -75,28 +55,25 @@ export default function AppShell({
             className="rail-link"
             href="/"
             aria-current={currentPath === '/' ? 'page' : undefined}
-            data-label="Hari ini"
           >
-            <Home size={19} strokeWidth={1.8} aria-hidden="true" />
-            <span className="sr-only">Hari ini</span>
+            <Home size={18} strokeWidth={1.8} aria-hidden="true" />
+            <span className="rail-label">Hari ini</span>
           </a>
           <a
             className="rail-link"
             href="/curriculum"
             aria-current={materialActive ? 'page' : undefined}
-            data-label="Materi"
           >
-            <BookOpen size={19} strokeWidth={1.8} aria-hidden="true" />
-            <span className="sr-only">Materi</span>
+            <BookOpen size={18} strokeWidth={1.8} aria-hidden="true" />
+            <span className="rail-label">Kurikulum</span>
           </a>
           <a
             className="rail-link"
             href="/progress"
             aria-current={currentPath === '/progress' ? 'page' : undefined}
-            data-label="Progres"
           >
-            <BarChart3 size={19} strokeWidth={1.8} aria-hidden="true" />
-            <span className="sr-only">Progres</span>
+            <BarChart3 size={18} strokeWidth={1.8} aria-hidden="true" />
+            <span className="rail-label">Progres</span>
           </a>
         </nav>
       </aside>

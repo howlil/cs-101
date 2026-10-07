@@ -14,7 +14,33 @@ import { Badge } from '../arc/badge/badge';
 import { Card } from '../arc/card/card';
 import ReviewAttempt from '../course/ReviewAttempt';
 
+const REVIEW_DAYS = [1, 3, 7, 14, 30] as const;
+
 type PublicQuestion = { id: string; prompt: string; options: string[] };
+
+function RetentionTimeline({
+  step,
+  state,
+}: {
+  step: number;
+  state: 'scheduled' | 'due' | 'retry' | 'retained';
+}) {
+  return <section className="review-retention">
+    <div>
+      <p className="eyebrow">RETENTION</p>
+      <h2>Jadwal penguatan ingatan</h2>
+    </div>
+    <div className="retention-steps retention-steps--large">
+      {REVIEW_DAYS.map((day, index) => {
+        const done = state === 'retained' || index < step;
+        const current = state !== 'retained' && index === step;
+        return <span key={day} className={done ? 'is-done' : current ? 'is-current' : ''}>
+          {done ? '✓ ' : current ? '● ' : '○ '}Hari {day}
+        </span>;
+      })}
+    </div>
+  </section>;
+}
 
 export default function ReviewPage({
   itemId,
@@ -39,79 +65,85 @@ export default function ReviewPage({
     <header className="review-header">
       <a className="review-back" href={itemHref}>
         <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
-        <span>Kembali ke item</span>
+        <span>Kembali ke materi</span>
       </a>
       <p className="eyebrow"><BrainCircuit size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId} / REVIEW</p>
       <h1>{title}</h1>
-      <p className="lede">Recall-first. Completion dan review adalah dua state yang berbeda.</p>
+      <p className="lede">Jawab tanpa membuka catatan. Tujuannya mengecek apakah pemahaman masih bisa dipanggil kembali.</p>
     </header>
 
     {completion !== 'passed' ? (
       <EmptyAction
-        title={completion === 'stale' ? 'Completion perlu divalidasi ulang.' : 'Item belum lulus.'}
-        description="Review hanya tersedia setelah item lulus terhadap curriculum aktif."
+        title={completion === 'stale' ? 'Materi perlu divalidasi ulang.' : 'Item belum selesai.'}
+        description="Review tersedia setelah semua target selesai memiliki bukti."
         href={itemHref}
-        actionLabel="Buka item"
+        actionLabel="Buka materi"
       />
     ) : !review ? (
       <EmptyAction
         title="Review belum terjadwal."
-        description="Schedule dibuat ketika item pertama kali lulus."
+        description="Jadwal dibuat ketika item pertama kali selesai."
         href="/progress"
         actionLabel="Buka progres"
       />
-    ) : review.state === 'retained' ? (
-      <Card
-        title="Retained"
-        description="Seluruh interval review v1 sudah dilewati."
-        meta={<CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />}
-        status="Retention"
-      />
-    ) : review.state === 'scheduled' ? (
-      <Card
-        title="Belum jatuh tempo"
-        description={review.dueAt
-          ? 'Review berikutnya: ' + new Date(review.dueAt).toLocaleString('id-ID')
-          : 'Tanggal review berikutnya belum ditentukan.'}
-        meta={<CalendarClock size={15} strokeWidth={1.8} aria-hidden="true" />}
-        status="Scheduled"
-      />
-    ) : !bank ? (
-      <EmptyAction
-        title="Review set belum tersedia."
-        description="Schedule sudah due, tetapi assessment bank terstruktur untuk item ini belum dibuat."
-        href={itemHref}
-        actionLabel="Buka materi"
-      />
-    ) : !bank.current ? (
-      <EmptyAction
-        title="Review set perlu diperbarui."
-        description="Assessment bank masih memakai fingerprint curriculum lama."
-        href={itemHref}
-        actionLabel="Buka materi terbaru"
-      />
-    ) : canAttempt ? (
-      <>
-        <section className="review-status-line">
-          <Badge
-            tone={review.state === 'retry' ? 'warning' : 'info'}
-            icon={review.state === 'retry'
-              ? <RotateCcw size={13} strokeWidth={1.8} />
-              : <ShieldCheck size={13} strokeWidth={1.8} />}
-          >
-            {review.state === 'retry' ? 'Retry' : 'Due'}
-          </Badge>
-          <span>Interval step {review.step + 1}</span>
-        </section>
-        <ReviewAttempt
-          itemId={itemId}
-          version={bank.version}
-          revision={revision}
-          questions={bank.questions}
-        />
-      </>
     ) : (
-      <ActionLink href={itemHref} label="Kembali ke item" />
+      <>
+        <RetentionTimeline step={review.step} state={review.state} />
+
+        {review.state === 'retained' ? (
+          <Card
+            title="Teringat"
+            description="Semua tahap review 1, 3, 7, 14, dan 30 hari sudah dilewati."
+            meta={<CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />}
+            status="Retention"
+          />
+        ) : review.state === 'scheduled' ? (
+          <Card
+            title="Belum waktunya review"
+            description={review.dueAt
+              ? 'Review berikutnya: ' + new Date(review.dueAt).toLocaleString('id-ID')
+              : 'Tanggal review berikutnya belum ditentukan.'}
+            meta={<CalendarClock size={15} strokeWidth={1.8} aria-hidden="true" />}
+            status="Terjadwal"
+          />
+        ) : !bank ? (
+          <EmptyAction
+            title="Set review belum tersedia."
+            description="Review sudah jatuh tempo, tetapi bank soal untuk item ini belum dibuat."
+            href={itemHref}
+            actionLabel="Buka materi"
+          />
+        ) : !bank.current ? (
+          <EmptyAction
+            title="Set review perlu diperbarui."
+            description="Bank soal masih memakai versi kurikulum lama."
+            href={itemHref}
+            actionLabel="Buka materi terbaru"
+          />
+        ) : canAttempt ? (
+          <>
+            <section className="review-status-line">
+              <Badge
+                tone={review.state === 'retry' ? 'warning' : 'info'}
+                icon={review.state === 'retry'
+                  ? <RotateCcw size={13} strokeWidth={1.8} />
+                  : <ShieldCheck size={13} strokeWidth={1.8} />}
+              >
+                {review.state === 'retry' ? 'Perlu diulang' : 'Review hari ini'}
+              </Badge>
+              <span>Tahap {review.step + 1} dari {REVIEW_DAYS.length}</span>
+            </section>
+            <ReviewAttempt
+              itemId={itemId}
+              version={bank.version}
+              revision={revision}
+              questions={bank.questions}
+            />
+          </>
+        ) : (
+          <ActionLink href={itemHref} label="Kembali ke materi" />
+        )}
+      </>
     )}
   </article>;
 }

@@ -85,14 +85,14 @@ export default function ProjectPage({
 
       <div className="project-status-row">
         {passed ? (
-          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Lulus</Badge>
+          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Selesai</Badge>
         ) : stale && !active ? (
           <>
-            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu validasi ulang</Badge>
-            {ready && <ActivateItem itemId={id} label="Validasi ulang" />}
+            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu diperbarui</Badge>
+            {ready && <ActivateItem itemId={id} label="Perbarui & validasi" />}
           </>
         ) : active ? (
-          <Badge tone="info" icon={<FolderKanban size={14} strokeWidth={1.8} />}>Aktif</Badge>
+          <Badge tone="info" icon={<FolderKanban size={14} strokeWidth={1.8} />}>Sedang dikerjakan</Badge>
         ) : ready ? (
           <ActivateItem itemId={id} label="Mulai checkpoint" />
         ) : (
@@ -191,11 +191,11 @@ export default function ProjectPage({
     ) : !passed && (
       <section className="project-section project-evidence-placeholder">
         <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
-        <h2>{ready ? 'Aktifkan checkpoint untuk mulai mencatat evidence.' : 'Evidence belum dapat dicatat.'}</h2>
+        <h2>{ready ? 'Mulai checkpoint untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
         <p className="muted">
           {ready
-            ? 'Satu active item dijaga agar continuation point dan evidence tidak bercampur.'
-            : 'Selesaikan prerequisite terlebih dahulu.'}
+            ? 'Fokus satu item agar titik lanjut dan bukti tidak bercampur.'
+            : 'Selesaikan prasyarat terlebih dahulu.'}
         </p>
       </section>
     )}
