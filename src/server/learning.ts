@@ -4,6 +4,7 @@ import type { CurriculumGraph } from '../domain/curriculum-v2/graph';
 import {
   deriveAvailability,
   requiredEvidenceForItem,
+  withCurrentCompletion,
   type ItemProgressState,
 } from '../domain/learning/rules';
 import { activeItemSchema, sessionSchema, type SessionFields } from '../domain/learning/schema';
@@ -36,13 +37,14 @@ export class LearningService {
     const rows = this.db.prepare(
       'SELECT item_id AS itemId, status, passed_fingerprint AS passedFingerprint, last_anchor AS lastAnchor, continue_from AS continueFrom FROM item_progress',
     ).all() as ItemProgressState[];
-    const progress = rows.map((item) => ({ ...item, taskId: item.itemId }));
+    const currentRows = withCurrentCompletion(this.graph, rows);
+    const progress = currentRows.map((item) => ({ ...item, taskId: item.itemId }));
     return {
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress,
-      availability: deriveAvailability(this.graph, rows),
+      availability: deriveAvailability(this.graph, currentRows),
     };
   }
 

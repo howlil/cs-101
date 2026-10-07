@@ -421,3 +421,5 @@
   color: var(--accent-strong);
   border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
 }
+
+.state-label--stale { color: var(--warning); }

@@ -3,6 +3,7 @@ import type { CurriculumGraph } from '../domain/curriculum-v2/graph';
 import {
   deriveAvailability,
   requiredEvidenceForItem,
+  withCurrentCompletion,
   type ItemProgressState,
 } from '../domain/learning/rules';
 import { activeItemSchema, sessionSchema, type SessionFields } from '../domain/learning/schema';
@@ -39,12 +40,13 @@ export class CloudflareLearningService {
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
     const rows = progressResult.results as ItemProgressState[];
+    const currentRows = withCurrentCompletion(this.graph, rows);
     return {
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
-      progress: rows.map((item) => ({ ...item, taskId: item.itemId })),
-      availability: deriveAvailability(this.graph, rows),
+      progress: currentRows.map((item) => ({ ...item, taskId: item.itemId })),
+      availability: deriveAvailability(this.graph, currentRows),
     };
   }
 
@@ -57,13 +59,14 @@ export class CloudflareLearningService {
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
     const rows = progressResult.results as ItemProgressState[];
+    const currentRows = withCurrentCompletion(this.graph, rows);
     return {
       version: 2,
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
-      progress: rows.map((item) => ({ ...item, taskId: item.itemId })),
-      availability: deriveAvailability(this.graph, rows),
+      progress: currentRows.map((item) => ({ ...item, taskId: item.itemId })),
+      availability: deriveAvailability(this.graph, currentRows),
       sessions: (sessionsResult.results as { id: string; itemId: string | null; recordedAt: string; payload: string }[])
         .map(({ payload, ...row }) => {
           const parsed = JSON.parse(payload) as Record<string, unknown>;

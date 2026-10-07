@@ -1,7 +1,8 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
 import type { Criterion, CurriculumItem } from '../curriculum-v2/schema';
 
-export type CompletionStatus = 'active' | 'passed';
+export type StoredCompletionStatus = 'active' | 'passed';
+export type CompletionStatus = StoredCompletionStatus | 'stale';
 
 export type ItemProgressState = {
   itemId: string;
@@ -26,11 +27,28 @@ export function requiredEvidenceForItem(item: CurriculumItem): Criterion[] {
   ];
 }
 
+export function withCurrentCompletion(
+  graph: CurriculumGraph,
+  progress: ItemProgressState[],
+): ItemProgressState[] {
+  return progress.map((entry) => {
+    if (entry.status !== 'passed') return entry;
+    const item = graph.itemsById.get(entry.itemId);
+    return item && entry.passedFingerprint === item.fingerprint
+      ? entry
+      : { ...entry, status: 'stale' as const };
+  });
+}
+
 export function deriveAvailability(
   graph: CurriculumGraph,
   progress: ItemProgressState[],
 ): AvailabilityState[] {
-  const passed = new Set(progress.filter((item) => item.status === 'passed').map((item) => item.itemId));
+  const current = withCurrentCompletion(graph, progress);
+  const passed = new Set(
+    current.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId),
+  );
+
   return graph.manifest.items.map((item) => {
     const missingPrerequisites = item.prerequisites.filter((id) => !passed.has(id));
     return {
@@ -41,13 +59,16 @@ export function deriveAvailability(
   });
 }
 
-export function assertItemReady(
+export function missingPrerequisites(
   graph: CurriculumGraph,
   itemId: string,
   progress: ItemProgressState[],
 ) {
   const item = graph.itemsById.get(itemId);
   if (!item) throw new Error('Item tidak ada di curriculum.');
-  const passed = new Set(progress.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId));
+  const current = withCurrentCompletion(graph, progress);
+  const passed = new Set(
+    current.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId),
+  );
   return item.prerequisites.filter((id) => !passed.has(id));
 }

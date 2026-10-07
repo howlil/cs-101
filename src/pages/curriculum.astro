@@ -51,6 +51,7 @@ const availabilityById = new Map(learningState?.availability.map((entry) => [ent
 const itemState = (itemId: string) => {
   const progress = progressById.get(itemId);
   if (progress?.status === 'passed') return 'passed';
+  if (progress?.status === 'stale' && learningState?.activeItemId !== itemId) return 'stale';
   if (learningState?.activeItemId === itemId) return 'active';
   return availabilityById.get(itemId)?.status ?? 'unknown';
 };
@@ -59,6 +60,7 @@ const stateMarker = (itemId: string, kind: string) => {
   const state = itemState(itemId);
   if (state === 'passed') return '✓';
   if (state === 'active') return '●';
+  if (state === 'stale') return '!';
   if (state === 'locked') return '×';
   if (state === 'ready') return '○';
   return itemMarker(kind);
@@ -204,6 +206,8 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
               <div class="item-state-actions">
                 {itemState(selectedItem.id) === 'passed' ? (
                   <span class="state-label state-label--passed">Lulus</span>
+                ) : itemState(selectedItem.id) === 'stale' ? (
+                  <span class="state-label state-label--stale">Perlu validasi ulang</span>
                 ) : itemState(selectedItem.id) === 'active' ? (
                   selectedItem.kind === 'unit'
                     ? <a class="workspace-action" href={`/learn/${selectedItem.id}`}>Lanjutkan</a>
