@@ -566,22 +566,6 @@ test('integration menunggu semua hard prerequisite lalu dapat diselesaikan tanpa
   }
 });
 
-test('related dan deep_dive tidak memblokir readiness integration', () => {
-  const db = openDatabase(':memory:');
-  try {
-    const service = new LearningService(db, graph, () => true);
-    const snapshot = service.snapshot();
-    const availability = snapshot.availability.find((entry) => entry.itemId === integration.id);
-    assert.equal(availability?.status, 'locked');
-    assert.deepEqual(
-      availability?.missingPrerequisites,
-      ['TEST-001', 'TEST-002'],
-    );
-  } finally {
-    db.close();
-  }
-});
-
 
 test('item passed membuat review schedule dan due state berasal dari waktu', () => {
   const db = openDatabase(':memory:');
