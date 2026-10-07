@@ -154,7 +154,7 @@ export default function ProgressPage({
     </section>
 
     <div className="actions">
-      <form action="/api/export" method="get">
+      <form action="/api/export" method="get" data-astro-reload="">
         <Button type="submit" variant="secondary">
           <Download size={15} strokeWidth={1.8} aria-hidden="true" />
           <span>Ekspor progres</span>

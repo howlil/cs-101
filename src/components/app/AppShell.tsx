@@ -11,11 +11,13 @@ type SearchEntry = CurriculumSearchEntry & { href: string };
 
 export default function AppShell({
   currentPath,
+  navigationKey,
   flush = false,
   searchEntries,
   children,
 }: {
   currentPath: string;
+  navigationKey: string;
   flush?: boolean;
   searchEntries: SearchEntry[];
   children: ReactNode;
@@ -103,7 +105,7 @@ export default function AppShell({
         id="main"
         tabIndex={-1}
         className={['app-main', flush ? 'app-main--flush' : ''].filter(Boolean).join(' ')}
-        key={currentPath}
+        key={navigationKey}
         initial={reduce ? false : { opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={reduce ? { duration: 0 } : { duration: .18, ease: [0.16, 1, 0.3, 1] }}

@@ -19,6 +19,7 @@ const {
 } = Astro.props;
 
 const path = Astro.url.pathname;
+const navigationKey = Astro.url.pathname + Astro.url.search;
 const searchEntries = buildCurriculumSearchIndex(curriculumGraph).map((entry) => ({
   ...entry,
   href: itemHref(curriculumGraph, entry.itemId),
@@ -49,6 +50,7 @@ Astro.response.headers.set('Cache-Control', 'no-store');
       client:load
       transition:persist="cs101-app-shell"
       currentPath={path}
+      navigationKey={navigationKey}
       flush={flush}
       searchEntries={searchEntries}
     >

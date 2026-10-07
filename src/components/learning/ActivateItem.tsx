@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { Button, type ButtonVariant } from '../arc/button/button';
 import { Play, RefreshCw } from 'lucide-react';
+import { navigate } from 'astro:transitions/client';
 import { Alert, type AlertTone } from '../arc/alert/alert';
 import { postJson, readDraft, removeDraft } from './client';
 
@@ -46,7 +47,7 @@ export default function ActivateItem({
       });
 
       if (previousItemId) removeDraft(previousItemId);
-      window.location.reload();
+      navigate(window.location.pathname + window.location.search, { history: 'replace' });
     } catch (error) {
       setFeedback({
         title: 'Item belum diubah',

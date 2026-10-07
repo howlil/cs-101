@@ -8,6 +8,7 @@ import {
   type CurriculumSearchEntry,
 } from "../../domain/curriculum-v2/selectors";
 import { Button } from "../arc/button/button";
+import { navigate } from "astro:transitions/client";
 import styles from "./curriculum-search.module.css";
 
 type SearchEntry = CurriculumSearchEntry & { href: string };
@@ -40,7 +41,10 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
 
   const select = (index: number) => {
     const target = results[index] as SearchEntry | undefined;
-    if (target) window.location.assign(target.href);
+    if (target) {
+      setOpen(false);
+      navigate(target.href);
+    }
   };
 
   return (
