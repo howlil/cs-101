@@ -6,7 +6,21 @@ import {
   withCurrentCompletion,
   type ItemProgressState,
 } from '../domain/learning/rules';
-import { activeItemSchema, sessionSchema, type SessionFields } from '../domain/learning/schema';
+import {
+  activeItemSchema,
+  reviewAttemptSchema,
+  sessionSchema,
+  type SessionFields,
+} from '../domain/learning/schema';
+import {
+  advanceReviewSchedule,
+  gradeReview,
+  initialReviewSchedule,
+  toReviewView,
+  type ReviewScheduleRow,
+  type ReviewScheduleView,
+} from '../domain/review/policy';
+import type { ReviewBank } from '../domain/review/schema';
 import { LearningError, type LearningSnapshot } from './learning';
 
 type D1Row = Record<string, unknown>;
@@ -24,55 +38,105 @@ export type D1Database = {
 
 type StateRow = { activeItemId: string | null; revision: number };
 type StoredReceipt = { payload_hash: string; response: string; nonce: string };
+type StoredReviewRow = {
+  itemId: string;
+  policyVersion: string;
+  step: number;
+  dueAt: string | null;
+  storedState: ReviewScheduleRow['storedState'];
+};
+
+function storedFromView(view: ReviewScheduleView): ReviewScheduleRow {
+  return {
+    itemId: view.itemId,
+    policyVersion: view.policyVersion,
+    step: view.step,
+    dueAt: view.dueAt,
+    storedState:
+      view.state === 'retry'
+        ? 'retry'
+        : view.state === 'retained'
+          ? 'retained'
+          : 'scheduled',
+  };
+}
 
 export class CloudflareLearningService {
   constructor(
     private db: D1Database,
     private graph: CurriculumGraph,
     private lessonReady: (itemId: string) => boolean,
+    private reviewBankFor: (itemId: string) => ReviewBank | undefined = () => undefined,
+    private now: () => Date = () => new Date(),
   ) {}
 
   async snapshot(): Promise<LearningSnapshot> {
-    const [stateResult, progressResult] = await this.db.batch([
+    const [stateResult, progressResult, reviewResult] = await this.db.batch([
       this.db.prepare('SELECT active_item_id AS activeItemId, revision FROM learner_state WHERE id=1'),
       this.db.prepare('SELECT item_id AS itemId, status, passed_fingerprint AS passedFingerprint, last_anchor AS lastAnchor, continue_from AS continueFrom FROM item_progress'),
+      this.db.prepare(`SELECT item_id AS itemId, policy_version AS policyVersion, step,
+        due_at AS dueAt, state AS storedState FROM review_schedule`),
     ]);
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
     const rows = progressResult.results as ItemProgressState[];
     const currentRows = withCurrentCompletion(this.graph, rows);
+    const now = this.now();
     return {
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress: currentRows.map((item) => ({ ...item, taskId: item.itemId })),
       availability: deriveAvailability(this.graph, currentRows),
+      reviews: (reviewResult.results as StoredReviewRow[]).map((row) => toReviewView(row, now)),
     };
   }
 
   async export() {
-    const [stateResult, progressResult, sessionsResult] = await this.db.batch([
+    const [stateResult, progressResult, reviewResult, sessionsResult, attemptsResult] = await this.db.batch([
       this.db.prepare('SELECT active_item_id AS activeItemId, revision FROM learner_state WHERE id=1'),
       this.db.prepare('SELECT item_id AS itemId, status, passed_fingerprint AS passedFingerprint, last_anchor AS lastAnchor, continue_from AS continueFrom FROM item_progress'),
+      this.db.prepare(`SELECT item_id AS itemId, policy_version AS policyVersion, step,
+        due_at AS dueAt, state AS storedState FROM review_schedule`),
       this.db.prepare('SELECT id, item_id AS itemId, recorded_at AS recordedAt, payload FROM sessions ORDER BY rowid'),
+      this.db.prepare(`SELECT id, item_id AS itemId, question_set_version AS questionSetVersion,
+        answers, grading_mode AS gradingMode, score, assisted, result,
+        recorded_at AS recordedAt FROM review_attempts ORDER BY rowid`),
     ]);
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
     const rows = progressResult.results as ItemProgressState[];
     const currentRows = withCurrentCompletion(this.graph, rows);
+    const now = this.now();
     return {
-      version: 2,
+      version: 3,
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress: currentRows.map((item) => ({ ...item, taskId: item.itemId })),
       availability: deriveAvailability(this.graph, currentRows),
+      reviews: (reviewResult.results as StoredReviewRow[]).map((row) => toReviewView(row, now)),
       sessions: (sessionsResult.results as { id: string; itemId: string | null; recordedAt: string; payload: string }[])
         .map(({ payload, ...row }) => {
           const parsed = JSON.parse(payload) as Record<string, unknown>;
           const itemId = row.itemId ?? String(parsed.itemId ?? parsed.taskId ?? '');
           return { ...row, ...parsed, itemId, taskId: itemId };
         }),
+      reviewAttempts: (attemptsResult.results as Array<{
+        id: string;
+        itemId: string;
+        questionSetVersion: string;
+        answers: string;
+        gradingMode: string;
+        score: number;
+        assisted: number;
+        result: string;
+        recordedAt: string;
+      }>).map((attempt) => ({
+        ...attempt,
+        answers: JSON.parse(attempt.answers) as number[],
+        assisted: Boolean(attempt.assisted),
+      })),
     };
   }
 
@@ -158,6 +222,7 @@ export class CloudflareLearningService {
       }
     }
 
+    const now = this.now();
     const nonce = randomUUID();
     const nextProgress = sessions.reduce(
       (progress, session) => this.progressAfter({ ...current, progress }, session),
@@ -175,12 +240,25 @@ export class CloudflareLearningService {
       });
     }
 
+    const reviewRows = new Map(
+      current.reviews.map((view) => [view.itemId, storedFromView(view)]),
+    );
+    const newlyPassed = sessions.filter((session) =>
+      session.kind === 'passed' &&
+      current.progress.find((entry) => entry.itemId === session.itemId)?.status !== 'passed'
+    );
+    for (const session of newlyPassed) {
+      reviewRows.set(session.itemId, initialReviewSchedule(session.itemId, now));
+    }
+
+    const nextReviews = [...reviewRows.values()].map((row) => toReviewView(row, now));
     const response: LearningSnapshot = {
       activeItemId: activeItemId ?? current.activeItemId,
       activeTaskId: activeItemId ?? current.activeItemId,
       revision: current.revision + 1,
       progress: nextProgress,
       availability: deriveAvailability(this.graph, nextProgress),
+      reviews: nextReviews,
     };
 
     const requestId = raw.requestId;
@@ -202,7 +280,7 @@ export class CloudflareLearningService {
 
     for (const session of sessions) {
       const id = randomUUID();
-      const recordedAt = new Date().toISOString();
+      const recordedAt = now.toISOString();
       const payload = JSON.stringify({ ...session, taskId: session.itemId });
       statements.push(this.db.prepare(`INSERT INTO sessions(id,task_id,recorded_at,payload,item_id)
         SELECT ?,?,?,?,? WHERE EXISTS (SELECT 1 FROM learner_state WHERE id=1 AND revision=?+1)
@@ -222,6 +300,28 @@ export class CloudflareLearningService {
             continue_from=excluded.continue_from`)
           .bind(session.itemId, status, passedFingerprint, session.lastAnchor, session.continueFrom, revision, requestId, nonce));
       }
+    }
+
+    for (const session of newlyPassed) {
+      const schedule = reviewRows.get(session.itemId)!;
+      statements.push(this.db.prepare(`INSERT INTO review_schedule(item_id,policy_version,step,due_at,state)
+        SELECT ?,?,?,?,? WHERE EXISTS (
+          SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+        )
+        ON CONFLICT(item_id) DO UPDATE SET
+          policy_version=excluded.policy_version,
+          step=excluded.step,
+          due_at=excluded.due_at,
+          state=excluded.state`)
+        .bind(
+          schedule.itemId,
+          schedule.policyVersion,
+          schedule.step,
+          schedule.dueAt,
+          schedule.storedState,
+          requestId,
+          nonce,
+        ));
     }
 
     if (activeItemId && !current.progress.some((entry) => entry.itemId === activeItemId)) {
@@ -259,6 +359,113 @@ export class CloudflareLearningService {
       input.itemId,
       input,
     );
+  }
+
+  async submitReview(raw: unknown) {
+    const input = reviewAttemptSchema.parse(raw);
+    const item = this.item(input.itemId);
+    const bank = this.reviewBankFor(input.itemId);
+    if (!bank) throw new LearningError(422, 'Review set belum tersedia untuk item ini.');
+    if (bank.curriculumFingerprint !== item.fingerprint) {
+      throw new LearningError(409, 'Review set stale terhadap curriculum aktif.');
+    }
+
+    let grading: ReturnType<typeof gradeReview>;
+    try {
+      grading = gradeReview(bank, input);
+    } catch (error) {
+      throw new LearningError(422, error instanceof Error ? error.message : 'Review tidak valid.');
+    }
+
+    const hash = createHash('sha256').update(JSON.stringify({ operation: 'review', input })).digest('hex');
+    const old = await this.db.prepare(
+      'SELECT payload_hash, response, nonce FROM request_receipts WHERE request_id=?',
+    ).bind(input.requestId).first<StoredReceipt>();
+    if (old) {
+      if (old.payload_hash !== hash) throw new LearningError(409, 'Request ID sudah dipakai untuk data berbeda.');
+      return { ...(JSON.parse(old.response) as LearningSnapshot), reviewAttempt: grading };
+    }
+
+    const current = await this.snapshot();
+    if (current.revision !== input.revision) {
+      throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
+    }
+    const completion = current.progress.find((entry) => entry.itemId === input.itemId);
+    if (completion?.status !== 'passed') {
+      throw new LearningError(422, 'Review hanya tersedia untuk item yang sudah lulus dan tidak stale.');
+    }
+
+    const view = current.reviews.find((entry) => entry.itemId === input.itemId);
+    if (!view) throw new LearningError(422, 'Review belum terjadwal.');
+    if (view.state === 'scheduled') throw new LearningError(422, 'Review belum jatuh tempo.');
+    if (view.state === 'retained') throw new LearningError(422, 'Item sudah retained pada policy review saat ini.');
+
+    const now = this.now();
+    const currentRow = storedFromView(view);
+    const nextSchedule = advanceReviewSchedule(currentRow, grading.result === 'passed', now);
+    const nextReviews = current.reviews.map((entry) =>
+      entry.itemId === input.itemId ? toReviewView(nextSchedule, now) : entry
+    );
+    const response: LearningSnapshot = {
+      ...current,
+      revision: current.revision + 1,
+      reviews: nextReviews,
+    };
+
+    const nonce = randomUUID();
+    const attemptId = randomUUID();
+    const statements: D1Statement[] = [
+      this.db.prepare(`INSERT INTO request_receipts(request_id,payload_hash,response,nonce)
+        SELECT ?,?,?,? WHERE EXISTS (SELECT 1 FROM learner_state WHERE id=1 AND revision=?)
+        AND NOT EXISTS (SELECT 1 FROM request_receipts WHERE request_id=?)`)
+        .bind(input.requestId, hash, JSON.stringify(response), nonce, input.revision, input.requestId),
+      this.db.prepare(`UPDATE learner_state SET revision=revision+1
+        WHERE id=1 AND revision=? AND EXISTS (
+          SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+        )`)
+        .bind(input.revision, input.requestId, nonce),
+      this.db.prepare(`INSERT INTO review_attempts(
+          id,item_id,question_set_version,answers,grading_mode,score,assisted,result,recorded_at
+        )
+        SELECT ?,?,?,?,?,?,?,?,? WHERE EXISTS (
+          SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+        )`)
+        .bind(
+          attemptId,
+          input.itemId,
+          input.questionSetVersion,
+          JSON.stringify(input.answers),
+          'multiple_choice',
+          grading.score,
+          grading.assisted ? 1 : 0,
+          grading.result,
+          now.toISOString(),
+          input.requestId,
+          nonce,
+        ),
+      this.db.prepare(`UPDATE review_schedule
+        SET policy_version=?, step=?, due_at=?, state=?
+        WHERE item_id=? AND EXISTS (
+          SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+        )`)
+        .bind(
+          nextSchedule.policyVersion,
+          nextSchedule.step,
+          nextSchedule.dueAt,
+          nextSchedule.storedState,
+          input.itemId,
+          input.requestId,
+          nonce,
+        ),
+    ];
+
+    await this.db.batch(statements);
+    const receipt = await this.db.prepare(
+      'SELECT payload_hash, response, nonce FROM request_receipts WHERE request_id=?',
+    ).bind(input.requestId).first<StoredReceipt>();
+    if (!receipt) throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
+    if (receipt.payload_hash !== hash) throw new LearningError(409, 'Request ID sudah dipakai untuk data berbeda.');
+    return { ...(JSON.parse(receipt.response) as LearningSnapshot), reviewAttempt: grading };
   }
 
   setActiveTask(raw: unknown) {
