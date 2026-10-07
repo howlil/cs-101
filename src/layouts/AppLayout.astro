@@ -1,12 +1,6 @@
 ---
 import '../styles/global.css';
 import '../styles/app-shell.css';
-import '../styles/curriculum.css';
-import '../styles/connections.css';
-import '../styles/integration.css';
-import '../styles/project.css';
-import '../styles/review.css';
-import { ClientRouter } from 'astro:transitions';
 import AppShell from '../components/app/AppShell';
 import { curriculumGraph } from '../server/curriculum';
 import { buildCurriculumSearchIndex, itemHref } from '../domain/curriculum-v2/selectors';
@@ -39,7 +33,6 @@ Astro.response.headers.set('Cache-Control', 'no-store');
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <title>{title} · CS-101</title>
-    <ClientRouter />
     <script is:inline>
       try {
         const preference = localStorage.getItem('cs101:theme') || 'system';
@@ -53,7 +46,6 @@ Astro.response.headers.set('Cache-Control', 'no-store');
   <body>
     <AppShell
       client:load
-      transition:persist="cs101-app-shell"
       currentPath={path}
       navigationKey={navigationKey}
       flush={flush}

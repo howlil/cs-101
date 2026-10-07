@@ -13,7 +13,6 @@ import {
 import { Input } from '../arc/input/input';
 import { Select } from '../arc/select/select';
 import { Accordion } from '../arc/accordion/accordion';
-import { navigate } from 'astro:transitions/client';
 
 type ItemKind = 'unit' | 'checkpoint' | 'integration';
 type DisplayState = 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
@@ -128,7 +127,7 @@ export default function CurriculumExplorer({
           }))}
           onValueChange={(next) => {
             if (next !== activeTrackId) {
-              navigate('/curriculum?track=' + encodeURIComponent(next));
+              window.location.assign('/curriculum?track=' + encodeURIComponent(next));
             }
           }}
         />
