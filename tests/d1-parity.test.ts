@@ -126,6 +126,9 @@ function snapshotShape(snapshot: Awaited<ReturnType<CloudflareLearningService['s
 test('SQLite dan D1 service menjaga contract state yang sama', async () => {
   const localDb = openDatabase(':memory:');
   const d1Db = openDatabase(':memory:');
+  // D1 initial schema has a nonce used by conditional mutation receipts.
+  // Local SQLite intentionally does not need this concurrency-only column.
+  d1Db.exec("ALTER TABLE request_receipts ADD COLUMN nonce TEXT NOT NULL DEFAULT ''");
   let clock = new Date('2026-10-07T00:00:00.000Z');
 
   const bank = reviewBankSchema.parse({
