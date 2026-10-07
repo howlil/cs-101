@@ -1,0 +1,124 @@
+.review-workspace {
+  width: min(820px,100%);
+}
+
+.review-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.review-back {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.review-header h1 {
+  max-width: 760px;
+  margin: 6px 0 8px;
+  font-size: 32px;
+}
+
+.review-status-card {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.review-status-card h2 {
+  margin: 4px 0 6px;
+  font-size: 17px;
+}
+
+.review-status-card p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.review-status-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 22px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.review-state {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  background: var(--accent-subtle);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.review-state--retry {
+  color: var(--warning);
+  background: var(--surface);
+}
+
+.review-attempt {
+  display: grid;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.review-instruction {
+  display: grid;
+  gap: 3px;
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  background: color-mix(in oklab,var(--accent-subtle) 45%,transparent);
+  font-size: 12px;
+}
+
+.review-instruction span {
+  color: var(--muted);
+}
+
+.review-question {
+  position: relative;
+  padding: 18px 18px 18px 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.review-question-index {
+  position: absolute;
+  left: 16px;
+  top: 19px;
+  color: var(--muted);
+  font: 650 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+
+.review-question .arc-alert {
+  margin-top: 12px;
+}
+
+.review-result {
+  margin-top: 24px;
+}
+
+.review-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+}
