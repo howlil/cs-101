@@ -54,7 +54,7 @@ export default function EvidenceForm({
   const [hydrated, setHydrated] = useState(false);
   const [loadingKind, setLoadingKind] = useState<'progress' | 'passed'>();
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone: AlertTone }>();
-  const request = useRef<{ key: string; id: string }>();
+  const request = useRef<{ key: string; id: string } | undefined>(undefined);
 
   const session = (kind: 'progress' | 'passed'): SessionFields => ({
     itemId,
