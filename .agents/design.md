@@ -485,7 +485,11 @@ Review menguji recall setelah completion, bukan menggantikan evidence.
 - Review failure tidak membatalkan historical evidence/completion.
 - Schedule berasal dari learning-state layer; jangan mengarang tanggal.
 
-Review due muncul di Hari ini dan Progress; tidak perlu global navigation sendiri.
+Review due/retry muncul di Hari ini dan Progress; tidak perlu global navigation sendiri.
+
+Policy runtime v1 memakai interval 1, 3, 7, 14, dan 30 hari setelah keberhasilan sebelumnya. Ini adalah keputusan produk aplikasi, bukan data curriculum workbook. Setelah interval terakhir berhasil, review menjadi `retained`. Review gagal tidak membatalkan completion; state menjadi `retry`.
+
+Answer key review tidak dikirim ke client sebelum submit. Server melakukan grading; remediation/explanation baru dikirim setelah attempt tercatat.
 
 ## Interaksi utama
 

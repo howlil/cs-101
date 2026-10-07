@@ -83,6 +83,11 @@ export function gradeReview(bank: ReviewBank, input: ReviewAttemptInput) {
   if (input.answers.length !== bank.questions.length) {
     throw new Error('Jawaban review tidak lengkap.');
   }
+  for (let index = 0; index < bank.questions.length; index += 1) {
+    if (input.answers[index] >= bank.questions[index].options.length) {
+      throw new Error('Pilihan jawaban review tidak valid.');
+    }
+  }
 
   const score = bank.questions.reduce(
     (total, question, index) => total + (input.answers[index] === question.answer ? 1 : 0),

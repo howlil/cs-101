@@ -498,6 +498,8 @@ due_at?
 state
 ```
 
+Policy v1: interval 1 → 3 → 7 → 14 → 30 hari. Interval ini adalah policy aplikasi dan tidak berasal dari curriculum workbook. `due` diturunkan dari `scheduled + due_at <= now`; `retry` dan `retained` disimpan eksplisit.
+
 ### request_receipts
 
 ```text
@@ -811,7 +813,7 @@ runtime render
 | P2 Generic learning state | item_progress, active item, readiness | Unit/checkpoint/integration memakai state engine sama |
 | P3 Project workflow | lineage + requirement delta + project evidence | Cumulative checkpoint dapat dikerjakan tanpa duplicate wall-of-text |
 | P4 Cross-module graph | typed relations + Connections selector/UI | Related/deep-dive terlihat tanpa menjadi prerequisite |
-| P5 Review engine | attempts + schedule + retention | Review due/retry/retained konsisten |
+| P5 Review engine ✅ | attempts + schedule + retention | Review due/retry/retained konsisten |
 | P6 Generator context | graph-aware context packet | Generator menerima prerequisite/project context yang tepat |
 | P7 Progress + search | hierarchical progress + local search | User dapat menemukan dan memahami posisi di curriculum besar |
 

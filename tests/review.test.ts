@@ -79,3 +79,18 @@ test('grade review butuh >=4/5 dan tidak assisted', () => {
     { score: 5, assisted: true, result: 'again' },
   );
 });
+
+
+test('grade review menolak answer index di luar options', () => {
+  assert.throws(
+    () => gradeReview(bank, {
+      requestId: '00000000-0000-4000-8000-000000000003',
+      revision: 0,
+      itemId: 'TEST-001',
+      questionSetVersion: 'review-v1',
+      answers: [9, 0, 0, 0, 0],
+      assisted: false,
+    }),
+    /tidak valid/,
+  );
+});
