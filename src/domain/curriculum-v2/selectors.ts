@@ -2,7 +2,54 @@ import type { CurriculumGraph } from './graph';
 export function getTrackExplorer(graph:CurriculumGraph,trackId:string){const track=graph.tracksById.get(trackId);if(!track)throw new Error('Track tidak ditemukan: '+trackId);const modules=[...graph.modulesById.values()].filter(x=>x.trackId===trackId).sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id)).map(module=>({...module,items:(graph.moduleItems.get(module.id)??[]).map(id=>graph.itemsById.get(id)!)}));return{track,modules};}
 export function getItemConnections(graph:CurriculumGraph,itemId:string){if(!graph.itemsById.has(itemId))throw new Error('Item tidak ditemukan: '+itemId);return{prerequisites:graph.prerequisites.get(itemId)??[],dependents:graph.dependents.get(itemId)??[],outgoing:graph.relationsFrom.get(itemId)??[],incoming:graph.relationsTo.get(itemId)??[]};}
 const normalizeRequirement=(text:string)=>text.toLowerCase().replace(/\s+/g,' ').trim();
-export function getProjectDelta(graph:CurriculumGraph,projectId:string){const project=graph.itemsById.get(projectId);if(!project||project.kind!=='checkpoint')throw new Error('Checkpoint tidak ditemukan: '+projectId);if(!project.parentProjectId)return{project,parent:undefined,inherited:[],added:project.requirements};const parent=graph.itemsById.get(project.parentProjectId);if(!parent||parent.kind!=='checkpoint')throw new Error('Project parent tidak valid: '+projectId);const previous=new Set(parent.requirements.map(x=>normalizeRequirement(x.text)));return{project,parent,inherited:project.requirements.filter(x=>previous.has(normalizeRequirement(x.text))),added:project.requirements.filter(x=>!previous.has(normalizeRequirement(x.text)))};}
+const inheritanceClause=(text:string)=>/^(includes|inherits|retains|preserves)\s+(every|all)\b/i.test(text.trim());
+
+export function getProjectDelta(graph:CurriculumGraph,projectId:string){
+  const project=graph.itemsById.get(projectId);
+  if(!project||project.kind!=='checkpoint')throw new Error('Checkpoint tidak ditemukan: '+projectId);
+  if(!project.parentProjectId){
+    return{project,parent:undefined,inherited:[],inheritanceClauses:[],added:project.requirements};
+  }
+
+  const parent=graph.itemsById.get(project.parentProjectId);
+  if(!parent||parent.kind!=='checkpoint')throw new Error('Project parent tidak valid: '+projectId);
+
+  const inheritanceClauses=project.requirements.filter(x=>inheritanceClause(x.text));
+  if(inheritanceClauses.length){
+    return{
+      project,
+      parent,
+      inherited:parent.requirements,
+      inheritanceClauses,
+      added:project.requirements.filter(x=>!inheritanceClause(x.text)),
+    };
+  }
+
+  const previous=new Set(parent.requirements.map(x=>normalizeRequirement(x.text)));
+  return{
+    project,
+    parent,
+    inherited:project.requirements.filter(x=>previous.has(normalizeRequirement(x.text))),
+    inheritanceClauses:[],
+    added:project.requirements.filter(x=>!previous.has(normalizeRequirement(x.text))),
+  };
+}
+
+export function getProjectNavigation(graph:CurriculumGraph,projectId:string){
+  const project=graph.itemsById.get(projectId);
+  if(!project||project.kind!=='checkpoint')throw new Error('Checkpoint tidak ditemukan: '+projectId);
+  const parent=project.parentProjectId?graph.itemsById.get(project.parentProjectId):undefined;
+  const children=(graph.projectChildren.get(project.id)??[])
+    .map(id=>graph.itemsById.get(id))
+    .filter((item):item is Extract<NonNullable<typeof item>,{kind:'checkpoint'}>=>item?.kind==='checkpoint')
+    .sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
+  return{
+    project,
+    parent:parent?.kind==='checkpoint'?parent:undefined,
+    children,
+    next:children[0],
+  };
+}
 
 export function getItemLocation(graph:CurriculumGraph,itemId:string){
   const item=graph.itemsById.get(itemId);

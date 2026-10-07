@@ -1,0 +1,106 @@
+---
+import type { Criterion } from '../../domain/curriculum-v2/schema';
+import { Textarea } from '../arc/textarea/textarea';
+import { Button } from '../arc/button/button';
+import Feedback from '../arc/Feedback';
+
+interface Props {
+  itemId: string;
+  fingerprint: string;
+  newRequirements: Criterion[];
+  inheritanceCriteria: Criterion[];
+  inheritedGuarantees: Criterion[];
+  revision: number;
+  continueFrom?: string;
+  lastAnchor?: string;
+}
+
+const {
+  itemId,
+  fingerprint,
+  newRequirements,
+  inheritanceCriteria,
+  inheritedGuarantees,
+  revision,
+  continueFrom = '',
+  lastAnchor = '',
+} = Astro.props;
+---
+<form
+  class="session-form project-evidence-form"
+  data-item-id={itemId}
+  data-fingerprint={fingerprint}
+  data-revision={revision}
+>
+  <section class="project-evidence-section">
+    <div class="project-section-heading">
+      <div>
+        <p class="eyebrow">EVIDENCE</p>
+        <h2>Requirement baru</h2>
+      </div>
+      <span>{newRequirements.length}</span>
+    </div>
+    <p class="muted small">Buktikan perubahan yang ditambahkan pada checkpoint ini.</p>
+    <fieldset>
+      <legend class="sr-only">Evidence requirement baru</legend>
+      {newRequirements.map((criterion) => (
+        <Textarea
+          label={criterion.text}
+          name={`evidence:${criterion.id}`}
+          rows={2}
+          maxLength={8000}
+        />
+      ))}
+    </fieldset>
+  </section>
+
+  {inheritanceCriteria.length > 0 && (
+    <section class="project-evidence-section project-evidence-section--inherited">
+      <div class="project-section-heading">
+        <div>
+          <p class="eyebrow">REGRESSION GUARANTEE</p>
+          <h2>Inherited guarantees</h2>
+        </div>
+        <span>{inheritedGuarantees.length}</span>
+      </div>
+      <p class="muted small">
+        Project lama sudah berubah. Berikan evidence bahwa guarantee yang diwariskan masih tetap berlaku.
+      </p>
+
+      <details class="inherited-guarantees">
+        <summary>Lihat guarantee dari checkpoint sebelumnya</summary>
+        <ol>
+          {inheritedGuarantees.map((criterion) => <li>{criterion.text}</li>)}
+        </ol>
+      </details>
+
+      <fieldset>
+        <legend class="sr-only">Evidence inherited guarantees</legend>
+        {inheritanceCriteria.map((criterion) => (
+          <Textarea
+            label={criterion.text}
+            name={`evidence:${criterion.id}`}
+            rows={3}
+            maxLength={8000}
+          />
+        ))}
+      </fieldset>
+    </section>
+  )}
+
+  <section class="project-evidence-section">
+    <Textarea
+      label="Lanjut dari mana?"
+      name="continueFrom"
+      rows={3}
+      maxLength={4000}
+      defaultValue={continueFrom}
+    />
+    <input type="hidden" name="lastAnchor" value={lastAnchor} />
+    <div class="actions">
+      <Button type="submit" variant="primary" value="progress">Simpan sesi</Button>
+      <Button type="submit" variant="secondary" value="passed">Ajukan checkpoint selesai</Button>
+    </div>
+    <Feedback client:load scope={`session:${itemId}`} />
+  </section>
+</form>
