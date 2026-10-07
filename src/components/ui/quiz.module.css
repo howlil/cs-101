@@ -1,0 +1,2 @@
+.quiz { display: grid; gap: var(--space-4); margin: var(--space-5) 0; }
+.question { display: grid; gap: var(--space-3); }

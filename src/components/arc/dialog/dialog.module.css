@@ -1,0 +1,47 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: color-mix(in oklab, var(--foreground) 22%, transparent);
+  backdrop-filter: blur(2px);
+  animation: dialog-overlay-in var(--duration-fast) var(--ease-enter) both;
+}
+.content {
+  position: fixed;
+  z-index: 100;
+  top: min(16vh, 132px);
+  left: 50%;
+  width: min(440px, calc(100vw - 28px));
+  max-height: min(76vh, 680px);
+  transform: translateX(-50%);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-raised);
+  color: var(--foreground);
+  box-shadow: var(--shadow-floating);
+  animation: dialog-content-in var(--duration-standard) var(--ease-enter) both;
+}
+.content[data-state="closed"] { animation: dialog-content-out var(--duration-fast) var(--ease-standard) both; }
+.overlay[data-state="closed"] { animation: dialog-overlay-out var(--duration-fast) var(--ease-standard) both; }
+.header {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.heading { min-width: 0; }
+.heading h2 { margin: 0; font-size: var(--text-sm); font-weight: 650; }
+.heading p { margin: 2px 0 0; color: var(--text-muted); font-size: var(--text-xs); }
+.close { width: 30px; min-width: 30px; height: 30px; min-height: 30px; padding: 0; }
+.body { min-width: 0; }
+@keyframes dialog-overlay-in { from { opacity: 0; } }
+@keyframes dialog-overlay-out { to { opacity: 0; } }
+@keyframes dialog-content-in { from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(.985); } }
+@keyframes dialog-content-out { to { opacity: 0; transform: translateX(-50%) translateY(3px) scale(.99); } }
+@media (prefers-reduced-motion: reduce) {
+  .content, .overlay, .content[data-state="closed"], .overlay[data-state="closed"] { animation-duration: var(--duration-instant); }
+}

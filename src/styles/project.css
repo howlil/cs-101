@@ -217,3 +217,24 @@
     text-align: left;
   }
 }
+
+/* Compact project */
+.project-header { padding-bottom: 20px; }
+.project-back { margin-bottom: 12px; }
+.project-header h1 { margin: 6px 0 8px; font-size: clamp(27px,3.4vw,34px); }
+.project-status-row { min-height: 32px; margin-top: 14px; }
+.project-context-grid { gap: 8px; margin: 18px 0 22px; }
+.project-section, .project-evidence-section { padding: 20px 0; }
+.project-section-heading { margin-bottom: 8px; }
+.project-section-heading h2 { font-size: 16px; }
+.project-requirement-list li { margin: 6px 0; }
+.project-contributors { gap: 0; }
+.project-contributors a {
+  padding: 7px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.project-lineage-nav { gap: 10px; padding-top: 18px; }

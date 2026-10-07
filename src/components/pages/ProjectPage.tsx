@@ -13,7 +13,7 @@ import {
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Card } from '../arc/card/card';
 import { Badge } from '../arc/badge/badge';
-import ActionLink from '../arc/ActionLink';
+import ActionLink from '../ui/ActionLink';
 import ActivateItem from '../learning/ActivateItem';
 import ProjectEvidence from '../course/ProjectEvidence';
 import GuaranteeAccordion from '../project/GuaranteeAccordion';

@@ -136,7 +136,7 @@ export default function CurriculumExplorer({
       {accordionItems.length > 0 && (
         <div className="module-tree module-tree--uiarc">
           <p className="explorer-label"><FolderKanban size={12} strokeWidth={1.8} aria-hidden="true" /> MODUL</p>
-          <Accordion items={accordionItems} defaultOpen={defaultOpen} />
+          <Accordion items={accordionItems} defaultOpen={defaultOpen} size="sm" />
         </div>
       )}
 

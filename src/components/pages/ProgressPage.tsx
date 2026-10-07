@@ -7,7 +7,7 @@ import {
   History,
   Check,
 } from 'lucide-react';
-import EmptyAction from '../arc/EmptyAction';
+import EmptyAction from '../ui/EmptyAction';
 import { Button } from '../arc/button/button';
 
 const REVIEW_DAYS = [1, 3, 7, 14, 30] as const;

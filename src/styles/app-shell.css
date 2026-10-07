@@ -1,10 +1,10 @@
 .topbar {
-  min-height: 56px;
-  padding: 0 14px 0 18px;
+  min-height: 52px;
+  padding: 0 12px 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   border-bottom: 1px solid var(--line);
   background: color-mix(in oklab, var(--canvas) 94%, transparent);
   backdrop-filter: blur(12px);
@@ -12,139 +12,97 @@
   top: 0;
   z-index: 30;
 }
-
 .brand {
   min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   color: var(--text);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 680;
   line-height: 1.05;
   letter-spacing: -.025em;
 }
-
 .brand-sub {
   display: block;
-  margin-top: 3px;
+  margin-top: 2px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 450;
   line-height: 1.2;
   letter-spacing: 0;
 }
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0;
-}
-
+.header-actions { display: flex; align-items: center; gap: 4px; margin: 0; }
 .app-shell {
-  min-height: calc(100vh - 56px);
+  min-height: calc(100vh - 52px);
   display: grid;
-  grid-template-columns: 156px minmax(0, 1fr);
+  grid-template-columns: 120px minmax(0, 1fr);
 }
-
 .global-rail {
   position: sticky;
-  top: 56px;
+  top: 52px;
   align-self: start;
-  height: calc(100vh - 56px);
-  padding: 10px;
+  height: calc(100vh - 52px);
+  padding: 8px;
   border-right: 1px solid var(--line);
   background: var(--surface);
   z-index: 20;
 }
-
-.global-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
+.global-nav { display: flex; flex-direction: column; gap: 3px; }
 .rail-link {
   width: 100%;
-  min-height: 42px;
+  min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 10px;
+  gap: 8px;
+  padding: 0 8px;
   border-radius: var(--radius-control);
   color: var(--muted);
   text-decoration: none;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 620;
   transition: color 140ms ease, background-color 140ms ease;
 }
-
-.rail-link:hover {
-  color: var(--text);
-  background: var(--surface-muted);
+.rail-link:hover { color: var(--text); background: var(--surface-muted); }
+.rail-link[aria-current="page"] { color: var(--accent-strong); background: var(--accent-subtle); }
+.rail-link:focus-visible { color: var(--foreground); background: var(--surface-muted); border-color: var(--border-strong); outline: none; }
+.app-main { min-width: 0; width: 100%; padding: 24px 24px 48px; }
+.app-main--flush { padding: 0; }
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-control);
+  background: var(--foreground);
+  color: var(--background);
+  font: 700 9px/1 var(--font-body);
+  letter-spacing: -.03em;
 }
-
-.rail-link[aria-current="page"] {
-  color: var(--accent-strong);
-  background: var(--accent-subtle);
-}
-
-.app-main {
-  min-width: 0;
-  width: 100%;
-  padding: 32px 32px 56px;
-}
-
-.app-main--flush {
-  padding: 0;
-}
-
 @media (max-width: 900px) {
-  .app-main:not(.app-main--flush) {
-    padding-inline: 22px;
-  }
+  .app-main:not(.app-main--flush) { padding-inline: 20px; }
 }
-
 @media (max-width: 767px) {
-  .topbar {
-    min-height: 52px;
-    padding-inline: 14px 10px;
-  }
-
-  .brand-sub {
-    display: none;
-  }
-
-  .app-shell {
-    display: block;
-    min-height: calc(100vh - 52px);
-  }
-
+  .topbar { min-height: 50px; padding-inline: 12px 8px; }
+  .brand-sub { display: none; }
+  .app-shell { display: block; min-height: calc(100vh - 50px); }
   .global-rail {
     position: fixed;
     inset: auto 0 0 0;
     width: 100%;
-    height: 62px;
-    padding: 6px 10px;
+    height: 60px;
+    padding: 5px 8px;
     border-right: 0;
     border-top: 1px solid var(--line);
     background: color-mix(in oklab, var(--surface) 96%, transparent);
     backdrop-filter: blur(12px);
     z-index: 40;
   }
-
-  .global-nav {
-    height: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-  }
-
+  .global-nav { height: 100%; flex-direction: row; align-items: center; justify-content: space-around; }
   .rail-link {
     width: min(104px, 30vw);
-    height: 48px;
+    min-height: 48px;
     justify-content: center;
     flex-direction: column;
     gap: 2px;
@@ -152,35 +110,7 @@
     font-size: 10px;
     line-height: 1;
   }
-
-  .rail-label {
-    font-size: 10px;
-  }
-
-  .app-main {
-    padding: 24px 16px 86px;
-  }
-
-  .app-main--flush {
-    padding: 0 0 62px;
-  }
-}
-
-.rail-link:focus-visible {
-  color: var(--foreground);
-  background: var(--surface-muted);
-  border-color: var(--border-strong);
-  outline: none;
-}
-
-.brand-mark {
-  width: 28px;
-  height: 28px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: var(--radius-control);
-  background: var(--foreground);
-  color: var(--background);
-  font: 700 10px/1 var(--font-body);
-  letter-spacing: -.03em;
+  .rail-label { font-size: 10px; }
+  .app-main { padding: 20px 14px 82px; }
+  .app-main--flush { padding: 0 0 60px; }
 }

@@ -219,3 +219,107 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
   .history-heading { display: grid; gap: 4px; }
   .history-heading > div { display: grid; gap: 2px; }
 }
+
+
+/* Compact product density */
+body { font-size: 15px; line-height: 1.6; }
+h2 { margin: 20px 0 10px; }
+h3 { margin: 18px 0 7px; }
+hr { margin: 24px 0; }
+.actions { margin: 12px 0; }
+.history-entry { padding: 12px 0; }
+.session-form { margin-top: 24px; }
+.progress-tracks { gap: 14px; margin-top: 20px; }
+.progress-review-queue, .progress-integrations { margin-top: 22px; padding-top: 14px; }
+.progress-history { margin-top: 22px; }
+
+.today-focus {
+  max-width: 680px;
+  margin-top: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.today-path { margin-bottom: 5px; font-size: 11px; }
+.today-item-id { margin-bottom: 5px; font-size: 10px; }
+.today-focus h2 { margin: 0 0 10px; font-size: 22px; }
+.today-why, .today-next-step {
+  margin: 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.today-next-step { margin-bottom: 10px; }
+.today-why > span, .today-next-step > span { margin-bottom: 3px; font-size: 9px; }
+.today-review { margin-top: 22px; }
+.today-review-heading h2 { margin: 0 0 6px; font-size: 15px; }
+.today-review-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 18px minmax(0,1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+}
+.today-review-row:hover .today-review-cta { color: var(--text); }
+.today-review-copy { min-width: 0; display: grid; gap: 1px; }
+.today-review-copy > span { min-width: 0; display: flex; gap: 7px; align-items: baseline; }
+.today-review-copy code { flex: none; color: var(--muted); font-size: 10px; }
+.today-review-copy strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.today-review-copy small { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.today-review-cta { display: inline-flex; align-items: center; gap: 3px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+
+.lesson-execution-context { gap: 0; margin: 20px 0 24px; }
+.lesson-why, .lesson-small-step {
+  padding: 11px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.lesson-why { border-top: 1px solid var(--line); }
+.lesson-stuck {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.lesson-why ul { margin: 6px 0 0; }
+.lesson-why li { margin: 3px 0; }
+.lesson-small-step strong { margin-top: 2px; }
+.lesson-small-step small { margin-top: 4px; }
+.lesson-stuck li { margin: 5px 0; }
+
+.session-close { padding: 16px 0; }
+.session-meta-field { max-width: 180px; }
+.session-reflection { margin-top: 10px; }
+.reflection-fields { gap: 2px; padding-top: 2px; }
+.reflection-fields textarea { min-height: 68px; }
+.evidence-completion { margin-top: 16px; padding-top: 18px; }
+.evidence-completion textarea { min-height: 84px; }
+.completion-rule {
+  gap: 3px;
+  margin-bottom: 16px;
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+  background: transparent;
+}
+.retention-steps--large { gap: 5px; margin: 10px 0 18px; }
+.retention-steps--large span { padding: 4px 7px; font-size: 10px; }
+.review-retention { margin: 18px 0; padding: 12px 0; }
+.review-retention h2 { font-size: 15px; }
+
+@media (max-width: 640px) {
+  .today-focus { padding: 0; }
+  .today-focus h2 { font-size: 20px; }
+  .today-review-row { grid-template-columns: 18px minmax(0,1fr); }
+  .today-review-cta { grid-column: 2; }
+}

@@ -41,7 +41,9 @@ for (const path of pageFiles) {
   }
 }
 
-const componentFiles = walk(join(root, 'src/components'))
+const componentsRoot = join(root, 'src/components');
+const arcRoot = join(componentsRoot, 'arc');
+const componentFiles = walk(componentsRoot)
   .filter((path) => path.endsWith('.tsx') && !path.includes('/arc/'));
 
 const forbiddenNativeControls = [
@@ -54,6 +56,7 @@ const forbiddenNativeControls = [
 ];
 
 const forbiddenGlyphIcons = ['←', '→', '◆', '◇', '○', '●', '◐', '✓', '×', '↑', '↓'];
+const forbiddenPrimitiveImports = ['@radix-ui/'];
 
 for (const path of componentFiles) {
   const source = readFileSync(path, 'utf8');
@@ -69,6 +72,18 @@ for (const path of componentFiles) {
       failures.push(relative(root, path) + ': text glyph used as icon: ' + glyph);
     }
   }
+
+  for (const dependency of forbiddenPrimitiveImports) {
+    if (source.includes(dependency)) {
+      failures.push(relative(root, path) + ': primitive dependency must be wrapped in src/components/arc: ' + dependency);
+    }
+  }
+}
+
+for (const name of readdirSync(arcRoot)) {
+  if (name.endsWith('.tsx')) {
+    failures.push('src/components/arc/' + name + ': app composition must live outside the Arc primitive root');
+  }
 }
 
 if (failures.length) {
@@ -77,4 +92,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('UI boundary valid: Astro routes are loaders, React owns interaction, UIArc owns controls.');
+console.log('UI boundary valid: Astro routes load data, Arc owns primitives, ui owns product composition.');

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type SubmitEvent } from 'react';
-import { Alert } from './alert/alert';
-import { Button } from './button/button';
-import { RadioGroup } from './radio-group/radio-group';
+import { Alert } from '../arc/alert/alert';
+import { Button } from '../arc/button/button';
+import { RadioGroup } from '../arc/radio-group/radio-group';
 import { CheckCircle2 } from 'lucide-react';
 import styles from './quiz.module.css';
 
@@ -26,9 +26,9 @@ function QuizQuestion({ item, index }: { item: QuizItem; index: number }) {
   };
 
   return <form className={styles.question} onSubmit={submit}>
-    <RadioGroup label={item.question} name={`answer-${index}`} options={options} value={value} onValueChange={(next) => { setValue(next); setResult(undefined); }} />
-    <Button type="submit" variant="primary" disabled={value === ''}>
-      <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+    <RadioGroup label={item.question} name={'answer-' + index} options={options} value={value} onValueChange={(next) => { setValue(next); setResult(undefined); }} />
+    <Button type="submit" variant="primary" size="sm" disabled={value === ''}>
+      <CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" />
       <span>Cek jawaban</span>
     </Button>
     {result && <Alert title={result.correct ? 'Jawaban benar.' : 'Belum tepat.'} tone={result.correct ? 'success' : 'warning'}>{result.explanation}</Alert>}
@@ -36,5 +36,5 @@ function QuizQuestion({ item, index }: { item: QuizItem; index: number }) {
 }
 
 export default function QuizClient({ items }: { items: QuizItem[] }) {
-  return <div className={styles.quiz}>{items.map((item, index) => <QuizQuestion key={`${item.question}-${index}`} item={item} index={index} />)}</div>;
+  return <div className={styles.quiz}>{items.map((item, index) => <QuizQuestion key={item.question + '-' + index} item={item} index={index} />)}</div>;
 }

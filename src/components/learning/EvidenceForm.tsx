@@ -269,6 +269,7 @@ export default function EvidenceForm({
       <div className="session-reflection">
         <Accordion
           defaultOpen={-1}
+          size="sm"
           items={[{
             title: 'Refleksi sesi (opsional)',
             content: reflectionFields,
@@ -319,7 +320,7 @@ export default function EvidenceForm({
             {group.description && <p className="muted small">{group.description}</p>}
             {group.referenceTitle && group.referenceItems?.length ? (
               <div className="evidence-reference">
-                <Accordion items={[{
+                <Accordion size="sm" items={[{
                   title: group.referenceTitle,
                   content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
                 }]} />

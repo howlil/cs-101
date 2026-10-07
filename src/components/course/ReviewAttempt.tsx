@@ -4,7 +4,7 @@ import { useMemo, useState, type SyntheticEvent } from 'react';
 import { Alert } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { RadioGroup } from '../arc/radio-group/radio-group';
-import ActionLink from '../arc/ActionLink';
+import ActionLink from '../ui/ActionLink';
 import { Send } from 'lucide-react';
 
 type PublicReviewQuestion = {

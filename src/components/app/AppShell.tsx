@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { BarChart3, BookOpen, Home } from 'lucide-react';
 import CurriculumSearch from '../search/CurriculumSearch';
-import ThemePreference from '../arc/ThemePreference';
+import ThemePreference from '../ui/ThemePreference';
 import type { CurriculumSearchEntry } from '../../domain/curriculum-v2/selectors';
 
 type SearchEntry = CurriculumSearchEntry & { href: string };

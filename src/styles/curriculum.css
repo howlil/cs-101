@@ -342,3 +342,49 @@
 }
 .item-next-step strong { display: block; font-size: 14px; line-height: 1.5; }
 .item-next-step p { margin: 6px 0 0; }
+
+/* Compact curriculum */
+.curriculum-shell { grid-template-columns: 232px minmax(0, 1fr); }
+.curriculum-explorer { padding: 16px 10px 20px; }
+.explorer-heading { margin-bottom: 10px; }
+.item-row, .search-row { padding: 5px 5px; }
+.curriculum-workspace { width: min(880px,100%); padding: 28px 32px 48px; }
+.item-header { padding-bottom: 18px; }
+.item-header h2 { font-size: 26px; }
+.item-state-actions { margin-top: 12px; }
+.item-section { padding-top: 18px; }
+.challenge-preview { margin-top: 18px; }
+.curriculum-controls { gap: 12px; }
+.module-tree, .integration-list { margin-top: 12px; }
+.track-select-uiarc { padding-bottom: 10px; }
+.item-why {
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.item-next-step {
+  padding: 10px 0 10px 10px;
+  border-left: 2px solid var(--accent-strong);
+  background: transparent;
+  border-radius: 0;
+}
+.connection-list { gap: 0; }
+.connection-list a {
+  min-height: 34px;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.item-meta { gap: 20px; margin-top: 22px; padding-top: 14px; }
+@media (max-width: 1000px) {
+  .curriculum-shell { grid-template-columns: 220px minmax(0, 1fr); }
+  .curriculum-workspace { padding-inline: 24px; }
+}
+@media (max-width: 767px) {
+  .curriculum-workspace { padding: 20px 14px 68px; }
+}

@@ -98,3 +98,31 @@
 .review-feedback > div strong { font-size: 11px; }
 .review-feedback > div span { font-size: 12px; }
 .review-feedback p { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+
+/* Compact review */
+.review-workspace { width: min(760px,100%); }
+.review-header { padding-bottom: 18px; }
+.review-back { margin-bottom: 12px; }
+.review-header h1 { margin: 4px 0 6px; font-size: 28px; }
+.review-status-line { gap: 7px; margin: 16px 0 6px; }
+.review-attempt { gap: 12px; margin-top: 10px; }
+.review-instruction { gap: 2px; padding: 8px 10px; }
+.review-question {
+  padding: 14px 0 16px 28px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.review-question:last-of-type { border-bottom: 1px solid var(--line); }
+.review-question-index { left: 0; top: 18px; }
+.review-result { margin-top: 18px; }
+.review-feedback-list { gap: 0; margin-top: 12px; }
+.review-feedback {
+  padding: 9px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}

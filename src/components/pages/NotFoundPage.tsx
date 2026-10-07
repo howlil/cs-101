@@ -1,5 +1,5 @@
 import { SearchX } from 'lucide-react';
-import EmptyAction from '../arc/EmptyAction';
+import EmptyAction from '../ui/EmptyAction';
 
 export default function NotFoundPage() {
   return <div className="content">

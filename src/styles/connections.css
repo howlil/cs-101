@@ -98,3 +98,20 @@
 @media (max-width: 700px) {
   .connection-items { grid-template-columns: 1fr; }
 }
+
+/* Compact connections */
+.connections-panel { padding: 20px 0; }
+.connections-heading { margin-bottom: 10px; }
+.connections-heading h2 { font-size: 16px; }
+.connection-groups { gap: 12px; }
+.connection-items { gap: 0 12px; }
+.connection-items a {
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.connections-note { margin-top: 10px; }
+.connections-panel--compact { padding-top: 16px; }

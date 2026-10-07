@@ -625,8 +625,8 @@ Rules:
 
 - Astro: route, SSR fetch, manifest/content/MDX rendering.
 - React: seluruh page shell, app shell, stateful interaction, mutation, local draft, disclosure, search, theme, loading/error feedback.
-- UIArc: primitive control dan boxed-surface design language.
-- `pnpm validate:ui` memblokir page markup di route Astro, native interactive controls di luar UIArc, dan glyph teks yang dipakai sebagai icon.
+- UIArc: source-owned interactive primitives only. Product composition lives in `src/components/ui`, while page/domain composition stays in its feature folder.
+- `pnpm validate:ui` memblokir page markup di route Astro, native interactive controls dan direct Radix imports di luar UIArc, product composition di root `arc/`, dan glyph teks yang dipakai sebagai icon.
 - Tidak ada imperative DOM orchestration seperti `document.querySelector(...).addEventListener(...)` untuk application behavior.
 - Tidak ada native `<details>` untuk product disclosure; gunakan React + UIArc Accordion.
 - Focus ring/halo dilarang oleh product decision; focus-visible harus tetap dibedakan lewat border/background.

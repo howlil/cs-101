@@ -3,18 +3,16 @@
 import {
   ArrowLeft,
   BrainCircuit,
-  CalendarClock,
-  CheckCircle2,
   RotateCcw,
   ShieldCheck,
   Check,
   Circle,
   CircleDot,
 } from 'lucide-react';
-import ActionLink from '../arc/ActionLink';
-import EmptyAction from '../arc/EmptyAction';
+import ActionLink from '../ui/ActionLink';
+import EmptyAction from '../ui/EmptyAction';
+import { Alert } from '../arc/alert/alert';
 import { Badge } from '../arc/badge/badge';
-import { Card } from '../arc/card/card';
 import ReviewAttempt from '../course/ReviewAttempt';
 
 const REVIEW_DAYS = [1, 3, 7, 14, 30] as const;
@@ -94,21 +92,15 @@ export default function ReviewPage({
         <RetentionTimeline step={review.step} state={review.state} />
 
         {review.state === 'retained' ? (
-          <Card
-            title="Teringat"
-            description="Semua tahap review 1, 3, 7, 14, dan 30 hari sudah dilewati."
-            meta={<CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />}
-            status="Retention"
-          />
+          <Alert title="Teringat" tone="success">
+            Semua tahap review 1, 3, 7, 14, dan 30 hari sudah dilewati.
+          </Alert>
         ) : review.state === 'scheduled' ? (
-          <Card
-            title="Belum waktunya review"
-            description={review.dueAt
+          <Alert title="Belum waktunya review" tone="info">
+            {review.dueAt
               ? 'Review berikutnya: ' + new Date(review.dueAt).toLocaleString('id-ID')
               : 'Tanggal review berikutnya belum ditentukan.'}
-            meta={<CalendarClock size={15} strokeWidth={1.8} aria-hidden="true" />}
-            status="Terjadwal"
-          />
+          </Alert>
         ) : !bank ? (
           <EmptyAction
             title="Set review belum tersedia."

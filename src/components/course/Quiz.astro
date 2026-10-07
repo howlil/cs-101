@@ -1,5 +1,5 @@
 ---
-import QuizClient from '../arc/QuizClient';
+import QuizClient from '../ui/QuizClient';
 interface Props { items: { question: string; options: string[]; answer: number; explanation: string }[] }
 ---
 <QuizClient client:load items={Astro.props.items} />

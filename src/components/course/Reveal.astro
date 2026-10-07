@@ -1,6 +1,6 @@
 ---
 interface Props { title?: string }
-import RevealAccordion from '../arc/RevealAccordion';
+import RevealAccordion from '../ui/RevealAccordion';
 const { title = 'Lihat penjelasan' } = Astro.props;
 const contentHtml = await Astro.slots.render('default');
 ---

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import CurriculumExplorer, { type ExplorerItem } from '../curriculum/CurriculumExplorer';
 import ActivateItem from '../learning/ActivateItem';
-import ActionLink from '../arc/ActionLink';
+import ActionLink from '../ui/ActionLink';
 import { Badge } from '../arc/badge/badge';
 import { Card } from '../arc/card/card';
 

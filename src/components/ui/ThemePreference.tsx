@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ThemeSwitch, type Theme } from './theme-switch/theme-switch';
+import { ThemeSwitch, type Theme } from '../arc/theme-switch/theme-switch';
 
 type Preference = 'system' | Theme;
 

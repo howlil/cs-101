@@ -129,3 +129,22 @@
 @media (max-width: 520px) {
   .integration-header h1 { font-size: 28px; }
 }
+
+/* Compact integration */
+.integration-header { padding-bottom: 20px; }
+.integration-back { margin-bottom: 12px; }
+.integration-header h1 { margin: 6px 0 8px; font-size: clamp(27px,3.4vw,34px); }
+.integration-status-row { min-height: 32px; margin-top: 14px; }
+.integration-section, .integration-evidence-section { padding: 20px 0; }
+.integration-section-heading { margin-bottom: 8px; }
+.integration-section-heading h2 { font-size: 16px; }
+.integration-prerequisites { gap: 0; }
+.integration-prerequisites a {
+  padding: 7px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.integration-list li { margin: 6px 0; }

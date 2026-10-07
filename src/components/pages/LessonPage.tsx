@@ -5,7 +5,7 @@ import { BookOpen, ListTree, TriangleAlert } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Alert } from '../arc/alert/alert';
 import { Accordion } from '../arc/accordion/accordion';
-import EmptyAction from '../arc/EmptyAction';
+import EmptyAction from '../ui/EmptyAction';
 import ActivateItem from '../learning/ActivateItem';
 import SessionLogger from '../course/SessionLogger';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
@@ -101,6 +101,7 @@ export default function LessonPage({
           <div className="lesson-stuck">
             <Accordion
               defaultOpen={-1}
+              size="sm"
               items={[{
                 title: 'Saya macet',
                 content: <ol>
