@@ -7,6 +7,7 @@ import {
   searchCurriculum,
   type CurriculumSearchEntry,
 } from "../../domain/curriculum-v2/selectors";
+import { Button } from "../arc/button/button";
 import styles from "./curriculum-search.module.css";
 
 type SearchEntry = CurriculumSearchEntry & { href: string };
@@ -54,14 +55,16 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
       }}
     >
       <Dialog.Trigger asChild>
-        <button
+        <Button
           type="button"
-          className="top-action"
+          variant="ghost"
+          size="sm"
+          className={styles.trigger}
           aria-label="Cari curriculum"
           title="Cari curriculum (Ctrl/⌘ K)"
         >
           <Search size={15} strokeWidth={1.8} aria-hidden="true" />
-        </button>
+        </Button>
       </Dialog.Trigger>
 
       <Dialog.Portal>

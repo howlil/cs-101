@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import type { SessionFields } from '../../domain/learning/schema';
 import { Accordion } from '../arc/accordion/accordion';
@@ -95,8 +95,7 @@ export default function EvidenceForm({
     });
   }, [criteria, evidence, fingerprint, hydrated, itemId, lastAnchor, nextStep]);
 
-  const submit = async (event: FormEvent, kind: 'progress' | 'passed') => {
-    event.preventDefault();
+  const submit = async (kind: 'progress' | 'passed') => {
     if (loadingKind) return;
     setLoadingKind(kind);
     setFeedback({ title: 'Menyimpan sesi', message: 'Perubahan sedang disimpan.', tone: 'info' });
@@ -186,7 +185,7 @@ export default function EvidenceForm({
           variant="primary"
           loading={loadingKind === 'progress'}
           disabled={Boolean(loadingKind)}
-          onClick={(event) => void submit(event as unknown as FormEvent, 'progress')}
+          onClick={() => void submit('progress')}
         >
           {saveLabel}
         </Button>
@@ -195,7 +194,7 @@ export default function EvidenceForm({
           variant="secondary"
           loading={loadingKind === 'passed'}
           disabled={Boolean(loadingKind)}
-          onClick={(event) => void submit(event as unknown as FormEvent, 'passed')}
+          onClick={() => void submit('passed')}
         >
           {passLabel}
         </Button>

@@ -22,7 +22,7 @@ export default function ActivateItem({
 }) {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone: AlertTone }>();
-  const requestId = useRef<string>();
+  const requestId = useRef<string | undefined>(undefined);
 
   const activate = async () => {
     if (loading) return;

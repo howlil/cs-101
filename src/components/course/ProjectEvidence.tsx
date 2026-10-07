@@ -1,7 +1,7 @@
 "use client";
 
 import type { Criterion } from '../../domain/curriculum-v2/schema';
-import EvidenceForm from '../learning/EvidenceForm';
+import EvidenceForm, { type EvidenceGroup } from '../learning/EvidenceForm';
 
 export default function ProjectEvidence({
   itemId,
@@ -22,7 +22,7 @@ export default function ProjectEvidence({
   continueFrom?: string;
   lastAnchor?: string;
 }) {
-  const groups = [{
+  const groups: EvidenceGroup[] = [{
     key: 'new',
     eyebrow: 'EVIDENCE',
     title: 'Requirement baru',
@@ -41,7 +41,7 @@ export default function ProjectEvidence({
       className: 'project-evidence-section project-evidence-section--inherited',
       referenceTitle: 'Lihat guarantee dari checkpoint sebelumnya',
       referenceItems: inheritedGuarantees.map((criterion) => criterion.text),
-    } as typeof groups[number] & { referenceTitle: string; referenceItems: string[] });
+    });
   }
 
   return <EvidenceForm
