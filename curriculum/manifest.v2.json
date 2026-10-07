@@ -399,7 +399,7 @@
       },
       "estimatedMinutes": 120,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:c5ec25a8203055876b4ddae9e192b9466671eb436ece3086fdc0bcc409fa4049"
+      "fingerprint": "sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602ab0c744c13480475"
     },
     {
       "id": "JAV-002",
@@ -466,7 +466,7 @@
       "crossModuleReferenceRaw": [
         "Related: software-design&quality → Domain invariants + state ownership + side-effect boundaries"
       ],
-      "fingerprint": "sha256:f9f2b71a011ed57fd46983cec4c1f91258130a6b105d11cab4ace91ee5d50279"
+      "fingerprint": "sha256:b7805221c341ff8966f9b10f822ebad72326f9a405e4bbf905bff53e5fedd1f6"
     },
     {
       "id": "JAV-003",
@@ -530,7 +530,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:e88f03f8b118d122d8343c61df9b931fc643f90e27c14e8ab58dc87245503680"
+      "fingerprint": "sha256:3b2c332eb78b309e0000506a733e2182bf441f7499e17738c0903a8c4d4e7781"
     },
     {
       "id": "JAV-004",
@@ -596,7 +596,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:039c0bef7cc36fa7c29a71fc0320bf036bbf8db3d926b2eab0443cecd022532b"
+      "fingerprint": "sha256:62ad0ca2c50be27044fc137f0488f788875abf30d7fb0cfde57bb2a7d16df039"
     },
     {
       "id": "JAV-005",
@@ -662,7 +662,7 @@
         "Related: db&sql → Money + time + identifiers + NULL semantics",
         "Related: networking → Production failure taxonomy"
       ],
-      "fingerprint": "sha256:f127f464d3fbd920ff4f0fee2707f8fcaaf371d3951624ca948bb3a0f461bc63"
+      "fingerprint": "sha256:fa4091078e921cca63962b36932ec51bd9c1cc78dc81adeb1c10ad09d7b7b5cc"
     },
     {
       "id": "JAV-P01",
@@ -734,7 +734,7 @@
         "url": "https://dev.java/learn/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:6e1c3f3c548492c53aee319dfacde0a28d0db19840c2f79e13fdf76ec3d2743a"
+      "fingerprint": "sha256:b382d5145f6d74277852c176a401dfd384511803e45a79db816010dbb14c3919"
     },
     {
       "id": "JAV-006",
@@ -800,7 +800,7 @@
         "Deep dive: software-design&quality → Cohesion + coupling + change boundaries",
         "Deep dive: software-design&quality → Design patterns + evidence-driven refactoring"
       ],
-      "fingerprint": "sha256:1c7f02ebe4c327a6e1185c690da9abb29bfa3ffadf64b773dfe51bd99b9bb510"
+      "fingerprint": "sha256:070d5455abdf7881a872b151d98025cf4b9bc3e2ff84d20106e7d557b121af28"
     },
     {
       "id": "JAV-007",
@@ -865,7 +865,7 @@
         "Deep dive: software-design&quality → Risk-based test strategy + test levels",
         "Deep dive: software-design&quality → Unit tests + behavior contracts + test doubles"
       ],
-      "fingerprint": "sha256:be74ea3611a6d6e06ddeb1ad28105b4527ea9cf5d11cd0a0cb11b2285e593137"
+      "fingerprint": "sha256:e91da1f7c6717ab76b6ccea66fac9d3223d34f3536ccc6b1511aa81b296a8423"
     },
     {
       "id": "JAV-008",
@@ -929,7 +929,7 @@
         "Deep dive: software-design&quality → Dependency injection + configuration + testability boundaries",
         "Related: software-design&quality → Unit tests + behavior contracts + test doubles"
       ],
-      "fingerprint": "sha256:26d1ac04dd6961e5edb431f9953701a24b23f2e7d9e4b02394363193f8f082df"
+      "fingerprint": "sha256:5ccdaca96645ec751ef8b6aff5c67338f4a71b607e0845462c9bcb09e184a70c"
     },
     {
       "id": "JAV-009",
@@ -992,7 +992,7 @@
         "Deep dive: software-design&quality → Property-based + mutation testing for test adequacy",
         "Related: software-design&quality → Security testing + CI quality gates + regression evidence"
       ],
-      "fingerprint": "sha256:ab766dd7a9e7da4a3bbf2012342dbfa1714c960994bdc6654ac62e16ff7d4d4b"
+      "fingerprint": "sha256:b48e52094b9bee416e29966065548ee4be9610cddd093690d3024c22ba1e3f8b"
     },
     {
       "id": "JAV-P02",
@@ -1061,7 +1061,7 @@
         "url": "https://www.jacoco.org/jacoco/trunk/doc/"
       },
       "estimatedMinutes": 120,
-      "fingerprint": "sha256:3defecf30003c8efa41290f4861c3e9f16c0f691b671046cabf28d7bb7cc93b7"
+      "fingerprint": "sha256:f73e46fd0cbd56464ecc981f8368e8bce4c9f3c784c86206f1d6ad7bffbeea2e"
     },
     {
       "id": "JAV-010",
@@ -1128,7 +1128,7 @@
         "Foundation: os&linux → Threads + CPU scheduling + context switching",
         "Related: os&linux → Synchronization + races + deadlocks + futex awareness"
       ],
-      "fingerprint": "sha256:f34b1b6fad07a23b5990ac25827f4e0631b5bf4ab552cc0bd76950153db80233"
+      "fingerprint": "sha256:52ba72cd07a53ed04605f7a61d4f6265d4adeb07c5c3a40dc4bb8c5a4d004bd2"
     },
     {
       "id": "JAV-011",
@@ -1194,7 +1194,7 @@
         "Related: networking → Timeouts + deadlines + cancellation",
         "Related: distributed&system-design → Backpressure + load shedding + rate limiting"
       ],
-      "fingerprint": "sha256:09e0357d86b62461ddd3393f0687c36ff59bce940f52927e3b0aed234e62b8dd"
+      "fingerprint": "sha256:e2ba49f5671e28b982e2fd366e191d5cbd701823ce3ed9707248b53c975760ff"
     },
     {
       "id": "JAV-012",
@@ -1261,7 +1261,7 @@
         "Related: os&linux → RSS + VSZ + page faults + /proc memory views",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:439fa52165c5ebd647966101da403676b6698fd7787fb6d1c93752bea484ef18"
+      "fingerprint": "sha256:9d961370ca5e7a49523ea29a8923f06e3008a1bbb5b5bd3278e2f1f24b99353d"
     },
     {
       "id": "JAV-P03",
@@ -1338,7 +1338,7 @@
         "url": "https://dev.java/learn/jvm/tools/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:23e97ffd649dbe305fd3301c007c0c65dfa008988749b223c54474b2a1c105b1"
+      "fingerprint": "sha256:5031befb1d22af91a6df5e6eba20d3d4a03c897899bb7c5be57a7cab92b43909"
     },
     {
       "id": "JAV-013",
@@ -1404,7 +1404,7 @@
         "Deep dive: networking → REST API contract + resource modeling + validation + error model",
         "Related: software-design&quality → Dependency injection + configuration + testability boundaries"
       ],
-      "fingerprint": "sha256:7457a5d95cb0a01334e4e1ee2003dd1fcec6695d70da9199231554c12d93a847"
+      "fingerprint": "sha256:b24de4ac02b22937ecd39cd0800d038cb880dbb82f17a6055eecaa87c441d596"
     },
     {
       "id": "JAV-014",
@@ -1470,7 +1470,7 @@
         "Deep dive: db&sql → Pagination + batching + N+1 + set-based processing",
         "Related: db&sql → EXPLAIN ANALYZE + BUFFERS + planner statistics"
       ],
-      "fingerprint": "sha256:4f07782300b2c87f072a0569cc090442d75efd5805cf335480429fe61e03d2be"
+      "fingerprint": "sha256:f9319119b299ced46282e2f23321199dd0b2de43878b370ec0a4569288802635"
     },
     {
       "id": "JAV-015",
@@ -1536,7 +1536,7 @@
         "Deep dive: db&sql → Row locking + deadlocks + serialization failure handling",
         "Related: distributed&system-design → Timeouts + retries + backoff + jitter + idempotency"
       ],
-      "fingerprint": "sha256:3392e58fa7eb5abb86024da9bb24f286f2e031418e28fa38b05a750a26d8a7d2"
+      "fingerprint": "sha256:a84d09e0a970d98cacdcdbf7260a48d98f0b4daa2c938b6b66147290d24b97a6"
     },
     {
       "id": "JAV-P04",
@@ -1609,7 +1609,7 @@
         "url": "https://docs.spring.io/spring-data/jpa/reference/jpa/transactions.html"
       },
       "estimatedMinutes": 300,
-      "fingerprint": "sha256:ea943c3c4876687c51cd6ec3a2c99641b5432d163d78dc607b7e5a806a0bbe65"
+      "fingerprint": "sha256:68845877eb9f98ab0d1d25e46c1132fe594d6c04810e7f6bdecc30121096ae74"
     },
     {
       "id": "JAV-016",
@@ -1672,7 +1672,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: software-design&quality → Risk-based test strategy + test levels"
       ],
-      "fingerprint": "sha256:3a15aced372a94c9f99719e74e8a1c4634223445da2eb4fcdd368fb8aa12967f"
+      "fingerprint": "sha256:e6a5289e112644172f5cfa041a216072cf37d72f6f869667964c59456b4931ac"
     },
     {
       "id": "JAV-017",
@@ -1736,7 +1736,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: software-design&quality → Integration tests with real infrastructure"
       ],
-      "fingerprint": "sha256:e3dbe79037ec2c379afa276ca4b2b742c28f446f3881662538f8ff4465013027"
+      "fingerprint": "sha256:c527bf4c87ba1bef99f606ec872057a49368225618a2e70fb13b0585ce8fe674"
     },
     {
       "id": "JAV-018",
@@ -1800,7 +1800,7 @@
         "Foundation: distributed&system-design → Partial failure + unknown outcomes",
         "Related: networking → Timeouts + deadlines + cancellation"
       ],
-      "fingerprint": "sha256:9e00060fcddb247f6d4c1d1b51786f1638885bc81dddb9b656501f9598b53040"
+      "fingerprint": "sha256:889ec6eac5db769d4e9115c15a73cfd2f16253639291b165c6f114481407eaae"
     },
     {
       "id": "JAV-P05",
@@ -1869,7 +1869,7 @@
         "url": "https://wiremock.org/docs/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:2f44bd6143e1c47eb85dcf6c87ed201ecb539589aa11be8d55b4f8b6c93e05a7"
+      "fingerprint": "sha256:006e8dfee9e4964974865ddd9544cb7cb3f356a415dd2db8dc2ce01d7d60877a"
     },
     {
       "id": "JAV-019",
@@ -1933,7 +1933,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:ca8a9f80b5f607fbc166cdabc4b9f247547c3911cca0a07c8448fdf2469b6641"
+      "fingerprint": "sha256:967365e74bc7412a333354d62caad2f95af42650f4e0501663ca5060304c0740"
     },
     {
       "id": "JAV-020",
@@ -1998,7 +1998,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: production-engineering → Load + stress + soak testing methodology"
       ],
-      "fingerprint": "sha256:1359d76f7b5afc3fa1185539ce871d5150e1c73cffc8125c0a4a1cb6f739e1a4"
+      "fingerprint": "sha256:54acb132af6784ed3255cd1959748265816034e80cccfcd30244b9ed0c4fd489"
     },
     {
       "id": "JAV-021",
@@ -2063,7 +2063,7 @@
         "Deep dive: software-design&quality → Security testing + CI quality gates + regression evidence",
         "Related: production-engineering → CI/CD pipeline + artifact promotion + quality gates"
       ],
-      "fingerprint": "sha256:855e93ebf15cb990e21dff1e0c48dabd015643c4eaab8da4d409185a0c60a4d3"
+      "fingerprint": "sha256:4fc928555cd0d3596ce8f686d4636d000852305077c9259d1b2c4b06a2627834"
     },
     {
       "id": "JAV-P06",
@@ -2144,7 +2144,7 @@
         "url": "https://docs.github.com/actions/automating-builds-and-tests/building-and-testing-java-with-maven"
       },
       "estimatedMinutes": 120,
-      "fingerprint": "sha256:27097c9fdc114e21c74a7f92d3d1304248eca95d29c0861dbcd470297e985639"
+      "fingerprint": "sha256:33f4b653388838ea5ed6162a18ebcb3ad6ceb231908dbc7fed85b8a4cd6a54c1"
     },
     {
       "id": "SQL-001",
@@ -2201,7 +2201,7 @@
       "crossModuleReferenceRaw": [
         "Related: distributed&system-design → System-level data placement + storage choice"
       ],
-      "fingerprint": "sha256:f0e2ffaec42a22380c9329d653c658aeba1575927988e6e2cc611f9e33ae0d92"
+      "fingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67"
     },
     {
       "id": "SQL-002",
@@ -2259,7 +2259,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:51b9124cd57a46b2fd7847c03825f5fbaeff9bf5ee6d8e2c377ffe19cc572014"
+      "fingerprint": "sha256:2243b604ca11c065b589e30d66201f0030270a1b136661ef4e9b880617d5a14f"
     },
     {
       "id": "SQL-003",
@@ -2319,7 +2319,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:8a2f018da2bf601c00781df1a5647a8a38e906edcc0194539a2ac27c893237ab"
+      "fingerprint": "sha256:7b18c39edb6674de6df1e1e875b3ea56fa18bdce02c25d487653d324881168fd"
     },
     {
       "id": "SQL-P01",
@@ -2375,7 +2375,7 @@
         "url": "https://15445.courses.cs.cmu.edu/fall2026/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:e2d229df29fe04aedd2c8a9c63722b3a677e8fa72c42c8688ac15f3b71160f8a"
+      "fingerprint": "sha256:80d336bf8e85d3ec99c2aabfa4fe9e1cfadc13d9b54e0d0faca025d2070b5b76"
     },
     {
       "id": "SQL-004",
@@ -2434,7 +2434,7 @@
       "crossModuleReferenceRaw": [
         "Related: distributed&system-design → System-level data placement + storage choice"
       ],
-      "fingerprint": "sha256:0273c2104632e471a68bedb5b429e61d009625c03c5492b21a30d6295247877e"
+      "fingerprint": "sha256:0675474cb9135fe33355d86ea00068c6d7b397c07d86c0430c02adfa60ffb6bd"
     },
     {
       "id": "SQL-005",
@@ -2494,7 +2494,7 @@
         "Related: software-design&quality → Domain invariants + state ownership + side-effect boundaries",
         "Related: java → OOP + object contracts"
       ],
-      "fingerprint": "sha256:40fa6886e7c99ccd31338c0a8870dd59ccff84601c5b7aa81e5f3bb6ba42737f"
+      "fingerprint": "sha256:fc7454156295f6e03760c5e69e67221a302acdd93a6ccb9d0fb5b6558430aa93"
     },
     {
       "id": "SQL-006",
@@ -2552,7 +2552,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → Exceptions + money + time + I/O boundaries"
       ],
-      "fingerprint": "sha256:a2bf5f45971a19fecb6952e9a3601e1710b8219a992c51e99c428e48d321cedc"
+      "fingerprint": "sha256:02790321c9ad5daa26156a1ff7d4c6bb92a301b40648f809eccc0bb4de0b2bdc"
     },
     {
       "id": "SQL-007",
@@ -2612,7 +2612,7 @@
         "Related: distributed&system-design → API + event schema evolution + backward compatibility",
         "Related: production-engineering → Safe rollout + rollback + canary/feature-flag mental model"
       ],
-      "fingerprint": "sha256:73108e24c5f414ddee16f6e87d9aad9d0a01697f63c4770444c92f5ccde4f970"
+      "fingerprint": "sha256:7b57475de2c739a7744e78ecca048d83ca9291a82d9b24034892cd06c471fb9f"
     },
     {
       "id": "SQL-P02",
@@ -2673,7 +2673,7 @@
         "url": "https://documentation.red-gate.com/fd/migrations-271585107.html"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:26831446de8186cf409e62d1cabc7fff70c336beab27a457632761b29f177580"
+      "fingerprint": "sha256:b1bbfda2114460db98fccd27182d1c2d9b28cddb8920bef13dbe19636bf1fe56"
     },
     {
       "id": "SQL-008",
@@ -2734,7 +2734,7 @@
         "Related: java → JPA and Hibernate behavior",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:002bb6c5c9807aebd8fa5287bc8e63b64102ef9d924506273eae75c895d26c97"
+      "fingerprint": "sha256:f38824c6dd3bb308f843bffeb1afc8f85a0650bc349361bf0f6d8c2eee9a98a2"
     },
     {
       "id": "SQL-009",
@@ -2794,7 +2794,7 @@
         "Related: java → JPA and Hibernate behavior",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:9bd3c1eee6d7e377d817d4da389d9440593ba6ab168bd03cff782309f3b8ebb8"
+      "fingerprint": "sha256:eeabef2970bbc25a8a248fb00fa022e0590cf5d953420b4670a8d538541cda4e"
     },
     {
       "id": "SQL-010",
@@ -2856,7 +2856,7 @@
         "Related: java → JPA and Hibernate behavior",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:c40c622b7b8684ed4ece9abc533801bfb42c96563b48638c4f80e737fd088a64"
+      "fingerprint": "sha256:f13eff00e7252f02a481addb1923b2c8fcab3dfc3ced26f6f9f012fa9de1059f"
     },
     {
       "id": "SQL-011",
@@ -2915,7 +2915,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:5747abc9cd2dc2f3311353301a81ccdd321b2146c4916000562b5642acdbfae8"
+      "fingerprint": "sha256:252069cf5d5564db91f5a5f87531ce3429a0ee0a77157aa2951a6bff8af3b411"
     },
     {
       "id": "SQL-P03",
@@ -2980,7 +2980,7 @@
         "url": "https://15445.courses.cs.cmu.edu/fall2026/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:ad41657550ff23774c227025c7971ba175c698a9bbff55e7b2b4ef7cf7454ddd"
+      "fingerprint": "sha256:9f0b7ae4d673b3378a766c08de7762da202dbf4209e2ae9ced94107c403ab874"
     },
     {
       "id": "SQL-012",
@@ -3042,7 +3042,7 @@
         "Deep dive for application layer: java → Transactions + locking + idempotency",
         "Related: distributed&system-design → Consistency models + CAP/PACELC intuition"
       ],
-      "fingerprint": "sha256:6f1395a224aea8672bbdac3f1b48fe1b0be3659f3fc4639df4adfabb09522adf"
+      "fingerprint": "sha256:d2524fb55f8ac20c8e7bf13d4b721ba695890afad468eec9719663c58e05e709"
     },
     {
       "id": "SQL-013",
@@ -3107,7 +3107,7 @@
         "Related: java → Transactions + locking + idempotency",
         "Related: os&linux → Synchronization + races + deadlocks + futex awareness"
       ],
-      "fingerprint": "sha256:b2c6daf097bef380d7f0b5fc5393b41237515876274302f1376b9900b5d065f8"
+      "fingerprint": "sha256:79eb8730a2190508901b327c08a8ee3283d584a4ac8c19f6fe3b6ebe2628a58c"
     },
     {
       "id": "SQL-014",
@@ -3166,7 +3166,7 @@
         "Related: java → Transactions + locking + idempotency",
         "Related: distributed&system-design → Timeouts + retries + backoff + jitter + idempotency"
       ],
-      "fingerprint": "sha256:112380865c85d6cbf76c4c010d816e617d654d015f13078389163353fd55eabf"
+      "fingerprint": "sha256:6f6a7d8e0ed29cdb10e61006cfe8cc44ec17f6a6762e100693591023972e946d"
     },
     {
       "id": "SQL-P04",
@@ -3235,7 +3235,7 @@
         "url": "https://www.postgresql.org/docs/18/sql-insert.html"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:4c915a233863831297d87404f49f716472d75a8b2c0d8a926a84ad11f1fc2a33"
+      "fingerprint": "sha256:087378f8ac9c4ec6cc8807bafbdfbc4c86efbde1e038910309e85086c5f51bf1"
     },
     {
       "id": "SQL-015",
@@ -3295,7 +3295,7 @@
         "Related: networking → Pagination + filtering + sorting as an API contract",
         "Related: java → JPA and Hibernate behavior"
       ],
-      "fingerprint": "sha256:d71276d8d724b317bd23cacb288dc162d40c5bf698199ab80217eb14fb0b59eb"
+      "fingerprint": "sha256:1a3f2060f930c0a098660390bb49e6c23735d13a7d9cf89f30fef09e3b2d5f42"
     },
     {
       "id": "SQL-016",
@@ -3354,7 +3354,7 @@
         "Related: networking → Connection pooling + keep-alive + DNS change",
         "Related: production-engineering → Capacity planning + headroom + autoscaling"
       ],
-      "fingerprint": "sha256:818a93086fb87c9acdea2461dc149f928fb8f1bb2713e2d97e90bba5296bda71"
+      "fingerprint": "sha256:af07aae325dea6cd9ebed80b09f0f0712b09e5be5b12e77b6b765ab2b2d17c8c"
     },
     {
       "id": "SQL-017",
@@ -3415,7 +3415,7 @@
         "Related: production-engineering → End-to-end bottleneck decomposition",
         "Related: production-engineering → Telemetry model: metrics + logs + traces"
       ],
-      "fingerprint": "sha256:53352196fe17737e2cead9795d891f5dfa1a6e46ff69bd730c2592f4b84afc28"
+      "fingerprint": "sha256:a72834bdd9a748f4a51c39460365c396d347d3737aca869267ec75ebbf9ca3d5"
     },
     {
       "id": "SQL-018",
@@ -3474,7 +3474,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:f09daa39ee7493d7db9b6db095561961a1cb43eef2d704ca96588b7c6a4ac581"
+      "fingerprint": "sha256:74e5b78fbfded234c8e0a890096e29b3e8baa3b479bee245998f45d9e9b35882"
     },
     {
       "id": "SQL-P05",
@@ -3535,7 +3535,7 @@
         "url": "https://www.postgresql.org/docs/18/routine-vacuuming.html"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:4f866197f525bbe1c217a99cd3f588823b3196a9d1293d626a7e390c6b279515"
+      "fingerprint": "sha256:b843f6dd413bab2cff73e7ff38d234e611f9c45f6b9907a7196fd5f560014e08"
     },
     {
       "id": "SQL-019",
@@ -3600,7 +3600,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Load + stress + soak testing methodology"
       ],
-      "fingerprint": "sha256:54e77f2dd6038f712dec28453dc32130cd101342b485532ca2175ddd0243800a"
+      "fingerprint": "sha256:8b992adab73eacdb434470bd2d7b0d8c3f55b4978adbfaf6f0c2b77268132c5e"
     },
     {
       "id": "SQL-020",
@@ -3665,7 +3665,7 @@
         "Related: distributed&system-design → API + event schema evolution + backward compatibility",
         "Related: production-engineering → Safe rollout + rollback + canary/feature-flag mental model"
       ],
-      "fingerprint": "sha256:3fb2ba57cd359f4828f4751e78c5ca6dcbbec162640e4316df3b361a294a8c08"
+      "fingerprint": "sha256:853463d8a4cbefa044a3ed0aeadf2998f3a31494bbf92fb8cb4497063138d4d6"
     },
     {
       "id": "SQL-P06",
@@ -3738,7 +3738,7 @@
         "url": "https://www.postgresql.org/docs/18/sql-createindex.html"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:6e38b53c7ee07ce05931f47662ddde9e5ce255e29445ce88436e9b2f365e341a"
+      "fingerprint": "sha256:540b9e8aadf32b87fef89b9dc8b95589931df28560f0914d4000df7980d5345b"
     },
     {
       "id": "NET-001",
@@ -3796,7 +3796,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:21dbc739a2816b5bd552e5b8e32e7f9bcc1bae4d9e34793466a2b226e2201d20"
+      "fingerprint": "sha256:ac646be8e217c69948ea2c74a23bbb081840d086bd61d32e9a1d663d353c8bde"
     },
     {
       "id": "NET-002",
@@ -3857,7 +3857,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:f16d5cbacbf04b96baeca7fd50cdc1949bd59b4aac995b43043e6915888eefbd"
+      "fingerprint": "sha256:0e5dc2b3c363db0e7f79ebf3af546e46fa5de5ad5d2fef136d5836c00615690c"
     },
     {
       "id": "NET-003",
@@ -3925,7 +3925,7 @@
         "Foundation: os&linux → File descriptors + open/read/write/dup + pipes",
         "Deep dive: os&linux → Nonblocking I/O + epoll"
       ],
-      "fingerprint": "sha256:71d4e629d0ce83389cf7f4fa593917a66fce978dd21c1076752e4826afad6b83"
+      "fingerprint": "sha256:2c4b4c53e5aad6773d4b13196a2b256ba421e10db876ad490b214bd4013b6522"
     },
     {
       "id": "NET-004",
@@ -3988,7 +3988,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Incident response + triage + incident roles"
       ],
-      "fingerprint": "sha256:f86fd3cc5369ae83db5b1f5b973a9c64501af9feb80fb9190cf44d779070c341"
+      "fingerprint": "sha256:a9d661e9a609cbac560d06d0af432a02a89355c18dd9d5f8fd7e4c2e93b729cf"
     },
     {
       "id": "NET-005",
@@ -4047,7 +4047,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:e9d093544dc0c6d7e9c70f9fb72b47395dbcb21bfc5020b5ed73465559db6d38"
+      "fingerprint": "sha256:a7a3bf76e28b6ddd93505bc484e8cb72b0534c6d8de95b2cefb5a7a02d5a9750"
     },
     {
       "id": "NET-P01",
@@ -4107,7 +4107,7 @@
         "url": "https://cs144.github.io/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:71f9f0c11a1744e0e369a982da3c435d4d539feef7156ce4dc1dd05ef83d93ba"
+      "fingerprint": "sha256:abb0dc83f728322acc3d2098675367896f0edf41fcc1174c2ed55822fe048c3d"
     },
     {
       "id": "NET-006",
@@ -4168,7 +4168,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:0d9d3427c7b09ae8d0c6c21e093b2f489480721f51ef9bbd13cc5d88cf98909d"
+      "fingerprint": "sha256:7372fffa2783bb5494b4b3a298d2ab1fa9197877c652580ef34276a19c911c8c"
     },
     {
       "id": "NET-007",
@@ -4230,7 +4230,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:22419e9e41d4e708c05262387532ac7e0eda4013a5791f75869ab5c9ae8f16c3"
+      "fingerprint": "sha256:31f0a26679c31dd0030eabd1c144e6a5cc127ef4078df4309343bf2852b2da42"
     },
     {
       "id": "NET-008",
@@ -4293,7 +4293,7 @@
       "crossModuleReferenceRaw": [
         "Related: os&linux → Resource limits + file descriptor exhaustion"
       ],
-      "fingerprint": "sha256:8f1a830713f579421a5bacf1a1d7339b935afce95a0a5f1ad6893c09038aced2"
+      "fingerprint": "sha256:2e84854db358c60ec88c1fca9a1cf592ba8eb57829c8d3df345a4ff06e898abc"
     },
     {
       "id": "NET-009",
@@ -4354,7 +4354,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:527c48a5c09ba7b4cb27a38e4daaa693216aeefda24ce5091114aee08d830b2f"
+      "fingerprint": "sha256:0bc2b47c2c44bd184c64322450822316d6d8771b15f77d8d42bdc7b3c0ffb8d4"
     },
     {
       "id": "NET-P02",
@@ -4415,7 +4415,7 @@
         "url": "https://datatracker.ietf.org/doc/rfc9000/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:540142b9be84721125a5ac0a3561037e2d2009de32d96815e6ac61c16748ded4"
+      "fingerprint": "sha256:4e6f8186e6e6cee90e93f0f9e73a7f8297ebb24286cbc48c881c4a4a4e3d0de7"
     },
     {
       "id": "NET-010",
@@ -4478,7 +4478,7 @@
         "Related: java → Spring Boot + DI + REST",
         "Related: software-design&quality → Contract + component testing"
       ],
-      "fingerprint": "sha256:ed8363f611e115b0564092335192ef32bb6d5a3c1ca5aa0e9c70bbaba4f6cf9b"
+      "fingerprint": "sha256:a3310adc7decb61b53f5328b163c785c39d8000313190d487d9d13b650fb754b"
     },
     {
       "id": "NET-011",
@@ -4540,7 +4540,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:cf024272ea85b035b703d5424682e9fe59e11c8c45c9c3690dda1a6a1855ba37"
+      "fingerprint": "sha256:b1f3245cdb0f37d837255c24ea9532dda4283aad141759b99fcd740adf6ec85b"
     },
     {
       "id": "NET-012",
@@ -4602,7 +4602,7 @@
       "crossModuleReferenceRaw": [
         "Related: software-design&quality → Threat modeling + security requirements"
       ],
-      "fingerprint": "sha256:92d1f32529c40502a959530960699496ce28312ec95c75294584831132c5a422"
+      "fingerprint": "sha256:25cb0155b40c014ec7cefe378303fc5acd7f56a1c6c0f99e79ceda0e596a11b7"
     },
     {
       "id": "NET-013",
@@ -4666,7 +4666,7 @@
         "Related: distributed&system-design → Load balancing + health + fault domains",
         "Related: production-engineering → Kubernetes workload model: Pod + Deployment + Service"
       ],
-      "fingerprint": "sha256:3b731f157c370fb62bff1138092a5553da4b04a0d303853f60ffc832451400ce"
+      "fingerprint": "sha256:b062f2e5ea5166bac006a24afaa5b98971c070a2b4423f4b641d224f4216d8db"
     },
     {
       "id": "NET-014",
@@ -4732,7 +4732,7 @@
         "Related: distributed&system-design → Service boundaries + API contracts + sync vs async",
         "Deep dive for compatibility tests: software-design&quality → Contract + component testing"
       ],
-      "fingerprint": "sha256:1be100956445a71ab644cdd8e7a832c039e111122e6ca55142110258cec84da4"
+      "fingerprint": "sha256:8344921ab3ac024baad9c05effe7a623d4457e0427be750a593ac1477297cd18"
     },
     {
       "id": "NET-015",
@@ -4796,7 +4796,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive for persistence: db&sql → Pagination + batching + N+1 + set-based processing"
       ],
-      "fingerprint": "sha256:6aacd033aba950aeb82611fb3dc9e857acaba4cc94a9cf9d093e8a3ddbd2018f"
+      "fingerprint": "sha256:5cc639a4db3d1defa3057465a558df0134dfb488ff9ec16b902dea98774975d0"
     },
     {
       "id": "NET-016",
@@ -4861,7 +4861,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: software-design&quality → Authorization + object ownership + privilege boundaries"
       ],
-      "fingerprint": "sha256:185425818c379434ec5c3ded3aa35f4b8d355d4462c33fe99c56bb9faef9d590"
+      "fingerprint": "sha256:bf6b213fdb7a4d2a7789b131eb0a1429beff97ad55afe619a6716be5c50dcfb6"
     },
     {
       "id": "NET-017",
@@ -4928,7 +4928,7 @@
         "Related: distributed&system-design → Delivery semantics + ordering + idempotent consumers",
         "Related: distributed&system-design → Transactional outbox + inbox + reliable event publication"
       ],
-      "fingerprint": "sha256:9328c3067ccdc2e736c42c73f0e22e47811385e907dcb703353a4b2ae0ed958f"
+      "fingerprint": "sha256:4f32adcbad2d6f358d61cd2cec6940b2e2db73da6b3355b1c7a4abbee9a6e837"
     },
     {
       "id": "NET-018",
@@ -4993,7 +4993,7 @@
       "crossModuleReferenceRaw": [
         "Related: os&linux → Nonblocking I/O + epoll"
       ],
-      "fingerprint": "sha256:6aea5de94971f6a3d096b11841e97d632b0f8074b9d09b76a9a3efc4beb2da4d"
+      "fingerprint": "sha256:71db9ba020644658355ad34e1489e34e9cdbd28a2fcc894ca06060ee0cd6b8f6"
     },
     {
       "id": "NET-P03",
@@ -5058,7 +5058,7 @@
         "url": "https://datatracker.ietf.org/doc/rfc6455/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:eaa47ed38372a1de836b044d8b8910f0e9ded975fcbd5795273579ff8ab42c6d"
+      "fingerprint": "sha256:f1f79eeb915ef94e4ce535e5c924aaee230f99a8e1e3b79fd7d5eefd52ad4412"
     },
     {
       "id": "NET-019",
@@ -5122,7 +5122,7 @@
         "Related: java → Executors + CompletableFuture + concurrency testing",
         "Deep dive: distributed&system-design → Timeouts + retries + backoff + jitter + idempotency"
       ],
-      "fingerprint": "sha256:1d8511e1ce0e87ef4e33167f42f176fc6a3538b0cf4cd92ec0653d5e387396a7"
+      "fingerprint": "sha256:62227284e86a09e810639b1029c57138ee2c714dc24ef9743ac5839fda6c764e"
     },
     {
       "id": "NET-020",
@@ -5187,7 +5187,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: distributed&system-design → Timeouts + retries + backoff + jitter + idempotency"
       ],
-      "fingerprint": "sha256:6127655e59235aa2215dd47578b4ab47341bf500849f3d0f5959fbe94f641334"
+      "fingerprint": "sha256:3f1acb6c6721b72bc2b69117cb2285f480fa731b720175aceb7ba18a1cc1c811"
     },
     {
       "id": "NET-021",
@@ -5252,7 +5252,7 @@
         "Related: db&sql → JDBC connection pooling + transaction duration",
         "Related: production-engineering → Capacity planning + headroom + autoscaling"
       ],
-      "fingerprint": "sha256:db6c6a05c7de5c8da997bf2dbb04d1aaae18eea2ee9101f1fe3320a41b8b0a6c"
+      "fingerprint": "sha256:5131175a9483f0a6da4854e2c631dc25f2a62c3c6c8fae4d2b4236c33e33d2d7"
     },
     {
       "id": "NET-022",
@@ -5317,7 +5317,7 @@
         "Related: distributed&system-design → Service boundaries + API contracts + sync vs async",
         "Related: distributed&system-design → API + event schema evolution + backward compatibility"
       ],
-      "fingerprint": "sha256:ee5c6ee8075b3e881bde423c10ef04c60a7a8d0cf580c47c42151adabb7ba173"
+      "fingerprint": "sha256:6a9bdfcf17722972550203186b0b6e803980fc1c5a491fb6ff4137332954ec1c"
     },
     {
       "id": "NET-P04",
@@ -5386,7 +5386,7 @@
         "url": "https://grpc.io/docs/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:1fa3bb58051c7b3d0caffd1d4ca8d848ae60cb9c834a441404bb49cd2b57e7ab"
+      "fingerprint": "sha256:271fd204814610d29aa6381a5e9334f2ea8beff38c5a9784c02b10844352a718"
     },
     {
       "id": "NET-023",
@@ -5450,7 +5450,7 @@
         "Related: os&linux → /proc + ps + top + vmstat + process-state diagnosis",
         "Related: production-engineering → Incident response + triage + incident roles"
       ],
-      "fingerprint": "sha256:128ad02fbb161cecc3f50afb34ec8d914ad0b2fad6dbbccf8532be099fa18991"
+      "fingerprint": "sha256:eb657870dd33864914bfbba4924f16236b3bdfdba0cf03592c3bac1412dc152f"
     },
     {
       "id": "NET-024",
@@ -5515,7 +5515,7 @@
       "crossModuleReferenceRaw": [
         "Related: os&linux → strace + lsof + perf + flame graph reasoning"
       ],
-      "fingerprint": "sha256:312bca90f5ba59e87d33d11d9a5bd8df51220acd28711456bedadef6e166eabb"
+      "fingerprint": "sha256:80fb42312ebb5af84fea4791c105c3d4e27fb22cd346ddafda89f0da5426c1dc"
     },
     {
       "id": "NET-025",
@@ -5579,7 +5579,7 @@
         "Deep dive: distributed&system-design → Partial failure + unknown outcomes",
         "Related: production-engineering → Incident response + triage + incident roles"
       ],
-      "fingerprint": "sha256:85552af0d6d2ee24842c6c9daa0d7bf6183722d9a9d617f3f2244c3ee66b4008"
+      "fingerprint": "sha256:105256e9bcf2469a3191c844508104b06929eccbd408a7804db15f1f59f18f3b"
     },
     {
       "id": "NET-P05",
@@ -5636,7 +5636,7 @@
         "url": "https://www.wireshark.org/docs/wsug_html_chunked/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:8dca21919ec80dcb684c7981e6b003fb972a80c4e66ddcf14444309004b4d7eb"
+      "fingerprint": "sha256:433f5b5d50200460733538308ce4918460c1e26099de2e236db545da6874820e"
     },
     {
       "id": "NET-026",
@@ -5702,7 +5702,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:4df1d86a6583edce1f8902a8343fd0691a549135208e1d6bc6a6159a567ccdd5"
+      "fingerprint": "sha256:d0175cddd3f54beb96058bb558759201f41cf28bc212672714a41d90f2b7e41d"
     },
     {
       "id": "NET-027",
@@ -5771,7 +5771,7 @@
         "Related: distributed&system-design → Partial failure + unknown outcomes",
         "Deep dive: production-engineering → Fault injection + game day + recovery verification"
       ],
-      "fingerprint": "sha256:f68f0f2192629772954af174c24498bc903a1bea86e7ce6fb9729133887583b8"
+      "fingerprint": "sha256:8403940135221de522424c78f691aae3de1270e3a9c4efd564c4594dedf8af2f"
     },
     {
       "id": "NET-P06",
@@ -5864,7 +5864,7 @@
         "url": "https://github.com/Shopify/toxiproxy"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:3e899b50499dae7048dfc728374c8a76501e4c366790a370c2c343f72228e5d9"
+      "fingerprint": "sha256:431d744ef4b1e9f0863927616a3870a5c9894a5dc22865d0792b41582da4b284"
     },
     {
       "id": "LIN-001",
@@ -5927,7 +5927,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Production lifecycle + environments + configuration"
       ],
-      "fingerprint": "sha256:7ac1987ce05f58fe925d6ead3292f9e5ef04fba76f78894f9702babf72ffb2c8"
+      "fingerprint": "sha256:7ac4d1394431d9f149a7f55fdcdbef51aacfbba92ebb060321c52e15bfc519af"
     },
     {
       "id": "LIN-002",
@@ -5986,7 +5986,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:850012845afd69771aabaede83b25d596e1d155afd185eb76bfecf69df2bf286"
+      "fingerprint": "sha256:5c6a75e36a1296c65d3f6269835e335170848929463f4a81b01664de91d70649"
     },
     {
       "id": "LIN-003",
@@ -6049,7 +6049,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Liveness + readiness + startup + graceful termination"
       ],
-      "fingerprint": "sha256:55e6188a1ca0f27df73bf15156b6bb721253c3ef2ac8de4cf7ff950a58460c74"
+      "fingerprint": "sha256:b4dac67564686860466da9256734931c596c30dac93b5abad49866b40be35b4e"
     },
     {
       "id": "LIN-004",
@@ -6112,7 +6112,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → Concurrency + Java Memory Model basics"
       ],
-      "fingerprint": "sha256:ddc93716efccd7864faf4e9e6c8c5c72de206b4b0adea08af46c3b43d9d5c753"
+      "fingerprint": "sha256:ba914c030abd65e424f5e95c0e33a61e9472c693bec6738585e52e2470cfc45b"
     },
     {
       "id": "LIN-P01",
@@ -6168,7 +6168,7 @@
         "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:f982601e3665801eaf939906f2d7a7fabf6fb5ca966beef727cc1b63569139cc"
+      "fingerprint": "sha256:607b77489453b4a92d50810e91ec69c0559c2f70e33c22d61475cf0efef0712e"
     },
     {
       "id": "LIN-005",
@@ -6232,7 +6232,7 @@
         "Related: java → JVM memory + JFR + profiling",
         "Related: production-engineering → Resource requests + limits + throttling + OOM interpretation"
       ],
-      "fingerprint": "sha256:6388c39234c64239c58112e135bc9ae1c424cfc8a073d6bbe383ecb67a9b56a1"
+      "fingerprint": "sha256:cb0ead4ab1b7b80ff5f2fd4902bb18726d5fcc6b76525ba0d8417586aab3ef34"
     },
     {
       "id": "LIN-006",
@@ -6296,7 +6296,7 @@
         "Related: java → JVM memory + JFR + profiling",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:fb7a9fac833e5c8a9d42035c2f64dbccd344428282de75e41c995011345cc523"
+      "fingerprint": "sha256:5031ba68cd976e8213ecaf200c209a179cad812675c4f2f96783c179e6d80076"
     },
     {
       "id": "LIN-007",
@@ -6360,7 +6360,7 @@
         "Related: java → JVM memory + JFR + profiling",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:29f8d8738cfcd46f9946190c79f0df1a2f12796e7586fc38f1729c3be4893edf"
+      "fingerprint": "sha256:5d912b044c40e1abba1ce5970ead49f80087a3b19f6d911d75fc6b946d9399a6"
     },
     {
       "id": "LIN-008",
@@ -6424,7 +6424,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive for orchestration: production-engineering → Resource requests + limits + throttling + OOM interpretation"
       ],
-      "fingerprint": "sha256:d31660e14620637399e9ffece78fd4c5b5c3f109bb67da75313b7eb545034d0e"
+      "fingerprint": "sha256:70b343ebdafec38a31601ceebeb57574671b28b2c7050b21a377299fc0905b74"
     },
     {
       "id": "LIN-P02",
@@ -6477,7 +6477,7 @@
         "url": "https://docs.kernel.org/admin-guide/cgroup-v2.html"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:3c1c241bffa2120a04bc49ac451fa37daeb24810596b8a458c8a15381bcb78db"
+      "fingerprint": "sha256:b29ba2926e35a83057b0c3c8c1d02d2b678454a868c8eca8be10d6cf39cac346"
     },
     {
       "id": "LIN-009",
@@ -6540,7 +6540,7 @@
       "crossModuleReferenceRaw": [
         "Related: networking → Ports + sockets + bind/listen/connect"
       ],
-      "fingerprint": "sha256:34fb230c18e1cf8cf45c759d03c51f7c832155b581144bab36a52ca372ffe843"
+      "fingerprint": "sha256:20e62eeaddd659e8dad33da9132b2fb9a3b22dffc2c65d83998a3467eb1ad0ca"
     },
     {
       "id": "LIN-010",
@@ -6603,7 +6603,7 @@
       "crossModuleReferenceRaw": [
         "Related: software-design&quality → Server-side trust boundaries: SSRF + path/file + unsafe deserialization"
       ],
-      "fingerprint": "sha256:e2925b8053282a5eb43b9bc5e5bbaeb9c588d931e9bbfcbb243b64215119dd70"
+      "fingerprint": "sha256:8bfa46365198dbe1fd3ceaa7f0ceceb14ecb4c42fcf152ca17a60b77beebb428"
     },
     {
       "id": "LIN-011",
@@ -6666,7 +6666,7 @@
       "crossModuleReferenceRaw": [
         "Related: db&sql → ACID + MVCC + isolation anomalies"
       ],
-      "fingerprint": "sha256:5d7ba7bb037c40395a2e07df4f00c4268a7cf02f080036cd28f0c0a35c98258d"
+      "fingerprint": "sha256:926ec0aadc0681c7c8f17c2df6b42475cc0e3b58fc81342dbfdded06c64d6de7"
     },
     {
       "id": "LIN-012",
@@ -6730,7 +6730,7 @@
         "Related: db&sql → EXPLAIN ANALYZE + BUFFERS + planner statistics",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:23deb429cf0b297a0846b44135cbf8cca359f27c002046c8998d683429325c38"
+      "fingerprint": "sha256:6735e600fb3afe4c4218d533b99c6b30a29270a722f0f07fd8509fedf2a29643"
     },
     {
       "id": "LIN-013",
@@ -6795,7 +6795,7 @@
         "Related: networking → Ports + sockets + bind/listen/connect",
         "Related: networking → WebSocket + SSE + long-lived backend connections"
       ],
-      "fingerprint": "sha256:9a01e99ecadb0a124ea0f606360a5c7df21b0bfea09850e676a4cfb3223003e9"
+      "fingerprint": "sha256:85a27fdafd51f88a40815030cb184f30773cc07f4af0460d615c73ad0abd1cd6"
     },
     {
       "id": "LIN-P03",
@@ -6852,7 +6852,7 @@
         "url": "https://man7.org/linux/man-pages/man7/epoll.7.html"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:3e98d723f4a18592b0f8d5c0dd09495d4233c1038e01164714b5499422de1b44"
+      "fingerprint": "sha256:89e92e22a602f4f8aa3895050550392b7d49406f5a183ba55777434ce80785ff"
     },
     {
       "id": "LIN-014",
@@ -6917,7 +6917,7 @@
         "Related: java → Concurrency + Java Memory Model basics",
         "Related: db&sql → Row locking + deadlocks + serialization failure handling"
       ],
-      "fingerprint": "sha256:59fc323405fc6fc718fa765b606b6e66c5dad04f2f990a9dc98503fec3db291f"
+      "fingerprint": "sha256:d5db86b40b1b168278034b6bd9d1c60ddb6527a702578744bd77ed87314e59d4"
     },
     {
       "id": "LIN-015",
@@ -6978,7 +6978,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:b6b13680c8cf48523efcfc78a29ca61c69dd9356971aaea6aa6664c417097586"
+      "fingerprint": "sha256:5280cc79bc5d88cce74ed12f949a57dae4491ce4abe3d03bec796476908b17ce"
     },
     {
       "id": "LIN-016",
@@ -7041,7 +7041,7 @@
         "Related: networking → TCP connection lifecycle + RST + FIN + TIME_WAIT",
         "Related: production-engineering → Resource requests + limits + throttling + OOM interpretation"
       ],
-      "fingerprint": "sha256:67c9df96bc5ddcaeebddfeb6518962b925785579eb41b533b2dbec9637e05e70"
+      "fingerprint": "sha256:ecfef4effca985145774a666d260bfbf822f0c81727065ed5c541c1626a436c6"
     },
     {
       "id": "LIN-P04",
@@ -7094,7 +7094,7 @@
         "url": "https://man7.org/linux/man-pages/man2/getrlimit.2.html"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:fe7dedcd0fbca694209835673a49ebf27da35e397568909eb7ed0b9b58e8849d"
+      "fingerprint": "sha256:4dabb4049677b950c163e9d95bb5bc7ac9d26ebbdadbd708bdbe927f9af47711"
     },
     {
       "id": "LIN-017",
@@ -7156,7 +7156,7 @@
       "crossModuleReferenceRaw": [
         "Related: software-design&quality → Authorization + object ownership + privilege boundaries"
       ],
-      "fingerprint": "sha256:38f7f7fbadd8038f8670bcecb3cd3e097a5f826724b68dfba3f6c11b8529767a"
+      "fingerprint": "sha256:5405db966e455cfadeb8fe5919959666e85e63992158a5b651a93018ad8dab20"
     },
     {
       "id": "LIN-018",
@@ -7219,7 +7219,7 @@
       "crossModuleReferenceRaw": [
         "Foundation for orchestration: production-engineering → Kubernetes workload model: Pod + Deployment + Service"
       ],
-      "fingerprint": "sha256:f919f3cae307a9de77c2e21221fc96c6a2257c26c00819a112dfd83c975ce28d"
+      "fingerprint": "sha256:aaf107d9fd89e4666fae7e2b9dc80b56ca356e5b5b1f60b5b648df425f8271ab"
     },
     {
       "id": "LIN-019",
@@ -7283,7 +7283,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive for orchestration: production-engineering → Resource requests + limits + throttling + OOM interpretation"
       ],
-      "fingerprint": "sha256:a2d614aa4a2924b8f4135aa5b7ad69f58cb63217c93e55df0933eef18d05a384"
+      "fingerprint": "sha256:d4309dadbc98e95adfa86f3e7e03592043b6361b6803b407f162114683476e17"
     },
     {
       "id": "LIN-020",
@@ -7348,7 +7348,7 @@
         "Foundation for deployment: production-engineering → Container image + immutable artifact + runtime contract",
         "Related: production-engineering → Kubernetes workload model: Pod + Deployment + Service"
       ],
-      "fingerprint": "sha256:2c02c2ea04bf1c7373a1edbc9f59f251990a03311f5b7fa6cb94c5e9cf73c5cb"
+      "fingerprint": "sha256:31ea40a4c993d623ae261434b625084943e7163a4d07b33a9c358ede4baaa55b"
     },
     {
       "id": "LIN-P05",
@@ -7405,7 +7405,7 @@
         "url": "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:60e9a9191fe1ae0586961fa80a231300d5ce9cbe66e827d0187de25631a93622"
+      "fingerprint": "sha256:cf589ebfffa852322b76d1bdc77c7ab39506ac877c4d228472f0d90b9854c070"
     },
     {
       "id": "LIN-021",
@@ -7472,7 +7472,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:70d02f5708d99c284088c392567dc6f73c851e69702a95360f26588cf98dab41"
+      "fingerprint": "sha256:8fe7a8964ff234a944fdc3c750e156b08351182af9ce641c57e0683d4d3ac4ff"
     },
     {
       "id": "LIN-022",
@@ -7535,7 +7535,7 @@
         "Related: java → JVM memory + JFR + profiling",
         "Related: production-engineering → End-to-end bottleneck decomposition"
       ],
-      "fingerprint": "sha256:66965724ba8c8ebb78f90636c2d89a04e82fafce99e32cf2cf36250de0712777"
+      "fingerprint": "sha256:4bdacca067aacd7c957fe33a913e7eb5d75f6ea3ccc08aa50dd1da60caa5e6ef"
     },
     {
       "id": "LIN-023",
@@ -7600,7 +7600,7 @@
         "Related: networking → Production failure taxonomy",
         "Deep dive for operations: production-engineering → Incident response + triage + incident roles"
       ],
-      "fingerprint": "sha256:d497c73b3d5d28bb07bd7c37fa78e9497945759a81eefad6c8dfe2a70e5f7762"
+      "fingerprint": "sha256:0d08daa55eab7d3ef02ec514601766353b6da53e6e83a929c867e3276defc9d3"
     },
     {
       "id": "LIN-P06",
@@ -7669,7 +7669,7 @@
         "url": "https://sre.google/sre-book/effective-troubleshooting/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:59cb62baef497b207061e0dba0241c678111613af3619771c25bcf01c3618c76"
+      "fingerprint": "sha256:4ccae0d62bd9f6b80171647fc697a77fbb54a2f9071dc3bd6ace675f2b1d0f5d"
     },
     {
       "id": "DSD-001",
@@ -7733,7 +7733,7 @@
         "Deep dive for operations: production-engineering → SLI + SLO + error budget",
         "Related: software-design&quality → Technical design docs + ADRs + technical debt + safe refactor plan"
       ],
-      "fingerprint": "sha256:5140fed0c4ee2118efcb92be42d2f0ae9bf155a50e5e0a35395083cfd764ae89"
+      "fingerprint": "sha256:78bb383cc3c28d777835d5b096844d48f6dc63bf118cff1d2bdccae1866b7962"
     },
     {
       "id": "DSD-002",
@@ -7798,7 +7798,7 @@
       "crossModuleReferenceRaw": [
         "Deep dive: production-engineering → Capacity planning + headroom + autoscaling"
       ],
-      "fingerprint": "sha256:f83a374883768295e89bf62544e4609f989ccf103c04d33f68fc3b1a55fcba5c"
+      "fingerprint": "sha256:1209438314725ac2a470d62addf6f96df1ba62edae3eab94c2835edca2529eea"
     },
     {
       "id": "DSD-003",
@@ -7863,7 +7863,7 @@
         "Foundation: software-design&quality → Modular monolith + package/module boundaries",
         "Related: networking → REST API contract + resource modeling + validation + error model"
       ],
-      "fingerprint": "sha256:0cbaa561d96478502e2b405e066c0522a03031fb152d49b0d65357bcad194903"
+      "fingerprint": "sha256:73f3afe44f9584eb6fc45da8aaa8808fdbd0914deb02a9cc15d0e78db6e6b65b"
     },
     {
       "id": "DSD-004",
@@ -7925,7 +7925,7 @@
       "crossModuleReferenceRaw": [
         "Related: db&sql → Relational modeling + normalization"
       ],
-      "fingerprint": "sha256:ff4068f5444f47d63bbeabb33cfe8349b28e8fba578756dbc69e123af69634e6"
+      "fingerprint": "sha256:e285b83e1e4bfe86b82905e975939e69eccf47a928a4fe50517aa3dfeddeed95"
     },
     {
       "id": "DSD-P01",
@@ -7981,7 +7981,7 @@
         "url": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:5a4e69fe7a8fc45d64d2d376dd4f588c0225397de644a5b1996eeab0978a5d7b"
+      "fingerprint": "sha256:b6c6f6490b5c975f59f6f47c183db789e6146d1f2fdfafaab3a672f579e0b190"
     },
     {
       "id": "DSD-005",
@@ -8047,7 +8047,7 @@
         "Related: networking → Production failure taxonomy",
         "Deep dive for operations: production-engineering → Fault injection + game day + recovery verification"
       ],
-      "fingerprint": "sha256:3ec7c97d4012bfcd8fc963c00b86d4fa769e775c366e1058c7c4b7ebe767ca0f"
+      "fingerprint": "sha256:7728ac75269bc6bae938a3e83b19fd00e421e8a9cd4f918ef20880075e3b7901"
     },
     {
       "id": "DSD-006",
@@ -8114,7 +8114,7 @@
         "Related: networking → Retries + exponential backoff + jitter",
         "Related: db&sql → Idempotent writes + UPSERT + uniqueness as concurrency control"
       ],
-      "fingerprint": "sha256:2bae4f046aea5b772aa344da39e8f6661b7c0c07e6728a2c1284f630fc0f4457"
+      "fingerprint": "sha256:35c86adedc7d0016194614f9ead64b3d3ba078c468d31f96852360932106f6fa"
     },
     {
       "id": "DSD-007",
@@ -8176,7 +8176,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → Exceptions + money + time + I/O boundaries"
       ],
-      "fingerprint": "sha256:58c3d515f4cc2c177d959940c4a44a3dd29d1b190afbe765fd86ee17519b2f9b"
+      "fingerprint": "sha256:481ca5c16aa143a4705a9cd4e6b777513b341a25447d22ba11b89eae3375395d"
     },
     {
       "id": "DSD-008",
@@ -8240,7 +8240,7 @@
       "crossModuleReferenceRaw": [
         "Related: db&sql → ACID + MVCC + isolation anomalies"
       ],
-      "fingerprint": "sha256:e8a172d1915b1bf2b0aef968a51d7500dd36f97f108fc97e439ae3de7b626f4c"
+      "fingerprint": "sha256:0849e610cc4a0da446a8dce6bf591ebda9ccc986c5aaae8d6cebfbed54f39834"
     },
     {
       "id": "DSD-009",
@@ -8304,7 +8304,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Backup + restore + RPO/RTO + disaster recovery"
       ],
-      "fingerprint": "sha256:b887430ae85db5778cf4a5917654891a9e99c3f859060f96125489cdd9d07a26"
+      "fingerprint": "sha256:ad49416f17509b0312f1416c21837e175915babb1dd232367a5b7c49c0eb82bf"
     },
     {
       "id": "DSD-010",
@@ -8366,7 +8366,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:c82656a21376b8411a8f946e626de8343ae365f1337b39f011a278b235b0079f"
+      "fingerprint": "sha256:81f5fb0e8ad60c7182da461a858dba0aa115682a794185fcbd705097e5803aad"
     },
     {
       "id": "DSD-P02",
@@ -8423,7 +8423,7 @@
         "url": "https://pdos.csail.mit.edu/6.5840/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:57662816f419b7e987e98e7438e31b9e62da3828a8619ae54a46c3faf1bb3508"
+      "fingerprint": "sha256:f006a88e396e5380c524f33dcbcd0a481a2c11f347d7790156b869b891e2d600"
     },
     {
       "id": "DSD-011",
@@ -8486,7 +8486,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:5d8ce1b5ba065c1652180bac1105f29876463b009554ab1b98f2a45e93eb37c7"
+      "fingerprint": "sha256:88e7ef8f3ec58c47124807cc96c826317bdc157ed5c9d84db9f1ab0dc27e2988"
     },
     {
       "id": "DSD-012",
@@ -8550,7 +8550,7 @@
         "Related: networking → Reverse proxy + load balancer + gateway",
         "Related: production-engineering → Kubernetes workload model: Pod + Deployment + Service"
       ],
-      "fingerprint": "sha256:604dd75763a94ebaf22b04bc19212a796ae7a91d23aea9dd2469cf7e9aca748c"
+      "fingerprint": "sha256:f9331f4809e0eaee62f4e5a44ab09d5331ec6d76059d157f89091579f3541f72"
     },
     {
       "id": "DSD-013",
@@ -8613,7 +8613,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:afbbb31a8e83acc3d56a153bd083e4a790b9f0269e441b7f8985ef9c6bc921a1"
+      "fingerprint": "sha256:a1cace1ee597ca3b28dfb1ce70dd2079d5aa1945665326d349696cca6891475e"
     },
     {
       "id": "DSD-014",
@@ -8680,7 +8680,7 @@
         "Related: networking → Webhooks + callbacks + signature + replay-safe processing",
         "Related: db&sql → Idempotent writes + UPSERT + uniqueness as concurrency control"
       ],
-      "fingerprint": "sha256:8d03b4cce69135bca863e16fb9ee4734155201156843208683264271e5e17db5"
+      "fingerprint": "sha256:717fd7af1dc0d8d0ed345756aec52cf93f54f7b58264e82f8d1584eca2c3d96d"
     },
     {
       "id": "DSD-015",
@@ -8746,7 +8746,7 @@
         "Related: networking → WebSocket + SSE + long-lived backend connections",
         "Deep dive for operations: production-engineering → Capacity planning + headroom + autoscaling"
       ],
-      "fingerprint": "sha256:37b0e1ea6871f014ef074214fd17d9e86f527e0696203a67c488a69e184c4fde"
+      "fingerprint": "sha256:4144aaeab6a096123d4c2472213b28896f30f25d8421929db42a27360d0db9eb"
     },
     {
       "id": "DSD-P03",
@@ -8807,7 +8807,7 @@
         "url": "https://sre.google/sre-book/addressing-cascading-failures/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:682cf5dcd4d8246dbc93efb8923f7f9c3c4b1f49b7f968e42408d3c1dce1361c"
+      "fingerprint": "sha256:27b430f05a97d13d209b6f4b483a4507df27ee09c6634a6306d3ecc24493edee"
     },
     {
       "id": "DSD-016",
@@ -8872,7 +8872,7 @@
         "Related: db&sql → ACID + MVCC + isolation anomalies",
         "Related: db&sql → Idempotent writes + UPSERT + uniqueness as concurrency control"
       ],
-      "fingerprint": "sha256:5ad8abe030d5eb53dd27be36784c5eca8270245c97cd4c54577f300dc135d30c"
+      "fingerprint": "sha256:f5a6acf77ed97a61d64a1133fe0094ef214a90aa97a3a93762f5b6c09f9f8196"
     },
     {
       "id": "DSD-017",
@@ -8935,7 +8935,7 @@
       "crossModuleReferenceRaw": [
         "Related: db&sql → Idempotent writes + UPSERT + uniqueness as concurrency control"
       ],
-      "fingerprint": "sha256:2fd36c6b25248af7c63759676ac014762e88effdb94bdbab2d2b140f75d911dc"
+      "fingerprint": "sha256:b10be8ec7474e3cf6c8e7fe782bb9e9afabf5fcf11ad876239b8ad80da36cfbe"
     },
     {
       "id": "DSD-018",
@@ -8998,7 +8998,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:79888eb8da0142f1d406728823979c7fe9a17a8ade8ebd7678948a2d18962d14"
+      "fingerprint": "sha256:369ed912dc0cd8972e0af3bcd67efad358fb539199d1d66f965217eac5036fa1"
     },
     {
       "id": "DSD-019",
@@ -9064,7 +9064,7 @@
         "Related: networking → REST API contract + resource modeling + validation + error model",
         "Deep dive for compatibility tests: software-design&quality → Contract + component testing"
       ],
-      "fingerprint": "sha256:54dc26a6def6349e4760c818454f131947b166747c5cf1a388e11a2d04a8a4e0"
+      "fingerprint": "sha256:fcca652d4504c1df2ba98639a8313f46fcbb7e646a2589d4cefa9f2c2760bf39"
     },
     {
       "id": "DSD-P04",
@@ -9121,7 +9121,7 @@
         "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:5352f7c420bd8e4d8f87e1d8e26ab951f147218f2c7ba66cad164f7c6f18f4ec"
+      "fingerprint": "sha256:73e98d8772b5c0d11e71cc25d7a7c6f1ce994fec655529ab9991157df6f20b84"
     },
     {
       "id": "DSD-020",
@@ -9186,7 +9186,7 @@
         "Related: networking → Retries + exponential backoff + jitter",
         "Related: production-engineering → Incident response + triage + incident roles"
       ],
-      "fingerprint": "sha256:dba1d08ab928d2cdf91deb7b259bb55f31c990b7f0600f359c71ffb62a2c84d9"
+      "fingerprint": "sha256:329bd7823da92b580d125591af65de6df65238c338e4506223f3952e6567f11a"
     },
     {
       "id": "DSD-021",
@@ -9251,7 +9251,7 @@
         "Deep dive: production-engineering → Telemetry model: metrics + logs + traces",
         "Deep dive: production-engineering → Distributed tracing + context propagation + latency decomposition"
       ],
-      "fingerprint": "sha256:8a3ee4bf9a0d616db33fd545cddb17de974c96d73874f4ab6ebd7b38e05e4b75"
+      "fingerprint": "sha256:1359ccb6bcc622a31bf92b30c1742c89457d3ea0a642111d83535d75ef1d8b91"
     },
     {
       "id": "DSD-022",
@@ -9318,7 +9318,7 @@
         "Deep dive: production-engineering → Capacity planning + headroom + autoscaling",
         "Related: production-engineering → Load + stress + soak testing methodology"
       ],
-      "fingerprint": "sha256:2d7cfffbcc84e11d4c9bba42f2b0574dadb3deed80004bf2bd39741acbeaa358"
+      "fingerprint": "sha256:4ae319ed66b2fbd1fb5d2e321ae73aa117948e338de4fb139efdedf7df5f7a7e"
     },
     {
       "id": "DSD-023",
@@ -9385,7 +9385,7 @@
         "Related: software-design&quality → Technical design docs + ADRs + technical debt + safe refactor plan",
         "Related: production-engineering → Production readiness review + operational ownership"
       ],
-      "fingerprint": "sha256:0b23910203a976260a295c7f9b8fb341fff97edba337aaffcf712fbce079daf8"
+      "fingerprint": "sha256:9a5bdae7f5f22355e1ef70bb9a08d86ad243f394da52bc69b48db5c295def6b8"
     },
     {
       "id": "DSD-P05",
@@ -9470,7 +9470,7 @@
         "url": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html"
       },
       "estimatedMinutes": 300,
-      "fingerprint": "sha256:5a740bd79ac55b9a4fc863485a897a20b9b4047c5f22afeb792e6d82a950ee78"
+      "fingerprint": "sha256:e06b242452762ed1d1e5f4c4a67eb9dca3ca3f6d5e8cc212d23552e305965aa1"
     },
     {
       "id": "DES-001",
@@ -9533,7 +9533,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → SOLID + refactoring + design patterns"
       ],
-      "fingerprint": "sha256:4d3134661ebb47ee385e60710a8c944f39e76e23aa15b3a842a348e0698e1dda"
+      "fingerprint": "sha256:baa0cfdea3aab42b36b0694b6c38220280b61f4025a0bdec4597e3bba5c8c2b2"
     },
     {
       "id": "DES-002",
@@ -9596,7 +9596,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → Spring Boot + DI + REST"
       ],
-      "fingerprint": "sha256:cbfb2008d69df5cc61c89c3e78f30f6e949c40827b2ed7fcdce6b2a34a49c99d"
+      "fingerprint": "sha256:73eba8d6400c485159323f04c718cd14a9779583662285f93f07067906121895"
     },
     {
       "id": "DES-003",
@@ -9660,7 +9660,7 @@
         "Related: java → OOP + object contracts",
         "Related: db&sql → Keys + constraints + database-enforced integrity"
       ],
-      "fingerprint": "sha256:f21a0bb70d135100186385977774fba4fffed58804931aa1adc0a2cd3cdebe72"
+      "fingerprint": "sha256:4a6d1248a3f683c3c74af790d128a41614194c8b8c50e06fa858956606b584d4"
     },
     {
       "id": "DES-004",
@@ -9725,7 +9725,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → SOLID + refactoring + design patterns"
       ],
-      "fingerprint": "sha256:d19fac2990b7717b11f89f9a9382884d53071c8cd005504d7f0d5a9975253822"
+      "fingerprint": "sha256:283b10438f2a1caf3b08f5ea662448886a4efb670e67b4a0793eaaf9dfa4ccf8"
     },
     {
       "id": "DES-P01",
@@ -9781,7 +9781,7 @@
         "url": "https://google.github.io/eng-practices/review/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:08b7b487cc12d046c97c88be9ffecd617abeff2e0a9df31c0bbc5746ac7b229a"
+      "fingerprint": "sha256:199074caa587b0f8d2fa04637d1976915ab05865a6bc2f14352ec19b0ab00264"
     },
     {
       "id": "DES-005",
@@ -9843,7 +9843,7 @@
       "crossModuleReferenceRaw": [
         "Foundation for service split: distributed&system-design → Service boundaries + API contracts + sync vs async"
       ],
-      "fingerprint": "sha256:e33a9988f592fe5bafc6453a4cb704a56a4c09eea1f1da5a2d65447fb7862999"
+      "fingerprint": "sha256:b47c1a9a5430aa7676366cfbc27599f07bb4653876bd5dc569c891f705bac378"
     },
     {
       "id": "DES-006",
@@ -9905,7 +9905,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → CI test strategy + performance regression"
       ],
-      "fingerprint": "sha256:d17018086673188bbcde063feb3a1256a0324a01f6f6a64ec594b8ff86af2097"
+      "fingerprint": "sha256:8512e21ce5daaf2d7712911010f32b8f9a463537a96ee140c4cc9e04eeb3b529"
     },
     {
       "id": "DES-007",
@@ -9969,7 +9969,7 @@
         "Related: java → TDD + Mockito + testability",
         "Related: java → Spring Boot + DI + REST"
       ],
-      "fingerprint": "sha256:c670bf68f83bad166e5b1a03a23b875adc062f8737f61268cbdcbaadec143618"
+      "fingerprint": "sha256:167421eeb3642e06b6fe867a6a1878843451f8644c96c36fffdf683b66b8f504"
     },
     {
       "id": "DES-008",
@@ -10036,7 +10036,7 @@
         "Related: distributed&system-design → Architecture trade-offs + cost + design review",
         "Related: production-engineering → Production readiness review + operational ownership"
       ],
-      "fingerprint": "sha256:70cf1186f02f2cc1c00af2d6f445e9c4f4aff433e0d3153a18438a011a7e93f9"
+      "fingerprint": "sha256:c7ea34d9abad8c02f5cee6b4e01cbcf5544ad2eb79bb131e015dede4b84fa584"
     },
     {
       "id": "DES-P02",
@@ -10093,7 +10093,7 @@
         "url": "https://google.github.io/eng-practices/review/reviewer/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:dba6405e5bbdefa7b2deebcb6f00718b7b4dbede912bc6d2d0c730716ddff826"
+      "fingerprint": "sha256:533c5268187740f02dba1d9fff5088d844eb8a80a5107d0e3637916e4b34e1da"
     },
     {
       "id": "DES-009",
@@ -10158,7 +10158,7 @@
         "Related: java → JUnit 5 + test design",
         "Related: java → Spring test slices + API testing"
       ],
-      "fingerprint": "sha256:d5f6faed165a3730120145550276267f0bec7edd37e2a15cda11162a663664a1"
+      "fingerprint": "sha256:1067a70798c4cfc5cc96c58cb2c537d11c3750b452a8e1f50e1f431525006979"
     },
     {
       "id": "DES-010",
@@ -10221,7 +10221,7 @@
         "Related: java → JUnit 5 + test design",
         "Related: java → TDD + Mockito + testability"
       ],
-      "fingerprint": "sha256:20d694ef71c8014b85e2c01d492fab4e83c41bbb29bd78ab775e023b3385b999"
+      "fingerprint": "sha256:a6f971d85e8fe1acbe66f51786c21e3380673dae9417fb36d6424604cfe3aafa"
     },
     {
       "id": "DES-011",
@@ -10284,7 +10284,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → Integration testing with real infrastructure"
       ],
-      "fingerprint": "sha256:9b5e19e42095255d28ca819af977babe6bec290a7f4ed4026735c9535cd1291f"
+      "fingerprint": "sha256:8e27568cb66dd3365a9643a5f467d36af42e937284a6e4f04f7ff4fad4e5cec1"
     },
     {
       "id": "DES-012",
@@ -10349,7 +10349,7 @@
         "Related: networking → REST API contract + resource modeling + validation + error model",
         "Related: distributed&system-design → API + event schema evolution + backward compatibility"
       ],
-      "fingerprint": "sha256:0a1075f869c44459bda27517f88374dc3efef44150fe0eaeafa296e2327ce095"
+      "fingerprint": "sha256:806504452378372421e00a4ad4cc5445c56f64aa9dd2464a49086c9649ff3c26"
     },
     {
       "id": "DES-013",
@@ -10413,7 +10413,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → CI/CD pipeline + artifact promotion + quality gates"
       ],
-      "fingerprint": "sha256:24b3967bf3cc4f524ed2f9869cd2c241e27d717051c921e8469ebe4873d19018"
+      "fingerprint": "sha256:d0adc9142f1884ff15f0d22866b877e4a4037c343d135c43c81d3298e7a1fd79"
     },
     {
       "id": "DES-014",
@@ -10477,7 +10477,7 @@
       "crossModuleReferenceRaw": [
         "Related: java → Regression + coverage discipline"
       ],
-      "fingerprint": "sha256:e2b2903466e644db85b3e9282a5e6b551037c295d4cc529bbce6e1762c33da75"
+      "fingerprint": "sha256:12cf5b7392baa3f76c6187ab381658ef3c833c0d5d4d1bc3f28e3bf44ebfe0bd"
     },
     {
       "id": "DES-015",
@@ -10542,7 +10542,7 @@
         "Related: java → Executors + CompletableFuture + concurrency testing",
         "Related: production-engineering → CI/CD pipeline + artifact promotion + quality gates"
       ],
-      "fingerprint": "sha256:beb8000949183fd9d7d864ccc90b741db69e03f1ec5162489753e17a33853538"
+      "fingerprint": "sha256:ae45f825e5c7ea74ab9033cbc46a460d3fe6f6e630d9f1707aa81ff55a9df11a"
     },
     {
       "id": "DES-P03",
@@ -10603,7 +10603,7 @@
         "url": "https://testing.googleblog.com/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:c620196d6f5105df33b2f83853c1e13e0d53862b38db608151715f01ef972db6"
+      "fingerprint": "sha256:999c141da65f5b8b6cf980f6f00eedaef6fba2135f0b359f7f75f272fe399d5d"
     },
     {
       "id": "DES-016",
@@ -10669,7 +10669,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Production readiness review + operational ownership"
       ],
-      "fingerprint": "sha256:74041dd8bc97add07c02689d6437905eafef8a60600a1571ce85cd201d91c06e"
+      "fingerprint": "sha256:bebc2d1e59f44a40379cba6ed755b4b737f4b63eae9ca1d10bae9e7926fef12e"
     },
     {
       "id": "DES-017",
@@ -10732,7 +10732,7 @@
       "crossModuleReferenceRaw": [
         "Related: networking → REST API contract + resource modeling + validation + error model"
       ],
-      "fingerprint": "sha256:e06256676f9e1529384c2443aa9e3a8e1808a170efbc9bfc08c1b3f1ec2f8e7f"
+      "fingerprint": "sha256:7fcdac347e2be65b92a2eaa89d915407a8aea58b79777ce5692b77c06baa7ecf"
     },
     {
       "id": "DES-018",
@@ -10796,7 +10796,7 @@
       "crossModuleReferenceRaw": [
         "Related: networking → Authentication + authorization boundary"
       ],
-      "fingerprint": "sha256:c54ec0bdf1ec6ecc233f50a441fb38f6c77a6f3c12efd3983f4c572c9b9aff90"
+      "fingerprint": "sha256:03b73722db138949982b6eeeacf0fbcfb30e521d14710ba12459484abf736427"
     },
     {
       "id": "DES-019",
@@ -10861,7 +10861,7 @@
         "Related: production-engineering → Production lifecycle + environments + configuration",
         "Related: production-engineering → Container image + immutable artifact + runtime contract"
       ],
-      "fingerprint": "sha256:4612d5825214e74a7f4abe83dd94f515200de162fb8d5dcd2285a0b1977ac20b"
+      "fingerprint": "sha256:2e7072299587229f0f2fd4abea3de04f4861db64279b7097ff4027e8ba399067"
     },
     {
       "id": "DES-020",
@@ -10927,7 +10927,7 @@
         "Related: networking → IPv4 + CIDR + routing + NAT",
         "Related: os&linux → Filesystem model + inodes + links + rename"
       ],
-      "fingerprint": "sha256:833c2249b53970e1ab1f3cf5c3e19c8a1fa3162a1936fc9a9789a1b19f268620"
+      "fingerprint": "sha256:7c243f1e762bdcfbeaa26128a6dc06d4d5b24c11b7985226dbd54778e39c4da8"
     },
     {
       "id": "DES-021",
@@ -10993,7 +10993,7 @@
         "Related: production-engineering → CI/CD pipeline + artifact promotion + quality gates",
         "Related: production-engineering → Container image + immutable artifact + runtime contract"
       ],
-      "fingerprint": "sha256:ff5a04d1802f1e2fd4ad0a38953267cc7e0e993be58a80213b8007022806bc75"
+      "fingerprint": "sha256:4126a8ab5d4a2c03a98a6d5b1d5827905c4ece76b2e05b62767ac4f6fae18cee"
     },
     {
       "id": "DES-022",
@@ -11057,7 +11057,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → Structured logs + correlation + event quality"
       ],
-      "fingerprint": "sha256:16251eb30c2fce99cc648aba9788422f57731a20e0084f936e82b6b97ec0905d"
+      "fingerprint": "sha256:c86237b6d198feb88309ffc12b4b002df46f06aa084096bb45a884342ce0f005"
     },
     {
       "id": "DES-P04",
@@ -11118,7 +11118,7 @@
         "url": "https://owasp.org/www-project-application-security-verification-standard/"
       },
       "estimatedMinutes": 180,
-      "fingerprint": "sha256:4ba73e2d8b356e499a85dccd0267c03fedf0af27b60958f35be6166a3ea7a3c7"
+      "fingerprint": "sha256:8005f7589a9f62699c42c902ecf9eb134e84598066fea5446413fb1bbf8fc703"
     },
     {
       "id": "DES-023",
@@ -11184,7 +11184,7 @@
         "Related: java → CI test strategy + performance regression",
         "Related: production-engineering → CI/CD pipeline + artifact promotion + quality gates"
       ],
-      "fingerprint": "sha256:ae53fefcd05f6f7472b871c3fe8865f2be6ca2dea016a496749577a7e26c3769"
+      "fingerprint": "sha256:500d649eff6780432d32f4ab3cd9eb380ca74dba84207be404f2cfdfaaabe229"
     },
     {
       "id": "DES-024",
@@ -11250,7 +11250,7 @@
       "crossModuleReferenceRaw": [
         "Related: production-engineering → CI/CD pipeline + artifact promotion + quality gates"
       ],
-      "fingerprint": "sha256:6882dc28ddf11e961e8678af0ad0f6aff16ab044b55986ba60891a84ec658602"
+      "fingerprint": "sha256:53bfd94106d135ef7bfdcdf0141ce27e17f9ac558fd8d67e9fc3bbc7f9f7f6a6"
     },
     {
       "id": "DES-P05",
@@ -11319,7 +11319,7 @@
         "url": "https://csrc.nist.gov/projects/ssdf"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:50f2fbe19c9a2122c566b455ed748aea8841f3b583f51874f82d8b20efaa5928"
+      "fingerprint": "sha256:c715292a5271ed81b0252a053e5f168a5029c4ecc389079fd06b67b0e5ed7776"
     },
     {
       "id": "OPS-001",
@@ -11382,7 +11382,7 @@
         "Related: os&linux → Linux development environment + shell process model",
         "Related: software-design&quality → Secrets + configuration + cryptography boundaries"
       ],
-      "fingerprint": "sha256:74b30410041b4033121b7b3c162dc47b87f04907adae2a83daad9bd753af9f45"
+      "fingerprint": "sha256:8815ce7197ffbe156ff0c344c5c7724fa8668bf82176383216558ecb7b00129a"
     },
     {
       "id": "OPS-002",
@@ -11448,7 +11448,7 @@
         "Foundation: os&linux → Containers as processes + namespaces + cgroups + PID 1",
         "Related: software-design&quality → Dependency + software supply-chain security"
       ],
-      "fingerprint": "sha256:461e47ff1f08a385231d5b06b1955635785f71a97e3dfc91348236b3fed21fb0"
+      "fingerprint": "sha256:71ab74aa900eef24ecb57963472c308e218222e37be928c95a929d4a3a1de957"
     },
     {
       "id": "OPS-003",
@@ -11513,7 +11513,7 @@
         "Related: java → CI test strategy + performance regression",
         "Related: software-design&quality → Security testing + CI quality gates + regression evidence"
       ],
-      "fingerprint": "sha256:35161f392794b2107bcea23923937c96070198e1d5f2e833a7e84ef3b454c5a0"
+      "fingerprint": "sha256:ba22ed070f1791ce21dce569f769cbd19b8bee1b341c8e422c328fab4906678d"
     },
     {
       "id": "OPS-004",
@@ -11576,7 +11576,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:011c725c64b7252827da9f91bddae1e6ae9f8db89b9c2eb87918ae4eabe9d895"
+      "fingerprint": "sha256:f2467e58c30a961e62789728b2e4c820b81748d0f4cee58da5944848a1354e67"
     },
     {
       "id": "OPS-P01",
@@ -11632,7 +11632,7 @@
         "url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:edcc36ee8f8fc701930012ee88d6a8cddaaf2c9c4dd017225ea59088d2ca54ea"
+      "fingerprint": "sha256:382a7720b135656630d68ac5c357a1d700c0f04b60781a5283bd83b512092ec2"
     },
     {
       "id": "OPS-005",
@@ -11697,7 +11697,7 @@
         "Foundation: os&linux → cgroups v2: CPU + memory + process limits",
         "Related: networking → Reverse proxy + load balancer + gateway"
       ],
-      "fingerprint": "sha256:0e54247497b6a17215aa57828ad5812fc75d8d1684b62456ef3e655949e2b3c9"
+      "fingerprint": "sha256:ec057f70a6303a2b567337ab28c56bdfa2660a6153135799f3c4d96897782f6f"
     },
     {
       "id": "OPS-006",
@@ -11760,7 +11760,7 @@
         "Related: networking → Reverse proxy + load balancer + gateway",
         "Related: os&linux → Process lifecycle + fork/exec/wait + signals"
       ],
-      "fingerprint": "sha256:b754c90bb738bfd4b256ce3b005c9c6a2801ed4b4d97b500912d347074227f5e"
+      "fingerprint": "sha256:36b514a75eafd5fc6fe54b21ee9d632a3e41045ac4402ca3126451d2a584574d"
     },
     {
       "id": "OPS-007",
@@ -11824,7 +11824,7 @@
         "Deep dive: os&linux → cgroups v2: CPU + memory + process limits",
         "Related: os&linux → Swap + OOM + memory pressure"
       ],
-      "fingerprint": "sha256:3e8e562cf0ae07200b908eef6ea337d136dd1ad4d009587428ba6ed7b3b8716f"
+      "fingerprint": "sha256:944a9874eb365a7dfe2044d7f10b2cde36c0d3cb6f4ecf7681991332def92f2e"
     },
     {
       "id": "OPS-008",
@@ -11890,7 +11890,7 @@
         "Related: db&sql → Versioned migrations + backward-compatible schema change",
         "Related: distributed&system-design → API + event schema evolution + backward compatibility"
       ],
-      "fingerprint": "sha256:46ce59129f8d44c9bdd40616de54b0c6ce9228dcee2f12c8b37529de3d9b9d13"
+      "fingerprint": "sha256:865bf897c4d42488fb1dd53372395d3cbda9613b8b7d32a5dbb2234e25bfc965"
     },
     {
       "id": "OPS-P02",
@@ -11947,7 +11947,7 @@
         "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:3f60728c8d985357cf3e169da631ac0178892fdcc68ba52837e0a5e225306eb2"
+      "fingerprint": "sha256:1c442dfa44c9c19e74e8165b427610f82440bd810cd874d4da457ee5638edc75"
     },
     {
       "id": "OPS-009",
@@ -12011,7 +12011,7 @@
       "crossModuleReferenceRaw": [
         "Related: distributed&system-design → Observability + distributed tracing + correlation"
       ],
-      "fingerprint": "sha256:96045abf80afdbe66fbc86d2cb5728fcaf5c8491f136d995df0b4827c4c472c8"
+      "fingerprint": "sha256:c8cd2b903f54515be1551ff9a30bce9b2b061acd22d4a779551396871ae2b331"
     },
     {
       "id": "OPS-010",
@@ -12076,7 +12076,7 @@
         "Related: os&linux → /proc + ps + top + vmstat + process-state diagnosis",
         "Related: networking → Latency + throughput + bandwidth + connection setup"
       ],
-      "fingerprint": "sha256:983261a307b8c0ec0fbd166cb0a739edc65496ebefb2ff48c470400d8f195bc2"
+      "fingerprint": "sha256:f0738e3c1953c59051b5d62bb6545b77e45b0b7698f804853e856b58f5f26739"
     },
     {
       "id": "OPS-011",
@@ -12140,7 +12140,7 @@
       "crossModuleReferenceRaw": [
         "Related: software-design&quality → Secure logging + error handling + audit trail"
       ],
-      "fingerprint": "sha256:7bbf367d63032044342ea7f23259ccba5f5f6786cde1356067f1edebe2c32e18"
+      "fingerprint": "sha256:7230c8bee2e75ac383fd77326b4408ddc2819b8ef67042cf6263214f63589611"
     },
     {
       "id": "OPS-012",
@@ -12207,7 +12207,7 @@
       "crossModuleReferenceRaw": [
         "Related: distributed&system-design → Observability + distributed tracing + correlation"
       ],
-      "fingerprint": "sha256:178a6c331a11dd37a63de4d079486ad204ad1552810788eea8aa4b5a923a903b"
+      "fingerprint": "sha256:e53224a7dd3b02b79765ef66bef37617d000533eef25c47df4a5f47ad2ffd76f"
     },
     {
       "id": "OPS-013",
@@ -12272,7 +12272,7 @@
       "crossModuleReferenceRaw": [
         "Related: distributed&system-design → Observability + distributed tracing + correlation"
       ],
-      "fingerprint": "sha256:26cf5952507489112f873490f79e0189ea254894902d8520c66fedb918194342"
+      "fingerprint": "sha256:18e0a35829e8253ce4b2b7854c9959271b81dc7cf2955a839ecd80ca95429be6"
     },
     {
       "id": "OPS-P03",
@@ -12329,7 +12329,7 @@
         "url": "https://opentelemetry.io/docs/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:535a3ef060dce689e112a6784f3039fb0dd1764ae95781643f6d9f5758b600fe"
+      "fingerprint": "sha256:0411bcbe96563bd296c07cd32ffc5e5441ce8fce5f75e2854793f182bfa3b87c"
     },
     {
       "id": "OPS-014",
@@ -12393,7 +12393,7 @@
       "crossModuleReferenceRaw": [
         "Foundation: distributed&system-design → Requirements + SLO + workload model"
       ],
-      "fingerprint": "sha256:c2deddbce8b2fc8e2a684d10090443f404758c1af4c8007bd16b2a717dae0f62"
+      "fingerprint": "sha256:63d7acdb6e89d1d08764c231ae8358c79540713349239e282d293938f043cd9f"
     },
     {
       "id": "OPS-015",
@@ -12453,7 +12453,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:736c22803ac5777ec5acc022ffd1c22d4d4ba1795bd0455c9895a67ed68ca8e1"
+      "fingerprint": "sha256:29976ee3dbbaa9a58205c134370d02b70c416d196f14c8daae310a395519bce7"
     },
     {
       "id": "OPS-016",
@@ -12520,7 +12520,7 @@
         "Related: networking → Production failure taxonomy",
         "Related: os&linux → OS incident method: CPU + memory + I/O + FD + process lifecycle"
       ],
-      "fingerprint": "sha256:85c4cef9c345b1cc5c5d81212aadff42ccb44ed47f98ca81aa75564a61cc1b20"
+      "fingerprint": "sha256:97c4a52bb4623039e83678f2b259ce63b7186441a4bd445cbeb71a8a8ddb03be"
     },
     {
       "id": "OPS-017",
@@ -12583,7 +12583,7 @@
       },
       "estimatedMinutes": 180,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:cc917c097c5bef997413a55a868e0427920c7c8c40a8012fb0b6f816959faa3e"
+      "fingerprint": "sha256:1666e59d9506f031932a8cbbbb37e1a36f4410e7fbc76f7ac639b7bdc6c7682d"
     },
     {
       "id": "OPS-018",
@@ -12645,7 +12645,7 @@
       },
       "estimatedMinutes": 240,
       "crossModuleReferenceRaw": [],
-      "fingerprint": "sha256:cdb126725d5aef70694ede3a1d37c89230bcf06842f880186bfbd5dde17cb529"
+      "fingerprint": "sha256:25b676ca802132f4cf439c506329f1d673348302d7954c5cfb32f49943b08050"
     },
     {
       "id": "OPS-019",
@@ -12710,7 +12710,7 @@
         "Related: db&sql → Database benchmarking with pgbench",
         "Related: distributed&system-design → Replication + leader + quorum mental model"
       ],
-      "fingerprint": "sha256:f1931c56294ce7e1f6140a61293e3721fbed6e96847814d811070adad4e72489"
+      "fingerprint": "sha256:6a34fcff3160c8d03d5638f02c63d282e6c40123fff512faf16478895ec29a23"
     },
     {
       "id": "OPS-P04",
@@ -12767,7 +12767,7 @@
         "url": "https://sre.google/workbook/table-of-contents/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:c65d79e18a788e62fbfc06a49d511e93081c21be48b9353ba5f0233d9c5312df"
+      "fingerprint": "sha256:97dd667adbeb326c0be28a71b176b943d047205b83ed4a096ffce941a8e82efc"
     },
     {
       "id": "OPS-020",
@@ -12836,7 +12836,7 @@
         "Related: db&sql → Database benchmarking with pgbench",
         "Related: networking → Network fault injection + capacity under degradation"
       ],
-      "fingerprint": "sha256:69e30a224c93c65dbed78ea6ec073808cc4f147917e91c4be21aafb155164124"
+      "fingerprint": "sha256:1fb9e50fc27003336fccceda8293d163fc98bec4b9bf6b4ca6ca20b311b80afd"
     },
     {
       "id": "OPS-021",
@@ -12904,7 +12904,7 @@
         "Related: networking → Latency + throughput + bandwidth + connection setup",
         "Related: os&linux → strace + lsof + perf + flame graph reasoning"
       ],
-      "fingerprint": "sha256:83f20c9a51efbf7b9836c5e64631125a74a8f122b32a73b3f60b0f869ad90d81"
+      "fingerprint": "sha256:7f1c220f6bd81e837dc7f621552bd8863dec3abe6503291a800fc9f8ff95bb3c"
     },
     {
       "id": "OPS-022",
@@ -12971,7 +12971,7 @@
         "Related: distributed&system-design → Back-of-envelope capacity estimation",
         "Related: distributed&system-design → Overload + cascading failure + capacity planning"
       ],
-      "fingerprint": "sha256:61d82bde1b6685c17fa3988819d13ffc5e1f6ec8f0c836964f9d0be783fc76d0"
+      "fingerprint": "sha256:51f85dd595b4c2fe0fe82ca6d674fdb17f56094109d5c85a1dfd6e80ee5cd45c"
     },
     {
       "id": "OPS-023",
@@ -13034,7 +13034,7 @@
       "crossModuleReferenceRaw": [
         "Related: distributed&system-design → Architecture trade-offs + cost + design review"
       ],
-      "fingerprint": "sha256:68026ec3eebb3efc0df8be186bd2df63266de184d396d06105bb73576e0226ee"
+      "fingerprint": "sha256:66c02800288aaea9999d7ec97abfb7872d420d9ea6d321c32b291a0f4211d0bb"
     },
     {
       "id": "OPS-P05",
@@ -13095,7 +13095,7 @@
         "url": "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:5a84caffedac2dc4fcf1ee065e04bd9ac4e11e00565df218ae7a6e81e69675a1"
+      "fingerprint": "sha256:cc9ec60f14eff3f051fb65cac55d20ab0ea2b0beb505e5fd8b0e158b79e84815"
     },
     {
       "id": "OPS-024",
@@ -13161,7 +13161,7 @@
         "Related: networking → Network fault injection + capacity under degradation",
         "Related: distributed&system-design → Partial failure + unknown outcomes"
       ],
-      "fingerprint": "sha256:62b78cd6da5d66d69a7dfd6fb5cc9528ec618f2870d1d1652c3fd41ad2c59081"
+      "fingerprint": "sha256:fd7530eaaa170e4d80acd87ef2260e1c235608ed88c899cb9a6cabc915e6291d"
     },
     {
       "id": "OPS-025",
@@ -13230,7 +13230,7 @@
         "Related: distributed&system-design → Architecture trade-offs + cost + design review",
         "Related: software-design&quality → Technical design docs + ADRs + technical debt + safe refactor plan"
       ],
-      "fingerprint": "sha256:1e94f03c4a0052738ed5a67cadfb6226b10f946b8520ea4805e76714f6757eda"
+      "fingerprint": "sha256:5d48360ec317e373b9450d43ded082034af3ac1495fa624da21850d0b9d1432c"
     },
     {
       "id": "OPS-P06",
@@ -13311,7 +13311,7 @@
         "url": "https://sre.google/sre-book/reliable-product-launches/"
       },
       "estimatedMinutes": 240,
-      "fingerprint": "sha256:5199db4d40d4e1f2ce4df0cca2c10308ab8873d9ff82613d9c1b90045f8dd63d"
+      "fingerprint": "sha256:c088947dc6dc58a87c45854007ed66ab897ee1b18da3279a4768673c390c9a92"
     },
     {
       "id": "INT-001",
@@ -13372,7 +13372,7 @@
         "title": "Rencana integrasi awal"
       },
       "estimatedMinutes": 120,
-      "fingerprint": "sha256:a263bf61881024066d951ac13c6c6088a127a71c29ed33529ffe3a8bad8590ed"
+      "fingerprint": "sha256:8545f1e3f9aab4998e56a77b7159c6e87be50f8885b1ddbfbef24e1fb5d14686"
     },
     {
       "id": "INT-002",
@@ -13424,7 +13424,7 @@
         "title": "Rencana integrasi awal"
       },
       "estimatedMinutes": 60,
-      "fingerprint": "sha256:ea2ef8ea8788643bf5f00336ea026e542188edaa9976665bc1fa6fb77cde37a9"
+      "fingerprint": "sha256:aaa86253b817ad28e24ea2139b23557a001334eb7507a01cdd41d40e97c8b8b7"
     },
     {
       "id": "INT-003",
@@ -13476,7 +13476,7 @@
         "title": "Rencana integrasi awal"
       },
       "estimatedMinutes": 60,
-      "fingerprint": "sha256:0c1a71a91d6a68f0af8e464818feff3ce2b6512a2b7e05476ae9f2bc181e087e"
+      "fingerprint": "sha256:0232961971fcf5701464432b8a0859c796cd8e0d0027b889a307a42d985e3143"
     }
   ],
   "relations": [

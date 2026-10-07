@@ -33,7 +33,21 @@ function assertAcyclic(items:Map<string,CurriculumItem>,edges:(item:CurriculumIt
   function visit(id:string){if(visiting.has(id))throw new Error('Siklus '+label+': '+id);if(visited.has(id))return;const item=items.get(id);if(!item)throw new Error('Item tidak ditemukan: '+id);visiting.add(id);edges(item).forEach(visit);visiting.delete(id);visited.add(id);}
   items.forEach((_item,id)=>visit(id));
 }
-export function curriculumItemFingerprint(item:object){const{fingerprint:_fingerprint,...payload}=item as Record<string,unknown>;return 'sha256:'+createHash('sha256').update(JSON.stringify(payload)).digest('hex');}
+function canonicalJsonValue(value:unknown):unknown{
+  if(Array.isArray(value))return value.map(canonicalJsonValue);
+  if(value&&typeof value==='object'){
+    return Object.fromEntries(
+      Object.entries(value as Record<string,unknown>)
+        .sort(([a],[b])=>a.localeCompare(b))
+        .map(([key,current])=>[key,canonicalJsonValue(current)])
+    );
+  }
+  return value;
+}
+export function curriculumItemFingerprint(item:object){
+  const{fingerprint:_fingerprint,...payload}=item as Record<string,unknown>;
+  return 'sha256:'+createHash('sha256').update(JSON.stringify(canonicalJsonValue(payload))).digest('hex');
+}
 export function parseManifestV2(input:unknown):CurriculumManifestV2{
   const manifest=manifestV2Schema.parse(input);
   assertUnique(manifest.tracks.map(x=>x.id),'Track ID');assertUnique(manifest.modules.map(x=>x.id),'Module ID');assertUnique(manifest.items.map(x=>x.id),'Item ID');

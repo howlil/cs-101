@@ -393,7 +393,7 @@ test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () 
 
 
 test('checkpoint mengikuti locked → ready → active → passed dan membuka project berikutnya', () => {
-  const { db, service } = fixture(false);
+  const { db: blockedDb, service } = fixture(false);
   try {
     assert.equal(
       service.snapshot().availability.find((entry) => entry.itemId === project.id)?.status,
@@ -414,7 +414,7 @@ test('checkpoint mengikuti locked → ready → active → passed dan membuka pr
       /Materi valid belum tersedia/,
     );
   } finally {
-    db.close();
+    blockedDb.close();
   }
 
   const db = openDatabase(':memory:');
