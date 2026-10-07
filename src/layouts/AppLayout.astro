@@ -2,6 +2,9 @@
 import '../styles/global.css';
 import '../styles/app-shell.css';
 import ThemePreference from '../components/arc/ThemePreference';
+import CurriculumSearch from '../components/search/CurriculumSearch';
+import { curriculumGraph } from '../server/curriculum';
+import { buildCurriculumSearchIndex, itemHref } from '../domain/curriculum-v2/selectors';
 import { BarChart3, BookOpen, Heart, Home, Star } from 'lucide-react';
 
 interface Props {
@@ -17,6 +20,11 @@ const {
 } = Astro.props;
 
 const path = Astro.url.pathname;
+const searchEntries = buildCurriculumSearchIndex(curriculumGraph).map((entry) => ({
+  ...entry,
+  href: itemHref(curriculumGraph, entry.itemId),
+}));
+
 const materialActive =
   path === '/curriculum' ||
   path.startsWith('/learn/') ||
@@ -53,6 +61,7 @@ Astro.response.headers.set('Cache-Control', 'no-store');
       </a>
 
       <div class="header-actions">
+        <CurriculumSearch client:load entries={searchEntries} />
         <a
           class="top-action"
           href="https://github.com/howlil/cs-101"
