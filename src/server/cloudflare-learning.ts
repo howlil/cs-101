@@ -226,7 +226,7 @@ export class CloudflareLearningService {
     const nonce = randomUUID();
     const nextProgress = sessions.reduce(
       (progress, session) => this.progressAfter({ ...current, progress }, session),
-      current.progress,
+      [...current.progress],
     );
 
     if (activeItemId && !nextProgress.some((entry) => entry.itemId === activeItemId)) {
