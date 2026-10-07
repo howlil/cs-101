@@ -40,35 +40,38 @@
   color: var(--muted);
 }
 
-.inputRow input {
+.commandField {
   min-width: 0;
-  height: 100%;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--text);
-  font: 14px/1 var(--font-body);
 }
 
-.inputRow input::placeholder {
-  color: var(--muted);
+.commandField label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.commandInput {
+  min-height: 36px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.commandInput:hover,
+.commandInput:focus-visible {
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
 }
 
 .close {
   width: 32px;
+  min-width: 32px;
   height: 32px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.close:hover {
-  color: var(--text);
-  background: var(--surface-muted);
+  min-height: 32px;
+  padding: 0;
 }
 
 .results {

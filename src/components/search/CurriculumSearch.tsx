@@ -8,6 +8,7 @@ import {
   type CurriculumSearchEntry,
 } from "../../domain/curriculum-v2/selectors";
 import { Button } from "../arc/button/button";
+import { Input } from "../arc/input/input";
 import { navigate } from "astro:transitions/client";
 import styles from "./curriculum-search.module.css";
 
@@ -85,44 +86,53 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
 
           <div className={styles.inputRow}>
             <Search size={17} strokeWidth={1.8} aria-hidden="true" />
-            <input
-              ref={inputRef}
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded={open}
-              aria-controls="curriculum-search-options"
-              aria-activedescendant={
-                results[activeIndex]
-                  ? "curriculum-search-option-" + results[activeIndex].itemId
-                  : undefined
-              }
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "ArrowDown") {
-                  event.preventDefault();
-                  setActiveIndex((current) =>
-                    results.length ? (current + 1) % results.length : 0,
-                  );
-                } else if (event.key === "ArrowUp") {
-                  event.preventDefault();
-                  setActiveIndex((current) =>
-                    results.length ? (current - 1 + results.length) % results.length : 0,
-                  );
-                } else if (event.key === "Enter") {
-                  event.preventDefault();
-                  select(activeIndex);
+            <div className={styles.commandField}>
+              <Input
+                ref={inputRef}
+                label="Cari curriculum"
+                className={styles.commandInput}
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={open}
+                aria-controls="curriculum-search-options"
+                aria-activedescendant={
+                  results[activeIndex]
+                    ? "curriculum-search-option-" + results[activeIndex].itemId
+                    : undefined
                 }
-              }}
-              placeholder="Cari ID, topik, track, module…"
-              autoComplete="off"
-              spellCheck={false}
-              aria-label="Cari ID, topik, track, atau module"
-            />
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    setActiveIndex((current) =>
+                      results.length ? (current + 1) % results.length : 0,
+                    );
+                  } else if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    setActiveIndex((current) =>
+                      results.length ? (current - 1 + results.length) % results.length : 0,
+                    );
+                  } else if (event.key === "Enter") {
+                    event.preventDefault();
+                    select(activeIndex);
+                  }
+                }}
+                placeholder="Cari ID, topik, track, module…"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </div>
             <Dialog.Close asChild>
-              <button type="button" className={styles.close} aria-label="Tutup pencarian">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={styles.close}
+                aria-label="Tutup pencarian"
+              >
                 <X size={16} strokeWidth={1.8} aria-hidden="true" />
-              </button>
+              </Button>
             </Dialog.Close>
           </div>
 
