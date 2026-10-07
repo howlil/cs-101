@@ -1,0 +1,179 @@
+"use client";
+
+import {
+  Boxes,
+  CheckCircle2,
+  Clock3,
+  ExternalLink,
+  FolderKanban,
+  Link2,
+  ListTree,
+  LockKeyhole,
+  Target,
+  TriangleAlert,
+} from 'lucide-react';
+import CurriculumExplorer, { type ExplorerItem } from '../curriculum/CurriculumExplorer';
+import ActivateItem from '../learning/ActivateItem';
+import ActionLink from '../arc/ActionLink';
+
+type Criterion = { id: string; text: string };
+type SelectedItem = {
+  id: string;
+  kind: 'unit' | 'checkpoint' | 'integration';
+  title: string;
+  breadcrumb: string;
+  href: string;
+  state?: ExplorerItem['state'];
+  missingPrerequisites: string[];
+  scope?: string[];
+  challenge?: { title: string; steps: string[] };
+  criteria?: Criterion[];
+  problemStatement?: string;
+  brief?: string;
+  source: { title: string; url?: string };
+  estimatedHours?: number;
+  prerequisites: Array<{ id: string; title: string; href: string }>;
+};
+
+export default function CurriculumPage({
+  total,
+  activeTrackId,
+  selectedModuleId,
+  tracks,
+  modules,
+  integrations,
+  searchEntries,
+  selected,
+}: {
+  total: number;
+  activeTrackId: string;
+  selectedModuleId?: string;
+  tracks: Array<{ id: string; title: string; total: number }>;
+  modules: Array<{ id: string; title: string; items: ExplorerItem[] }>;
+  integrations: ExplorerItem[];
+  searchEntries: Array<ExplorerItem & { searchText: string }>;
+  selected?: SelectedItem;
+}) {
+  return <div className="curriculum-shell">
+    <aside className="curriculum-explorer" aria-label="Curriculum explorer">
+      <div className="explorer-heading">
+        <div>
+          <p className="eyebrow"><ListTree size={13} strokeWidth={1.8} aria-hidden="true" /> CURRICULUM</p>
+          <h1>Materi</h1>
+        </div>
+        <span className="explorer-count">{total}</span>
+      </div>
+
+      <CurriculumExplorer
+        activeTrackId={activeTrackId}
+        selectedModuleId={selectedModuleId}
+        tracks={tracks}
+        modules={modules}
+        integrations={integrations}
+        searchEntries={searchEntries}
+      />
+    </aside>
+
+    <section className="curriculum-workspace">
+      {selected ? <>
+        <header className="item-header">
+          <p className="breadcrumb">{selected.breadcrumb}</p>
+          <div className="item-kicker">
+            <span>{selected.kind === 'checkpoint' ? 'Project checkpoint' : selected.kind === 'integration' ? 'Integration' : 'Unit'}</span>
+            <code>{selected.id}</code>
+          </div>
+          <h2>{selected.title}</h2>
+
+          {selected.state && <div className="item-state-actions">
+            {selected.state === 'passed' ? (
+              <span className="state-label state-label--passed"><CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" /> Lulus</span>
+            ) : selected.state === 'stale' ? (
+              <span className="state-label state-label--stale"><TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Perlu validasi ulang</span>
+            ) : selected.state === 'active' ? (
+              <ActionLink href={selected.href} label="Lanjutkan" />
+            ) : selected.state === 'ready' || selected.state === 'started' ? (
+              <ActivateItem
+                itemId={selected.id}
+                label={selected.state === 'started' ? 'Lanjutkan item' : 'Jadikan aktif'}
+              />
+            ) : selected.state === 'locked' ? (
+              <span className="state-label state-label--locked">
+                <LockKeyhole size={14} strokeWidth={1.8} aria-hidden="true" />
+                Terkunci · selesaikan {selected.missingPrerequisites.join(', ')}
+              </span>
+            ) : null}
+          </div>}
+        </header>
+
+        {selected.prerequisites.length > 0 && (
+          <section className="item-section">
+            <h3><Link2 size={16} strokeWidth={1.8} aria-hidden="true" /> Requires</h3>
+            <div className="connection-list">
+              {selected.prerequisites.map((item) => (
+                <a href={item.href} key={item.id}>
+                  <Link2 size={13} strokeWidth={1.8} aria-hidden="true" />
+                  <code>{item.id}</code>
+                  <span>{item.title}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {selected.kind === 'unit' && <>
+          <section className="item-section">
+            <h3><ListTree size={16} strokeWidth={1.8} aria-hidden="true" /> Scope</h3>
+            <ul className="compact-list">{selected.scope?.map((scope) => <li key={scope}>{scope}</li>)}</ul>
+          </section>
+          <section className="item-section challenge-preview">
+            <p className="eyebrow"><Target size={13} strokeWidth={1.8} aria-hidden="true" /> MINI CHALLENGE</p>
+            <h3>{selected.challenge?.title}</h3>
+            <ul className="compact-list">{selected.challenge?.steps.map((step) => <li key={step}>{step}</li>)}</ul>
+          </section>
+          <section className="item-section">
+            <h3><CheckCircle2 size={16} strokeWidth={1.8} aria-hidden="true" /> Definition of Done</h3>
+            <ol className="criteria-list">{selected.criteria?.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
+          </section>
+        </>}
+
+        {selected.kind === 'checkpoint' && (
+          <section className="item-section">
+            <h3><FolderKanban size={16} strokeWidth={1.8} aria-hidden="true" /> Project checkpoint</h3>
+            <p>{selected.problemStatement}</p>
+            <p><ActionLink href={selected.href} label="Buka project workspace" /></p>
+          </section>
+        )}
+
+        {selected.kind === 'integration' && (
+          <section className="item-section">
+            <h3><Boxes size={16} strokeWidth={1.8} aria-hidden="true" /> Cross-track integration</h3>
+            <p>{selected.brief}</p>
+            <p><ActionLink href={selected.href} label="Buka integration workspace" /></p>
+          </section>
+        )}
+
+        <section className="item-section item-meta">
+          <div>
+            <span className="explorer-label"><ExternalLink size={12} strokeWidth={1.8} aria-hidden="true" /> SOURCE</span>
+            {selected.source.url
+              ? <a href={selected.source.url} target="_blank" rel="noopener noreferrer">
+                  {selected.source.title} <ExternalLink size={12} strokeWidth={1.8} aria-hidden="true" />
+                </a>
+              : <span>{selected.source.title}</span>}
+          </div>
+          {selected.estimatedHours && (
+            <div>
+              <span className="explorer-label"><Clock3 size={12} strokeWidth={1.8} aria-hidden="true" /> ESTIMATE</span>
+              <span>{selected.estimatedHours}h</span>
+            </div>
+          )}
+        </section>
+      </> : (
+        <div className="curriculum-empty">
+          <h2>Curriculum belum tersedia.</h2>
+          <p>Tidak ada item yang dapat ditampilkan.</p>
+        </div>
+      )}
+    </section>
+  </div>;
+}

@@ -2,8 +2,7 @@
 import source from '../../curriculum/manifest.v2.json';
 import '../styles/curriculum.css';
 import AppLayout from '../layouts/AppLayout.astro';
-import ActivateItem from '../components/learning/ActivateItem';
-import CurriculumExplorer from '../components/curriculum/CurriculumExplorer';
+import CurriculumPage from '../components/pages/CurriculumPage';
 import { learning } from '../server/runtime';
 import { buildCurriculumGraph } from '../domain/curriculum-v2/graph';
 import {
@@ -11,11 +10,9 @@ import {
   getItemConnections,
   getItemLocation,
   getTrackExplorer,
+  itemHref,
 } from '../domain/curriculum-v2/selectors';
-import {
-  getItemLearningView,
-  itemStateMarker,
-} from '../domain/learning/view-models';
+import { getItemLearningView } from '../domain/learning/view-models';
 
 const graph = buildCurriculumGraph(source);
 const tracks = [...graph.manifest.tracks].sort((a, b) => a.order - b.order);
@@ -26,8 +23,7 @@ const integrations = graph.manifest.items
 const requestedItemId = Astro.url.searchParams.get('item');
 const requestedItem = requestedItemId ? graph.itemsById.get(requestedItemId) : undefined;
 const requestedTrackId = Astro.url.searchParams.get('track');
-
-let activeTrackId =
+const activeTrackId =
   requestedItem && requestedItem.kind !== 'integration'
     ? requestedItem.trackId
     : tracks.some((track) => track.id === requestedTrackId)
@@ -43,202 +39,63 @@ const connections = selectedItem ? getItemConnections(graph, selectedItem.id) : 
 const searchIndex = buildCurriculumSearchIndex(graph);
 
 let learningState: Awaited<ReturnType<Awaited<ReturnType<typeof learning>>['snapshot']>> | undefined;
-try {
-  learningState = await (await learning()).snapshot();
-} catch {
-  learningState = undefined;
-}
+try { learningState = await (await learning()).snapshot(); } catch { learningState = undefined; }
 
-const learningView = (itemId: string) =>
-  learningState ? getItemLearningView(graph, learningState, itemId) : undefined;
+const viewFor = (id: string) => learningState ? getItemLearningView(graph, learningState, id) : undefined;
+const stateFor = (id: string) => viewFor(id)?.displayState ?? 'unknown';
 
-const stateMarker = (itemId: string, kind: 'unit' | 'checkpoint' | 'integration') => {
-  const view = learningView(itemId);
-  return view ? itemStateMarker(view.displayState, kind) : itemMarker(kind);
-};
+const explorerItem = (item: typeof graph.manifest.items[number]) => ({
+  id: item.id,
+  title: item.title,
+  href: itemHref(graph, item.id),
+  kind: item.kind,
+  state: stateFor(item.id),
+  active: item.id === selectedItem?.id,
+});
 
-const explorerHref = (itemId: string) => {
-  const location = getItemLocation(graph, itemId);
-  if (location.item.kind === 'checkpoint') return `/project/${encodeURIComponent(itemId)}`;
-  if (location.item.kind === 'integration') return `/integration/${encodeURIComponent(itemId)}`;
-  return `/curriculum?track=${encodeURIComponent(location.track!.id)}&item=${encodeURIComponent(itemId)}`;
-};
-
-const kindLabel = (kind: string) =>
-  kind === 'checkpoint' ? 'Project checkpoint' : kind === 'integration' ? 'Integration' : 'Unit';
-
-const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'integration' ? '◇' : '○';
+const selectedView = selectedItem ? viewFor(selectedItem.id) : undefined;
+const selected = selectedItem && selectedLocation ? {
+  id: selectedItem.id,
+  kind: selectedItem.kind,
+  title: selectedItem.title,
+  breadcrumb: [selectedLocation.track?.title ?? 'Cross-track', selectedLocation.module?.title].filter(Boolean).join(' / '),
+  href: itemHref(graph, selectedItem.id),
+  state: selectedView?.displayState,
+  missingPrerequisites: selectedView?.missingPrerequisites ?? [],
+  scope: selectedItem.kind === 'unit' || selectedItem.kind === 'integration' ? selectedItem.scope : undefined,
+  challenge: selectedItem.kind === 'unit' || selectedItem.kind === 'integration' ? selectedItem.challenge : undefined,
+  criteria: selectedItem.kind === 'unit' || selectedItem.kind === 'integration' ? selectedItem.criteria : undefined,
+  problemStatement: selectedItem.kind === 'checkpoint' ? selectedItem.problemStatement : undefined,
+  brief: selectedItem.kind === 'integration' ? selectedItem.brief : undefined,
+  source: selectedItem.source,
+  estimatedHours: selectedItem.estimatedMinutes ? Math.round(selectedItem.estimatedMinutes / 60 * 10) / 10 : undefined,
+  prerequisites: (connections?.prerequisites ?? []).map((id) => {
+    const item = graph.itemsById.get(id)!;
+    return { id, title: item.title, href: itemHref(graph, id) };
+  }),
+} : undefined;
 ---
 <AppLayout title="Materi" description="Browse curriculum CS-101 berdasarkan track, module, dan dependency." flush>
-  <div class="curriculum-shell">
-    <aside class="curriculum-explorer" aria-label="Curriculum explorer">
-      <div class="explorer-heading">
-        <div>
-          <p class="eyebrow">CURRICULUM</p>
-          <h1>Materi</h1>
-        </div>
-        <span class="explorer-count">{graph.manifest.items.length}</span>
-      </div>
-
-      <CurriculumExplorer
-        client:load
-        activeTrackId={activeTrackId ?? ''}
-        selectedModuleId={selectedModuleId}
-        tracks={tracks.map((track) => ({
-          id: track.id,
-          title: track.title,
-          total: graph.manifest.items.filter(
-            (item) => item.kind !== 'integration' && item.trackId === track.id
-          ).length,
-        }))}
-        modules={(explorer?.modules ?? []).map((module) => ({
-          id: module.id,
-          title: module.title,
-          items: module.items.map((item) => ({
-            id: item.id,
-            title: item.title,
-            href: explorerHref(item.id),
-            marker: stateMarker(item.id, item.kind),
-            active: item.id === selectedItem?.id,
-          })),
-        }))}
-        integrations={integrations.map((item) => ({
-          id: item.id,
-          title: item.title,
-          href: explorerHref(item.id),
-          marker: stateMarker(item.id, item.kind),
-          active: item.id === selectedItem?.id,
-        }))}
-        searchEntries={searchIndex.map((entry) => {
-          const item = graph.itemsById.get(entry.itemId)!;
-          return {
-            id: entry.itemId,
-            title: entry.title,
-            href: explorerHref(entry.itemId),
-            marker: stateMarker(entry.itemId, item.kind),
-            active: entry.itemId === selectedItem?.id,
-            searchText: entry.searchText,
-          };
-        })}
-      />
-    </aside>
-
-    <section class="curriculum-workspace">
-      {selectedItem && selectedLocation ? (
-        <>
-          <header class="item-header">
-            <p class="breadcrumb">
-              {selectedLocation.track?.title ?? 'Cross-track'}
-              {selectedLocation.module && <> / {selectedLocation.module.title}</>}
-            </p>
-            <div class="item-kicker">
-              <span>{kindLabel(selectedItem.kind)}</span>
-              <code>{selectedItem.id}</code>
-            </div>
-            <h2>{selectedItem.title}</h2>
-            {learningState && (() => {
-              const view = learningView(selectedItem.id)!;
-              return (
-                <div class="item-state-actions">
-                  {view.displayState === 'passed' ? (
-                    <span class="state-label state-label--passed">Lulus</span>
-                  ) : view.displayState === 'stale' ? (
-                    <span class="state-label state-label--stale">Perlu validasi ulang</span>
-                  ) : view.displayState === 'active' ? (
-                    <a class="workspace-action" href={view.href}>Lanjutkan</a>
-                  ) : view.displayState === 'ready' || view.displayState === 'started' ? (
-                    <ActivateItem
-                      client:load
-                      itemId={selectedItem.id}
-                      label={view.displayState === 'started' ? 'Lanjutkan item' : 'Jadikan aktif'}
-                    />
-                  ) : view.displayState === 'locked' ? (
-                    <span class="state-label state-label--locked">
-                      Terkunci · selesaikan {view.missingPrerequisites.join(', ')}
-                    </span>
-                  ) : null}
-                </div>
-              );
-            })()}
-          </header>
-
-          {connections && connections.prerequisites.length > 0 && (
-            <section class="item-section">
-              <h3>Requires</h3>
-              <div class="connection-list">
-                {connections.prerequisites.map((id) => {
-                  const prerequisite = graph.itemsById.get(id)!;
-                  return <a href={explorerHref(id)}><code>{id}</code><span>{prerequisite.title}</span></a>;
-                })}
-              </div>
-            </section>
-          )}
-
-          {selectedItem.kind === 'unit' && (
-            <>
-              <section class="item-section">
-                <h3>Scope</h3>
-                <ul class="compact-list">{selectedItem.scope.map((scope) => <li>{scope}</li>)}</ul>
-              </section>
-              <section class="item-section challenge-preview">
-                <p class="eyebrow">MINI CHALLENGE</p>
-                <h3>{selectedItem.challenge.title}</h3>
-                <ul class="compact-list">{selectedItem.challenge.steps.map((step) => <li>{step}</li>)}</ul>
-              </section>
-              <section class="item-section">
-                <h3>Definition of Done</h3>
-                <ol class="criteria-list">{selectedItem.criteria.map((criterion) => <li>{criterion.text}</li>)}</ol>
-              </section>
-            </>
-          )}
-
-          {selectedItem.kind === 'checkpoint' && (
-            <section class="item-section">
-              <h3>Project checkpoint</h3>
-              <p>{selectedItem.problemStatement}</p>
-              <p>
-                <a class="workspace-action" href={`/project/${selectedItem.id}`}>
-                  Buka project workspace
-                </a>
-              </p>
-            </section>
-          )}
-
-          {selectedItem.kind === 'integration' && (
-            <section class="item-section">
-              <h3>Cross-track integration</h3>
-              <p>{selectedItem.brief}</p>
-              <p>
-                <a class="workspace-action" href={`/integration/${selectedItem.id}`}>
-                  Buka integration workspace
-                </a>
-              </p>
-            </section>
-          )}
-
-          <section class="item-section item-meta">
-            <div>
-              <span class="explorer-label">SOURCE</span>
-              {selectedItem.source.url
-                ? <a href={selectedItem.source.url} target="_blank" rel="noopener noreferrer">{selectedItem.source.title}</a>
-                : <span>{selectedItem.source.title}</span>}
-            </div>
-            {selectedItem.estimatedMinutes && (
-              <div>
-                <span class="explorer-label">ESTIMATE</span>
-                <span>{Math.round(selectedItem.estimatedMinutes / 60 * 10) / 10}h</span>
-              </div>
-            )}
-          </section>
-        </>
-      ) : (
-        <div class="curriculum-empty">
-          <h2>Curriculum belum tersedia.</h2>
-          <p>Tidak ada item yang dapat ditampilkan.</p>
-        </div>
-      )}
-    </section>
-  </div>
-
-
+  <CurriculumPage
+    client:load
+    total={graph.manifest.items.length}
+    activeTrackId={activeTrackId ?? ''}
+    selectedModuleId={selectedModuleId}
+    tracks={tracks.map((track) => ({
+      id: track.id,
+      title: track.title,
+      total: graph.manifest.items.filter((item) => item.kind !== 'integration' && item.trackId === track.id).length,
+    }))}
+    modules={(explorer?.modules ?? []).map((module) => ({
+      id: module.id,
+      title: module.title,
+      items: module.items.map(explorerItem),
+    }))}
+    integrations={integrations.map(explorerItem)}
+    searchEntries={searchIndex.map((entry) => ({
+      ...explorerItem(graph.itemsById.get(entry.itemId)!),
+      searchText: entry.searchText,
+    }))}
+    selected={selected}
+  />
 </AppLayout>
