@@ -88,7 +88,6 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
           placeholder="Cari ID atau topik…"
           autocomplete="off"
           spellcheck="false"
-          aria-keyshortcuts="Control+K Meta+K"
         />
       </label>
 
@@ -335,13 +334,8 @@ const itemMarker = (kind: string) => kind === 'checkpoint' ? '◆' : kind === 'i
 
     input?.addEventListener('input', updateSearch);
 
-    window.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        input?.focus();
-        input?.select();
-      }
-      if (event.key === 'Escape' && document.activeElement === input && input) {
+    input?.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && input) {
         input.value = '';
         updateSearch();
         input.blur();

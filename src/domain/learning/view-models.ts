@@ -24,7 +24,7 @@ export type ItemLearningView = {
   item: CurriculumItem;
   href: string;
   displayState: ItemDisplayState;
-  completion: 'not_started' | 'active' | 'passed' | 'stale';
+  completion: 'not_started' | 'started' | 'active' | 'passed' | 'stale';
   availability: 'locked' | 'ready' | 'unknown';
   review: ReviewScheduleView['state'] | 'none';
   reviewDueAt: string | null;
@@ -62,7 +62,9 @@ export function getItemLearningView(
         ? 'stale'
         : isFocused
           ? 'active'
-          : 'not_started';
+          : progress?.status === 'active'
+            ? 'started'
+            : 'not_started';
 
   const displayState: ItemDisplayState =
     completion === 'passed'
@@ -71,7 +73,7 @@ export function getItemLearningView(
         ? 'stale'
         : isFocused
           ? 'active'
-          : progress?.status === 'active'
+          : completion === 'started'
             ? 'started'
             : availability?.status ?? 'unknown';
 
