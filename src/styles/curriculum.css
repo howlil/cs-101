@@ -385,3 +385,39 @@
     font-size: 24px;
   }
 }
+
+.item-state-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.state-label,
+.workspace-action {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.state-label--passed {
+  color: var(--success);
+}
+
+.state-label--locked {
+  max-width: 620px;
+  color: var(--muted);
+}
+
+.workspace-action {
+  color: var(--accent-strong);
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
+}

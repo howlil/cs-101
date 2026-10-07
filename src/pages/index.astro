@@ -1,18 +1,66 @@
 ---
-import curriculumV2 from '../../curriculum/manifest.v2.json';
 import AppLayout from '../layouts/AppLayout.astro';
-import { tasks } from '../server/curriculum';
+import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
 import EmptyAction from '../components/arc/EmptyAction';
 import TaskCard from '../components/arc/TaskCard';
+
 const state = await (await learning()).snapshot();
-const active = tasks.find((task) => task.taskId === state.activeTaskId);
-const progress = state.progress.find((item) => item.taskId === active?.taskId);
-const curriculumAvailable = curriculumV2.items.length > 0;
+const active = state.activeItemId ? curriculumGraph.itemsById.get(state.activeItemId) : undefined;
+const activeProgress = active ? state.progress.find((entry) => entry.itemId === active.id) : undefined;
+const passed = new Set(state.progress.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId));
+const nextReady = curriculumGraph.manifest.items.find((item) => {
+  if (passed.has(item.id)) return false;
+  return state.availability.find((entry) => entry.itemId === item.id)?.status === 'ready';
+});
+
+const hrefFor = (itemId: string) => {
+  const item = curriculumGraph.itemsById.get(itemId);
+  return item?.kind === 'unit'
+    ? `/learn/${itemId}`
+    : `/curriculum?item=${encodeURIComponent(itemId)}`;
+};
 ---
-<AppLayout title="Hari ini"><div class="content">
-  <p class="eyebrow">BELAJAR / HARI INI</p><h1>Lanjut dari sini.</h1><p class="lede">Satu task. Satu langkah berikutnya.</p>
-  {active ? <TaskCard taskId={active.taskId} title={active.title} description={progress?.continueFrom || 'Mulai dari konsep pertama, lalu kerjakan latihannya.'} href={`/learn/${active.taskId}${progress?.lastAnchor ? `#${progress.lastAnchor}` : ''}`} actionLabel="Lanjutkan" /> : <EmptyAction client:load title={curriculumAvailable ? 'Pilih materi pertama.' : 'Curriculum belum tersedia.'} description={curriculumAvailable ? `${curriculumV2.items.length} item tersedia. Pilih satu unit dari curriculum untuk mulai.` : 'Materi akan muncul setelah curriculum ditambahkan.'} href={curriculumAvailable ? '/curriculum' : '/demo'} actionLabel={curriculumAvailable ? 'Buka curriculum' : 'Lihat contoh tampilan'} />}
-  <h2>Review</h2><EmptyAction client:load title="Belum ada review terjadwal." description="Jadwal review akan muncul setelah ada materi yang perlu diulang." />
-  <hr /><p class="muted small">Progres dihitung dari bukti yang lo simpan.</p>
-</div></AppLayout>
+<AppLayout title="Hari ini">
+  <div class="content">
+    <p class="eyebrow">BELAJAR / HARI INI</p>
+    <h1>Lanjut dari sini.</h1>
+    <p class="lede">Satu item. Satu langkah berikutnya.</p>
+
+    {active ? (
+      <TaskCard
+        taskId={active.id}
+        title={active.title}
+        description={activeProgress?.continueFrom || 'Lanjutkan item aktif.'}
+        href={hrefFor(active.id)}
+        actionLabel="Lanjutkan"
+      />
+    ) : nextReady ? (
+      <TaskCard
+        taskId={nextReady.id}
+        title={nextReady.title}
+        description="Item berikutnya sudah siap dikerjakan."
+        href={`/curriculum?item=${encodeURIComponent(nextReady.id)}`}
+        actionLabel="Buka"
+      />
+    ) : (
+      <EmptyAction
+        client:load
+        title="Tidak ada item yang siap."
+        description="Periksa prerequisite di curriculum."
+        href="/curriculum"
+        actionLabel="Buka curriculum"
+      />
+    )}
+
+    <h2>Review</h2>
+    <EmptyAction
+      client:load
+      title="Belum ada review terjadwal."
+      description="Jadwal review akan muncul setelah review engine diaktifkan."
+    />
+
+    <hr />
+    <p class="muted small">Progres dihitung dari evidence, bukan durasi belajar.</p>
+  </div>
+</AppLayout>

@@ -9,10 +9,9 @@ CREATE TABLE item_progress (
   continue_from TEXT NOT NULL DEFAULT ''
 );
 
-INSERT INTO item_progress(item_id, status, passed_fingerprint, last_anchor, continue_from)
+INSERT OR IGNORE INTO item_progress(item_id, status, passed_fingerprint, last_anchor, continue_from)
 SELECT task_id, status, passed_fingerprint, last_anchor, continue_from
-FROM task_progress
-ON CONFLICT(item_id) DO NOTHING;
+FROM task_progress;
 
 ALTER TABLE sessions ADD COLUMN item_id TEXT;
 UPDATE sessions SET item_id = task_id WHERE item_id IS NULL;

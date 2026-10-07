@@ -100,3 +100,14 @@ html[data-sidebar-collapsed="true"] .sidebar { display: none; }
 }
 @media (max-width: 360px) { .shell { padding-inline: 12px; } .topbar { padding-inline: 12px; } .topbar nav { width: calc(100% + 24px); margin-inline: -12px; padding-inline: 12px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+
+.progress-tracks { display: grid; gap: 18px; margin-top: 24px; }
+.progress-track { border-top: 1px solid var(--line); padding-top: 12px; }
+.progress-track-heading { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-bottom: 8px; }
+.progress-track-heading a { color: var(--text); font-weight: 650; text-decoration: none; }
+.progress-track-heading span { color: var(--muted); font: 600 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.progress-modules { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 12px; }
+.progress-modules a { display: flex; justify-content: space-between; gap: 12px; padding: 7px 8px; border-radius: 7px; color: var(--muted); text-decoration: none; font-size: 12px; }
+.progress-modules a:hover { color: var(--text); background: var(--surface-muted); }
+.progress-modules small { white-space: nowrap; }
+@media (max-width: 767px) { .progress-modules { grid-template-columns: 1fr; } }

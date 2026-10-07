@@ -7,25 +7,72 @@ import Notice from '../../components/arc/Notice.astro';
 import EmptyAction from '../../components/arc/EmptyAction';
 import Feedback from '../../components/arc/Feedback';
 import { Button } from '../../components/arc/button/button';
-import { tasks } from '../../server/curriculum';
+import { requiredEvidenceForItem } from '../../domain/learning/rules';
+import { curriculumGraph } from '../../server/curriculum';
 import { learning } from '../../server/runtime';
-import { fingerprint } from '../../domain/curriculum';
-const task = tasks.find((item) => item.taskId === Astro.params.id);
-if (!task) return Astro.redirect('/404');
+
+const item = curriculumGraph.itemsById.get(Astro.params.id ?? '');
+if (!item) return Astro.redirect('/404');
+if (item.kind !== 'unit') return Astro.redirect(`/curriculum?item=${encodeURIComponent(item.id)}`);
+
 const lessons = await getCollection('lessons');
-const lesson = lessons.find((item) => item.data.taskId === task.taskId && !item.data.demo);
+const lesson = lessons.find((entry) => entry.data.taskId === item.id && !entry.data.demo);
 const rendered = lesson ? await render(lesson) : null;
 const Content = rendered?.Content;
-const stale = !!lesson && lesson.data.curriculumFingerprint !== fingerprint(task);
+const stale = !!lesson && lesson.data.curriculumFingerprint !== item.fingerprint;
 const state = await (await learning()).snapshot();
-const progress = state.progress.find((item) => item.taskId === task.taskId);
+const progress = state.progress.find((entry) => entry.itemId === item.id);
 ---
-{lesson && Content ? <LessonLayout title={task.title} description={lesson.data.description} taskId={task.taskId} headings={rendered?.headings}>
-  <div slot="before">
-    {stale && <Notice title="Materi perlu diperbarui" message="Bukti sebelumnya tetap tersimpan." tone="warning" />}
-    {progress?.continueFrom && <Notice title="Lanjut dari" message={progress.continueFrom} />}
-    {state.activeTaskId !== task.taskId && <div class="actions"><Button type="button" variant="primary" data-activate={task.taskId} data-revision={state.revision}>Jadikan task aktif</Button><Feedback client:load scope={`activate:${task.taskId}`} /></div>}
-  </div>
-  <Content />
-  <div slot="after">{state.activeTaskId === task.taskId && <SessionLogger task={task} revision={state.revision} continueFrom={progress?.continueFrom} lastAnchor={progress?.lastAnchor} />}</div>
-</LessonLayout> : <AppLayout title={task.title}><div class="content"><p class="eyebrow">{task.taskId}</p><h1>{task.title}</h1><EmptyAction client:load title="Materi belum tersedia." description="Lesson untuk task ini belum dibuat." href="/progress" actionLabel="Kembali ke daftar task" /></div></AppLayout>}
+{lesson && Content ? (
+  <LessonLayout
+    title={item.title}
+    description={lesson.data.description}
+    taskId={item.id}
+    headings={rendered?.headings}
+  >
+    <div slot="before">
+      {stale && <Notice title="Materi perlu diperbarui" message="Bukti sebelumnya tetap tersimpan." tone="warning" />}
+      {progress?.continueFrom && <Notice title="Lanjut dari" message={progress.continueFrom} />}
+      {state.activeItemId !== item.id && (
+        <div class="actions">
+          <Button
+            type="button"
+            variant="primary"
+            data-activate-item={item.id}
+            data-revision={state.revision}
+          >
+            Jadikan item aktif
+          </Button>
+          <Feedback client:load scope={`activate:${item.id}`} />
+        </div>
+      )}
+    </div>
+    <Content />
+    <div slot="after">
+      {state.activeItemId === item.id && (
+        <SessionLogger
+          itemId={item.id}
+          fingerprint={item.fingerprint}
+          criteria={requiredEvidenceForItem(item)}
+          revision={state.revision}
+          continueFrom={progress?.continueFrom}
+          lastAnchor={progress?.lastAnchor}
+        />
+      )}
+    </div>
+  </LessonLayout>
+) : (
+  <AppLayout title={item.title}>
+    <div class="content">
+      <p class="eyebrow">{item.id}</p>
+      <h1>{item.title}</h1>
+      <EmptyAction
+        client:load
+        title="Materi belum tersedia."
+        description="Lesson untuk unit ini belum dibuat. Scope dan challenge tetap bisa dilihat dari curriculum."
+        href={`/curriculum?item=${encodeURIComponent(item.id)}`}
+        actionLabel="Kembali ke curriculum"
+      />
+    </div>
+  </AppLayout>
+)}
