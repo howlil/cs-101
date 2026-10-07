@@ -1,0 +1,15 @@
+{
+  "sourceSha256": "63187b8f134b37ea67cf9361644c57c9680244f99604d1865735df343bcebcd5",
+  "generatedFrom": "kurikulum.xlsx snapshot",
+  "counts": {
+    "tracks": 7,
+    "modules": 43,
+    "items": 206,
+    "units": 163,
+    "checkpoints": 40,
+    "integrations": 3,
+    "relations": 637,
+    "warnings": 0
+  },
+  "warnings": []
+}
