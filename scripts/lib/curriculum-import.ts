@@ -1,0 +1,46 @@
+import { createHash } from 'node:crypto';
+import { curriculumItemFingerprint,parseManifestV2,type CurriculumItem,type CurriculumManifestV2,type IntegrationExercise,type LearningUnit,type ProjectCheckpoint,type Relation } from '../../src/domain/curriculum-v2/schema';
+import type { WorkbookRows } from './xlsx-lite';
+
+export const TRACK_SPECS=[
+ {sourceId:'java',id:'java',title:'Java'},
+ {sourceId:'db&sql',id:'db-sql',title:'DB & SQL'},
+ {sourceId:'networking',id:'networking',title:'Networking'},
+ {sourceId:'os&linux',id:'os-linux',title:'OS & Linux'},
+ {sourceId:'distributed&system-design',id:'distributed-system-design',title:'Distributed & System Design'},
+ {sourceId:'software-design&quality',id:'software-design-quality',title:'Software Design & Quality'},
+ {sourceId:'production-engineering',id:'production-engineering',title:'Production Engineering'},
+] as const;
+type ItemWithoutFingerprint=Omit<LearningUnit,'fingerprint'>|Omit<ProjectCheckpoint,'fingerprint'>|Omit<IntegrationExercise,'fingerprint'>;
+const itemId=/^[A-Z]+-(?:P\d{2,3}|\d{3})$/,unitId=/^[A-Z]+-\d{3}$/;
+const normalize=(value:string)=>value.toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
+const slugify=(value:string)=>value.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const hash=(value:string)=>createHash('sha256').update(value).digest('hex');
+function objectRows(rows:string[][],headerIndex:number){const headers=rows[headerIndex].map(value=>String(value??'').trim());return rows.slice(headerIndex+1).map(row=>Object.fromEntries(headers.map((header,index)=>[header,String(row[index]??'').trim()])));}
+function bullets(raw:string){const value=String(raw??'').trim();if(!value)return[];const lines=value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean),list=lines.filter(line=>/^[-•]\s*/.test(line)).map(line=>line.replace(/^[-•]\s*/,''));return list.length?list:[value];}
+function challenge(raw:string){const value=String(raw??'').trim(),lines=value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);return{title:lines[0]??'',steps:lines.slice(1).map(line=>line.replace(/^[-•]\s*/,'')),raw:value};}
+function criteria(raw:string,prefix='criterion'){return bullets(raw).map(text=>({id:prefix+'-'+hash(normalize(text)).slice(0,10),text}));}
+function estimatedMinutes(raw:string){const match=/^(\d+(?:\.\d+)?)\s*h?$/i.exec(String(raw??'').trim());return match?Math.round(Number(match[1])*60):undefined;}
+function source(title:string,url:string){return{title:String(title??'').trim(),...(String(url??'').trim()?{url:String(url).trim()}:{})};}
+export type CurriculumImportWarning={itemId:string;kind:'unparsed-relation'|'unresolved-relation';raw:string};
+export type CurriculumImportReport={sourceSha256?:string;counts:{tracks:number;modules:number;items:number;units:number;checkpoints:number;integrations:number;relations:number;warnings:number};warnings:CurriculumImportWarning[]};
+
+export function buildManifestFromWorkbook(workbook:WorkbookRows,sourceSha256?:string){
+ const tracks=TRACK_SPECS.map((track,index)=>({id:track.id,title:track.title,order:index+1})),modules:CurriculumManifestV2['modules']=[],unitSource=new Map<string,Record<string,string>&{trackId:string;moduleId:string}>(),titlesByTrack=new Map<string,Map<string,string>>();
+ for(const spec of TRACK_SPECS){const rows=workbook.get(spec.sourceId);if(!rows)throw new Error('Sheet curriculum hilang: '+spec.sourceId);let moduleOrder=0,lastPhase='';for(const record of objectRows(rows,0)){const id=record['Task ID'];if(!unitId.test(id))continue;const phase=record.Phase;if(phase!==lastPhase){lastPhase=phase;moduleOrder++;const title=phase.replace(/^\d+(?:\.\d+)?\.\s*/,'').trim();modules.push({id:spec.id+'-'+slugify(title),trackId:spec.id,title,sourceLabel:phase,order:moduleOrder});}const moduleId=modules[modules.length-1].id;unitSource.set(id,{...record,trackId:spec.id,moduleId});const titles=titlesByTrack.get(spec.id)??new Map<string,string>();titles.set(normalize(record['Skill / Topic']),id);titlesByTrack.set(spec.id,titles);}}
+ const queueRows=workbook.get('Antrean');if(!queueRows)throw new Error('Sheet Antrean tidak ditemukan.');const headerIndex=queueRows.findIndex(row=>row[0]==='ID'&&row.includes('Jalur')&&row.includes('Topik'));if(headerIndex<0)throw new Error('Header Antrean tidak ditemukan.');const queue=objectRows(queueRows,headerIndex).filter(row=>itemId.test(row.ID));
+ const items:CurriculumItem[]=[],relations:Relation[]=[],relationKeys=new Set<string>(),warnings:CurriculumImportWarning[]=[],checkpointsByTrack=new Map<string,string[]>();
+ const addRelation=(relation:Relation)=>{const key=relation.from+'\0'+relation.to+'\0'+relation.type;if(!relationKeys.has(key)){relationKeys.add(key);relations.push(relation);}};
+ for(const row of queue){const id=row.ID,kind=row.Jenis==='Checkpoint'?'checkpoint':row.Jenis==='Integrasi'?'integration':'unit',prerequisites=[row['Prasyarat 1'],row['Prasyarat 2'],row['Prasyarat 3']].filter(Boolean);let payload:ItemWithoutFingerprint;
+  if(kind==='unit'){const original=unitSource.get(id);if(!original)throw new Error('Unit '+id+' tidak ditemukan di sheet track.');payload={id,kind,trackId:original.trackId,moduleId:original.moduleId,order:Number(row.Urutan),title:row.Topik,scope:bullets(row['Scope asli']),criteria:criteria(row['Exit criteria asli']),challenge:challenge(row['Challenge asli']),prerequisites,marketExpectation:bullets(original['Market Expectation']),source:source(row['Nama sumber']||original['Learning Source'],row['URL sumber']||original['Source URL']),estimatedMinutes:estimatedMinutes(row['Estimasi asli']||original.Duration),crossModuleReferenceRaw:bullets(original['Cross-Module Reference'])};}
+  else if(kind==='checkpoint'){const trackId=slugify(row.Jalur),original=unitSource.get(row['ID sumber'])??unitSource.get(prerequisites[0]);if(!original)throw new Error('Source checkpoint '+id+' tidak ditemukan.');const previous=checkpointsByTrack.get(trackId)?.at(-1);payload={id,kind,trackId,moduleId:original.moduleId,order:Number(row.Urutan),title:row.Topik,problemStatement:row['Problem statement asli']||row['Scope asli'],requirements:criteria(row['Project requirements asli']||row['Exit criteria asli'],'requirement'),prerequisites,...(previous?{parentProjectId:previous}:{}),source:source(row['Nama sumber'],row['URL sumber']),estimatedMinutes:estimatedMinutes(row['Estimasi asli'])};const checkpoints=checkpointsByTrack.get(trackId)??[];checkpoints.push(id);checkpointsByTrack.set(trackId,checkpoints);}
+  else payload={id,kind,order:Number(row.Urutan),title:row.Topik,brief:row['Problem statement asli']||row['Scope asli'],scope:bullets(row['Scope asli']),challenge:challenge(row['Challenge asli']),criteria:criteria(row['Exit criteria asli']),requirements:criteria(row['Project requirements asli'],'requirement'),prerequisites,source:source(row['Nama sumber'],row['URL sumber']),estimatedMinutes:estimatedMinutes(row['Estimasi asli'])};
+  const item={...payload,fingerprint:curriculumItemFingerprint(payload)} as CurriculumItem;items.push(item);prerequisites.forEach(prerequisite=>addRelation({from:prerequisite,to:id,type:'prerequisite'}));if(item.kind==='checkpoint'&&item.parentProjectId)addRelation({from:item.parentProjectId,to:item.id,type:'project_parent'});
+ }
+ const allItemIds=new Set(items.map(current=>current.id));for(const current of items)for(const prerequisite of current.prerequisites)if(!allItemIds.has(prerequisite))throw new Error('Prerequisite '+prerequisite+' untuk '+current.id+' tidak ditemukan.');
+ for(const current of items){if(current.kind!=='unit')continue;for(const raw of current.crossModuleReferenceRaw){const match=/^(Related|Deep dive|Foundation)(?:[^:]*)?:\s*([^→]+)→\s*(.+)$/i.exec(raw.replace(/^[-•]\s*/,''));if(!match){warnings.push({itemId:current.id,kind:'unparsed-relation',raw});continue;}const type=match[1].toLowerCase()==='deep dive'?'deep_dive':match[1].toLowerCase() as 'related'|'foundation',targetTrack=slugify(match[2].trim()),target=titlesByTrack.get(targetTrack)?.get(normalize(match[3]));if(target)addRelation({from:current.id,to:target,type});else warnings.push({itemId:current.id,kind:'unresolved-relation',raw});}}
+ for(const[trackId,checkpointIds]of checkpointsByTrack){let previousOrder=0;for(const checkpointId of checkpointIds){const checkpoint=items.find(current=>current.id===checkpointId)!;for(const unit of items.filter(current=>current.kind==='unit'&&current.trackId===trackId&&current.order>previousOrder&&current.order<checkpoint.order))addRelation({from:unit.id,to:checkpoint.id,type:'contributes_to'});previousOrder=checkpoint.order;}}
+ const manifest=parseManifestV2({version:2,tracks,modules,items,relations}),report:CurriculumImportReport={sourceSha256,counts:{tracks:manifest.tracks.length,modules:manifest.modules.length,items:manifest.items.length,units:manifest.items.filter(x=>x.kind==='unit').length,checkpoints:manifest.items.filter(x=>x.kind==='checkpoint').length,integrations:manifest.items.filter(x=>x.kind==='integration').length,relations:manifest.relations.length,warnings:warnings.length},warnings};
+ return{manifest,report};
+}
+export function workbookSha256(content:Buffer){return createHash('sha256').update(content).digest('hex');}
