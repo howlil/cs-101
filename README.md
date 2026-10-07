@@ -27,11 +27,10 @@ Deployment mengikuti pola yang sama dengan `modu-app`: **Cloudflare Workers Buil
 ```text
 push master
   ↓
-pnpm run build
-  ↓
-Astro + @astrojs/cloudflare
-  ↓
-dist/
+pnpm run build:cloudflare
+  ├─ validate curriculum/content/review
+  ├─ apply pending D1 migrations
+  └─ Astro + @astrojs/cloudflare → dist/
   ↓
 npx wrangler deploy
   ↓
@@ -41,7 +40,7 @@ Cloudflare Worker + D1
 Gunakan konfigurasi dashboard berikut:
 
 ```text
-Build command:  pnpm run build
+Build command:  pnpm run build:cloudflare
 Deploy command: npx wrangler deploy
 Root directory: /
 Production branch: master
@@ -57,7 +56,9 @@ D1 tersedia sebagai binding `LEARNING_DB`. Setelah deployment pertama atau ketik
 pnpm run migrate:cloudflare
 ```
 
-Cloudflare menjalankan semua preparation pada Build command: validasi konten, migration D1 yang belum terpasang, lalu Astro Cloudflare build. Deploy command tetap `npx wrangler deploy` dan hanya mengirim artifact yang sudah siap.
+Cloudflare menjalankan preparation release lewat `pnpm run build:cloudflare`: migration D1 yang belum terpasang lalu build yang tervalidasi. Deploy command tetap `npx wrangler deploy` dan hanya mengirim artifact yang sudah siap.
+
+`pnpm run build` sengaja **tidak** menjalankan migration remote. Ini membuat build lokal/CI reproducible dan mencegah validation/build biasa memodifikasi production database.
 
 Untuk deploy manual dari terminal:
 
@@ -65,7 +66,7 @@ Untuk deploy manual dari terminal:
 pnpm run deploy:cloudflare
 ```
 
-`pnpm run deploy:cloudflare` hanya convenience script lokal yang menjalankan build workflow yang sama lalu `wrangler deploy`.
+`pnpm run deploy:cloudflare` adalah release path manual: migrate D1 → validated Cloudflare build → `wrangler deploy`.
 
 `astro.config.mjs` adalah konfigurasi production Cloudflare. `pnpm dev` dan `pnpm run build:node` memakai `astro.node.config.mjs` untuk runtime Node + `node:sqlite` lokal.
 
