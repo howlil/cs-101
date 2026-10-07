@@ -1,141 +1,198 @@
 ---
 name: course-generator
-description: Generate one CS-101 lesson on demand from the curriculum source, research authoritative sources, and write a source-backed Astro/MDX course page with quizzes, challenges, project guidance, and exit-criteria validation. Use when generating, regenerating, or auditing a specific curriculum task such as SQL-001 or JAV-013; do not bulk-generate the curriculum unless explicitly requested.
+description: Generate one CS-101 unit on demand from Curriculum Manifest V2, research authoritative sources, and persist a validated Astro/MDX lesson plus review bank. Use for one unit such as SQL-001 or JAV-013. Project checkpoints and integrations use their dedicated runtime workspaces.
 ---
 
 # Course Generator
 
-Generate **one learning unit at a time** from the CS-101 curriculum. Treat the curriculum as the specification and the generated lesson as a compiled artifact.
+Generate **one unit at a time**. Treat curriculum as source code and generated content as a compiled artifact.
 
-## Core mental model
+## Execution model
 
-`curriculum row -> source pack -> lesson spec -> MDX lesson -> validation -> persisted artifact`
+```text
+Item ID
+  ↓
+pnpm generation:prepare <ITEM-ID>
+  ↓
+context.json
+  ↓
+source research
+  ↓
+source-pack.json
+  ↓
+lesson-spec.json
+  ↓
+lesson.mdx
+  ↓
+pnpm generation:validate <ITEM-ID>
+  ↓
+derived generation record + review bank
+  ↓
+pnpm generation:promote <ITEM-ID>
+```
 
-- Curriculum = source of truth for scope, challenge, prerequisites, project checkpoint, and definition of done.
-- Authoritative sources = factual dependencies used to explain the scope correctly.
-- Lesson spec = compact intermediate representation passed between generation stages.
-- Astro/MDX = presentation layer; Astro compiles the lesson to HTML.
-- Exit criteria = executable acceptance tests for the lesson itself.
+Never write final lesson/review artifacts before the staged bundle passes validation.
 
-Never make the generated lesson become a second curriculum.
+## Input
 
-## Read these references
+Resolve to one Curriculum V2 Item ID.
 
-Before generating a lesson, read only what is needed:
+- Unit, e.g. `SQL-001`: supported.
+- Checkpoint, e.g. `SQL-P01`: do not generate as a lesson; use the project workspace.
+- Integration, e.g. `INT-001`: do not generate as a lesson; use the integration workspace.
 
-- `references/curriculum-contract.md`
-- `references/prompt-chain.md`
-- `references/source-policy.md`
-- `references/repo-architecture.md`
-- `references/learning-workflow.md`
-- `references/lesson-quality-gate.md`
+For ambiguous title lookup, resolve against Manifest V2 before generating.
 
-Use `assets/lesson-template.mdx` as the output contract.
+## 1. Prepare graph context
 
-## Input resolution
+Run:
 
-Accept any of these targets:
+```sh
+pnpm generation:prepare SQL-001
+```
 
-1. Explicit Task ID, e.g. `SQL-001`, `JAV-013`.
-2. Explicit topic name if it uniquely resolves to a Task ID.
-3. `current`, `active`, or equivalent: resolve the active task from the curriculum/workflow source.
+Read `generation/staging/SQL-001/context.json`.
 
-If a target can be resolved unambiguously, do not ask for confirmation.
+The resolver selects only deterministic relevant context:
 
-## Workflow
+- current item;
+- direct prerequisites;
+- nearby module items;
+- nearest checkpoint;
+- checkpoint lineage;
+- bounded related/deep-dive/foundation/contributes-to relations;
+- curated curriculum source.
 
-1. **Resolve context**
-   - Find the target Task ID.
-   - Read the target row plus only its direct prerequisites, cross-module references, active project checkpoint, and previous lesson if needed for continuity.
-   - Preserve the curriculum wording for challenge and exit criteria.
+Do not replace this packet with the full manifest.
 
-2. **Build a curriculum packet**
-   Normalize only these fields:
-   - task id
-   - track/jalur
-   - phase
-   - topic
-   - why/market expectation
-   - Pareto scope (`Learn Now`)
-   - exit criteria
-   - micro challenge
-   - project checkpoint/problem/requirements
-   - curriculum source + URL
-   - prerequisites
-   - cross-module references
+## 2. Research sources
 
-3. **Research sources**
-   - Read the curriculum-provided source first.
-   - Find primary/official sources for the exact Pareto scope.
-   - Produce a compact source pack: source title, URL, authority tier, concepts supported, important caveats.
-   - Do not continue with unsupported factual claims.
+Read the curated curriculum source first, then primary/official sources for the exact scope.
 
-4. **Create the lesson spec**
-   Build a compact plan before writing prose:
-   - learner payoff
-   - 3-7 learning outcomes derived from exit criteria
-   - one central mental model
-   - dependency/cause-effect graph
-   - concepts in teaching order
-   - one mechanism/example per important concept
-   - misconception traps
-   - practice sequence
-   - quiz blueprint
-   - challenge plan
-   - project bridge if applicable
-   - exit-criteria coverage map
+Write `source-pack.json` using the schema in `src/domain/generation/schema.ts`.
 
-5. **Generate the lesson**
-   - Write MDX using `assets/lesson-template.mdx`.
-   - Optimize for low cognitive load: payoff first, then mental model, then mechanisms, then practice.
-   - Be detailed enough to pass the original exit criteria, but do not expand the syllabus with unrelated material.
-   - Prefer diagrams, tables, code, traces, state transitions, and prediction exercises when they reduce prose.
+Rules:
 
-6. **Generate assessment from the definition of done**
-   - Every quiz item must test a learning outcome or known misconception.
-   - Challenges must preserve the original challenge intent.
-   - For prediction-heavy topics, require prediction before execution.
-   - For coding topics, provide acceptance criteria and tests, not a full solution unless explicitly requested.
-   - For project checkpoints, explain what to build, dependency order, observable evidence, and done conditions.
+- 1–5 strong sources.
+- Tier 0 = curriculum-provided source.
+- Prefer Tier 1 official/primary sources.
+- Every concept claim in the lesson spec must point to a URL in this pack.
+- Keep `unsupportedClaims` non-empty until unresolved factual gaps are actually resolved.
+- Do not broaden curriculum scope to justify extra research.
 
-7. **Validate**
-   Run the quality gate in `references/lesson-quality-gate.md`.
-   A lesson is invalid if any original exit criterion is not taught and assessed.
+## 3. Build lesson spec
 
-8. **Persist**
-   Write only the requested lesson and its generation metadata.
-   Never generate the next lesson automatically.
+Create `lesson-spec.json` before prose.
+
+It must contain:
+
+- payoff;
+- concrete learning outcomes;
+- one predictive mental model;
+- relationship/cause-effect graph;
+- concepts in dependency order;
+- mechanism explanation per concept;
+- misconception traps;
+- guided practice;
+- full criterion/challenge coverage matrix;
+- exactly five review questions.
+
+Each curriculum criterion must be tested by at least one review question. Challenge coverage is required in the lesson/evidence matrix but does not need to become trivia in the review bank.
+
+## 4. Write lesson
+
+Write `generation/staging/<ITEM-ID>/lesson.mdx` using `assets/lesson-template.mdx`.
+
+Preserve:
+
+- original scope;
+- original challenge intent;
+- original Definition of Done;
+- direct prerequisite identity.
+
+Optimize teaching order, not requirements.
+
+Required course components:
+
+- MentalModel
+- ConceptGraph
+- Quiz
+- Challenge
+- ExitCriteria
+- SourceList
+
+## 5. Validate
+
+Run:
+
+```sh
+pnpm generation:validate SQL-001
+```
+
+Validation blocks:
+
+- stale fingerprint;
+- missing criterion/challenge coverage;
+- review questions not covering curriculum criteria;
+- unsupported claims;
+- source URLs outside source pack;
+- invalid frontmatter;
+- missing prerequisite references;
+- source pack URLs absent from lesson;
+- missing required course components.
+
+The validator derives:
+
+- `generation-record.json`
+- `review-bank.json`
+- `validation-report.json`
+
+Do not hand-edit derived files.
+
+## 6. Promote
+
+Run:
+
+```sh
+pnpm generation:promote SQL-001
+```
+
+Promotion verifies validation hashes and writes:
+
+- `src/content/lessons/<ITEM-ID>.mdx`
+- `generation/<ITEM-ID>.json`
+- `review-banks/<ITEM-ID>.json`
+
+Then run:
+
+```sh
+pnpm validate:content
+pnpm validate:reviews
+```
+
+Generating content never marks the learner item passed.
 
 ## Writing rules
 
-- Direct answer/payoff first.
-- Use one strong mental model rather than many analogies.
-- Explain relationships: dependency, cause-effect, hierarchy, state transition, invariants, failure modes.
-- Pareto principle applies to teaching order, not to deleting requirements.
-- Explain “what is behind it” when it changes reasoning or debugging ability.
-- Avoid motivational filler and generic definitions that do not help solve the challenge.
-- Use exact technical vocabulary, then explain it plainly.
-- Code examples must be minimal, executable, and directly tied to the concept.
-- No invented metrics, APIs, behavior, or requirements.
+- Payoff first.
+- One strong mental model.
+- Explain dependency, mechanism, invariant, state transition, and failure mode when they affect reasoning.
+- Prefer prediction before execution.
+- Code/examples must be minimal and tied to a criterion.
+- Pareto applies to teaching order, never to deleting requirements.
+- No invented metrics, APIs, behavior, citations, or requirements.
 
 ## Non-goals
 
-Do not:
-
-- bulk-generate all lessons by default;
-- silently modify curriculum scope;
-- generate standalone raw HTML files with duplicated layout/style;
-- use blogs as the primary factual source when official/primary documentation exists;
-- turn every cross-module reference into a deep dive;
-- provide full project solutions when the learning goal is implementation practice;
-- mark a lesson complete merely because content was generated.
+Do not bulk-generate by default. Do not use checkpoint/integration as ordinary MDX lessons. Do not turn contextual relations into prerequisites. Do not use blogs as primary evidence when official sources exist. Do not provide full project solutions when implementation practice is the learning goal.
 
 ## Completion report
 
-After generation, report only:
+Report:
 
-- generated Task ID and path;
-- primary sources used;
-- exit-criteria coverage status;
-- any unresolved source/curriculum conflict;
-- the single next learner action.
+- Item ID + generated lesson path;
+- authoritative sources used;
+- criterion/challenge coverage status;
+- review bank status;
+- unresolved source/curriculum conflicts;
+- next learner action.

@@ -10,3 +10,5 @@ dist/
 coverage/
 .dev.vars*
 curriculum/raw/*.xlsx
+
+generation/staging/

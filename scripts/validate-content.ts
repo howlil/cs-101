@@ -1,29 +1,12 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { parse } from 'yaml';
-import { z } from 'zod';
-
 import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { requiredEvidenceForItem } from '../src/domain/learning/rules';
+import { generationRecordSchema } from '../src/domain/generation/schema';
 
 const graph = buildCurriculumGraph(manifestSource);
-const recordSchema = z.object({
-  taskId: z.string().optional(),
-  itemId: z.string().optional(),
-  fingerprint: z.string(),
-  sources: z.array(z.object({
-    title: z.string().min(1),
-    url: z.url().refine((url) => /^https?:/.test(url)),
-  })).min(1),
-  coverage: z.array(z.object({
-    criterionId: z.string(),
-    taughtAt: z.string().min(1),
-    assessedAt: z.string().min(1),
-    evidenceExpected: z.string().min(1),
-  })),
-  validator: z.object({ passed: z.literal(true) }),
-});
 
 const found = new Set<string>();
 let demos = 0;
@@ -53,9 +36,8 @@ for (const file of readdirSync('src/content/lessons', { recursive: true, withFil
 
   const recordPath = resolve('generation', `${item.id}.json`);
   if (!existsSync(recordPath)) throw new Error(`Metadata belum tersedia: ${item.id}`);
-  const record = recordSchema.parse(JSON.parse(readFileSync(recordPath, 'utf8')));
-  const recordId = record.itemId ?? record.taskId;
-  if (recordId !== item.id || record.fingerprint !== item.fingerprint) {
+  const record = generationRecordSchema.parse(JSON.parse(readFileSync(recordPath, 'utf8')));
+  if (record.itemId !== item.id || record.fingerprint !== item.fingerprint) {
     throw new Error(`Metadata stale: ${item.id}`);
   }
 

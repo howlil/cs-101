@@ -366,13 +366,13 @@ Pemilihan context deterministic dari graph. Model tidak memilih dependency sendi
 
 Generation flow:
 
-1. Resolve item + context.
-2. Fetch/review official sources.
-3. Generate staged artifact + metadata.
-4. Validate coverage terhadap criteria/challenge.
-5. Validate internal references dan MDX imports.
-6. Build artifact.
-7. Promote atomically ke release.
+1. Resolve satu unit + bounded graph context dengan `generation:prepare`.
+2. Fetch/review 1–5 authoritative sources dan tulis source pack.
+3. Tulis lesson spec sebelum prose; spec memuat coverage + lima review questions.
+4. Tulis lesson MDX di staging.
+5. `generation:validate` memeriksa fingerprint, source, coverage, review coverage, frontmatter, component imports, prerequisite links, dan source links.
+6. Validator menurunkan generation record + review bank serta content hashes.
+7. `generation:promote` menolak bundle yang berubah setelah validation lalu memindahkan artifact ke release paths.
 
 Perubahan fingerprint membuat artifact lama stale, tetapi tidak menghapus historical evidence.
 
@@ -814,7 +814,7 @@ runtime render
 | P3 Project workflow | lineage + requirement delta + project evidence | Cumulative checkpoint dapat dikerjakan tanpa duplicate wall-of-text |
 | P4 Cross-module graph | typed relations + Connections selector/UI | Related/deep-dive terlihat tanpa menjadi prerequisite |
 | P5 Review engine ✅ | attempts + schedule + retention | Review due/retry/retained konsisten |
-| P6 Generator context | graph-aware context packet | Generator menerima prerequisite/project context yang tepat |
+| P6 Generator context ✅ | graph-aware staged generation + review bank | Generator menerima bounded prerequisite/project context; bundle tervalidasi sebelum promotion |
 | P7 Progress + search | hierarchical progress + local search | User dapat menemukan dan memahami posisi di curriculum besar |
 
 ## Engineering acceptance
