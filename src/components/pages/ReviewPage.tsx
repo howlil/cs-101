@@ -7,6 +7,9 @@ import {
   CheckCircle2,
   RotateCcw,
   ShieldCheck,
+  Check,
+  Circle,
+  CircleDot,
 } from 'lucide-react';
 import ActionLink from '../arc/ActionLink';
 import EmptyAction from '../arc/EmptyAction';
@@ -35,7 +38,7 @@ function RetentionTimeline({
         const done = state === 'retained' || index < step;
         const current = state !== 'retained' && index === step;
         return <span key={day} className={done ? 'is-done' : current ? 'is-current' : ''}>
-          {done ? '✓ ' : current ? '● ' : '○ '}Hari {day}
+          {done ? <Check size={11} strokeWidth={2} aria-hidden="true" /> : current ? <CircleDot size={11} strokeWidth={2} aria-hidden="true" /> : <Circle size={11} strokeWidth={1.8} aria-hidden="true" />}Hari {day}
         </span>;
       })}
     </div>
