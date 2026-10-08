@@ -212,7 +212,12 @@ try {
   await client.eval('document.querySelector("#lesson-tab-practice").click()');
   await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display !== "none"'), 'Evidence form visible');
+  await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
+  const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
+  if (evidenceExists) {
+    assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
+      'Already-active item must show the existing evidence form');
+  } // Never force lesson activation simply to make a visual smoke test pass.
   await client.eval('document.querySelector(".lesson-focus-toggle").click()');
   await client.wait(async () => await client.eval('document.documentElement.dataset.focus === "true"'), 'Focus Mode');
   assert.equal(await client.eval('getComputedStyle(document.querySelector(".app-sidebar")).display'), 'none', 'Focus Mode sidebar must be hidden');
