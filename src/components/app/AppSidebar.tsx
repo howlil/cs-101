@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { BarChart3, BookOpen, Home, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button } from '../arc/button/button';
 import { Dialog, DialogContent, DialogTrigger } from '../arc/dialog/dialog';
@@ -43,13 +43,16 @@ function Navigation({ currentPath, compact = false }: { currentPath: string; com
   </nav>;
 }
 
-function SidebarSections({ currentPath, data, compact = false, scrollRef }: {
+function SidebarSections({ currentPath, data, compact = false, scrollRef, scrollKey }: {
   currentPath: string;
   data?: SidebarData;
   compact?: boolean;
-  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  scrollRef?: RefObject<HTMLDivElement | null>;
+  scrollKey?: string;
 }) {
-  return <div className="sidebar-scroll" ref={scrollRef}>
+  return <div className="sidebar-scroll" ref={scrollRef} onScroll={scrollKey ? (event) => {
+    try { sessionStorage.setItem(scrollKey, String(event.currentTarget.scrollTop)); } catch {}
+  } : undefined}>
     <Navigation currentPath={currentPath} compact={compact} />
     {data && <div className="sidebar-curriculum">
       <div className="sidebar-section-heading">
@@ -110,6 +113,7 @@ export default function AppSidebar({ currentPath, data }: { currentPath: string;
         currentPath={currentPath}
         data={data}
         scrollRef={scrollRef}
+        scrollKey={SCROLL_PREFIX + (data?.activeTrackId || 'global')}
         compact
       />
     </aside>

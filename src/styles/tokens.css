@@ -53,3 +53,21 @@
   --accent:#9BB1FF; --accent-strong:#B4C5FF; --accent-subtle:#1B2638;
   --accent-foreground:#121212; --shadow-resting:none;
 }
+
+/* Arc's accent preset selector is more specific than :root: override it explicitly. */
+:root[data-accent="blue"] {
+  --accent:#9BB1FF;
+  --accent-strong:#465C9A;
+  --accent-subtle:#EAF8FC;
+  --accent-foreground:#121212;
+  --control-on:#9BB1FF;
+  --control-glyph:#121212;
+}
+:root[data-theme="dark"][data-accent="blue"] {
+  --accent:#9BB1FF;
+  --accent-strong:#B4C5FF;
+  --accent-subtle:#1B2638;
+  --accent-foreground:#121212;
+  --control-on:#9BB1FF;
+  --control-glyph:#121212;
+}

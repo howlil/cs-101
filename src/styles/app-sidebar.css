@@ -1,4 +1,5 @@
 /* Unified navigation owns the sole curriculum hierarchy for every route. */
+@media (min-width:901px) { .topbar .brand { visibility:hidden; } }
 .app-shell { grid-template-columns: 248px minmax(0, 1fr); }
 html[data-sidebar="collapsed"] .app-shell { grid-template-columns: 56px minmax(0, 1fr); }
 .app-sidebar {
@@ -17,6 +18,8 @@ html[data-sidebar="collapsed"] .app-shell { grid-template-columns: 56px minmax(0
 .sidebar-scroll { min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:none; padding:8px 10px 24px; }
 .sidebar-scroll::-webkit-scrollbar { display:none; }
 .sidebar-global-nav { display:grid; gap:4px; }
+.sidebar-global-nav > span { display:flex; width:100%; }
+.sidebar-global-nav > span > a { flex:1; }
 .sidebar-nav-link { min-height:40px; width:100%; display:flex; align-items:center; gap:11px; padding:9px 12px; color:var(--text-secondary); border-radius:10px; text-decoration:none; font-size:14px; line-height:20px; }
 .sidebar-nav-link:hover { color:var(--foreground); background:var(--surface-muted); }
 .sidebar-nav-link[aria-current="page"] { color:var(--foreground); background:var(--background); font-weight:500; }
@@ -38,15 +41,15 @@ html[data-sidebar="collapsed"] .app-shell { grid-template-columns: 56px minmax(0
 .app-sidebar .module-items { border-left:1px solid var(--border-subtle); }
 .app-sidebar .item-row[aria-current="page"] { background:var(--background); color:var(--foreground); font-weight:500; }
 html[data-sidebar="collapsed"] .app-sidebar .sidebar-scroll { padding:8px 6px; overflow:hidden; }
-html[data-sidebar="collapsed"] .sidebar-brand-label,
-html[data-sidebar="collapsed"] .sidebar-collapse,
-html[data-sidebar="collapsed"] .sidebar-link-copy,
-html[data-sidebar="collapsed"] .sidebar-curriculum,
-html[data-sidebar="collapsed"] .sidebar-open-curriculum { display:none; }
-html[data-sidebar="collapsed"] .sidebar-expand { display:inline-flex; }
-html[data-sidebar="collapsed"] .sidebar-brand { display:none; }
-html[data-sidebar="collapsed"] .sidebar-identity { justify-content:center; padding:0; }
-html[data-sidebar="collapsed"] .sidebar-nav-link { justify-content:center; padding:10px 0; }
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-brand-label,
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-collapse,
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-link-copy,
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-curriculum,
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-open-curriculum { display:none; }
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-expand { display:inline-flex; }
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-brand { display:none; }
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-identity { justify-content:center; padding:0; }
+html[data-sidebar="collapsed"] .app-sidebar .sidebar-nav-link { justify-content:center; padding:10px 0; }
 .sidebar-mobile-trigger { display:none!important; }
 
 .mobile-sidebar-dialog { top:0!important; left:0!important; transform:none!important; height:100dvh!important; width:min(295px,92vw)!important; max-height:100dvh!important; border-radius:0!important; display:flex; flex-direction:column; animation:none!important; background:var(--background)!important; }
