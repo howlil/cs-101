@@ -342,3 +342,9 @@ body::-webkit-scrollbar,
   height: 0;
   display: none;
 }
+
+/* ClientRouter only animates the replaceable workspace; respect user motion settings. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-workspace),
+  ::view-transition-new(page-workspace) { animation-duration: 0.01ms !important; }
+}

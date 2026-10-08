@@ -28,6 +28,8 @@ Aturan implementasi:
 - Jangan membuat tooltip, dialog/modal, select/dropdown, accordion/disclosure, radio group, input, textarea, alert, badge, empty state, atau theme control baru jika primitive Arc sudah ada.
 - Icon memakai Lucide; jangan pakai glyph teks sebagai icon.
 - Navigation tetap semantic: gunakan `<a href>` untuk perpindahan route. Jangan mengganti link menjadi Button hanya demi visual consistency.
+- `AppLayout.astro` owns ClientRouter navigation. Keep the Astro header persistent, but let the route workspace and route-aware rail swap; never persist a React wrapper around `<slot />`.
+- SSR HTML includes private learner progress/revision and stays `Cache-Control: no-store`. Do not enable document prefetch or shared HTML caching until immutable curriculum content is separated from mutable learner state.
 - Card/surface bukan default container. Gunakan Card hanya bila containment memang membawa makna; untuk content linear gunakan heading, spacing, divider, atau accent line.
 - Density default adalah `data-density="compact"`. Gunakan token layout/control; jangan hard-code versi density baru per halaman.
 - Jangan mengatasi ruang kosong desktop dengan melebarkan prose. Bedakan **page frame** dari **reading measure**: workbench desktop centered boleh sampai ±1500 px, sedangkan prose tetap ±72–76ch.

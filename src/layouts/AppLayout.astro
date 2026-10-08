@@ -3,14 +3,15 @@ import '../styles/global.css';
 import '../styles/app-shell.css';
 import '../styles/workspace.css';
 import '../styles/curriculum.css';
-import AppShell from '../components/app/AppShell';
-import { ClientRouter } from 'astro:transitions';
+import { AppHeaderActions, AppNavigation } from '../components/app/AppShell';
+import NavigationProgress from '../components/app/NavigationProgress';
+import ContextualCurriculumSidebar from '../components/curriculum/ContextualCurriculumSidebar';
+import { ClientRouter, fade } from 'astro:transitions';
 import type { ContextualCurriculumData } from '../components/curriculum/ContextualCurriculumSidebar';
-import { curriculumGraph } from '../server/curriculum';
+import { curriculumGraph, curriculumSearchIndex, curriculumSearchEntries } from '../server/curriculum';
 import { snapshotForRequest } from '../server/request-snapshot';
 import type { LearningSnapshot } from '../server/learning';
 import {
-  buildCurriculumSearchIndex,
   getItemLocation,
   getTrackExplorer,
   itemHref,
@@ -30,11 +31,8 @@ const {
 } = Astro.props;
 
 const path = Astro.url.pathname;
-const searchIndex = buildCurriculumSearchIndex(curriculumGraph);
-const searchEntries = searchIndex.map((entry) => ({
-  ...entry,
-  href: itemHref(curriculumGraph, entry.itemId),
-}));
+const searchIndex = curriculumSearchIndex;
+const searchEntries = curriculumSearchEntries;
 
 let contextualExplorer: ContextualCurriculumData | undefined;
 const contextualMatch = path.match(/^\/(learn|project|integration)\/([^/]+)$/);
@@ -111,7 +109,9 @@ Astro.response.headers.set('Cache-Control', 'no-store');
     <meta name="description" content={description} />
     <title>{title} · CS-101</title>
     <ClientRouter fallback="swap" />
-    <script is:inline data-astro-rerun>
+    <script is:inline>
+      // The new SSR document defaults to light. Copy the current preference
+      // before the DOM swap to avoid a theme flash during client navigation.
       try {
         const preference = localStorage.getItem('cs101:theme') || 'system';
         document.documentElement.dataset.themePreference = preference;
@@ -119,17 +119,36 @@ Astro.response.headers.set('Cache-Control', 'no-store');
           ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
           : preference;
       } catch {}
+      document.addEventListener('astro:before-swap', (event) => {
+        event.newDocument.documentElement.dataset.themePreference =
+          document.documentElement.dataset.themePreference || 'system';
+        event.newDocument.documentElement.dataset.theme =
+          document.documentElement.dataset.theme || 'light';
+      });
     </script>
   </head>
   <body transition:animate="none">
-    <AppShell
-      client:load
-      currentPath={path}
-      flush={flush}
-      searchEntries={searchEntries}
-      contextualExplorer={contextualExplorer}
-    >
-      <slot />
-    </AppShell>
+    <a class="skip-link" href="#main">Langsung ke isi</a>
+    <header class="topbar" transition:persist="app-header">
+      <a class="brand" href="/" aria-label="CS-101 · Hari ini">
+        <span class="brand-mark" aria-hidden="true">CS</span>
+        <span>CS-101</span>
+      </a>
+      <AppHeaderActions client:load searchEntries={searchEntries} />
+    </header>
+    <div class:list={['app-shell', contextualExplorer && 'app-shell--with-context']}>
+      <AppNavigation currentPath={path} />
+      {contextualExplorer && <ContextualCurriculumSidebar client:load data={contextualExplorer} />}
+      <main
+        id="main"
+        tabindex="-1"
+        class:list={['app-main', flush && 'app-main--flush']}
+        transition:name="page-workspace"
+        transition:animate={fade({ duration: '0.14s' })}
+      >
+        <slot />
+      </main>
+    </div>
+    <NavigationProgress client:load transition:persist="navigation-progress" />
   </body>
 </html>
