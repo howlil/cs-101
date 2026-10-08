@@ -133,9 +133,9 @@ const session = (revision: number) => ({
   continueFrom: 'Lanjut latihan 2',
 });
 
-function fixture(ready = true) {
+function fixture() {
   const db = openDatabase(':memory:');
-  const service = new LearningService(db, graph, () => ready);
+  const service = new LearningService(db, graph);
   service.setActiveItem({ ...envelope(0), itemId: unit.id });
   return { db, service };
 }
@@ -291,7 +291,7 @@ test('hard prerequisite memblokir aktivasi sampai prerequisite passed', () => {
 });
 
 test('fingerprint stale memblokir, tetapi lesson MDX bukan syarat kelulusan', () => {
-  const { db, service } = fixture(false);
+  const { db, service } = fixture();
   try {
     assert.throws(
       () => service.saveSession({
@@ -373,13 +373,13 @@ test('restart mempertahankan sesi dan active item dari SQLite disk', () => {
   const path = join(directory, 'learning.sqlite');
   let db = openDatabase(path);
   try {
-    let service = new LearningService(db, graph, () => true);
+    let service = new LearningService(db, graph);
     service.setActiveItem({ ...envelope(0), itemId: unit.id });
     service.saveSession(session(1));
     db.close();
 
     db = openDatabase(path);
-    service = new LearningService(db, graph, () => true);
+    service = new LearningService(db, graph);
     assert.equal(service.snapshot().activeItemId, unit.id);
     assert.equal(service.snapshot().progress[0].continueFrom, 'Lanjut latihan 2');
     assert.equal(service.export().sessions.length, 1);
@@ -394,7 +394,7 @@ test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () 
   try {
     db.prepare('INSERT INTO item_progress(item_id,status,passed_fingerprint,last_anchor,continue_from) VALUES(?,?,?,?,?)')
       .run(unit.id, 'passed', `sha256:${'0'.repeat(64)}`, '', '');
-    const service = new LearningService(db, graph, () => true);
+    const service = new LearningService(db, graph);
     const snapshot = service.snapshot();
     assert.equal(snapshot.progress.find((entry) => entry.itemId === unit.id)?.status, 'stale');
     assert.equal(
@@ -408,7 +408,7 @@ test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () 
 
 
 test('checkpoint mengikuti locked → ready → active → passed dan membuka project berikutnya', () => {
-  const { db, service } = fixture(false);
+  const { db, service } = fixture();
   try {
     assert.equal(
       service.snapshot().availability.find((entry) => entry.itemId === project.id)?.status,
@@ -467,7 +467,7 @@ test('checkpoint mengikuti locked → ready → active → passed dan membuka pr
 test('parent checkpoint memblokir project berikutnya walau explicit prerequisite sudah passed', () => {
   const db = openDatabase(':memory:');
   try {
-    const service = new LearningService(db, graph, () => true);
+    const service = new LearningService(db, graph);
 
     // TEST-001 adalah explicit prerequisite TEST-P02, tetapi parent TEST-P01 belum passed.
     service.setActiveItem({ ...envelope(0), itemId: unit.id });
@@ -493,7 +493,7 @@ test('parent checkpoint memblokir project berikutnya walau explicit prerequisite
 test('integration menunggu semua hard prerequisite lalu dapat diselesaikan tanpa lesson MDX', () => {
   const db = openDatabase(':memory:');
   try {
-    const service = new LearningService(db, graph, () => true);
+    const service = new LearningService(db, graph);
 
     service.setActiveItem({ ...envelope(0), itemId: unit.id });
     const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
@@ -565,7 +565,7 @@ test('item passed membuat review schedule dan due state berasal dari waktu', () 
   const db = openDatabase(':memory:');
   let clock = new Date('2026-10-07T00:00:00.000Z');
   try {
-    const service = new LearningService(db, graph, () => true, () => undefined, () => clock);
+    const service = new LearningService(db, graph, () => undefined, () => clock);
     service.setActiveItem({ ...envelope(0), itemId: unit.id });
     const evidence = requiredEvidenceForItem(unit).map((criterion) => ({
       criterionId: criterion.id,
@@ -612,7 +612,6 @@ test('assisted review 5/5 menjadi retry; unassisted pass maju interval dan compl
     const service = new LearningService(
       db,
       graph,
-      () => true,
       (itemId) => itemId === unit.id ? bank : undefined,
       () => clock,
     );
@@ -685,7 +684,7 @@ test('review tidak boleh dilakukan sebelum due, tanpa bank, atau ketika completi
   });
 
   try {
-    const service = new LearningService(db, graph, () => true, () => bank, () => clock);
+    const service = new LearningService(db, graph, () => bank, () => clock);
     service.setActiveItem({ ...envelope(0), itemId: unit.id });
     const evidence = requiredEvidenceForItem(unit).map((criterion) => ({
       criterionId: criterion.id,

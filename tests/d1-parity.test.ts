@@ -146,11 +146,10 @@ test('SQLite dan D1 service menjaga contract state yang sama', async () => {
   });
 
   const bankFor = (itemId: string) => itemId === first.id ? bank : undefined;
-  const local = new LearningService(localDb, graph, () => true, bankFor, () => clock);
+  const local = new LearningService(localDb, graph, bankFor, () => clock);
   const cloud = new CloudflareLearningService(
     sqliteD1(d1Db),
     graph,
-    () => true,
     bankFor,
     () => clock,
   );

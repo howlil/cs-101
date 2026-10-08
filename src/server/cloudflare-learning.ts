@@ -65,7 +65,6 @@ export class CloudflareLearningService {
   constructor(
     private db: D1Database,
     private graph: CurriculumGraph,
-    private _lessonReady: (itemId: string) => boolean,
     private reviewBankFor: (itemId: string) => ReviewBank | undefined = () => undefined,
     private now: () => Date = () => new Date(),
   ) {}

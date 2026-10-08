@@ -61,7 +61,6 @@ export class LearningService {
   constructor(
     private db: DatabaseSync,
     private graph: CurriculumGraph,
-    private _lessonReady: (itemId: string) => boolean,
     private reviewBankFor: (itemId: string) => ReviewBank | undefined = () => undefined,
     private now: () => Date = () => new Date(),
   ) {}
