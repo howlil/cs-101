@@ -6,10 +6,10 @@ const src = (path: string) => readFileSync(new URL('../' + path, import.meta.url
 
 test('SQL-001 uses authored stage boundaries with original quiz and challenge', () => {
   const lesson = src('src/content/lessons/SQL-001.mdx');
-  assert.equal((lesson.match(/<LessonStage stage="understand">/g) ?? []).length, 2); // concepts + sources
+  assert.equal((lesson.match(/<LessonStage stage="understand">/g) ?? []).length, 1); // concepts + sources share one tabpanel
   assert.equal((lesson.match(/<LessonStage stage="practice">/g) ?? []).length, 1);
   assert.equal((lesson.match(/<LessonStage stage="evidence">/g) ?? []).length, 1);
-  assert.equal((lesson.match(/<\/LessonStage>/g) ?? []).length, 4);
+  assert.equal((lesson.match(/<\/LessonStage>/g) ?? []).length, 3);
   assert.match(lesson, /<Quiz items=/);
   assert.match(lesson, /<Challenge\s/);
   assert.match(lesson, /<ExitCriteria items=/);
