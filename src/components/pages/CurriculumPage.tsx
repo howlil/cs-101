@@ -7,6 +7,7 @@ import {
 import ActivateItem from '../learning/ActivateItem';
 import ActionLink from '../ui/ActionLink';
 import { Badge } from '../arc/badge/badge';
+import { Accordion } from '../arc/accordion/accordion';
 
 type Criterion = { id: string; text: string };
 type SelectedItem = {
@@ -39,9 +40,8 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
             <h2>{selected.title}</h2>
           </header>
 
-          <div className="item-workbench">
-            <aside className="item-context" aria-label="Konteks item">
-              {selected.state && <div className="item-state-actions">
+
+          {selected.state && <div className="item-state-actions">
                 {selected.state === 'passed' ? (
                   <>
                     <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Selesai</Badge>
@@ -71,38 +71,8 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
                   </Badge>
                 ) : null}
               </div>}
-
-              {selected.prerequisites.length > 0 && (
-                <section className="item-context-section">
-                  <h3><Link2 size={14} strokeWidth={1.8} aria-hidden="true" /> Prasyarat</h3>
-                  <div className="connection-list">
-                    {selected.prerequisites.map((item) => (
-                      <a href={item.href} key={item.id}>
-                        <code>{item.id}</code>
-                        <span>{item.title}</span>
-                      </a>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <section className="item-context-section item-meta">
-                <div>
-                  <span className="explorer-label"><ExternalLink size={11} strokeWidth={1.8} aria-hidden="true" /> SUMBER</span>
-                  {selected.source.url
-                    ? <a href={selected.source.url} target="_blank" rel="noopener noreferrer">{selected.source.title}</a>
-                    : <span>{selected.source.title}</span>}
-                </div>
-                {selected.estimatedHours && (
-                  <div>
-                    <span className="explorer-label"><Clock3 size={11} strokeWidth={1.8} aria-hidden="true" /> ESTIMASI</span>
-                    <span>{selected.estimatedHours}h</span>
-                  </div>
-                )}
-              </section>
-            </aside>
-
-            <main className="item-main">
+          <div className="item-workbench">
+            <div className="item-main">
               {selected.marketExpectation?.length ? (
                 <section className="item-section item-why">
                   <h3>Kenapa materi ini ada</h3>
@@ -150,8 +120,45 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
                   <ActionLink href={selected.href} label="Buka latihan" />
                 </section>
               )}
-            </main>
-          </div>
+
+            </div>
+            <section className="item-details-disclosure" aria-label="Konteks kurikulum">
+              <Accordion size="sm" defaultOpen={-1} items={[{
+                title: 'Prasyarat & sumber',
+                content: <aside className="item-context" aria-label="Prasyarat dan referensi">
+
+              {selected.prerequisites.length > 0 && (
+                <section className="item-context-section">
+                  <h3><Link2 size={14} strokeWidth={1.8} aria-hidden="true" /> Prasyarat</h3>
+                  <div className="connection-list">
+                    {selected.prerequisites.map((item) => (
+                      <a href={item.href} key={item.id}>
+                        <code>{item.id}</code>
+                        <span>{item.title}</span>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <section className="item-context-section item-meta">
+                <div>
+                  <span className="explorer-label"><ExternalLink size={11} strokeWidth={1.8} aria-hidden="true" /> SUMBER</span>
+                  {selected.source.url
+                    ? <a href={selected.source.url} target="_blank" rel="noopener noreferrer">{selected.source.title}</a>
+                    : <span>{selected.source.title}</span>}
+                </div>
+                {selected.estimatedHours && (
+                  <div>
+                    <span className="explorer-label"><Clock3 size={11} strokeWidth={1.8} aria-hidden="true" /> ESTIMASI</span>
+                    <span>{selected.estimatedHours}h</span>
+                  </div>
+                )}
+              </section>
+
+                </aside>,
+              }]} />
+            </section>
         </> : (
           <div className="curriculum-empty">
             <h2>Kurikulum belum tersedia.</h2>
