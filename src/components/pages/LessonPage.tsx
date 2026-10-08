@@ -1,9 +1,10 @@
 "use client";
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { BookOpen, ExternalLink, ListTree, Target, TriangleAlert } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Alert } from '../arc/alert/alert';
+import { Button } from '../arc/button/button';
 import { Accordion } from '../arc/accordion/accordion';
 import ActivateItem from '../learning/ActivateItem';
 import SessionLogger from '../course/SessionLogger';
@@ -54,9 +55,82 @@ export default function LessonPage({
   children?: ReactNode;
 }) {
   const toc = headings.filter((heading) => heading.depth === 2);
+  // SQL-001 is the first authored stage-based lesson. All other lessons retain
+  // their existing MDX rendering and session workflow until explicitly migrated.
+  const staged = itemId === 'SQL-001' && available && !demo;
+  type LessonStageId = 'understand' | 'practice' | 'evidence';
+  const stages: Array<{ id: LessonStageId; label: string }> = [
+    { id: 'understand', label: 'Pahami' },
+    { id: 'practice', label: 'Latihan' },
+    { id: 'evidence', label: 'Bukti' },
+  ];
+  const [stage, setStage] = useState<LessonStageId>('understand');
+  const [contextOpen, setContextOpen] = useState(false);
 
-  return <div className="lesson-grid">
-    {!demo && (
+  useEffect(() => {
+    if (!staged) return;
+    const updateFromHash = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash === 'understand' || hash === 'practice' || hash === 'evidence') {
+        setStage(hash);
+      }
+    };
+    updateFromHash();
+    window.addEventListener('hashchange', updateFromHash);
+    return () => window.removeEventListener('hashchange', updateFromHash);
+  }, [staged]);
+
+  const chooseStage = (next: LessonStageId) => {
+    setStage(next);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.hash = next;
+      window.history.replaceState(window.history.state, '', url);
+    }
+  };
+
+  const tabKeyboard = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const nextIndex = event.key === 'Home' ? 0
+      : event.key === 'End' ? stages.length - 1
+        : (index + (event.key === 'ArrowRight' ? 1 : -1) + stages.length) % stages.length;
+    chooseStage(stages[nextIndex].id);
+    document.getElementById('lesson-tab-' + stages[nextIndex].id)?.focus();
+  };
+
+  const context = (
+    <>
+      <section className="lesson-execution-context">
+        {marketExpectation.length > 0 && (
+          <div className="lesson-why">
+            <span className="eyebrow">KENAPA MATERI INI ADA</span>
+            <ul>{marketExpectation.slice(0, 2).map((item) => <li key={item}>{item}</li>)}</ul>
+          </div>
+        )}
+        <div className="lesson-small-step">
+          <span className="eyebrow">BERIKUTNYA</span>
+          <strong>{nextSmallStep}</strong>
+        </div>
+        <div className="lesson-stuck">
+          <Accordion defaultOpen={-1} size="sm" items={[{
+            title: 'Saya macet',
+            content: <ol>
+              <li>Kerjakan hanya: <strong>{nextSmallStep}</strong></li>
+              <li>Buat satu prediksi sebelum mencoba.</li>
+              <li>Jalankan satu eksperimen kecil.</li>
+              <li>Kalau masih macet, simpan hambatannya saat mengakhiri sesi.</li>
+            </ol>,
+          }]} />
+        </div>
+      </section>
+      <ConnectionsPanel groups={connections} compact />
+    </>
+  );
+
+
+  return <div className={staged ? "lesson-grid lesson-sql001" : "lesson-grid"} data-active-stage={staged ? stage : undefined}>
+    {!demo && !staged && (
       <aside className="lesson-sidecar" aria-label="Konteks belajar">
         <section className="lesson-execution-context">
           {marketExpectation.length > 0 && (
@@ -121,6 +195,41 @@ export default function LessonPage({
         </div>
       )}
 
+      {staged && (
+        <>
+          <div className="lesson-stage-toolbar">
+            <div className="lesson-stage-tabs" role="tablist" aria-label="Tahapan belajar SQL-001">
+              {stages.map(({ id, label }, index) => (
+                <Button
+                  type="button"
+                  key={id}
+                  id={'lesson-tab-' + id}
+                  role="tab"
+                  aria-controls={'lesson-panel-' + id}
+                  aria-selected={stage === id}
+                  tabIndex={stage === id ? 0 : -1}
+                  variant="ghost"
+                  size="sm"
+                  className="lesson-stage-tab"
+                  onClick={() => chooseStage(id)}
+                  onKeyDown={(event) => tabKeyboard(event, index)}
+                >{label}</Button>
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="lesson-context-toggle"
+              aria-expanded={contextOpen}
+              aria-controls="lesson-sql001-context"
+              onClick={() => setContextOpen(!contextOpen)}
+            >{contextOpen ? 'Tutup konteks' : 'Konteks materi'}</Button>
+          </div>
+          {contextOpen && <aside id="lesson-sql001-context" className="lesson-sql001-context" aria-label="Konteks materi">{context}</aside>}
+        </>
+      )}
+
       {available ? children : (
         <div className="lesson-fallback">
           <section>
@@ -150,10 +259,19 @@ export default function LessonPage({
         </div>
       )}
 
-      <ConnectionsPanel groups={connections} compact />
+      {!staged && <ConnectionsPanel groups={connections} compact />}
+
+      {staged && stage === 'understand' && (
+        <div className="lesson-stage-next"><Button type="button" variant="primary" onClick={() => chooseStage('practice')}>Mulai latihan</Button></div>
+      )}
+      {staged && stage === 'practice' && (
+        <div className="lesson-stage-next"><Button type="button" variant="primary" onClick={() => chooseStage('evidence')}>Catat bukti</Button></div>
+      )}
 
       {!demo && active && (
+        <div className={staged ? 'lesson-sql001-evidence-form' : undefined}>
         <SessionLogger
+          initialCompletionOpen={staged}
           itemId={itemId}
           fingerprint={fingerprint}
           criteria={criteria}
@@ -161,6 +279,7 @@ export default function LessonPage({
           continueFrom={continueFrom}
           lastAnchor={lastAnchor}
         />
+        </div>
       )}
     </article>
   </div>;

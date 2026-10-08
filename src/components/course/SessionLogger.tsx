@@ -10,6 +10,7 @@ export default function SessionLogger({
   revision,
   continueFrom = '',
   lastAnchor = '',
+  initialCompletionOpen = false,
 }: {
   itemId: string;
   fingerprint: string;
@@ -17,6 +18,7 @@ export default function SessionLogger({
   revision: number;
   continueFrom?: string;
   lastAnchor?: string;
+  initialCompletionOpen?: boolean;
 }) {
   return <EvidenceForm
     itemId={itemId}
@@ -24,6 +26,7 @@ export default function SessionLogger({
     revision={revision}
     continueFrom={continueFrom}
     lastAnchor={lastAnchor}
+    initialCompletionOpen={initialCompletionOpen}
     groups={[{
       key: 'criteria',
       title: 'Selesai jika',

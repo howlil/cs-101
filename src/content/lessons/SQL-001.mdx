@@ -7,12 +7,15 @@ curriculumFingerprint: "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250
 ---
 
 import MentalModel from '../../components/course/MentalModel.astro';
+import LessonStage from '../../components/course/LessonStage.astro';
 import ConceptGraph from '../../components/course/ConceptGraph.astro';
 import Quiz from '../../components/course/Quiz.astro';
 import Challenge from '../../components/course/Challenge.astro';
 import ExitCriteria from '../../components/course/ExitCriteria.astro';
 import SourceList from '../../components/course/SourceList.astro';
 import Reveal from '../../components/course/Reveal.astro';
+
+<LessonStage stage="understand">
 
 > Target materi ini bukan hafal syntax. Lo harus bisa **memprediksi hasil query sebelum menjalankannya**, terutama saat ada `NULL`, duplikat, dan ordering.
 
@@ -220,6 +223,10 @@ SELECT x FROM (VALUES (2), (1), (2)) AS t(x) LIMIT 1;
 
 Untuk dua query terakhir, jangan menebak order yang tidak dijanjikan.
 
+</LessonStage>
+
+<LessonStage stage="practice">
+
 <Quiz items={[
   { question: 'Apa hasil dari 7 = NULL?', options: ['TRUE', 'FALSE', 'NULL / unknown'], answer: 2, explanation: 'Perbandingan biasa dengan NULL menghasilkan unknown. Gunakan IS NULL untuk menguji nullness.' },
   { question: 'Apa hasil dari 3 NOT IN (1, 2, NULL)?', options: ['TRUE', 'FALSE', 'NULL / unknown'], answer: 2, explanation: 'Tidak ada match, tetapi perbandingan dengan NULL membuat konjungsi akhir menjadi unknown.' },
@@ -240,6 +247,10 @@ Untuk dua query terakhir, jangan menebak order yang tidak dijanjikan.
   ]}
 />
 
+</LessonStage>
+
+<LessonStage stage="evidence">
+
 <ExitCriteria items={[
   'Predict at least 18 of 20 SQL semantics traps correctly before execution',
   'Complete a clean schema + seed + query workflow entirely from psql',
@@ -254,6 +265,10 @@ Untuk dua query terakhir, jangan menebak order yang tidak dijanjikan.
 - test/assertion output;
 - catatan singkat untuk setiap prediksi yang salah dan model yang diperbaiki.
 
+</LessonStage>
+
+<LessonStage stage="understand">
+
 <SourceList sources={[
   { title: 'PostgreSQL 18 — Tutorial', url: 'https://www.postgresql.org/docs/18/tutorial.html' },
   { title: 'PostgreSQL 18 — Comparison Functions and Operators', url: 'https://www.postgresql.org/docs/18/functions-comparison.html' },
@@ -261,3 +276,6 @@ Untuk dua query terakhir, jangan menebak order yang tidak dijanjikan.
   { title: 'PostgreSQL 18 — SELECT', url: 'https://www.postgresql.org/docs/18/sql-select.html' },
   { title: 'PostgreSQL 18 — Constraints', url: 'https://www.postgresql.org/docs/18/ddl-constraints.html' }
 ]} />
+
+</LessonStage>
+
