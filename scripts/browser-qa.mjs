@@ -154,6 +154,20 @@ try {
   await client.wait(async () => await client.eval('document.documentElement.dataset.sidebar === "expanded"'), 'sidebar expansion');
   console.log('PASS desktop sidebar collapse / expansion persistence');
 
+  // Exercise Astro ClientRouter rather than only hard Page.navigate calls.
+  await client.eval('localStorage.setItem("cs101:theme","dark"); document.documentElement.dataset.theme="dark"; document.documentElement.dataset.themePreference="dark"');
+  const originalNavigation = await client.eval('performance.timeOrigin');
+  await client.eval('document.querySelector(\'.sidebar-nav-link[href="/curriculum"]\').click()');
+  await client.wait(async () => await client.eval('location.pathname === "/curriculum"'), 'Astro client navigation to curriculum', 20000);
+  await client.wait(async () => await client.eval('document.querySelectorAll("astro-island[ssr]").length === 0'), 'Astro next route hydration', 20000);
+  m = await client.metrics();
+  assert.equal(await client.eval('performance.timeOrigin'), originalNavigation,
+    'Sidebar navigation should use Astro ClientRouter, not a document reload');
+  assert.equal(m.theme, 'dark', 'ClientRouter must retain the dark theme');
+  assert.equal(m.mainCount, 1, 'ClientRouter must not duplicate main');
+  console.log('PASS Astro client navigation: no full reload, theme kept');
+  await client.eval('localStorage.setItem("cs101:theme","light"); document.documentElement.dataset.theme="light"; document.documentElement.dataset.themePreference="light"');
+
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
   m = await client.metrics();
@@ -180,7 +194,8 @@ try {
   await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
   await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
   await client.wait(async () => !(await client.eval('Boolean(document.querySelector(".sidebar-mobile-dialog"))')), 'Escape closes drawer');
-  console.log('PASS mobile 390 drawer dimensions and Escape close');
+  await client.wait(async () => await client.eval('document.activeElement?.classList.contains("sidebar-mobile-trigger") === true'), 'focus restoration after drawer');
+  console.log('PASS mobile 390 drawer dimensions, Escape and focus restoration');
 
   await client.eval('localStorage.setItem("cs101:theme","dark")');
   await client.goto('/progress');
@@ -200,6 +215,12 @@ try {
     assert.equal(m.mainCount, 1, 'Duplicate main at ' + route);
   }
   await client.screenshot('lesson-mobile-320.png');
+  await client.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  assert.equal(await client.eval('matchMedia("(prefers-reduced-motion: reduce)").matches'), true,
+    'Browser should honor reduced motion');
+  const transition = await client.eval('getComputedStyle(document.querySelector(".topbar"), "::after").transitionDuration');
+  assert.ok(transition === '0s' || transition === '', 'Navigation motion must be disabled under reduced motion: ' + transition);
+  await client.send('Emulation.setEmulatedMedia', { features: [] });
   assert.equal(client.exceptions.length, 0, 'Browser runtime exceptions: ' + JSON.stringify(client.exceptions));
   console.log('PASS 320px route matrix: no document overflow, no nested main, zero runtime errors');
   console.log('PASS screenshots saved at ' + screenshotDir);
