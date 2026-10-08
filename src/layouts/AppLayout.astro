@@ -36,13 +36,24 @@ const searchEntries = curriculumSearchEntries;
 
 const curriculumRoute = path === '/curriculum';
 const contextualMatch = path.match(/^\/(learn|project|integration)\/([^/]+)$/);
-const showCurriculum = curriculumRoute || Boolean(contextualMatch);
+const reviewMatch = path.match(/^\/review\/([^/]+)$/);
+const showCurriculum = curriculumRoute || Boolean(contextualMatch) ||
+  Boolean(reviewMatch) || path === '/' || path === '/progress';
 let sidebarData: SidebarData | undefined;
 
 if (showCurriculum) {
+  // One request-scoped snapshot drives the page and global navigation.
+  // A highlighted item never activates learner progress by itself.
+  let learningState: LearningSnapshot | undefined;
+  try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
+
   const currentItemId = contextualMatch
     ? decodeURIComponent(contextualMatch[2])
-    : Astro.url.searchParams.get('item');
+    : reviewMatch
+      ? decodeURIComponent(reviewMatch[1])
+      : curriculumRoute
+        ? Astro.url.searchParams.get('item')
+        : learningState?.activeItemId;
   const currentItem = currentItemId ? curriculumGraph.itemsById.get(currentItemId) : undefined;
   const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
   const integrations = curriculumGraph.manifest.items
@@ -68,8 +79,6 @@ if (showCurriculum) {
   const selectedItem = currentItem ?? (curriculumRoute ? firstItem : undefined);
   const selectedLocation = selectedItem ? getItemLocation(curriculumGraph, selectedItem.id) : undefined;
 
-  let learningState: LearningSnapshot | undefined;
-  try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
   const stateFor = (id: string) =>
     learningState ? getItemLearningView(curriculumGraph, learningState, id).displayState : 'unknown';
 
