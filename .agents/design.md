@@ -691,3 +691,16 @@ The application chrome now uses one route-aware sidebar for global navigation an
 ## SQL-001 lesson vertical slice — October 2026
 
 SQL-001 is the first staged curriculum lesson. Its original MDX content is retained, but authored Astro LessonStage boundaries separate concept reading, practice, and evidence. LessonPage switches the visible stage using accessible tabs and a URL hash without DOM reparenting, and keeps references with the reading content and contextual connections behind an optional disclosure. QuizClient remains the original learning UI. The existing SessionLogger/EvidenceForm and /api/sessions validation remain the sole owners of saving progress and passing; SQL-001 opens its existing evidence group by default. No client-side quiz score sets domain completion. All other lessons and the demo retain their prior linear rendering until separately migrated.
+
+
+## Phase 05 — task-first workspace parity (October 2026)
+
+Navigation hierarchy belongs solely to AppSidebar across Today, Curriculum, Progress, Lesson, Project, Integration, and Review. AppLayout selects the relevant track from the route item (including Review), or the request-scoped learner active item (Today/Progress). Selecting a route never mutates learner activation or completion.
+
+- Today renders a single next action first; blocker stays visible, optional business context uses Arc Accordion, due review remains a secondary action.
+- Progress renders per-track completion as Arc Accordion disclosures rather than a second full curriculum tree. Actionable reviews and integration status precede the session history; the export endpoint and full history remain unchanged.
+- Project renders current requirements/evidence directly and keeps contributors, lineage, and connections available in one disclosure. Inherited guarantees remain part of the primary requirement flow.
+- Integration renders scope/challenge/requirements/evidence directly. Prerequisite completion count is in the disclosure label; full links and relations remain accessible.
+- Review is a single centered recall workspace; status and optional schedule sit inline before the attempt, with no permanent context rail.
+- There is exactly one semantic page main region, owned by AppLayout. Individual workspaces use sections/divs, never nested main.
+- No changes to curriculum schema, learning domain, evidence persistence, review scheduling, or API contracts. Maintain focusable controls and reduced-motion behavior through Arc primitives.
