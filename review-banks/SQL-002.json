@@ -1,0 +1,80 @@
+{
+  "itemId": "SQL-002",
+  "version": "lesson-spec-v1:sha256:2243b604ca11c065b589e30d66201f0030270a1b136661ef4e9b880617d5a14f",
+  "curriculumFingerprint": "sha256:2243b604ca11c065b589e30d66201f0030270a1b136661ef4e9b880617d5a14f",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Lo butuh satu row per merchant yang punya minimal satu failed payment. Bentuk yang paling langsung menjaga grain?",
+      "options": [
+        "INNER JOIN semua payment",
+        "WHERE EXISTS subquery",
+        "CROSS JOIN"
+      ],
+      "answer": 1,
+      "explanation": "EXISTS menjawab keberadaan tanpa menambahkan matching payment rows ke output merchant.",
+      "criterionIds": [
+        "criterion-f6b60d06f6",
+        "criterion-4191b7aa22"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Satu order punya tiga payment. Berapa row yang dihasilkan INNER JOIN order itu ke payments sebelum aggregation?",
+      "options": [
+        "1",
+        "3",
+        "Tidak pernah lebih dari 1"
+      ],
+      "answer": 1,
+      "explanation": "Join membentuk satu output row per matching pair, sehingga one-to-many dapat memperbanyak row.",
+      "criterionIds": [
+        "criterion-14ff5013b7"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Apa perbedaan utama UNION dan UNION ALL?",
+      "options": [
+        "UNION menghapus duplicate; UNION ALL mempertahankan",
+        "UNION selalu mengurutkan",
+        "UNION ALL hanya untuk tabel yang sama"
+      ],
+      "answer": 0,
+      "explanation": "UNION memakai distinct semantics secara default; ALL mempertahankan seluruh rows.",
+      "criterionIds": [
+        "criterion-f6b60d06f6"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Kapan LEFT JOIN tepat dipilih?",
+      "options": [
+        "Ketika unmatched row kiri tetap harus muncul",
+        "Setiap kali ada foreign key",
+        "Untuk menghindari NULL"
+      ],
+      "answer": 0,
+      "explanation": "LEFT JOIN mempertahankan left rows yang tidak punya match dan mengisi right columns dengan null.",
+      "criterionIds": [
+        "criterion-f6b60d06f6"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa langkah pertama sebelum menulis query multi-table kompleks?",
+      "options": [
+        "Tambahkan DISTINCT",
+        "Tentukan output grain dan expected cardinality",
+        "Pindahkan logic ke loop aplikasi"
+      ],
+      "answer": 1,
+      "explanation": "Grain dan cardinality membuat join semantics dapat diprediksi dan mencegah duplicate amplification.",
+      "criterionIds": [
+        "criterion-f6b60d06f6",
+        "criterion-4191b7aa22",
+        "criterion-14ff5013b7"
+      ]
+    }
+  ]
+}

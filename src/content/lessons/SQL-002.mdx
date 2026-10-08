@@ -1,0 +1,278 @@
+---
+taskId: "SQL-002"
+title: "Joins + subqueries + CTEs + set operations"
+description: "Belajar menggabungkan tabel tanpa duplicate amplification, memilih EXISTS untuk pertanyaan keberadaan, dan menjaga cardinality query tetap sesuai pertanyaan bisnis."
+demo: false
+curriculumFingerprint: "sha256:2243b604ca11c065b589e30d66201f0030270a1b136661ef4e9b880617d5a14f"
+---
+
+import MentalModel from '../../components/course/MentalModel.astro';
+import ConceptGraph from '../../components/course/ConceptGraph.astro';
+import Quiz from '../../components/course/Quiz.astro';
+import Challenge from '../../components/course/Challenge.astro';
+import ExitCriteria from '../../components/course/ExitCriteria.astro';
+import SourceList from '../../components/course/SourceList.astro';
+import Reveal from '../../components/course/Reveal.astro';
+
+> Sebelum menulis join, tentukan dulu **satu row output merepresentasikan apa**. Itu cara paling cepat mencegah duplicate amplification dan query yang benar secara syntax tetapi salah secara bisnis.
+
+## Setelah materi ini, lo harus bisa
+
+- memilih `INNER JOIN` vs `LEFT JOIN` berdasarkan pertanyaan;
+- memprediksi cardinality sebelum query dijalankan;
+- menjelaskan kenapa join dapat menggandakan row;
+- memakai `EXISTS` / `NOT EXISTS` untuk pertanyaan keberadaan;
+- memecah reasoning dengan CTE tanpa memindahkan business logic ke aplikasi;
+- membedakan `UNION` dan `UNION ALL`;
+- menyelesaikan pertanyaan multi-table dalam satu SQL statement.
+
+<MentalModel title="Grain dulu, baru join">
+Tentukan grain hasil: **satu row output = apa?** Setelah itu, untuk setiap join tanyakan berapa row pasangan yang mungkin muncul untuk satu row kiri. Join tidak “menempelkan kolom”; join membentuk pasangan row yang memenuhi kondisi. Kalau satu order cocok dengan tiga payment rows, order itu muncul tiga kali sebelum tahap query berikutnya.
+</MentalModel>
+
+<ConceptGraph>
+<pre>{`pertanyaan bisnis
+   ↓
+grain hasil
+   ↓
+relationship cardinality
+   ↓
+JOIN / EXISTS / subquery
+   ↓
+intermediate rows
+   ↓
+CTE / aggregation bila perlu
+   ↓
+final cardinality`}</pre>
+</ConceptGraph>
+
+## INNER JOIN dan LEFT JOIN
+
+`INNER JOIN` hanya mempertahankan pasangan yang match.
+
+```sql
+SELECT o.id, p.id AS payment_id
+FROM orders o
+JOIN payments p ON p.order_id = o.id;
+```
+
+`LEFT JOIN` mempertahankan semua row kiri; bila tidak ada match, column dari sisi kanan menjadi null.
+
+```sql
+SELECT o.id, p.id AS payment_id
+FROM orders o
+LEFT JOIN payments p ON p.order_id = o.id;
+```
+
+Jangan memilih LEFT JOIN hanya karena terasa “lebih aman”. Pilih berdasarkan pertanyaan.
+
+## Duplicate amplification adalah masalah grain
+
+Misalnya:
+
+```text
+orders
+o1
+
+payments
+p1 → o1
+p2 → o1
+
+refunds
+r1 → p1
+r2 → p1
+```
+
+Join `orders → payments → refunds` tidak menghasilkan “satu row per order”. Ia menghasilkan pasangan sesuai relationship. Kalau lalu `SUM(order.amount)` dilakukan tanpa memperbaiki grain, amount order bisa terhitung berulang.
+
+Sebelum query:
+
+1. tulis grain setiap tabel;
+2. tulis multiplicity relationship;
+3. prediksi jumlah row intermediate;
+4. baru pilih join/aggregation.
+
+## EXISTS untuk pertanyaan “apakah ada?”
+
+Kalau pertanyaannya:
+
+> merchant mana yang punya minimal satu payment gagal?
+
+lo tidak membutuhkan semua matching payment rows.
+
+```sql
+SELECT m.id
+FROM merchants m
+WHERE EXISTS (
+  SELECT 1
+  FROM payments p
+  WHERE p.merchant_id = m.id
+    AND p.status = 'failed'
+);
+```
+
+`EXISTS` bernilai true kalau subquery menghasilkan setidaknya satu row. Output list subquery biasanya tidak penting.
+
+Untuk “tidak punya”:
+
+```sql
+SELECT m.id
+FROM merchants m
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM payments p
+  WHERE p.merchant_id = m.id
+);
+```
+
+Ini menjaga grain outer query: satu merchant tetap maksimal satu row.
+
+## Correlated subquery
+
+Subquery disebut correlated ketika merujuk value dari outer row:
+
+```sql
+SELECT o.id
+FROM orders o
+WHERE EXISTS (
+  SELECT 1
+  FROM payments p
+  WHERE p.order_id = o.id
+);
+```
+
+Mental modelnya: untuk current outer row, cek apakah condition subquery memiliki row yang memenuhi. Jangan otomatis menganggap correlated subquery lambat; ukur plan nanti. Di materi ini fokus dulu ke semantics.
+
+## CTE untuk memberi nama tahap reasoning
+
+`WITH` bisa membuat query multi-stage lebih mudah diverifikasi.
+
+```sql
+WITH paid_orders AS (
+  SELECT DISTINCT order_id
+  FROM payments
+  WHERE status = 'paid'
+)
+SELECT o.id
+FROM orders o
+JOIN paid_orders p ON p.order_id = o.id;
+```
+
+CTE bukan alasan untuk memecah setiap dua baris SQL. Pakai ketika nama intermediate result membantu menjelaskan grain atau aturan.
+
+## Self join
+
+Self join memakai tabel yang sama dalam dua role berbeda.
+
+Contoh struktur referral:
+
+```sql
+SELECT child.id, parent.id AS referrer_id
+FROM customers child
+LEFT JOIN customers parent
+  ON parent.id = child.referred_by;
+```
+
+Alias bukan kosmetik: ia menyatakan role dari setiap instance tabel.
+
+## UNION vs UNION ALL
+
+`UNION` menggabungkan dua compatible result set dan menghapus duplicate rows.
+
+`UNION ALL` mempertahankan semua rows, termasuk duplikat.
+
+```sql
+SELECT merchant_id FROM card_payments
+UNION ALL
+SELECT merchant_id FROM bank_payments;
+```
+
+Kalau duplikat punya arti bisnis atau tidak perlu dihapus, jangan membayar semantic/cost dedup tanpa alasan.
+
+## Jangan pindahkan query logic ke application loop
+
+Kalau pertanyaan adalah:
+
+> order mana yang punya payment sukses tetapi tidak pernah direfund?
+
+lebih baik express relation-nya di SQL:
+
+```sql
+SELECT o.id
+FROM orders o
+WHERE EXISTS (
+  SELECT 1
+  FROM payments p
+  WHERE p.order_id = o.id
+    AND p.status = 'paid'
+)
+AND NOT EXISTS (
+  SELECT 1
+  FROM refunds r
+  JOIN payments p ON p.id = r.payment_id
+  WHERE p.order_id = o.id
+);
+```
+
+Bukan fetch semua tabel lalu loop/filter di Java/JavaScript.
+
+## Checklist sebelum execute
+
+Untuk setiap query multi-table, tulis:
+
+```text
+Output grain:
+Expected row count / range:
+Relationship:
+Potential amplification:
+Why JOIN / EXISTS / CTE:
+```
+
+Kalau lo belum bisa mengisi ini, query-nya belum siap dijalankan.
+
+<Reveal title="Kenapa DISTINCT bukan obat untuk join yang salah?">
+`DISTINCT` dapat menghapus duplicate output rows, tetapi tidak memperbaiki model relationship yang salah. Ia juga bisa menyembunyikan amplification sebelum aggregation. Perbaiki grain dan join condition lebih dulu.
+</Reveal>
+
+<Quiz items={[
+  { question: 'Lo butuh satu row per merchant yang memiliki minimal satu failed payment. Bentuk yang paling langsung menjaga grain merchant?', options: ['JOIN payment lalu berharap tidak duplicate', 'WHERE EXISTS subquery', 'CROSS JOIN'], answer: 1, explanation: 'EXISTS menjawab pertanyaan keberadaan tanpa menambahkan matching rows ke output merchant.' },
+  { question: 'Satu order memiliki 3 payment. INNER JOIN orders ke payments menghasilkan berapa row untuk order itu sebelum aggregation?', options: ['1', '3', 'Tergantung ORDER BY'], answer: 1, explanation: 'Join menghasilkan satu output row per matching pair.' },
+  { question: 'Apa perbedaan utama UNION dan UNION ALL?', options: ['UNION menghapus duplicate; UNION ALL mempertahankan', 'UNION selalu mengurutkan', 'UNION ALL hanya menerima satu tabel'], answer: 0, explanation: 'UNION default melakukan distinct set union; ALL mempertahankan duplicate rows.' },
+  { question: 'Kapan LEFT JOIN diperlukan?', options: ['Ketika row kiri tanpa match tetap harus muncul', 'Setiap kali ada foreign key', 'Agar query lebih cepat'], answer: 0, explanation: 'LEFT JOIN mempertahankan unmatched left rows dengan right columns bernilai null.' },
+  { question: 'Apa pertanyaan pertama sebelum menulis join kompleks?', options: ['Index apa yang tersedia?', 'Satu row output merepresentasikan apa?', 'Harus pakai CTE berapa?'], answer: 1, explanation: 'Output grain menentukan cardinality yang diharapkan dan membantu mendeteksi amplification.' }
+]} />
+
+<Challenge
+  title="Join Labyrinth"
+  brief="Gunakan dataset marketplace berisi customers, orders, payments, refunds, merchants, dan disputes. Jawab 15 pertanyaan bisnis tanpa application-side post-processing dan tulis expected cardinality sebelum menjalankan setiap query."
+  acceptanceCriteria={[
+    '15 pertanyaan multi-table diselesaikan dengan satu SQL statement masing-masing.',
+    'Minimal tiga pertanyaan memakai EXISTS atau NOT EXISTS.',
+    'Minimal dua pertanyaan memakai self-join atau multi-stage CTE reasoning.',
+    'Expected cardinality ditulis sebelum setiap query dijalankan.',
+    'Tidak ada application-side post-processing untuk logic yang natural diekspresikan di SQL.',
+    'Satu contoh duplicate amplification dijelaskan dari relationship yang salah.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Solve 15 multi-table business questions with one SQL statement each',
+  'Zero application-side post-processing for logic naturally expressible in SQL',
+  'Explain duplicate amplification caused by a wrong join'
+]} />
+
+## Bukti yang perlu disimpan
+
+- 15 query files + business question;
+- expected cardinality sebelum run dan actual cardinality setelah run;
+- minimal tiga `EXISTS`/`NOT EXISTS` queries;
+- dua self-join/CTE examples;
+- satu write-up singkat duplicate amplification sebelum/sesudah fix.
+
+<SourceList sources={[
+  { title: 'PostgreSQL Exercises', url: 'https://pgexercises.com/' },
+  { title: 'PostgreSQL 18 — Joins Between Tables', url: 'https://www.postgresql.org/docs/18/tutorial-join.html' },
+  { title: 'PostgreSQL 18 — Subquery Expressions', url: 'https://www.postgresql.org/docs/18/functions-subquery.html' },
+  { title: 'PostgreSQL 18 — SELECT', url: 'https://www.postgresql.org/docs/18/sql-select.html' },
+  { title: 'PostgreSQL 18 — Queries', url: 'https://www.postgresql.org/docs/18/queries.html' }
+]} />

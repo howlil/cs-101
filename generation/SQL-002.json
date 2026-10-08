@@ -1,0 +1,56 @@
+{
+  "itemId": "SQL-002",
+  "fingerprint": "sha256:2243b604ca11c065b589e30d66201f0030270a1b136661ef4e9b880617d5a14f",
+  "sources": [
+    {
+      "title": "PostgreSQL Exercises",
+      "url": "https://pgexercises.com/"
+    },
+    {
+      "title": "PostgreSQL 18 — Joins Between Tables",
+      "url": "https://www.postgresql.org/docs/18/tutorial-join.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Subquery Expressions",
+      "url": "https://www.postgresql.org/docs/18/functions-subquery.html"
+    },
+    {
+      "title": "PostgreSQL 18 — SELECT",
+      "url": "https://www.postgresql.org/docs/18/sql-select.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Queries",
+      "url": "https://www.postgresql.org/docs/18/queries.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-f6b60d06f6",
+      "taughtAt": "Join grain, EXISTS, CTE, set operations",
+      "assessedAt": "Quiz + Join Labyrinth",
+      "evidenceExpected": "15 one-statement SQL answers with expected/actual cardinality"
+    },
+    {
+      "criterionId": "criterion-4191b7aa22",
+      "taughtAt": "Jangan pindahkan query logic ke application loop",
+      "assessedAt": "Join Labyrinth",
+      "evidenceExpected": "15 answers expressed fully in SQL without application post-processing"
+    },
+    {
+      "criterionId": "criterion-14ff5013b7",
+      "taughtAt": "Duplicate amplification adalah masalah grain",
+      "assessedAt": "Quiz + Join Labyrinth",
+      "evidenceExpected": "Before/after example explaining incorrect join multiplicity"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "JOIN, EXISTS, self join, CTE, UNION",
+      "assessedAt": "Join Labyrinth",
+      "evidenceExpected": "15-query pack with required EXISTS and self-join/CTE cases"
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}
