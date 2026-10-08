@@ -1,0 +1,263 @@
+---
+taskId: "SQL-001"
+title: "Relational model + PostgreSQL fundamentals"
+description: "Bangun mental model SQL yang benar untuk NULL, identitas row, tipe data, duplikat, dan ordering sebelum masuk ke query yang lebih kompleks."
+demo: false
+curriculumFingerprint: "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67"
+---
+
+import MentalModel from '../../components/course/MentalModel.astro';
+import ConceptGraph from '../../components/course/ConceptGraph.astro';
+import Quiz from '../../components/course/Quiz.astro';
+import Challenge from '../../components/course/Challenge.astro';
+import ExitCriteria from '../../components/course/ExitCriteria.astro';
+import SourceList from '../../components/course/SourceList.astro';
+import Reveal from '../../components/course/Reveal.astro';
+
+> Target materi ini bukan hafal syntax. Lo harus bisa **memprediksi hasil query sebelum menjalankannya**, terutama saat ada `NULL`, duplikat, dan ordering.
+
+## Setelah materi ini, lo harus bisa
+
+- membedakan row, relation/result set, dan identitas row;
+- menjelaskan kenapa `NULL` menghasilkan nilai logika *unknown*;
+- memprediksi jebakan `NOT IN` ketika sisi kanan mengandung `NULL`;
+- memilih tipe PostgreSQL dasar dengan sadar;
+- menjelaskan kapan hasil query deterministik dan kapan tidak;
+- menjalankan schema, seed, dan query langsung dari `psql`.
+
+<MentalModel title="Ekspresi → truth value → filter → hasil">
+SQL bukan mesin yang mengubah semua kondisi menjadi true/false. Perbandingan yang melibatkan nilai yang tidak diketahui dapat menghasilkan **unknown**. Pada `WHERE`, hanya row dengan kondisi **true** yang lolos. Setelah row terpilih, urutannya tetap tidak dijamin kecuali query meminta urutan yang cukup spesifik dengan `ORDER BY`.
+</MentalModel>
+
+<ConceptGraph>
+<pre>{`data + tipe
+   ↓
+ekspresi/perbandingan
+   ↓
+TRUE | FALSE | UNKNOWN
+   ↓
+WHERE hanya mempertahankan TRUE
+   ↓
+result rows
+   ↓
+ORDER BY yang unik → urutan deterministik`}</pre>
+</ConceptGraph>
+
+## Row bukan identitas
+
+Satu row adalah satu tuple nilai. Kalau aplikasi perlu menunjuk satu row secara stabil, schema harus punya identitas yang jelas.
+
+Di PostgreSQL, `PRIMARY KEY` berarti nilai key harus unik dan tidak boleh `NULL`. Primary key juga memberi metadata yang bisa dipakai relasi lain sebagai target foreign key.
+
+```sql
+CREATE TABLE payment (
+  id bigint PRIMARY KEY,
+  merchant_id bigint NOT NULL,
+  amount numeric(18,2) NOT NULL,
+  status text NOT NULL
+);
+```
+
+Jangan menganggap posisi fisik row sebagai identitas. Query planner bebas memilih cara membaca tabel.
+
+## NULL berarti “tidak diketahui”
+
+`NULL` bukan angka nol, string kosong, atau sentinel biasa.
+
+Perbandingan biasa dengan `NULL` menghasilkan `NULL`/unknown:
+
+```sql
+SELECT 7 = NULL;       -- NULL
+SELECT 7 <> NULL;      -- NULL
+SELECT NULL = NULL;    -- NULL
+```
+
+Karena itu cek `NULL` memakai:
+
+```sql
+value IS NULL
+value IS NOT NULL
+```
+
+Untuk perbandingan yang sengaja memperlakukan `NULL` sebagai nilai yang bisa dibandingkan, PostgreSQL menyediakan `IS DISTINCT FROM` dan `IS NOT DISTINCT FROM`.
+
+<Reveal title="Kenapa WHERE x <> NULL tidak mengembalikan row?">
+`x <> NULL` menghasilkan unknown. `WHERE` hanya mempertahankan kondisi yang bernilai true; false dan unknown sama-sama tidak lolos filter.
+</Reveal>
+
+## Jebakan NOT IN
+
+Baca:
+
+```sql
+x NOT IN (1, 2, NULL)
+```
+
+secara mental sebagai rangkaian:
+
+```text
+x <> 1
+AND x <> 2
+AND x <> NULL
+```
+
+Kalau `x` bukan 1 atau 2, bagian terakhir tetap unknown. Hasil keseluruhan bisa menjadi unknown, bukan true.
+
+Contoh:
+
+```sql
+SELECT 3 NOT IN (1, 2, NULL); -- NULL
+```
+
+Ini alasan `NOT IN` sering berbahaya bila sumber nilai bisa mengandung `NULL`. Sebelum memilih operator, pahami contract datanya.
+
+## Duplikat dan DISTINCT
+
+SQL tidak otomatis menjadikan semua hasil sebagai set unik.
+
+```sql
+SELECT status FROM payment;
+```
+
+bisa menghasilkan status yang sama berkali-kali. `DISTINCT` menghapus duplicate result rows:
+
+```sql
+SELECT DISTINCT status
+FROM payment;
+```
+
+Tetapi `DISTINCT` **tidak berarti hasil menjadi terurut**.
+
+## Tipe data adalah bagian dari contract
+
+Pilih tipe berdasarkan makna data, bukan sekadar “bisa menyimpan nilainya”.
+
+- `integer` / `bigint` untuk bilangan bulat;
+- `numeric(p,s)` untuk angka desimal exact dengan precision yang dipilih;
+- `text` untuk string;
+- `boolean` untuk true/false, dengan `NULL` sebagai unknown bila column nullable;
+- `date` untuk tanggal kalender;
+- `timestamp with time zone` / `timestamptz` untuk instant yang perlu semantics zona waktu;
+- `uuid` untuk identifier UUID.
+
+Implicit cast bisa membuat query tampak bekerja tetapi menyembunyikan asumsi tipe. Di latihan, biasakan tahu tipe operand sebelum memprediksi hasil.
+
+## ORDER BY adalah bagian dari correctness
+
+Tanpa `ORDER BY`, SQL tidak menjanjikan urutan hasil.
+
+Query ini tidak punya “tiga payment pertama” yang stabil:
+
+```sql
+SELECT id
+FROM payment
+LIMIT 3;
+```
+
+Kalau kebutuhan bisnis mengharuskan urutan tertentu:
+
+```sql
+SELECT id
+FROM payment
+ORDER BY id
+LIMIT 3;
+```
+
+Kalau kolom ordering tidak unik, tambahkan tie-breaker sampai urutannya cukup unik:
+
+```sql
+ORDER BY created_at, id
+```
+
+Maka determinism bukan kosmetik UI. Ia bagian dari contract query.
+
+## Workflow minimum di psql
+
+Bangun latihan tanpa ORM:
+
+```sql
+CREATE TABLE sample (
+  id bigint PRIMARY KEY,
+  value integer,
+  label text
+);
+
+INSERT INTO sample (id, value, label) VALUES
+  (1, 10, 'a'),
+  (2, NULL, 'b'),
+  (3, 10, 'a');
+
+SELECT id, value
+FROM sample
+WHERE value <> 10
+ORDER BY id;
+```
+
+Sebelum query terakhir dijalankan, prediksi row mana yang lolos dan jelaskan kenapa.
+
+## Wrong models yang harus dibuang
+
+- “`NULL` sama dengan kosong.”
+- “Kondisi SQL selalu true atau false.”
+- “`NOT IN` aman selama value yang dicari tidak null.”
+- “`DISTINCT` juga mengurutkan.”
+- “Kalau query kemarin keluar berurutan, berarti urutannya stabil.”
+- “Primary key cuma index performa.”
+
+## Latihan prediksi
+
+Prediksi hasil sebelum menjalankan:
+
+```sql
+SELECT NULL = NULL;
+SELECT 5 <> NULL;
+SELECT 3 NOT IN (1, 2, NULL);
+SELECT TRUE AND NULL;
+SELECT FALSE AND NULL;
+SELECT DISTINCT x FROM (VALUES (2), (1), (2)) AS t(x);
+SELECT x FROM (VALUES (2), (1), (2)) AS t(x) LIMIT 1;
+```
+
+Untuk dua query terakhir, jangan menebak order yang tidak dijanjikan.
+
+<Quiz items={[
+  { question: 'Apa hasil dari 7 = NULL?', options: ['TRUE', 'FALSE', 'NULL / unknown'], answer: 2, explanation: 'Perbandingan biasa dengan NULL menghasilkan unknown. Gunakan IS NULL untuk menguji nullness.' },
+  { question: 'Apa hasil dari 3 NOT IN (1, 2, NULL)?', options: ['TRUE', 'FALSE', 'NULL / unknown'], answer: 2, explanation: 'Tidak ada match, tetapi perbandingan dengan NULL membuat konjungsi akhir menjadi unknown.' },
+  { question: 'Mana yang menjamin tiga row yang sama dipilih secara deterministik?', options: ['LIMIT 3', 'DISTINCT lalu LIMIT 3', 'ORDER BY id LIMIT 3'], answer: 2, explanation: 'LIMIT tanpa ORDER BY yang cukup spesifik tidak menjamin subset atau urutan yang sama.' },
+  { question: 'Apa contract utama PRIMARY KEY?', options: ['Row harus tersimpan berurutan', 'Nilai key unik dan tidak NULL', 'Query selalu memakai index'], answer: 1, explanation: 'Primary key menyatakan identitas unik dan non-null; cara eksekusi query tetap keputusan planner.' },
+  { question: 'Apa yang dilakukan WHERE terhadap kondisi unknown?', options: ['Row lolos', 'Row tidak lolos', 'Query error'], answer: 1, explanation: 'WHERE mempertahankan row dengan kondisi true. False dan unknown tidak lolos.' }
+]} />
+
+<Challenge
+  title="SQL Semantics Minefield"
+  brief="Buat 20 query kecil yang sengaja menguji NULL, NOT IN, DISTINCT, ORDER BY, duplicate rows, boolean logic, implicit casts, dan LIMIT. Untuk setiap query, tulis prediksi sebelum eksekusi lalu simpan actual result."
+  acceptanceCriteria={[
+    'Prediksi minimal 18 dari 20 kasus dengan benar sebelum eksekusi.',
+    'Setiap prediksi disimpan sebagai SQL assertion atau expected-result file.',
+    'Schema, seed, dan query dapat dijalankan seluruhnya dari psql tanpa ORM.',
+    'Setiap query yang membutuhkan ordering memakai ORDER BY yang cukup untuk hasil deterministik.',
+    'Setiap mental model yang salah diperbaiki sebelum materi ditandai selesai.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Predict at least 18 of 20 SQL semantics traps correctly before execution',
+  'Complete a clean schema + seed + query workflow entirely from psql',
+  'Every query result is deterministic when ordering matters'
+]} />
+
+## Bukti yang perlu disimpan
+
+- file schema + seed;
+- file 20 prediksi dan actual result;
+- command transcript `psql`;
+- test/assertion output;
+- catatan singkat untuk setiap prediksi yang salah dan model yang diperbaiki.
+
+<SourceList sources={[
+  { title: 'PostgreSQL 18 — Tutorial', url: 'https://www.postgresql.org/docs/18/tutorial.html' },
+  { title: 'PostgreSQL 18 — Comparison Functions and Operators', url: 'https://www.postgresql.org/docs/18/functions-comparison.html' },
+  { title: 'PostgreSQL 18 — Row and Array Comparisons', url: 'https://www.postgresql.org/docs/18/functions-comparisons.html' },
+  { title: 'PostgreSQL 18 — SELECT', url: 'https://www.postgresql.org/docs/18/sql-select.html' },
+  { title: 'PostgreSQL 18 — Constraints', url: 'https://www.postgresql.org/docs/18/ddl-constraints.html' }
+]} />

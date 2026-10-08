@@ -1,0 +1,79 @@
+{
+  "itemId": "SQL-001",
+  "version": "lesson-spec-v1:sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
+  "curriculumFingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Query SELECT 7 = NULL menghasilkan apa?",
+      "options": [
+        "TRUE",
+        "FALSE",
+        "NULL / unknown"
+      ],
+      "answer": 2,
+      "explanation": "Perbandingan biasa dengan NULL menghasilkan unknown; nullness diuji dengan IS NULL.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa hasil 3 NOT IN (1, 2, NULL)?",
+      "options": [
+        "TRUE",
+        "FALSE",
+        "NULL / unknown"
+      ],
+      "answer": 2,
+      "explanation": "NOT IN menjadi rangkaian ketidaksamaan; perbandingan terakhir dengan NULL membuat hasil akhir unknown.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Mana yang paling tepat untuk mendapatkan tiga row yang sama secara deterministik?",
+      "options": [
+        "LIMIT 3",
+        "DISTINCT lalu LIMIT 3",
+        "ORDER BY id LIMIT 3"
+      ],
+      "answer": 2,
+      "explanation": "LIMIT tanpa ORDER BY yang cukup spesifik tidak menjanjikan subset atau urutan tertentu.",
+      "criterionIds": [
+        "criterion-9b52958986"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Apa arti utama PRIMARY KEY pada schema?",
+      "options": [
+        "Menyimpan row secara fisik berurutan",
+        "Memberi identifier unik dan non-null untuk row",
+        "Memaksa semua query memakai index"
+      ],
+      "answer": 1,
+      "explanation": "Primary key menyatakan uniqueness dan non-null identity; planner tetap memilih execution plan.",
+      "criterionIds": [
+        "criterion-141c1bd6ee"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Workflow mana yang paling membuktikan materi ini dikuasai?",
+      "options": [
+        "Membaca dokumentasi sampai selesai",
+        "Menjalankan schema, seed, prediksi, dan query dari psql lalu menyimpan hasil",
+        "Menggunakan ORM agar query tersembunyi"
+      ],
+      "answer": 1,
+      "explanation": "Target curriculum meminta clean schema + seed + query workflow dari psql dan prediksi yang dapat diverifikasi.",
+      "criterionIds": [
+        "criterion-141c1bd6ee",
+        "criterion-2f0d9333e1",
+        "criterion-9b52958986"
+      ]
+    }
+  ]
+}

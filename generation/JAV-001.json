@@ -1,0 +1,58 @@
+{
+  "itemId": "JAV-001",
+  "fingerprint": "sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602ab0c744c13480475",
+  "sources": [
+    {
+      "title": "Dev.java — Learn Java",
+      "url": "https://dev.java/learn/"
+    },
+    {
+      "title": "Apache Maven — Introduction to the Build Lifecycle",
+      "url": "https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html"
+    },
+    {
+      "title": "Java Language Specification 17 — Types, Values, and Variables",
+      "url": "https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html"
+    },
+    {
+      "title": "Java Language Specification 17 — Classes / Records",
+      "url": "https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-5a2766d788",
+      "taughtAt": "Build harus hidup di luar IDE + Maven lifecycle",
+      "assessedAt": "Quiz + Reproducible Build Trap",
+      "evidenceExpected": "Output 5 clean runs mvn test dan mvn package"
+    },
+    {
+      "criterionId": "criterion-17cb87ed20",
+      "taughtAt": "Primitive/reference, String, null, record + prediksi",
+      "assessedAt": "Quiz + 12 prediction tests",
+      "evidenceExpected": "12 prediksi sebelum eksekusi; minimal 11 benar"
+    },
+    {
+      "criterionId": "criterion-86c471c16a",
+      "taughtAt": "Deterministic CLI",
+      "assessedAt": "Reproducible Build Trap",
+      "evidenceExpected": "Tiga run input sama dengan output byte-identical"
+    },
+    {
+      "criterionId": "criterion-52c56d6391",
+      "taughtAt": "Build harus hidup di luar IDE",
+      "assessedAt": "Reproducible Build Trap",
+      "evidenceExpected": "Clean checkout build/run transcript memakai Maven dan java -jar tanpa config IDE"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Seluruh alur toolchain + language model",
+      "assessedAt": "Reproducible Build Trap",
+      "evidenceExpected": "Executable Maven JAR, prediction tests, deterministic run evidence"
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

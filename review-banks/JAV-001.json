@@ -1,0 +1,80 @@
+{
+  "itemId": "JAV-001",
+  "version": "lesson-spec-v1:sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602ab0c744c13480475",
+  "curriculumFingerprint": "sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602ab0c744c13480475",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Kalau targetnya menghasilkan JAR, Maven phase mana yang paling langsung dipilih?",
+      "options": [
+        "compile",
+        "test",
+        "package"
+      ],
+      "answer": 2,
+      "explanation": "package menjalankan phase sebelumnya yang diperlukan lalu membuat artifact distributable seperti JAR.",
+      "criterionIds": [
+        "criterion-5a2766d788",
+        "criterion-52c56d6391"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Dua String object berbeda berisi teks yang sama. Apa yang digunakan untuk content equality?",
+      "options": [
+        "==",
+        "equals",
+        "="
+      ],
+      "answer": 1,
+      "explanation": "Pada reference, == membandingkan identity. String.equals membandingkan content.",
+      "criterionIds": [
+        "criterion-17cb87ed20"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Apa yang dapat disimpan variable reference?",
+      "options": [
+        "Hanya primitive value",
+        "Reference ke object atau null",
+        "Selalu copy seluruh object"
+      ],
+      "answer": 1,
+      "explanation": "Reference type menyimpan reference value; null adalah null reference.",
+      "criterionIds": [
+        "criterion-17cb87ed20"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dua instance record dengan tipe dan component values yang sama biasanya bagaimana?",
+      "options": [
+        "equals true walau identity berbeda",
+        "== selalu true",
+        "Record tidak punya equals"
+      ],
+      "answer": 0,
+      "explanation": "Record menyediakan equals berdasarkan component values; reference identity tetap konsep berbeda.",
+      "criterionIds": [
+        "criterion-17cb87ed20"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Bukti mana yang paling kuat bahwa program reproducible dan tidak bergantung IDE?",
+      "options": [
+        "Project berhasil dibuka di IDE",
+        "Clean checkout lolos test/package dan tiga java -jar run memberi output identik",
+        "Source memakai package declaration"
+      ],
+      "answer": 1,
+      "explanation": "Curriculum meminta build/run dari terminal tanpa IDE dan output deterministik untuk input yang sama.",
+      "criterionIds": [
+        "criterion-5a2766d788",
+        "criterion-86c471c16a",
+        "criterion-52c56d6391"
+      ]
+    }
+  ]
+}

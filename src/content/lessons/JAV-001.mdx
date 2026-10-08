@@ -1,0 +1,269 @@
+---
+taskId: "JAV-001"
+title: "Java toolchain + language model"
+description: "Bangun proyek Java yang bisa ditest, dipackage, dan dijalankan dari terminal sambil memahami primitive, reference, String, null, dan record."
+demo: false
+curriculumFingerprint: "sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602ab0c744c13480475"
+---
+
+import MentalModel from '../../components/course/MentalModel.astro';
+import ConceptGraph from '../../components/course/ConceptGraph.astro';
+import Quiz from '../../components/course/Quiz.astro';
+import Challenge from '../../components/course/Challenge.astro';
+import ExitCriteria from '../../components/course/ExitCriteria.astro';
+import SourceList from '../../components/course/SourceList.astro';
+import Reveal from '../../components/course/Reveal.astro';
+
+> Java proficiency di materi ini berarti proyek bisa **dibangun, ditest, dipackage, dan dijalankan dari clean checkout tanpa IDE**, lalu perilaku dasar bahasanya bisa lo prediksi.
+
+## Setelah materi ini, lo harus bisa
+
+- menjelaskan alur source → compile → test → package → run;
+- memilih Maven phase berdasarkan outcome yang dibutuhkan;
+- membedakan primitive value dengan reference ke object;
+- membedakan reference identity dan value equality pada object/String;
+- menjelaskan efek `null` pada reference;
+- memakai record sebagai data carrier sederhana dan memahami equality-nya;
+- menghasilkan CLI dengan output deterministik untuk input yang sama.
+
+<MentalModel title="Toolchain dan language model adalah satu rantai">
+Source code hanya berguna kalau build contract-nya reproducible. Maven membawa source melewati lifecycle sampai artifact; JVM menjalankan artifact itu. Di dalam program, variable menyimpan **primitive value** atau **reference value**. Prediksi behavior dari dua lapisan ini: apa yang build tool kerjakan, lalu nilai/reference apa yang program operasikan.
+</MentalModel>
+
+<ConceptGraph>
+<pre>{`pom.xml + source
+     ↓
+mvn test → compile + test
+     ↓
+mvn package → test + package
+     ↓
+JAR artifact
+     ↓
+java -jar
+     ↓
+primitive values | references → program output`}</pre>
+</ConceptGraph>
+
+## Build harus hidup di luar IDE
+
+IDE boleh membantu edit/debug. Tetapi contract build harus berada di repository.
+
+Maven default lifecycle berjalan berurutan. Memanggil phase yang lebih akhir menjalankan phase-phase yang diperlukan sebelumnya.
+
+Untuk materi ini dua command utama:
+
+```bash
+mvn test
+mvn package
+```
+
+`test` menjalankan test. `package` melanjutkan lifecycle sampai artifact distributable seperti JAR.
+
+Target akhirnya bukan “Works on my IDE”, tetapi:
+
+```text
+clean checkout
+→ mvn test
+→ mvn package
+→ java -jar ...
+→ deterministic output
+```
+
+## Primitive vs reference
+
+Java punya dua kategori tipe utama: primitive dan reference.
+
+Primitive seperti:
+
+```java
+int count = 3;
+boolean valid = true;
+double ratio = 0.5;
+```
+
+menyimpan primitive value.
+
+Reference variable seperti:
+
+```java
+String a = new String("paid");
+String b = a;
+```
+
+menyimpan reference ke object. Setelah assignment `b = a`, keduanya menunjuk object yang sama.
+
+Ini membuat pertanyaan berikut berbeda:
+
+```java
+a == b
+a.equals(b)
+```
+
+Untuk reference type, `==` membandingkan reference identity. `equals` adalah contract object untuk equality berbasis nilai bila class mendefinisikannya.
+
+## String: immutable dan equality
+
+`String` adalah object dengan value yang tidak berubah setelah dibuat.
+
+```java
+String status = "paid";
+status.toUpperCase();
+System.out.println(status); // tetap "paid"
+```
+
+Method menghasilkan String baru; ia tidak memutasi value `status`.
+
+Jangan gunakan `==` untuk menyatakan “text-nya sama”:
+
+```java
+String x = new String("paid");
+String y = new String("paid");
+
+System.out.println(x == y);      // false
+System.out.println(x.equals(y)); // true
+```
+
+<Reveal title="Kenapa string literal kadang membuat == tampak benar?">
+Runtime dapat memakai kembali reference untuk string literal tertentu. Itu bukan contract untuk content equality. Untuk membandingkan isi String, gunakan `equals`.
+</Reveal>
+
+## null hanya berlaku untuk reference
+
+`null` adalah null reference. Primitive biasa seperti `int` tidak dapat menyimpan `null`.
+
+```java
+String name = null;
+int count = 0;
+```
+
+Dereference null gagal:
+
+```java
+name.length(); // NullPointerException
+```
+
+Mental model yang lebih berguna: setiap reference boundary harus punya contract — **boleh null atau tidak?**
+
+## Record untuk data carrier
+
+Record adalah class khusus untuk aggregate data sederhana.
+
+```java
+record Transaction(String id, long amount) {}
+```
+
+Record memberi component fields/accessors dan implementasi `equals`, `hashCode`, serta `toString` berdasarkan component values.
+
+```java
+var a = new Transaction("tx-1", 100);
+var b = new Transaction("tx-1", 100);
+
+System.out.println(a == b);      // false
+System.out.println(a.equals(b)); // true
+```
+
+Record mengurangi ceremony data carrier, tetapi bukan alasan untuk menghapus domain validation. Constructor tetap bisa memvalidasi invariant.
+
+## Package dan module: jangan dicampur
+
+Package adalah namespace dan organisasi type:
+
+```java
+package com.example.ledger;
+```
+
+Java module adalah boundary yang lebih besar dengan descriptor `module-info.java`. Materi ini hanya butuh awareness: package name tidak otomatis berarti aplikasi sudah memakai Java Platform Module System.
+
+## Deterministic CLI
+
+Challenge membutuhkan input yang sama menghasilkan output byte-identical.
+
+Contoh sumber nondeterminism yang harus dihindari bila tidak dibutuhkan:
+
+- timestamp “sekarang” di output;
+- random value tanpa fixed seed;
+- iteration order dari struktur yang contract-nya tidak menjamin order;
+- environment-specific path;
+- locale/timezone implicit.
+
+Untuk CLI transaksi sederhana:
+
+```text
+stdin
+↓
+parse
+↓
+domain calculation
+↓
+stable formatting
+↓
+stdout
+```
+
+Pisahkan diagnostics ke `stderr` bila perlu agar output data tetap punya contract yang jelas.
+
+## Prediksi sebelum menjalankan
+
+Tulis jawaban sebelum mengeksekusi:
+
+```java
+int a = 3;
+int b = a;
+b++;
+System.out.println(a);
+```
+
+```java
+String a = new String("x");
+String b = new String("x");
+System.out.println(a == b);
+System.out.println(a.equals(b));
+```
+
+```java
+record Id(String value) {}
+System.out.println(new Id("1").equals(new Id("1")));
+```
+
+<Quiz items={[
+  { question: 'Kalau tujuanmu menghasilkan JAR, Maven phase utama yang sesuai adalah?', options: ['compile', 'test', 'package'], answer: 2, explanation: 'Phase package menjalankan phase sebelumnya yang diperlukan lalu membuat artifact distributable seperti JAR.' },
+  { question: 'Dua String object berbeda berisi "paid". Operator/method mana yang menyatakan content equality?', options: ['==', 'equals', '='], answer: 1, explanation: '== membandingkan reference identity pada object; String.equals membandingkan content.' },
+  { question: 'Apa yang disimpan variable reference?', options: ['Selalu seluruh bytes object', 'Reference ke object atau null', 'Hanya primitive value'], answer: 1, explanation: 'Reference variable menyimpan reference value; null adalah null reference.' },
+  { question: 'Dua record dengan tipe dan component values yang sama biasanya bagaimana?', options: ['equals mengembalikan true', '== selalu true', 'Tidak punya equals'], answer: 0, explanation: 'Record menyediakan value-based equals dari component values; object identity tetap berbeda.' },
+  { question: 'Bukti terkuat bahwa build tidak bergantung IDE adalah?', options: ['Project bisa dibuka di IDE', 'Clean checkout lolos mvn test/package dan java -jar dari terminal', 'Semua file ada di src/'], answer: 1, explanation: 'Build contract harus bisa dijalankan dari repository dan toolchain standar tanpa konfigurasi IDE.' }
+]} />
+
+<Challenge
+  title="Reproducible Build Trap"
+  brief="Buat satu executable Maven JAR yang membaca transaction records dari stdin dan menghasilkan output deterministik. Sebelum menjalankan kasus bahasa, tulis prediksi lalu encode prediksi itu sebagai test."
+  acceptanceCriteria={[
+    'Clean checkout menjalankan mvn test dan mvn package dengan sukses 5 dari 5 kali.',
+    'Minimal 11 dari 12 prediksi reference, String equality, null, record, dan primitive benar sebelum eksekusi.',
+    'Input yang sama menghasilkan output byte-identical pada 3 run.',
+    'Build dan run tidak membutuhkan konfigurasi IDE.',
+    'Executable dapat dijalankan dengan java -jar.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Clean checkout passes mvn test and mvn package 5/5 times',
+  'Predict at least 11 of 12 Java reference, equality, null, record, and primitive cases correctly before execution',
+  'Same input produces byte-identical program output across 3 repeated runs',
+  'Build and run require no IDE-specific configuration'
+]} />
+
+## Bukti yang perlu disimpan
+
+- commit dari clean repository state;
+- output 5 run `mvn test` dan `mvn package`;
+- 12 prediction tests beserta hasil;
+- transcript 3 kali `java -jar` dengan input yang sama;
+- hash/diff output untuk menunjukkan hasil byte-identical;
+- README command minimum untuk build dan run.
+
+<SourceList sources={[
+  { title: 'Dev.java — Learn Java', url: 'https://dev.java/learn/' },
+  { title: 'Apache Maven — Introduction to the Build Lifecycle', url: 'https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html' },
+  { title: 'Java Language Specification 17 — Types, Values, and Variables', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html' },
+  { title: 'Java Language Specification 17 — Classes / Records', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html' }
+]} />

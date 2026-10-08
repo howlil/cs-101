@@ -1,0 +1,56 @@
+{
+  "itemId": "SQL-001",
+  "fingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
+  "sources": [
+    {
+      "title": "PostgreSQL 18 — Tutorial",
+      "url": "https://www.postgresql.org/docs/18/tutorial.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Comparison Functions and Operators",
+      "url": "https://www.postgresql.org/docs/18/functions-comparison.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Row and Array Comparisons",
+      "url": "https://www.postgresql.org/docs/18/functions-comparisons.html"
+    },
+    {
+      "title": "PostgreSQL 18 — SELECT",
+      "url": "https://www.postgresql.org/docs/18/sql-select.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Constraints",
+      "url": "https://www.postgresql.org/docs/18/ddl-constraints.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-2f0d9333e1",
+      "taughtAt": "NULL, NOT IN, DISTINCT, tipe, dan latihan prediksi",
+      "assessedAt": "Quiz + SQL Semantics Minefield",
+      "evidenceExpected": "20 prediksi beserta actual result; minimal 18 benar sebelum eksekusi"
+    },
+    {
+      "criterionId": "criterion-141c1bd6ee",
+      "taughtAt": "Workflow minimum di psql",
+      "assessedAt": "SQL Semantics Minefield",
+      "evidenceExpected": "Schema, seed, query files, dan transcript psql dari clean workflow"
+    },
+    {
+      "criterionId": "criterion-9b52958986",
+      "taughtAt": "ORDER BY adalah bagian dari correctness",
+      "assessedAt": "Quiz + SQL Semantics Minefield",
+      "evidenceExpected": "Query yang butuh ordering memakai ORDER BY dengan tie-breaker yang cukup"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Latihan prediksi dan seluruh core semantics",
+      "assessedAt": "SQL Semantics Minefield",
+      "evidenceExpected": "Executable assertions/expected-result file untuk 20 kasus tanpa ORM"
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}
