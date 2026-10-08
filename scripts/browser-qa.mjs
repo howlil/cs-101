@@ -109,25 +109,45 @@ class DevTools {
 
 let chrome;
 let client;
-const profile = await mkdtemp(join(tmpdir(), 'cs101-chrome-qa-'));
+let profile;
 try {
-  chrome = spawn(chromeBin, [
-    '--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
-    '--disable-gpu', '--no-first-run', '--no-default-browser-check',
-    '--remote-allow-origins=*', '--remote-debugging-port=0',
-    '--user-data-dir=' + profile, 'about:blank',
-  ], { stdio: 'ignore' });
-  const portFile = join(profile, 'DevToolsActivePort');
   let port;
-  for (let i = 0; i < 120; i++) {
-    try {
-      port = (await readFile(portFile, 'utf8')).split('\n')[0].trim();
-      if (port) break;
-    } catch {}
-    if (chrome.exitCode !== null) throw new Error('Headless Chrome terminated during startup');
-    await sleep(100);
+  let lastStartupError = '';
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    profile = await mkdtemp(join(tmpdir(), 'cs101-chrome-qa-'));
+    let stderr = '';
+    chrome = spawn(chromeBin, [
+      '--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
+      '--disable-gpu', '--disable-extensions', '--disable-background-networking',
+      '--disable-breakpad', '--no-first-run', '--no-default-browser-check',
+      '--remote-allow-origins=*', '--remote-debugging-port=0',
+      '--user-data-dir=' + profile, 'about:blank',
+    ], { stdio: ['ignore', 'ignore', 'pipe'] });
+    chrome.stderr?.on('data', (buffer) => {
+      stderr = (stderr + buffer.toString()).slice(-12000);
+    });
+    const portFile = join(profile, 'DevToolsActivePort');
+    const started = Date.now();
+    while (Date.now() - started < 18000) {
+      try {
+        port = (await readFile(portFile, 'utf8')).split('\n')[0].trim();
+        if (port) break;
+      } catch {}
+      if (chrome.exitCode !== null) break;
+      await sleep(125);
+    }
+    if (port) {
+      console.log('Chrome CDP ready on attempt ' + attempt);
+      break;
+    }
+    lastStartupError = 'attempt ' + attempt + ', exitCode=' + chrome.exitCode + ', stderr=' + stderr.slice(-1600);
+    console.warn('Chrome startup retry: ' + lastStartupError);
+    chrome.kill('SIGKILL');
+    await sleep(450);
+    await rm(profile, { recursive: true, force: true, maxRetries: 4, retryDelay: 100 });
+    profile = undefined;
   }
-  assert.ok(port, 'Chrome DevTools port did not start');
+  assert.ok(port, 'Chrome DevTools failed after three attempts: ' + lastStartupError);
   const response = await fetch('http://127.0.0.1:' + port + '/json/new?about:blank', { method: 'PUT' });
   assert.ok(response.ok, 'Chrome could not create a QA tab');
   const tab = await response.json();
@@ -240,5 +260,5 @@ try {
   try { client?.ws.close(); } catch {}
   chrome?.kill('SIGTERM');
   await sleep(100);
-  await rm(profile, { recursive: true, force: true, maxRetries: 4, retryDelay: 100 });
+  if (profile) await rm(profile, { recursive: true, force: true, maxRetries: 4, retryDelay: 100 });
 }
