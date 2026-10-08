@@ -1,6 +1,7 @@
 import { ChevronRight, Home, RotateCcw } from 'lucide-react';
 import EmptyAction from '../ui/EmptyAction';
 import ActionLink from '../ui/ActionLink';
+import { Accordion } from '../arc/accordion/accordion';
 
 type CardData = {
   id: string;
@@ -34,7 +35,7 @@ export default function TodayPage({
     </header>
 
     <div className={['today-workbench', review ? 'has-review' : ''].filter(Boolean).join(' ')}>
-      <main className="today-primary">
+      <section className="today-primary">
         {primary ? (
           <section className="today-focus">
             <p className="today-path">{primary.breadcrumb}</p>
@@ -42,24 +43,26 @@ export default function TodayPage({
               <code className="today-item-id">{primary.id}</code>
               <h2>{primary.title}</h2>
             </div>
-            {primary.whyMatters && (
-              <div className="today-why">
-                <span>Kenapa penting</span>
-                <p>{primary.whyMatters}</p>
-              </div>
-            )}
-            {primary.blocker && (
-              <div className="today-blocker">
-                <span>Yang menghambat terakhir</span>
-                <p>{primary.blocker}</p>
-              </div>
-            )}
             <div className="today-next-step">
-              <span>Berikutnya</span>
+              <span>BERIKUTNYA</span>
               <strong>{primary.nextStep}</strong>
               <small>{primary.whyNext}</small>
             </div>
+            {primary.blocker && (
+              <div className="today-blocker">
+                <span>HAMBATAN TERAKHIR</span>
+                <p>{primary.blocker}</p>
+              </div>
+            )}
             <ActionLink href={primary.href} label={primary.actionLabel} />
+            {primary.whyMatters && (
+              <div className="today-why">
+                <Accordion size="sm" defaultOpen={-1} items={[{
+                  title: 'Kenapa materi ini penting',
+                  content: <p>{primary.whyMatters}</p>,
+                }]} />
+              </div>
+            )}
           </section>
         ) : (
           <EmptyAction
@@ -69,7 +72,7 @@ export default function TodayPage({
             actionLabel="Buka kurikulum"
           />
         )}
-      </main>
+      </section>
 
       {review && (
         <aside className="today-sidecar" aria-label="Review berikutnya">

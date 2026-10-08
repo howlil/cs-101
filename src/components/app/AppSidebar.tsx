@@ -27,7 +27,9 @@ const destinations = [
 ];
 
 function Navigation({ currentPath, compact = false }: { currentPath: string; compact?: boolean }) {
-  const current = currentPath === '/' ? '/' : currentPath === '/progress' ? '/progress' : '/curriculum';
+  const current = currentPath === '/' ? '/'
+    : currentPath === '/progress' || currentPath.startsWith('/review/') ? '/progress'
+      : '/curriculum';
   return <nav className="sidebar-global-nav" aria-label="Navigasi utama">
     {destinations.map(({ href, label, Icon }) => {
       const link = <a

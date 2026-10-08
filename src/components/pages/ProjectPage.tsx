@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Badge } from '../arc/badge/badge';
+import { Accordion } from '../arc/accordion/accordion';
 import ActivateItem from '../learning/ActivateItem';
 import ProjectEvidence from '../course/ProjectEvidence';
 import GuaranteeAccordion from '../project/GuaranteeAccordion';
@@ -101,8 +102,14 @@ export default function ProjectPage({
       </div>
     </header>
 
-    <div className="project-body">
-      <aside className="project-sidecar" aria-label="Konteks project">
+    <section className="project-reference" aria-label="Konteks project">
+      <Accordion
+        size="sm"
+        defaultOpen={-1}
+        items={[{
+          title: 'Materi terkait & perjalanan project',
+          content: <div className="project-reference-content">
+            <aside className="project-sidecar" aria-label="Konteks project">
         <section className="project-context-strip">
           <div>
             <span>Melanjutkan dari</span>
@@ -156,8 +163,15 @@ export default function ProjectPage({
           ) : <span />}
         </nav>
       </aside>
+          </div>,
+        }]}
+      />
+    </section>
 
-      <main className="project-main">
+    <div className="project-body">
+
+
+      <div className="project-main">
         <section className="project-section">
           <div className="project-section-heading">
             <div>
@@ -207,7 +221,7 @@ export default function ProjectPage({
             {!ready && <p className="muted">Selesaikan prasyarat terlebih dahulu.</p>}
           </section>
         )}
-      </main>
+      </div>
     </div>
   </article>;
 }
