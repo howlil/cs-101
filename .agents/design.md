@@ -712,3 +712,11 @@ Navigation hierarchy belongs solely to AppSidebar across Today, Curriculum, Prog
 - Curriculum detail is a single content workspace; primary action remains visible while prerequisites/sources live in one Arc Accordion. There must be only one main landmark, owned by AppLayout.
 - Retired `.curriculum-shell` / `.curriculum-explorer` CSS is deleted. Search, track selector, tree, item rows and deep-linked context remain supported in the shared sidebar.
 - QA checks target 1440/900/390/320 viewport widths, collapsed state persistence, mobile drawer, route navigation, dark mode, and zero document horizontal overflow.
+
+## Design-contract parity (October 2026)
+
+Unified navigation preserves route-specific track/item context. A sidebar curriculum link from a lesson retains that item; an explicitly selected track overrides the active learning item. The selected sidebar row displays its position within the module.
+
+Every unit offers Pahami, Latihan, Bukti stages. SQL-001, SQL-002, and JAV-001 preserve their full authored MDX through Astro LessonStage; manifest-only units use honest scope/challenge/evidence fallbacks. Evidence persistence and completion remain server-owned. Other stages never mark a unit complete.
+
+The normal lesson layout uses a readable centered column, optional contextual disclosure, and a lesson-only Focus Mode with Escape exit. Curriculum preview exposes only one actionable short summary, not a second lesson. Desktop chrome aligns the fixed sidebar to the viewport top and the toolbar to the workspace.
