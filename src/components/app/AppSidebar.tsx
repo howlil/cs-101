@@ -12,6 +12,7 @@ const COLLAPSE_KEY = 'cs101:sidebar-collapsed';
 
 export type SidebarData = {
   total: number;
+  curriculumHref: string;
   activeTrackId: string;
   selectedModuleId?: string;
   tracks: Array<{ id: string; title: string; total: number }>;
@@ -26,7 +27,7 @@ const destinations = [
   { href: '/progress', label: 'Progres', Icon: BarChart3 },
 ];
 
-function Navigation({ currentPath, compact = false }: { currentPath: string; compact?: boolean }) {
+function Navigation({ currentPath, curriculumHref = '/curriculum', compact = false }: { currentPath: string; curriculumHref?: string; compact?: boolean }) {
   const current = currentPath === '/' ? '/'
     : currentPath === '/progress' || currentPath.startsWith('/review/') ? '/progress'
       : '/curriculum';
@@ -35,7 +36,7 @@ function Navigation({ currentPath, compact = false }: { currentPath: string; com
       const link = <a
         key={href}
         className="sidebar-nav-link"
-        href={href}
+        href={href === '/curriculum' ? curriculumHref : href}
         title={compact ? label : undefined}
         aria-label={label}
         aria-current={current === href ? 'page' : undefined}
@@ -55,10 +56,10 @@ function SidebarSections({ currentPath, data, compact = false, scrollRef, scroll
   return <div className="sidebar-scroll" ref={scrollRef} onScroll={scrollKey ? (event) => {
     try { sessionStorage.setItem(scrollKey, String(event.currentTarget.scrollTop)); } catch {}
   } : undefined}>
-    <Navigation currentPath={currentPath} compact={compact} />
+    <Navigation currentPath={currentPath} curriculumHref={data?.curriculumHref} compact={compact} />
     {data && <div className="sidebar-curriculum">
       <div className="sidebar-section-heading">
-        <a href="/curriculum">Kurikulum</a><span>{data.total} item</span>
+        <a href={data.curriculumHref}>Kurikulum</a><span>{data.total} item</span>
       </div>
       <CurriculumExplorer
         activeTrackId={data.activeTrackId}

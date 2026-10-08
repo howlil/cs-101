@@ -52,7 +52,8 @@ if (showCurriculum) {
     : reviewMatch
       ? decodeURIComponent(reviewMatch[1])
       : curriculumRoute
-        ? Astro.url.searchParams.get('item')
+        ? Astro.url.searchParams.get('item') ??
+          (Astro.url.searchParams.has('track') ? null : learningState?.activeItemId)
         : learningState?.activeItemId;
   const currentItem = currentItemId ? curriculumGraph.itemsById.get(currentItemId) : undefined;
   const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
@@ -87,6 +88,12 @@ if (showCurriculum) {
       ? '/curriculum?item=' + encodeURIComponent(item.id)
       : '/curriculum?track=' + encodeURIComponent(item.trackId) + '&item=' + encodeURIComponent(item.id);
 
+  const curriculumHref = currentItem
+    ? previewHref(currentItem)
+    : activeTrackId
+      ? '/curriculum?track=' + encodeURIComponent(activeTrackId)
+      : '/curriculum';
+
   const sidebarItem = (item: typeof curriculumGraph.manifest.items[number]) => ({
     id: item.id,
     title: item.title,
@@ -98,6 +105,7 @@ if (showCurriculum) {
 
   sidebarData = {
     total: curriculumGraph.manifest.items.length,
+    curriculumHref,
     activeTrackId: activeTrackId ?? '',
     selectedModuleId: selectedLocation?.module?.id,
     tracks: tracks.map((track) => ({
@@ -109,7 +117,10 @@ if (showCurriculum) {
     modules: (explorer?.modules ?? []).map((module) => ({
       id: module.id,
       title: module.title,
-      items: module.items.map(sidebarItem),
+      items: module.items.map((item, index) => ({
+        ...sidebarItem(item),
+        position: { index: index + 1, total: module.items.length },
+      })),
     })),
     integrations: integrations.map(sidebarItem),
     searchEntries: searchIndex.map((entry) => ({

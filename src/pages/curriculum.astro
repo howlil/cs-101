@@ -19,7 +19,11 @@ const integrations = graph.manifest.items
   .filter((item) => item.kind === 'integration')
   .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
 
-const requestedItemId = Astro.url.searchParams.get('item');
+let learningState: LearningSnapshot | undefined;
+try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
+
+const requestedItemId = Astro.url.searchParams.get('item') ??
+  (Astro.url.searchParams.has('track') ? null : learningState?.activeItemId);
 const requestedItem = requestedItemId ? graph.itemsById.get(requestedItemId) : undefined;
 const requestedTrackId = Astro.url.searchParams.get('track');
 const activeTrackId =
@@ -34,9 +38,6 @@ const defaultItem = explorer?.modules.flatMap((module) => module.items)[0] ?? in
 const selectedItem = requestedItem ?? defaultItem;
 const selectedLocation = selectedItem ? getItemLocation(graph, selectedItem.id) : undefined;
 const connections = selectedItem ? getItemConnections(graph, selectedItem.id) : undefined;
-
-let learningState: LearningSnapshot | undefined;
-try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
 
 const viewFor = (id: string) => learningState ? getItemLearningView(graph, learningState, id) : undefined;
 
