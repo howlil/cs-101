@@ -73,6 +73,13 @@ export default function LessonPage({
       const hash = window.location.hash.slice(1);
       if (hash === 'understand' || hash === 'practice' || hash === 'evidence') {
         setStage(hash);
+      } else if (hash === 'challenge') {
+        // Keep pre-existing authored MDX anchors working after the stage split.
+        setStage('practice');
+      } else if (hash === 'exit-criteria') {
+        setStage('evidence');
+      } else if (hash === 'sumber') {
+        setStage('understand');
       }
     };
     updateFromHash();
@@ -226,7 +233,7 @@ export default function LessonPage({
               onClick={() => setContextOpen(!contextOpen)}
             >{contextOpen ? 'Tutup konteks' : 'Konteks materi'}</Button>
           </div>
-          {contextOpen && <aside id="lesson-sql001-context" className="lesson-sql001-context" aria-label="Konteks materi">{context}</aside>}
+          <aside id="lesson-sql001-context" className="lesson-sql001-context" aria-label="Konteks materi" hidden={!contextOpen}>{context}</aside>
         </>
       )}
 
