@@ -139,6 +139,10 @@ try {
   let m = await client.metrics();
   assert.equal(m.mainCount, 1, 'AppLayout should own exactly one main landmark');
   assert.equal(Math.round(m.sidebar), 248, 'Expanded sidebar should be 248px');
+  assert.equal(await client.eval('getComputedStyle(document.querySelector(".sidebar-expand")).display'), 'none',
+    'Desktop expanded state must hide the Expand button');
+  assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".sidebar-collapse")).display'), 'none',
+    'Desktop expanded state must expose the Collapse button');
   assert.ok(m.doc <= m.vw + 1, 'Desktop document horizontal overflow: ' + JSON.stringify(m));
   await client.screenshot('curriculum-desktop-1440.png');
   console.log('PASS desktop 1440: expanded sidebar, semantics, no overflow');
@@ -147,6 +151,10 @@ try {
   await client.wait(async () => await client.eval('document.documentElement.dataset.sidebar === "collapsed"'), 'sidebar collapse');
   m = await client.metrics();
   assert.equal(Math.round(m.sidebar), 56, 'Collapsed sidebar should be 56px');
+  assert.equal(await client.eval('getComputedStyle(document.querySelector(".sidebar-collapse")).display'), 'none',
+    'Collapsed sidebar must hide Collapse');
+  assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".sidebar-expand")).display'), 'none',
+    'Collapsed sidebar must show Expand');
   await client.goto('/progress');
   m = await client.metrics();
   assert.equal(m.collapsed, 'collapsed', 'Collapsed state should survive route navigation');
@@ -180,6 +188,10 @@ try {
   m = await client.metrics();
   assert.equal(m.sidebarDisplay, 'none', '900px should use mobile drawer');
   assert.notEqual(m.triggerDisplay, 'none', 'Mobile menu button must be visible');
+  const triggerBox = await client.eval('(() => { const b=document.querySelector(".sidebar-mobile-trigger"); const r=b.getBoundingClientRect(); return {top:r.top,left:r.left,position:getComputedStyle(b).position}; })()');
+  assert.equal(triggerBox.position, 'fixed', 'Hamburger button must be fixed in the topbar');
+  assert.ok(triggerBox.top >= 0 && triggerBox.top <= 12 && triggerBox.left >= 0 && triggerBox.left <= 12,
+    'Hamburger must not drop below topbar: ' + JSON.stringify(triggerBox));
   assert.ok(m.doc <= m.vw + 1, '900px horizontal overflow');
   console.log('PASS responsive boundary 900/901');
 
