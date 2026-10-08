@@ -27,6 +27,7 @@
 
 .curriculum-detail {
   width: min(1220px, 100%);
+  margin-inline: auto;
   padding: 22px 28px 48px;
 }
 
@@ -410,4 +411,11 @@
   }
 
   .item-header h2 { font-size: 23px; }
+}
+
+/* Explorer now belongs to AppSidebar. Curriculum route renders detail only. */
+.curriculum-workspace { height:100%; overflow:auto; }
+@media(max-width:900px) {
+  .curriculum-workspace { height:auto; min-height:calc(100dvh - var(--app-topbar-height)); }
+  .curriculum-detail { width:100%; padding:24px 20px 48px; }
 }

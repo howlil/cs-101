@@ -38,73 +38,6 @@
   grid-template-columns: var(--app-rail-width) minmax(0, 1fr);
 }
 
-.app-shell--with-context {
-  grid-template-columns: var(--app-rail-width) var(--curriculum-explorer-width) minmax(0, 1fr);
-}
-
-.contextual-curriculum-rail {
-  position: sticky;
-  top: var(--app-topbar-height);
-  align-self: start;
-  height: calc(100dvh - var(--app-topbar-height));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  z-index: 18;
-}
-
-.contextual-curriculum-title {
-  color: var(--text);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 650;
-  letter-spacing: -.015em;
-}
-
-.contextual-curriculum-title:hover {
-  color: var(--accent-strong);
-}
-
-.global-rail {
-  position: sticky;
-  top: var(--app-topbar-height);
-  align-self: start;
-  height: calc(100dvh - var(--app-topbar-height));
-  padding: 7px;
-  border-right: 1px solid var(--line);
-  background: var(--surface);
-  z-index: 20;
-}
-
-.global-nav {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-
-.rail-link {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-control);
-  color: var(--muted);
-  text-decoration: none;
-  transition: color 120ms ease, background-color 120ms ease;
-}
-
-.rail-link:hover {
-  color: var(--text);
-  background: var(--surface-muted);
-}
-
-.rail-link[aria-current="page"] {
-  color: var(--accent-strong);
-  background: var(--accent-subtle);
-}
-
-
 .app-main {
   min-width: 0;
   width: 100%;
@@ -131,64 +64,11 @@
 }
 
 @media (max-width: 900px) {
-  .app-shell--with-context {
-    grid-template-columns: var(--app-rail-width) minmax(0, 1fr);
-  }
-
-  .contextual-curriculum-rail {
-    display: none;
-  }
-
   .app-main:not(.app-main--flush) { padding-inline: 18px; }
 }
 
 @media (max-width: 767px) {
-  .topbar {
-    height: 48px;
-    min-height: 48px;
-    padding-inline: 10px 8px;
-  }
-
-  .app-shell {
-    display: block;
-    min-height: calc(100dvh - 48px);
-  }
-
-  .global-rail {
-    position: fixed;
-    inset: auto 0 0 0;
-    width: 100%;
-    height: 56px;
-    padding: 6px 8px;
-    border-right: 0;
-    border-top: 1px solid var(--line);
-    background: color-mix(in oklab, var(--surface) 96%, transparent);
-    backdrop-filter: blur(10px);
-    z-index: 40;
-  }
-
-  .global-nav {
-    height: 100%;
-    flex-direction: row;
-    justify-content: center;
-    gap: 22px;
-  }
-
-  .rail-link {
-    width: 42px;
-    height: 42px;
-  }
-
-  .app-main {
-    padding: 18px 14px 76px;
-  }
-
-  .app-main--flush {
-    height: auto;
-    min-height: calc(100dvh - 48px);
-    padding: 0 0 56px;
-    overflow: visible;
-  }
+  .topbar { height:48px; min-height:48px; padding-inline:10px 8px; }
 }
 
 /* Feedback for SSR navigation (does not obscure the previous workspace). */

@@ -27,3 +27,47 @@
 }
 
 :root[data-theme="dark"] { color-scheme: dark; }
+
+
+/* Howlil shared visual grammar: neutral-first; soft cobalt only for selection/focus. */
+:root {
+  --background:#FEFEFE; --foreground:#121212;
+  --surface:#F7F7F7; --surface-raised:#FEFEFE; --surface-muted:#F5F5F5;
+  --text-secondary:#626262; --text-muted:#949494;
+  --border:#E7E7E7; --border-subtle:#EFEFEF; --border-strong:#BFBFBF;
+  --accent:#9BB1FF; --accent-strong:#465C9A;
+  --accent-subtle:#EAF8FC; --accent-foreground:#121212;
+  --font-display:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-body:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  --text-xl:1.25rem; --text-2xl:1.75rem; --text-3xl:2.25rem;
+  --shadow-resting:none;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px;
+}
+:root[data-theme="dark"] {
+  --background:#080808; --foreground:#FEFEFE;
+  --surface:#121212; --surface-raised:#121212; --surface-muted:#1B1B1B;
+  --text-secondary:#BFBFBF; --text-muted:#949494;
+  --border:#262626; --border-subtle:#262626; --border-strong:#626262;
+  --accent:#9BB1FF; --accent-strong:#B4C5FF; --accent-subtle:#1B2638;
+  --accent-foreground:#121212; --shadow-resting:none;
+}
+
+/* Arc's accent preset selector is more specific than :root: override it explicitly. */
+:root[data-accent="blue"] {
+  --accent:#9BB1FF;
+  --accent-strong:#465C9A;
+  --accent-subtle:#EAF8FC;
+  --accent-foreground:#121212;
+  --control-on:#9BB1FF;
+  --control-glyph:#121212;
+}
+:root[data-theme="dark"][data-accent="blue"] {
+  --accent:#9BB1FF;
+  --accent-strong:#B4C5FF;
+  --accent-subtle:#1B2638;
+  --accent-foreground:#121212;
+  --control-on:#9BB1FF;
+  --control-glyph:#121212;
+}

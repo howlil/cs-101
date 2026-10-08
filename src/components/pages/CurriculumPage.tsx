@@ -1,18 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
 import {
-  Boxes,
-  CheckCircle2,
-  Clock3,
-  ExternalLink,
-  FolderKanban,
-  Link2,
-  LockKeyhole,
-  Target,
-  TriangleAlert,
+  Boxes, CheckCircle2, Clock3, ExternalLink, FolderKanban,
+  Link2, LockKeyhole, Target, TriangleAlert,
 } from 'lucide-react';
-import CurriculumExplorer, { type ExplorerItem } from '../curriculum/CurriculumExplorer';
 import ActivateItem from '../learning/ActivateItem';
 import ActionLink from '../ui/ActionLink';
 import { Badge } from '../arc/badge/badge';
@@ -24,7 +15,7 @@ type SelectedItem = {
   title: string;
   breadcrumb: string;
   href: string;
-  state?: ExplorerItem['state'];
+  state?: 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
   missingPrerequisites: string[];
   marketExpectation?: string[];
   nextSmallStep?: string;
@@ -38,65 +29,8 @@ type SelectedItem = {
   prerequisites: Array<{ id: string; title: string; href: string }>;
 };
 
-const EXPLORER_SCROLL_KEY = 'cs101:curriculum-explorer-scroll';
-
-export default function CurriculumPage({
-  total,
-  activeTrackId,
-  selectedModuleId,
-  tracks,
-  modules,
-  integrations,
-  searchEntries,
-  selected,
-}: {
-  total: number;
-  activeTrackId: string;
-  selectedModuleId?: string;
-  tracks: Array<{ id: string; title: string; total: number }>;
-  modules: Array<{ id: string; title: string; items: ExplorerItem[] }>;
-  integrations: ExplorerItem[];
-  searchEntries: Array<ExplorerItem & { searchText: string }>;
-  selected?: SelectedItem;
-}) {
-  const explorerRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const node = explorerRef.current;
-    if (!node) return;
-    try {
-      const saved = Number(sessionStorage.getItem(EXPLORER_SCROLL_KEY) ?? 0);
-      if (Number.isFinite(saved)) node.scrollTop = saved;
-    } catch {}
-  }, []);
-
-  return <div className="curriculum-shell">
-    <aside
-      ref={explorerRef}
-      className="curriculum-explorer"
-      aria-label="Kurikulum"
-      onScroll={(event) => {
-        try {
-          sessionStorage.setItem(EXPLORER_SCROLL_KEY, String(event.currentTarget.scrollTop));
-        } catch {}
-      }}
-    >
-      <div className="explorer-heading">
-        <h1>Kurikulum</h1>
-        <span className="explorer-count">{total}</span>
-      </div>
-
-      <CurriculumExplorer
-        activeTrackId={activeTrackId}
-        selectedModuleId={selectedModuleId}
-        tracks={tracks}
-        modules={modules}
-        integrations={integrations}
-        searchEntries={searchEntries}
-      />
-    </aside>
-
-    <section className="curriculum-workspace" aria-label="Detail kurikulum">
+export default function CurriculumPage({ selected }: { selected?: SelectedItem }) {
+  return <section className="curriculum-workspace" aria-label="Detail kurikulum">
       <div className="curriculum-detail">
         {selected ? <>
           <header className="item-header">
@@ -224,6 +158,5 @@ export default function CurriculumPage({
           </div>
         )}
       </div>
-    </section>
-  </div>;
+    </section>;
 }
