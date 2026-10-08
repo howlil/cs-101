@@ -673,3 +673,16 @@ Review engine
 ```
 
 Jangan polish sidebar lama sebelum Curriculum V2 tersedia; UI yang dibangun di atas flat task model akan perlu dibongkar lagi.
+
+
+## Implementation update — Unified sidebar (October 2026)
+
+The application chrome now uses one route-aware sidebar for global navigation and the contextual curriculum hierarchy. The global icon rail and the Curriculum page's second explorer are retired. AppLayout builds the sidebar view from the manifest and the request-scoped learning snapshot; the feature UI never derives learner completion from client storage.
+
+- Desktop: 248px sidebar; compact mode 56px, persisted as cs101:sidebar-collapsed.
+- At <=900px, Arc Dialog presents the same hierarchy in a keyboard-accessible drawer.
+- Only the current track and one relevant module expand by default. /curriculum keeps its preview URL contract; lesson/project/integration sidebar items link to their real routes.
+- Scroll position is session-scoped per track, not persisted as a learner domain fact.
+- Astro ClientRouter continues swapping route workspaces. SSR remains Cache-Control: no-store.
+- Howlil neutrals and typography are shared through tokens.css rather than adding an independent component palette.
+- The second phase will move lesson content into structured Pahami/Latihan/Bukti stages without changing learning-domain semantics.

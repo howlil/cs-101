@@ -4,7 +4,7 @@ import AppLayout from '../layouts/AppLayout.astro';
 import CurriculumPage from '../components/pages/CurriculumPage';
 import { snapshotForRequest } from '../server/request-snapshot';
 import type { LearningSnapshot } from '../server/learning';
-import { curriculumGraph, curriculumSearchIndex } from '../server/curriculum';
+import { curriculumGraph } from '../server/curriculum';
 import {
   getItemConnections,
   getItemLocation,
@@ -33,29 +33,17 @@ const explorer = activeTrackId ? getTrackExplorer(graph, activeTrackId) : undefi
 const defaultItem = explorer?.modules.flatMap((module) => module.items)[0] ?? integrations[0];
 const selectedItem = requestedItem ?? defaultItem;
 const selectedLocation = selectedItem ? getItemLocation(graph, selectedItem.id) : undefined;
-const selectedModuleId = selectedLocation?.module?.id;
 const connections = selectedItem ? getItemConnections(graph, selectedItem.id) : undefined;
-const searchIndex = curriculumSearchIndex;
 
 let learningState: LearningSnapshot | undefined;
 try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
 
 const viewFor = (id: string) => learningState ? getItemLearningView(graph, learningState, id) : undefined;
-const stateFor = (id: string) => viewFor(id)?.displayState ?? 'unknown';
 
 const previewHref = (item: typeof graph.manifest.items[number]) =>
   item.kind === 'integration'
     ? '/curriculum?item=' + encodeURIComponent(item.id)
     : '/curriculum?track=' + encodeURIComponent(item.trackId) + '&item=' + encodeURIComponent(item.id);
-
-const explorerItem = (item: typeof graph.manifest.items[number]) => ({
-  id: item.id,
-  title: item.title,
-  href: previewHref(item),
-  kind: item.kind,
-  state: stateFor(item.id),
-  active: item.id === selectedItem?.id,
-});
 
 const selectedView = selectedItem ? viewFor(selectedItem.id) : undefined;
 const selected = selectedItem && selectedLocation ? {
@@ -85,26 +73,5 @@ const selected = selectedItem && selectedLocation ? {
 } : undefined;
 ---
 <AppLayout title="Kurikulum" description="Jelajahi materi berdasarkan jalur, modul, dan prasyarat." flush>
-  <CurriculumPage
-    client:load
-    total={graph.manifest.items.length}
-    activeTrackId={activeTrackId ?? ''}
-    selectedModuleId={selectedModuleId}
-    tracks={tracks.map((track) => ({
-      id: track.id,
-      title: track.title,
-      total: graph.manifest.items.filter((item) => item.kind !== 'integration' && item.trackId === track.id).length,
-    }))}
-    modules={(explorer?.modules ?? []).map((module) => ({
-      id: module.id,
-      title: module.title,
-      items: module.items.map(explorerItem),
-    }))}
-    integrations={integrations.map(explorerItem)}
-    searchEntries={searchIndex.map((entry) => ({
-      ...explorerItem(graph.itemsById.get(entry.itemId)!),
-      searchText: entry.searchText,
-    }))}
-    selected={selected}
-  />
+  <CurriculumPage client:load selected={selected} />
 </AppLayout>

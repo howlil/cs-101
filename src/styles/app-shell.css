@@ -143,52 +143,7 @@
 }
 
 @media (max-width: 767px) {
-  .topbar {
-    height: 48px;
-    min-height: 48px;
-    padding-inline: 10px 8px;
-  }
-
-  .app-shell {
-    display: block;
-    min-height: calc(100dvh - 48px);
-  }
-
-  .global-rail {
-    position: fixed;
-    inset: auto 0 0 0;
-    width: 100%;
-    height: 56px;
-    padding: 6px 8px;
-    border-right: 0;
-    border-top: 1px solid var(--line);
-    background: color-mix(in oklab, var(--surface) 96%, transparent);
-    backdrop-filter: blur(10px);
-    z-index: 40;
-  }
-
-  .global-nav {
-    height: 100%;
-    flex-direction: row;
-    justify-content: center;
-    gap: 22px;
-  }
-
-  .rail-link {
-    width: 42px;
-    height: 42px;
-  }
-
-  .app-main {
-    padding: 18px 14px 76px;
-  }
-
-  .app-main--flush {
-    height: auto;
-    min-height: calc(100dvh - 48px);
-    padding: 0 0 56px;
-    overflow: visible;
-  }
+  .topbar { height:48px; min-height:48px; padding-inline:10px 8px; }
 }
 
 /* Feedback for SSR navigation (does not obscure the previous workspace). */
