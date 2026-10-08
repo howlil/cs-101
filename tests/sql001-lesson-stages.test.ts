@@ -51,3 +51,9 @@ test('units without MDX render honest scope/challenge/evidence fallback', () => 
   assert.match(page, /<SessionLogger/);
   assert.match(page, /document\.documentElement\.dataset\.focus/);
 });
+
+test('legacy permanent lesson rail styles are removed', () => {
+  const css = src('src/styles/workspace.css');
+  assert.doesNotMatch(css, /\.lesson-sidecar/);
+  assert.match(css, /\.lesson-staged blockquote/);
+});

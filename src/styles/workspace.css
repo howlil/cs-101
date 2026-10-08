@@ -160,79 +160,6 @@
   grid-column: 1 / -1;
 }
 
-/* Lesson: prose remains readable, right side becomes a real context region. */
-.lesson-grid {
-  display: grid;
-  grid-template-columns: minmax(0, var(--content-measure)) minmax(320px, 1fr);
-  grid-template-areas: "main side";
-  gap: var(--workspace-gap);
-  align-items: start;
-}
-
-.lesson-grid > .prose {
-  grid-area: main;
-  width: 100%;
-  max-width: var(--content-measure);
-}
-
-.lesson-sidecar {
-  grid-area: side;
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(180px, .72fr);
-  gap: 20px;
-  align-items: start;
-  padding-left: 20px;
-  border-left: 1px solid var(--line);
-}
-
-.lesson-sidecar:not(:has(.toc)) {
-  grid-template-columns: minmax(0, 420px);
-}
-
-.lesson-sidecar .lesson-execution-context {
-  margin: 0;
-}
-
-.lesson-sidecar .lesson-why,
-.lesson-sidecar .lesson-small-step {
-  padding: 9px 0;
-}
-
-.lesson-sidecar .lesson-why {
-  border-top: 0;
-}
-
-.lesson-sidecar .lesson-why ul {
-  margin: 6px 0 0;
-  padding-left: 17px;
-  font-size: 11px;
-}
-
-.lesson-sidecar .lesson-small-step strong {
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.lesson-sidecar .lesson-stuck {
-  border-bottom: 1px solid var(--line);
-}
-
-.lesson-sidecar .toc {
-  position: static;
-  display: block;
-  margin: 0;
-  padding-top: 0;
-  border-top: 0;
-  font-size: 11px;
-}
-
-.lesson-sidecar .toc a {
-  padding: 4px 0;
-}
-
 /* Project / Integration: page frame fills the workbench.
    Long-form children keep a readable measure while rules/dividers span the primary region. */
 .project-header,
@@ -356,17 +283,6 @@
   }
 }
 
-@media (max-width: 1240px) {
-  .lesson-sidecar {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .lesson-sidecar .toc {
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
-  }
-}
-
 @media (max-width: 1100px) {
   .today-workbench,
   .progress-workbench,
@@ -412,32 +328,6 @@
     margin-top: 12px;
   }
 
-  .lesson-grid {
-    width: min(var(--content-measure), 100%);
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  .lesson-sidecar {
-    order: 0;
-    position: static;
-    width: 100%;
-    display: block;
-    padding: 0 0 12px;
-    border-left: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .lesson-grid > .prose {
-    order: 1;
-    width: 100%;
-  }
-
-  .lesson-sidecar .toc {
-    display: none;
-  }
-
   .progress-history {
     grid-template-columns: 1fr;
   }
@@ -475,6 +365,16 @@
 .deep-reflection{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .deep-reflection>p{margin:0 0 8px}
 
+
+/* Keep authored MDX quotes readable on narrow screens rather than inheriting
+   browser blockquote margins that consume 80px of a 320px viewport. */
+.lesson-staged blockquote {
+  margin:18px 0 24px;
+  padding:3px 0 3px 14px;
+  border-left:2px solid var(--border);
+  color:var(--text-secondary);
+}
+.lesson-staged blockquote > :last-child { margin-bottom:0; }
 
 /* Shared lesson workspace: no permanent context rail. All units use 3 stages. */
 .lesson-grid.lesson-staged,
