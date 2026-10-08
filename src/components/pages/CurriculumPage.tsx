@@ -159,6 +159,7 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
                 </aside>,
               }]} />
             </section>
+          </div>
         </> : (
           <div className="curriculum-empty">
             <h2>Kurikulum belum tersedia.</h2>
