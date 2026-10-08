@@ -3,14 +3,14 @@ import '../../styles/review.css';
 import AppLayout from '../../layouts/AppLayout.astro';
 import ReviewPage from '../../components/pages/ReviewPage';
 import { curriculumGraph } from '../../server/curriculum';
-import { learning } from '../../server/runtime';
+import { snapshotForRequest } from '../../server/request-snapshot';
 import { reviewBankFor } from '../../server/review-bank';
 import { itemHref } from '../../domain/curriculum-v2/selectors';
 
 const item = curriculumGraph.itemsById.get(Astro.params.id ?? '');
 if (!item) return Astro.redirect('/404');
 
-const state = await (await learning()).snapshot();
+const state = await snapshotForRequest(Astro.locals);
 const progress = state.progress.find((entry) => entry.itemId === item.id);
 const review = state.reviews.find((entry) => entry.itemId === item.id);
 const bank = reviewBankFor(item.id);

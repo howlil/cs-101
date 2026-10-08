@@ -7,7 +7,7 @@ import { requiredEvidenceForItem } from '../../domain/learning/rules';
 import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
 import { curriculumGraph } from '../../server/curriculum';
 import { connectionLabels } from '../../lib/learning-language';
-import { learning } from '../../server/runtime';
+import { snapshotForRequest } from '../../server/request-snapshot';
 
 const item = curriculumGraph.itemsById.get(Astro.params.id ?? '');
 if (!item) return Astro.redirect('/404');
@@ -18,7 +18,7 @@ const lesson = lessons.find((entry) => entry.data.taskId === item.id && !entry.d
 const rendered = lesson ? await render(lesson) : null;
 const Content = rendered?.Content;
 const stale = !!lesson && lesson.data.curriculumFingerprint !== item.fingerprint;
-const state = await (await learning()).snapshot();
+const state = await snapshotForRequest(Astro.locals);
 const progress = state.progress.find((entry) => entry.itemId === item.id);
 
 const groups = getConnectionGroups(curriculumGraph, item.id);

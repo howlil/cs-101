@@ -3,7 +3,7 @@ import source from '../../curriculum/manifest.v2.json';
 import '../styles/curriculum.css';
 import AppLayout from '../layouts/AppLayout.astro';
 import CurriculumPage from '../components/pages/CurriculumPage';
-import { learning } from '../server/runtime';
+import { snapshotForRequest } from '../server/request-snapshot';
 import { buildCurriculumGraph } from '../domain/curriculum-v2/graph';
 import {
   buildCurriculumSearchIndex,
@@ -39,7 +39,7 @@ const connections = selectedItem ? getItemConnections(graph, selectedItem.id) : 
 const searchIndex = buildCurriculumSearchIndex(graph);
 
 let learningState: Awaited<ReturnType<Awaited<ReturnType<typeof learning>>['snapshot']>> | undefined;
-try { learningState = await (await learning()).snapshot(); } catch { learningState = undefined; }
+try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
 
 const viewFor = (id: string) => learningState ? getItemLearningView(graph, learningState, id) : undefined;
 const stateFor = (id: string) => viewFor(id)?.displayState ?? 'unknown';

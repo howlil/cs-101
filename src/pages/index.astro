@@ -3,12 +3,14 @@ import AppLayout from '../layouts/AppLayout.astro';
 import TodayPage from '../components/pages/TodayPage';
 import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
+import { snapshotForRequest } from '../server/request-snapshot';
 import { getTodayView } from '../domain/learning/view-models';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 
-const state = await (await learning()).export();
+const state = await snapshotForRequest(Astro.locals);
 const today = getTodayView(curriculumGraph, state);
 const primary = today.primary;
+const lastSession = primary ? (await (await learning()).recentSessions(1, primary.item.id))[0] : undefined;
 
 const nextStepFor = (view: NonNullable<typeof primary>) => {
   if (view.continueFrom) return view.continueFrom;
@@ -31,9 +33,6 @@ const primaryAction = primary
 
 const primaryCard = primary ? (() => {
   const location = getItemLocation(curriculumGraph, primary.item.id);
-  const lastSession = [...(state.sessions as Array<Record<string, unknown>>)]
-    .reverse()
-    .find((session) => (session.itemId ?? session.taskId) === primary.item.id);
   const blocker = typeof lastSession?.blocker === 'string' && lastSession.blocker.trim()
     ? lastSession.blocker.trim()
     : undefined;

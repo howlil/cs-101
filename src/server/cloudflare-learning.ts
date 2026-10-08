@@ -145,6 +145,25 @@ export class CloudflareLearningService {
     };
   }
 
+  /** Bounded dashboard read; avoid loading full export and review attempts. */
+  async recentSessions(limit = 20, itemId?: string) {
+    const where = itemId ? ' WHERE item_id=?' : '';
+    const params = itemId ? [itemId, limit] : [limit];
+    const result = await this.db.prepare(
+      'SELECT id, item_id AS itemId, recorded_at AS recordedAt, payload FROM sessions' +
+      where + ' ORDER BY rowid DESC LIMIT ?',
+    ).bind(...params).all<{ id: string; itemId: string | null; recordedAt: string; payload: string }>();
+    const rows = result.results;
+    return rows.map(({ payload, ...row }) => {
+      const parsed = JSON.parse(payload) as Record<string, unknown>;
+      const id = row.itemId ?? String(parsed.itemId ?? parsed.taskId ?? '');
+      return {
+        ...row, ...parsed, itemId: id, taskId: id,
+        continueFrom: typeof parsed.continueFrom === 'string' ? parsed.continueFrom : '',
+      };
+    });
+  }
+
   private item(id: string) {
     const item = this.graph.itemsById.get(id);
     if (!item) throw new LearningError(422, 'Item tidak ada di curriculum.');

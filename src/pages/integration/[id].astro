@@ -5,14 +5,14 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import IntegrationPage from '../../components/pages/IntegrationPage';
 import { curriculumGraph } from '../../server/curriculum';
 import { connectionLabels } from '../../lib/learning-language';
-import { learning } from '../../server/runtime';
+import { snapshotForRequest } from '../../server/request-snapshot';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
 import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
 
 const integration = curriculumGraph.itemsById.get(Astro.params.id ?? '');
 if (!integration || integration.kind !== 'integration') return Astro.redirect('/404');
 
-const state = await (await learning()).snapshot();
+const state = await snapshotForRequest(Astro.locals);
 const progress = state.progress.find((entry) => entry.itemId === integration.id);
 const availability = state.availability.find((entry) => entry.itemId === integration.id);
 const active = state.activeItemId === integration.id;

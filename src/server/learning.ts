@@ -137,6 +137,24 @@ export class LearningService {
     };
   }
 
+  /** Bounded dashboard read; the export endpoint remains unchanged. */
+  recentSessions(limit = 20, itemId?: string) {
+    const where = itemId ? ' WHERE item_id=?' : '';
+    const params = itemId ? [itemId, limit] : [limit];
+    const rows = this.db.prepare(
+      'SELECT id, item_id AS itemId, recorded_at AS recordedAt, payload FROM sessions' +
+      where + ' ORDER BY rowid DESC LIMIT ?',
+    ).all(...params) as { id: string; itemId: string | null; recordedAt: string; payload: string }[];
+    return rows.map(({ payload, ...row }) => {
+      const parsed = JSON.parse(payload) as Record<string, unknown>;
+      const id = row.itemId ?? String(parsed.itemId ?? parsed.taskId ?? '');
+      return {
+        ...row, ...parsed, itemId: id, taskId: id,
+        continueFrom: typeof parsed.continueFrom === 'string' ? parsed.continueFrom : '',
+      };
+    });
+  }
+
   private item(id: string) {
     const item = this.graph.itemsById.get(id);
     if (!item) throw new LearningError(422, 'Item tidak ada di curriculum.');

@@ -3,10 +3,15 @@ import AppLayout from '../layouts/AppLayout.astro';
 import ProgressPage from '../components/pages/ProgressPage';
 import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
+import { snapshotForRequest } from '../server/request-snapshot';
 import { getProgressOverview, type ItemLearningView } from '../domain/learning/view-models';
 import { reviewStateLabel } from '../lib/learning-language';
 
-const state = await (await learning()).export();
+const service = await learning();
+const [state, recentSessions] = await Promise.all([
+  snapshotForRequest(Astro.locals),
+  service.recentSessions(20),
+]);
 const overview = getProgressOverview(curriculumGraph, state);
 
 const reviewLabel = (review: ItemLearningView['review']) => reviewStateLabel(review);
@@ -53,9 +58,7 @@ type ExportSession = {
   blocker?: string;
 };
 
-const sessions = (state.sessions as ExportSession[])
-  .slice(-20)
-  .reverse()
+const sessions = (recentSessions as ExportSession[])
   .map((session) => {
     const id = session.itemId || session.taskId || '';
     const item = curriculumGraph.itemsById.get(id);
