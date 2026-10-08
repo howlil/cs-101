@@ -190,3 +190,32 @@
     overflow: visible;
   }
 }
+
+/* Feedback for SSR navigation (does not obscure the previous workspace). */
+.navigation-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-strong);
+  transform-origin: left;
+  opacity: 0;
+  pointer-events: none;
+}
+.navigation-progress[data-pending="true"] {
+  animation: navigation-wait 1.2s 120ms ease-out both;
+}
+@keyframes navigation-wait {
+  0% { opacity: 0; transform: scaleX(0.08); }
+  10% { opacity: 1; transform: scaleX(0.18); }
+  100% { opacity: 1; transform: scaleX(0.9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navigation-progress[data-pending="true"] {
+    animation: none;
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
