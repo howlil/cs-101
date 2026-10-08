@@ -580,3 +580,48 @@
   .today-focus { padding:21px 18px; }
   .today-focus h2 { font-size:22px; line-height:28px; }
 }
+
+
+/* Phase 05: Progress owns history and actions, not a second permanent rail. */
+.progress-page { width:min(960px,100%); margin-inline:auto; }
+.progress-workbench,
+.progress-primary { display:block; width:100%; min-width:0; }
+.progress-overview { margin-bottom:30px; }
+.progress-overview .progress-section-heading { margin-bottom:15px; }
+.progress-track-panel { display:grid; gap:12px; padding:8px 0 20px; }
+.progress-track-open { justify-self:start; text-decoration:none; font-size:13px; color:var(--text-secondary); }
+.progress-track-open:hover { color:var(--foreground); text-decoration:underline; }
+.progress-track-panel .progress-modules { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:5px 20px; }
+.progress-track-panel .progress-modules a {
+  display:grid; grid-template-columns:17px minmax(0,1fr) auto;
+  align-items:center; gap:10px; padding:9px 6px; font-size:13px;
+  color:var(--text-secondary); border-radius:8px;
+}
+.progress-track-panel .progress-modules a:hover { color:var(--foreground); }
+.progress-track-panel .progress-modules span { min-width:0; overflow-wrap:anywhere; }
+.progress-track-panel .progress-modules small { font:400 12px/16px var(--font-mono); }
+.progress-actions {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px 28px; padding:25px 0; margin:22px 0 12px;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.progress-actions .progress-review-queue,
+.progress-actions .progress-integrations { padding:0; margin:0; border:0; min-width:0; }
+.progress-actions .progress-review-items a,
+.progress-actions .progress-integration-items a {
+  padding:10px 4px; border-bottom:1px solid var(--line); border-radius:0;
+}
+.progress-actions .progress-review-copy span,
+.progress-actions .progress-integration-copy strong {
+  white-space:normal; overflow-wrap:anywhere; font-size:13px; line-height:20px;
+}
+.progress-actions .progress-review-items small,
+.progress-actions .progress-integration-items small { font-size:12px; }
+.progress-history { display:block; max-width:960px; margin-top:24px; }
+.progress-history > * { max-width:100%; }
+.progress-history .history-entry { padding:15px 0; }
+@media(max-width:640px) {
+  .progress-track-panel .progress-modules { grid-template-columns:1fr; }
+  .progress-actions { display:block; }
+  .progress-actions > section + section { margin-top:25px; }
+}

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import EmptyAction from '../ui/EmptyAction';
 import { Button } from '../arc/button/button';
+import { Accordion } from '../arc/accordion/accordion';
 
 type ReviewRow = {
   id: string;
@@ -70,81 +71,35 @@ export default function ProgressPage({
     </header>
 
     <div className="progress-workbench">
-      <main className="progress-primary">
-        <div className="progress-tracks">
-          {tracks.map((track) => (
-            <section className="progress-track" key={track.id}>
-              <div className="progress-track-heading">
-                <a href={track.href}><BarChart3 size={14} strokeWidth={1.8} aria-hidden="true" /> {track.title}</a>
-                <span>
-                  {track.completed}/{track.total}
-                  {track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''}
-                </span>
-              </div>
-              <div className="progress-modules">
-                {track.modules.map((module) => (
-                  <a href={module.href} key={module.id}>
-                    <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
-                    <span>{module.title}</span>
-                    <small>
-                      {module.active ? 'Aktif · ' : ''}
-                      {module.completed}/{module.total}
-                      {module.reviewActions ? ' · ' + module.reviewActions + 'R' : ''}
-                    </small>
-                  </a>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        <section className="progress-history">
+      <section className="progress-primary">
+        <section className="progress-overview" aria-label="Progres per jalur">
           <div className="progress-section-heading">
-            <div>
-              <p className="eyebrow">SESI</p>
-              <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Terbaru</h2>
-            </div>
+            <div><p className="eyebrow">JALUR BELAJAR</p><h2>Yang sudah diselesaikan</h2></div>
+            <span>{tracks.reduce((sum, track) => sum + track.completed, 0)} / {tracks.reduce((sum, track) => sum + track.total, 0)}</span>
           </div>
-          {sessions.length ? (
-            sessions.map((session) => (
-              <article className="history-entry" key={session.id + session.recordedAt}>
-                <div className="history-heading">
-                  <div>
-                    <code>{session.id}</code>
-                    <strong>{session.title}</strong>
-                  </div>
-                  <span>{session.kind === 'passed' ? 'Selesai' : 'Sesi'}</span>
+          <Accordion
+            size="sm"
+            defaultOpen={tracks.findIndex((track) => track.modules.some((module) => module.active))}
+            items={tracks.map((track) => ({
+              title: track.title + ' · ' + track.completed + '/' + track.total + (track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''),
+              content: <div className="progress-track-panel">
+                <a className="progress-track-open" href={track.href}>Lihat jalur di kurikulum</a>
+                <div className="progress-modules">
+                  {track.modules.map((module) => (
+                    <a href={module.href} key={module.id} aria-label={module.title + ', ' + module.completed + ' dari ' + module.total + ' selesai'}>
+                      <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
+                      <span>{module.title}</span>
+                      <small>{module.active ? 'Aktif · ' : ''}{module.completed}/{module.total}{module.reviewActions ? ' · ' + module.reviewActions + ' review' : ''}</small>
+                    </a>
+                  ))}
                 </div>
-                <p className="small muted">
-                  <time dateTime={session.recordedAt}>{new Date(session.recordedAt).toLocaleString('id-ID')}</time>
-                  {session.minutes ? ' · ' + session.minutes + 'm' : ''}
-                  {session.evidenceCount ? ' · ' + session.evidenceCount + ' bukti' : ''}
-                </p>
-                {session.reflectionSummary && <p className="history-reflection">{session.reflectionSummary}</p>}
-                {session.blocker && <p className="history-blocker"><strong>Hambatan:</strong> {session.blocker}</p>}
-                {session.continueFrom && <p className="history-next"><strong>Lanjut:</strong> {session.continueFrom}</p>}
-              </article>
-            ))
-          ) : (
-            <EmptyAction
-              title="Belum ada sesi."
-              description="Simpan sesi pertama untuk mulai membentuk riwayat."
-            />
-          )}
+              </div>,
+            }))}
+          />
         </section>
 
-        <div className="actions">
-          <form action="/api/export" method="get" data-astro-reload="">
-            <Button type="submit" variant="secondary" size="sm">
-              <Download size={14} strokeWidth={1.8} aria-hidden="true" />
-              <span>Ekspor</span>
-            </Button>
-          </form>
-        </div>
-      </main>
-
       {(reviews.length > 0 || integrations.length > 0) && (
-        <aside className="progress-sidecar" aria-label="Aksi progres">
+        <section className="progress-actions" aria-label="Aksi progres">
           {reviews.length > 0 && (
             <section className="progress-review-queue">
               <div className="progress-section-heading">
@@ -195,8 +150,55 @@ export default function ProgressPage({
               </div>
             </section>
           )}
-        </aside>
+        </section>
       )}
+
+        <section className="progress-history">
+          <div className="progress-section-heading">
+            <div>
+              <p className="eyebrow">SESI</p>
+              <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Terbaru</h2>
+            </div>
+          </div>
+          {sessions.length ? (
+            sessions.map((session) => (
+              <article className="history-entry" key={session.id + session.recordedAt}>
+                <div className="history-heading">
+                  <div>
+                    <code>{session.id}</code>
+                    <strong>{session.title}</strong>
+                  </div>
+                  <span>{session.kind === 'passed' ? 'Selesai' : 'Sesi'}</span>
+                </div>
+                <p className="small muted">
+                  <time dateTime={session.recordedAt}>{new Date(session.recordedAt).toLocaleString('id-ID')}</time>
+                  {session.minutes ? ' · ' + session.minutes + 'm' : ''}
+                  {session.evidenceCount ? ' · ' + session.evidenceCount + ' bukti' : ''}
+                </p>
+                {session.reflectionSummary && <p className="history-reflection">{session.reflectionSummary}</p>}
+                {session.blocker && <p className="history-blocker"><strong>Hambatan:</strong> {session.blocker}</p>}
+                {session.continueFrom && <p className="history-next"><strong>Lanjut:</strong> {session.continueFrom}</p>}
+              </article>
+            ))
+          ) : (
+            <EmptyAction
+              title="Belum ada sesi."
+              description="Simpan sesi pertama untuk mulai membentuk riwayat."
+            />
+          )}
+        </section>
+
+        <div className="actions">
+          <form action="/api/export" method="get" data-astro-reload="">
+            <Button type="submit" variant="secondary" size="sm">
+              <Download size={14} strokeWidth={1.8} aria-hidden="true" />
+              <span>Ekspor</span>
+            </Button>
+          </form>
+        </div>
+      </section>
+
+
     </div>
   </div>;
 }
