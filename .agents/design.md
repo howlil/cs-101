@@ -31,11 +31,11 @@ Pilih / lanjutkan item
   ↓
 Pahami konsep
   ↓
-Kerjakan challenge / project
+Kerjakan latihan / project
   ↓
-Simpan evidence
+Simpan bukti
   ↓
-Lulus
+Selesai
   ↓
 Review
   ↓
@@ -44,22 +44,23 @@ Item berikutnya menjadi ready
 
 ## Vocabulary produk
 
-Gunakan istilah berikut secara konsisten di UI, domain, dan dokumentasi.
+Domain dan UI **tidak harus memakai vocabulary yang sama**. Domain tetap presisi; UI memakai bahasa kerja yang mudah dikenali.
 
-| Entitas | Contoh | Makna |
+| Domain internal | UI | Makna user |
 | --- | --- | --- |
-| Track | Java, DB & SQL, Networking | Bidang besar |
-| Module | Java Core, Testing, Network Foundations | Kelompok kompetensi di dalam track |
-| Unit | Collections + Generics | Satu unit belajar |
-| Scope | List, Set, Map, generics | Materi yang harus dipahami |
-| Challenge | One-pass Settlement Index | Mini-case di dalam unit |
-| Criterion | Top-K benar, complexity benar | Definition of Done unit |
-| Checkpoint | Adversarial Ledger Kernel | Project kumulatif setelah sekumpulan unit |
-| Integration | Cross-track exercise | Latihan yang membutuhkan beberapa track |
-| Relation | prerequisite, related, deep dive | Hubungan antar-item |
-| Evidence | test, repo, output, note, URL | Bukti terhadap criterion/requirement |
+| unit | Materi | Satu materi yang dikerjakan |
+| checkpoint | Project | Project kumulatif |
+| integration | Latihan gabungan | Latihan yang memakai beberapa jalur |
+| scope | Yang perlu dikuasai | Materi inti |
+| challenge | Latihan | Pekerjaan yang harus dilakukan |
+| criterion | Selesai jika | Syarat yang harus terbukti |
+| evidence | Bukti | Link/output/catatan yang membuktikan target |
+| ready | Bisa dimulai | Semua prasyarat sudah selesai |
+| retention | Jadwal review | Kapan perlu mengulang recall |
+| deep_dive | Pendalaman | Materi lanjutan opsional |
+| contributes_to | Dipakai di project | Materi ini dipakai oleh project |
 
-Istilah `task` boleh tetap muncul sementara pada kompatibilitas implementasi lama, tetapi model produk baru memakai **item** sebagai istilah generik untuk unit, checkpoint, dan integration.
+Istilah domain seperti `delta`, `inherited guarantee`, `readiness`, atau `retained` boleh tetap hidup di code/engineering docs, tetapi jangan dijadikan vocabulary wajib bagi learner.
 
 ## Struktur curriculum
 
@@ -115,7 +116,7 @@ Jangan menampilkan semua requirement warisan berulang kali dalam satu blok panja
 4. **Satu aksi utama per konteks.** Continue, mulai item, simpan sesi, atau submit evidence.
 5. **Status tidak disimpulkan dari waktu atau scroll.** Completion berasal dari evidence terhadap Definition of Done.
 6. **Project adalah first-class entity.** Project tidak dirender seperti lesson panjang biasa.
-7. **Cross-track relation terlihat saat dibutuhkan.** Tampilkan Requires, Used later by, Related, dan Deep dive di context section.
+7. **Cross-track relation terlihat saat dibutuhkan.** Tampilkan Harus selesai dulu, Dipakai nanti, Terkait, dan Pendalaman di context section.
 8. **Compact bukan berarti kecil.** Kurangi chrome dan whitespace berlebih, bukan target klik atau readability.
 9. **Tidak ada gamification palsu.** Hindari streak, XP, badge dekoratif, confetti, progress angka yang tidak membantu keputusan.
 10. **Sumber curriculum tidak dikaburkan oleh lesson.** Lesson menjelaskan curriculum; lesson tidak boleh mengubah scope/criteria.
@@ -361,19 +362,19 @@ Contoh struktur:
 ◆ Project 2
 Rule Explosion Gauntlet
 
-Built on
+Melanjutkan dari
 Project 1 · Adversarial Ledger Kernel
 
-New in this checkpoint
-+ requirement baru
-+ requirement baru
-+ requirement baru
+Yang baru di project ini
++ target baru
++ target baru
++ target baru
 
-Inherited guarantees
-12 requirement dari Project 1
-[Show inherited]
+Dari project sebelumnya
+12 target tetap harus benar
+[Lihat target sebelumnya]
 
-Evidence
+Bukti
 □ repository
 □ tests
 □ benchmark / report
@@ -391,13 +392,13 @@ Integration adalah item lintas track.
 ```text
 INT-001 · Bootstrap Integration
 
-Requires
+Harus selesai dulu
 Java foundation     ✓
 SQL foundation      ✓
 Linux foundation    ○
 
-Locked
-LIN-001 belum lulus
+Terkunci
+LIN-001 belum selesai
 ```
 
 Begitu seluruh hard prerequisite passed, state berubah menjadi Ready secara otomatis.
@@ -537,7 +538,7 @@ Answer key review tidak dikirim ke client sebelum submit. Server melakukan gradi
 | Curriculum kosong | “Curriculum belum tersedia.” |
 | Tidak ada active item | Tampilkan next ready item |
 | Item locked | Tampilkan prerequisite yang belum passed |
-| Lesson belum tersedia | Item tetap terlihat; “Materi belum tersedia.” |
+| Lesson belum tersedia | Tampilkan fallback curriculum: Yang perlu dikuasai, Latihan, Selesai jika, Sumber, session, dan Bukti. |
 | Curriculum stale | “Materi perlu diperbarui.” Evidence historis tetap terlihat |
 | Tidak ada review | Jangan buat section besar kosong |
 | Save gagal | Pertahankan input + “Coba lagi” |
@@ -573,11 +574,11 @@ Bahasa Indonesia langsung. Istilah teknis tetap presisi.
 
 | Hindari | Pakai |
 | --- | --- |
-| Mulai perjalanan belajarmu | Mulai unit |
+| Mulai perjalanan belajarmu | Mulai belajar |
 | Unlock your potential | Continue |
 | Selamat! Kamu luar biasa! | Jawaban benar. [alasan] |
 | Terjadi kesalahan | Sesi belum tersimpan. Coba lagi. |
-| Progress 73% karena waktu | 3 dari 5 criteria terbukti |
+| Progress 73% karena waktu | 3 dari 5 target punya bukti |
 
 Hindari pembuka generik, motivasi otomatis, angka vanity, dan rekap yang tidak menambah keputusan.
 

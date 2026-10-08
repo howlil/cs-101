@@ -15,6 +15,7 @@ type PrimaryCardData = CardData & {
   nextStep: string;
   whyNext: string;
   whyMatters?: string;
+  blocker?: string;
 };
 
 export default function TodayPage({
@@ -45,6 +46,12 @@ export default function TodayPage({
               <div className="today-why">
                 <span>Kenapa penting</span>
                 <p>{primary.whyMatters}</p>
+              </div>
+            )}
+            {primary.blocker && (
+              <div className="today-blocker">
+                <span>Yang menghambat terakhir</span>
+                <p>{primary.blocker}</p>
               </div>
             )}
             <div className="today-next-step">

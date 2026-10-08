@@ -143,7 +143,7 @@ export default function CurriculumExplorer({
 
       {integrations.length > 0 && (
         <div className="integration-list">
-          <p className="explorer-label"><Boxes size={12} strokeWidth={1.8} aria-hidden="true" /> INTEGRASI</p>
+          <p className="explorer-label"><Boxes size={12} strokeWidth={1.8} aria-hidden="true" /> LATIHAN GABUNGAN</p>
           {integrations.map((item) => <ItemRow key={item.id} item={item} />)}
         </div>
       )}

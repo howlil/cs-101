@@ -1,11 +1,10 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import { BookOpen, ListTree, TriangleAlert } from 'lucide-react';
+import { BookOpen, ExternalLink, ListTree, Target, TriangleAlert } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Alert } from '../arc/alert/alert';
 import { Accordion } from '../arc/accordion/accordion';
-import EmptyAction from '../ui/EmptyAction';
 import ActivateItem from '../learning/ActivateItem';
 import SessionLogger from '../course/SessionLogger';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
@@ -15,6 +14,9 @@ export default function LessonPage({
   title,
   marketExpectation,
   nextSmallStep,
+  scope,
+  challenge,
+  source,
   available,
   stale,
   active,
@@ -25,7 +27,6 @@ export default function LessonPage({
   criteria,
   headings,
   connections,
-  curriculumHref,
   demo = false,
   children,
 }: {
@@ -35,6 +36,9 @@ export default function LessonPage({
   marketExpectation: string[];
   nextSmallStep: string;
   estimatedMinutes?: number;
+  scope: string[];
+  challenge: { title: string; steps: string[] };
+  source: { title: string; url?: string };
   available: boolean;
   stale: boolean;
   active: boolean;
@@ -49,20 +53,6 @@ export default function LessonPage({
   demo?: boolean;
   children?: ReactNode;
 }) {
-  if (!available) {
-    return <div className="content">
-      <p className="eyebrow"><BookOpen size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId}</p>
-      <h1>{title}</h1>
-      <EmptyAction
-        title="Materi belum tersedia."
-        description="Buka kurikulum untuk melihat scope dan challenge."
-        href={curriculumHref}
-        actionLabel="Kembali ke kurikulum"
-      />
-      <ConnectionsPanel groups={connections} compact />
-    </div>;
-  }
-
   const toc = headings.filter((heading) => heading.depth === 2);
 
   return <div className="lesson-grid">
@@ -71,7 +61,7 @@ export default function LessonPage({
         <section className="lesson-execution-context">
           {marketExpectation.length > 0 && (
             <div className="lesson-why">
-              <span className="eyebrow">KENAPA PENTING</span>
+              <span className="eyebrow">KENAPA MATERI INI ADA</span>
               <ul>{marketExpectation.slice(0, 2).map((item) => <li key={item}>{item}</li>)}</ul>
             </div>
           )}
@@ -91,7 +81,7 @@ export default function LessonPage({
                   <li>Kerjakan hanya: <strong>{nextSmallStep}</strong></li>
                   <li>Buat satu prediksi sebelum mencoba.</li>
                   <li>Jalankan satu eksperimen kecil.</li>
-                  <li>Catat hasil yang berbeda dari dugaan.</li>
+                  <li>Kalau masih macet, simpan hambatannya saat mengakhiri sesi.</li>
                 </ol>,
               }]}
             />
@@ -119,13 +109,46 @@ export default function LessonPage({
       )}
       {continueFrom && <Alert title="Lanjut dari">{continueFrom}</Alert>}
 
+      {!available && !demo && (
+        <Alert title="Materi lengkap belum tersedia" tone="info">
+          Ringkasan kurikulum di bawah tetap bisa dipakai untuk belajar. Kelulusan ditentukan oleh latihan, target selesai, dan bukti — bukan keberadaan halaman materi lengkap.
+        </Alert>
+      )}
+
       {!demo && !active && (
         <div className="actions">
           <ActivateItem itemId={itemId} label="Mulai belajar" />
         </div>
       )}
 
-      {children}
+      {available ? children : (
+        <div className="lesson-fallback">
+          <section>
+            <h2>Yang perlu dikuasai</h2>
+            <ul>{scope.map((item) => <li key={item}>{item}</li>)}</ul>
+          </section>
+
+          <section>
+            <h2><Target size={16} strokeWidth={1.8} aria-hidden="true" /> Latihan</h2>
+            <h3>{challenge.title}</h3>
+            <ol>{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+          </section>
+
+          <section>
+            <h2>Selesai jika</h2>
+            <ol>{criteria.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
+          </section>
+
+          <section>
+            <h2>Sumber utama</h2>
+            {source.url ? (
+              <a href={source.url} target="_blank" rel="noopener noreferrer">
+                <ExternalLink size={14} strokeWidth={1.8} aria-hidden="true" /> {source.title}
+              </a>
+            ) : <p>{source.title}</p>}
+          </section>
+        </div>
+      )}
 
       <ConnectionsPanel groups={connections} compact />
 

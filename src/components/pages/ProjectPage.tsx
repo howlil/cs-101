@@ -75,7 +75,7 @@ export default function ProjectPage({
       <p className="project-breadcrumb">{breadcrumb}</p>
       <div className="project-kicker">
         <FolderKanban size={14} strokeWidth={1.8} aria-hidden="true" />
-        <span>Checkpoint</span>
+        <span>Project</span>
         <code>{id}</code>
       </div>
       <h1>{title}</h1>
@@ -92,7 +92,7 @@ export default function ProjectPage({
         ) : active ? (
           <Badge tone="info" icon={<FolderKanban size={14} strokeWidth={1.8} />}>Sedang dikerjakan</Badge>
         ) : ready ? (
-          <ActivateItem itemId={id} label="Mulai checkpoint" />
+          <ActivateItem itemId={id} label="Mulai project" />
         ) : (
           <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
             Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prasyarat'}
@@ -102,19 +102,19 @@ export default function ProjectPage({
     </header>
 
     <div className="project-body">
-      <aside className="project-sidecar" aria-label="Konteks checkpoint">
+      <aside className="project-sidecar" aria-label="Konteks project">
         <section className="project-context-strip">
           <div>
-            <span>Built on</span>
-            {parent ? <a href={parent.href}><code>{parent.id}</code> {parent.title}</a> : <strong>Root</strong>}
+            <span>Melanjutkan dari</span>
+            {parent ? <a href={parent.href}><code>{parent.id}</code> {parent.title}</a> : <strong>Project awal</strong>}
           </div>
           <div>
-            <span>Units</span>
+            <span>Materi terkait</span>
             <strong>{contributors.length}</strong>
           </div>
           <div>
-            <span>Next</span>
-            {next ? <a href={next.href}><code>{next.id}</code> {next.title}</a> : <strong>End</strong>}
+            <span>Project berikutnya</span>
+            {next ? <a href={next.href}><code>{next.id}</code> {next.title}</a> : <strong>Selesai</strong>}
           </div>
         </section>
 
@@ -122,8 +122,8 @@ export default function ProjectPage({
           <section className="project-side-section">
             <div className="project-section-heading">
               <div>
-                <p className="eyebrow"><GitBranchIcon /> FOUNDATION</p>
-                <h2>Unit terkait</h2>
+                <p className="eyebrow">MATERI DASAR</p>
+                <h2>Materi terkait</h2>
               </div>
               <span>{contributors.length}</span>
             </div>
@@ -141,7 +141,7 @@ export default function ProjectPage({
 
         <ConnectionsPanel groups={connections} compact />
 
-        <nav className="project-lineage-nav" aria-label="Navigasi checkpoint">
+        <nav className="project-lineage-nav" aria-label="Navigasi project">
           {parent ? (
             <a href={parent.href}>
               <span><ArrowLeft size={13} strokeWidth={1.8} aria-hidden="true" /> Sebelumnya</span>
@@ -161,8 +161,8 @@ export default function ProjectPage({
         <section className="project-section">
           <div className="project-section-heading">
             <div>
-              <p className="eyebrow"><Layers3 size={13} strokeWidth={1.8} aria-hidden="true" /> DELTA</p>
-              <h2>Requirement baru</h2>
+              <p className="eyebrow"><Layers3 size={13} strokeWidth={1.8} aria-hidden="true" /> YANG BARU</p>
+              <h2>Yang harus dikerjakan di project ini</h2>
             </div>
             <span>{newRequirements.length}</span>
           </div>
@@ -170,20 +170,20 @@ export default function ProjectPage({
             <ol className="project-requirement-list">
               {newRequirements.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}
             </ol>
-          ) : <p className="muted">Tidak ada requirement baru.</p>}
+          ) : <p className="muted">Tidak ada tambahan baru dari project sebelumnya.</p>}
         </section>
 
         {parent && (
           <section className="project-section">
             <div className="project-section-heading">
               <div>
-                <p className="eyebrow"><Link2 size={13} strokeWidth={1.8} aria-hidden="true" /> INHERITED</p>
-                <h2>Guarantee yang harus tetap hidup</h2>
+                <p className="eyebrow"><Link2 size={13} strokeWidth={1.8} aria-hidden="true" /> DARI PROJECT SEBELUMNYA</p>
+                <h2>Yang harus tetap benar</h2>
               </div>
               <span>{inherited.length}</span>
             </div>
             <GuaranteeAccordion
-              title={inheritanceTitle ?? 'Guarantee checkpoint sebelumnya'}
+              title={inheritanceTitle ?? 'Target dari project sebelumnya'}
               items={inherited.map((criterion) => criterion.text)}
             />
           </section>
@@ -202,16 +202,12 @@ export default function ProjectPage({
           />
         ) : !passed && (
           <section className="project-section project-evidence-placeholder">
-            <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
-            <h2>{ready ? 'Mulai checkpoint untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
+            <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> BUKTI</p>
+            <h2>{ready ? 'Mulai project untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
             {!ready && <p className="muted">Selesaikan prasyarat terlebih dahulu.</p>}
           </section>
         )}
       </main>
     </div>
   </article>;
-}
-
-function GitBranchIcon() {
-  return <Layers3 size={13} strokeWidth={1.8} aria-hidden="true" />;
 }

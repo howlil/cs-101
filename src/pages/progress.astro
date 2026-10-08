@@ -57,6 +57,7 @@ type ExportSession = {
   minutes?: number;
   evidence?: unknown[];
   reflection?: Record<string, string>;
+  blocker?: string;
 };
 
 const sessions = (state.sessions as ExportSession[])
@@ -82,6 +83,7 @@ const sessions = (state.sessions as ExportSession[])
       minutes: typeof session.minutes === 'number' ? session.minutes : undefined,
       evidenceCount: Array.isArray(session.evidence) ? session.evidence.length : 0,
       reflectionSummary,
+      blocker: typeof session.blocker === 'string' ? session.blocker : undefined,
     };
   });
 ---

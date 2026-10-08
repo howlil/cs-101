@@ -54,10 +54,11 @@ type SessionRow = {
   minutes?: number;
   evidenceCount: number;
   reflectionSummary?: string;
+  blocker?: string;
 };
 
 function RetentionSteps({ step }: { step: number }) {
-  return <div className="retention-steps" aria-label="Tahap retention">
+  return <div className="retention-steps" aria-label="Jadwal review">
     {REVIEW_DAYS.map((day, index) => (
       <span
         key={day}
@@ -138,6 +139,7 @@ export default function ProgressPage({
                   {session.evidenceCount ? ' · ' + session.evidenceCount + ' bukti' : ''}
                 </p>
                 {session.reflectionSummary && <p className="history-reflection">{session.reflectionSummary}</p>}
+                {session.blocker && <p className="history-blocker"><strong>Hambatan:</strong> {session.blocker}</p>}
                 {session.continueFrom && <p className="history-next"><strong>Lanjut:</strong> {session.continueFrom}</p>}
               </article>
             ))
@@ -190,7 +192,7 @@ export default function ProgressPage({
               <div className="progress-section-heading">
                 <div>
                   <p className="eyebrow">LINTAS JALUR</p>
-                  <h2><Boxes size={17} strokeWidth={1.8} aria-hidden="true" /> Integrasi</h2>
+                  <h2><Boxes size={17} strokeWidth={1.8} aria-hidden="true" /> Latihan gabungan</h2>
                 </div>
                 <span>{integrations.filter((item) => item.passed).length}/{integrations.length}</span>
               </div>

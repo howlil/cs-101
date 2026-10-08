@@ -123,7 +123,13 @@ export default function CurriculumPage({
                 ) : selected.state === 'ready' || selected.state === 'started' ? (
                   <ActivateItem
                     itemId={selected.id}
-                    label={selected.state === 'started' ? 'Lanjut belajar' : selected.kind === 'unit' ? 'Mulai belajar' : 'Mulai item'}
+                    label={selected.state === 'started'
+                      ? 'Lanjut'
+                      : selected.kind === 'unit'
+                        ? 'Mulai belajar'
+                        : selected.kind === 'checkpoint'
+                          ? 'Mulai project'
+                          : 'Mulai latihan gabungan'}
                   />
                 ) : selected.state === 'locked' ? (
                   <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
@@ -165,7 +171,7 @@ export default function CurriculumPage({
             <main className="item-main">
               {selected.marketExpectation?.length ? (
                 <section className="item-section item-why">
-                  <h3>Kenapa penting</h3>
+                  <h3>Kenapa materi ini ada</h3>
                   <ul className="compact-list">{selected.marketExpectation.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul>
                 </section>
               ) : null}
@@ -179,25 +185,25 @@ export default function CurriculumPage({
 
               {selected.kind === 'unit' && <>
                 <section className="item-section">
-                  <h3>Scope</h3>
+                  <h3>Yang perlu dikuasai</h3>
                   <ul className="compact-list">{selected.scope?.map((scope) => <li key={scope}>{scope}</li>)}</ul>
                 </section>
                 <section className="item-section challenge-preview">
                   <div className="compact-section-heading">
-                    <h3><Target size={15} strokeWidth={1.8} aria-hidden="true" /> {selected.challenge?.title ?? 'Challenge'}</h3>
-                    <span>Challenge</span>
+                    <h3><Target size={15} strokeWidth={1.8} aria-hidden="true" /> {selected.challenge?.title ?? 'Latihan'}</h3>
+                    <span>Latihan</span>
                   </div>
                   <ul className="compact-list">{selected.challenge?.steps.map((step) => <li key={step}>{step}</li>)}</ul>
                 </section>
                 <section className="item-section">
-                  <h3><CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" /> Target selesai</h3>
+                  <h3><CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" /> Selesai jika</h3>
                   <ol className="criteria-list">{selected.criteria?.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
                 </section>
               </>}
 
               {selected.kind === 'checkpoint' && (
                 <section className="item-section">
-                  <h3><FolderKanban size={15} strokeWidth={1.8} aria-hidden="true" /> Checkpoint</h3>
+                  <h3><FolderKanban size={15} strokeWidth={1.8} aria-hidden="true" /> Project</h3>
                   <p>{selected.problemStatement}</p>
                   <ActionLink href={selected.href} label="Buka project" />
                 </section>
@@ -205,9 +211,9 @@ export default function CurriculumPage({
 
               {selected.kind === 'integration' && (
                 <section className="item-section">
-                  <h3><Boxes size={15} strokeWidth={1.8} aria-hidden="true" /> Integrasi</h3>
+                  <h3><Boxes size={15} strokeWidth={1.8} aria-hidden="true" /> Latihan gabungan</h3>
                   <p>{selected.brief}</p>
-                  <ActionLink href={selected.href} label="Buka integrasi" />
+                  <ActionLink href={selected.href} label="Buka latihan" />
                 </section>
               )}
             </main>

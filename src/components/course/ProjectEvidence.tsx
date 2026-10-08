@@ -24,9 +24,9 @@ export default function ProjectEvidence({
 }) {
   const groups: EvidenceGroup[] = [{
     key: 'new',
-    eyebrow: 'EVIDENCE',
-    title: 'Requirement baru',
-    description: 'Buktikan perubahan yang ditambahkan pada checkpoint ini.',
+    eyebrow: 'BUKTI',
+    title: 'Yang harus dikerjakan di project ini',
+    description: 'Tambahkan bukti untuk target baru di project ini.',
     criteria: newRequirements,
     className: 'project-evidence-section',
   }];
@@ -34,12 +34,12 @@ export default function ProjectEvidence({
   if (inheritanceCriteria.length) {
     groups.push({
       key: 'inherited',
-      eyebrow: 'REGRESSION GUARANTEE',
-      title: 'Inherited guarantees',
-      description: 'Berikan evidence bahwa guarantee yang diwariskan masih tetap berlaku.',
+      eyebrow: 'DARI PROJECT SEBELUMNYA',
+      title: 'Yang harus tetap benar',
+      description: 'Buktikan bahwa target dari project sebelumnya masih tetap benar.',
       criteria: inheritanceCriteria,
       className: 'project-evidence-section project-evidence-section--inherited',
-      referenceTitle: 'Lihat guarantee dari checkpoint sebelumnya',
+      referenceTitle: 'Lihat target dari project sebelumnya',
       referenceItems: inheritedGuarantees.map((criterion) => criterion.text),
     });
   }
@@ -52,6 +52,6 @@ export default function ProjectEvidence({
     lastAnchor={lastAnchor}
     groups={groups}
     className="project-evidence-form"
-    passLabel="Kirim bukti & selesaikan checkpoint"
+    passLabel="Kirim bukti & selesaikan project"
   />;
 }

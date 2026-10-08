@@ -6,7 +6,7 @@ import { learning } from '../server/runtime';
 import { getTodayView } from '../domain/learning/view-models';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 
-const state = await (await learning()).snapshot();
+const state = await (await learning()).export();
 const today = getTodayView(curriculumGraph, state);
 const primary = today.primary;
 
@@ -31,6 +31,12 @@ const primaryAction = primary
 
 const primaryCard = primary ? (() => {
   const location = getItemLocation(curriculumGraph, primary.item.id);
+  const lastSession = [...(state.sessions as Array<Record<string, unknown>>)]
+    .reverse()
+    .find((session) => (session.itemId ?? session.taskId) === primary.item.id);
+  const blocker = typeof lastSession?.blocker === 'string' && lastSession.blocker.trim()
+    ? lastSession.blocker.trim()
+    : undefined;
   const breadcrumb = [location.track?.title ?? 'Cross-track', location.module?.title]
     .filter(Boolean)
     .join(' / ');
@@ -53,6 +59,7 @@ const primaryCard = primary ? (() => {
     nextStep: nextStepFor(primary),
     whyNext,
     whyMatters,
+    blocker,
     href: primary.href,
     actionLabel: primaryAction,
   };

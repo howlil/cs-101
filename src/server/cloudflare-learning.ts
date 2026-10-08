@@ -65,7 +65,7 @@ export class CloudflareLearningService {
   constructor(
     private db: D1Database,
     private graph: CurriculumGraph,
-    private lessonReady: (itemId: string) => boolean,
+    private _lessonReady: (itemId: string) => boolean,
     private reviewBankFor: (itemId: string) => ReviewBank | undefined = () => undefined,
     private now: () => Date = () => new Date(),
   ) {}
@@ -168,18 +168,16 @@ export class CloudflareLearningService {
     }
 
     if (input.kind === 'passed') {
-      if (item.kind === 'unit' && !this.lessonReady(item.id)) {
-        throw new LearningError(422, 'Materi valid belum tersedia untuk unit ini.');
-      }
       if (expected.some((id) => !provided.includes(id))) {
-        throw new LearningError(422, 'Lengkapi bukti untuk semua kriteria dan challenge.');
+        throw new LearningError(422, 'Lengkapi bukti untuk semua target dan latihan.');
       }
     } else if (
       !input.evidence.length &&
       !input.continueFrom &&
+      !input.blocker &&
       !Object.values(input.reflection ?? {}).some((value) => value.trim())
     ) {
-      throw new LearningError(422, 'Isi titik lanjut, bukti, atau refleksi sesi.');
+      throw new LearningError(422, 'Isi titik lanjut, hambatan, bukti, atau catatan sesi.');
     }
     return item;
   }
@@ -375,9 +373,9 @@ export class CloudflareLearningService {
     const input = reviewAttemptSchema.parse(raw);
     const item = this.item(input.itemId);
     const bank = this.reviewBankFor(input.itemId);
-    if (!bank) throw new LearningError(422, 'Review set belum tersedia untuk item ini.');
+    if (!bank) throw new LearningError(422, 'Soal review belum tersedia untuk materi ini.');
     if (bank.curriculumFingerprint !== item.fingerprint) {
-      throw new LearningError(409, 'Review set stale terhadap curriculum aktif.');
+      throw new LearningError(409, 'Soal review perlu diperbarui untuk versi materi terbaru.');
     }
 
     let grading: ReturnType<typeof gradeReview>;
@@ -411,13 +409,13 @@ export class CloudflareLearningService {
     }
     const completion = current.progress.find((entry) => entry.itemId === input.itemId);
     if (completion?.status !== 'passed') {
-      throw new LearningError(422, 'Review hanya tersedia untuk item yang sudah lulus dan tidak stale.');
+      throw new LearningError(422, 'Review tersedia setelah materi selesai dan masih sesuai kurikulum terbaru.');
     }
 
     const view = current.reviews.find((entry) => entry.itemId === input.itemId);
     if (!view) throw new LearningError(422, 'Review belum terjadwal.');
     if (view.state === 'scheduled') throw new LearningError(422, 'Review belum jatuh tempo.');
-    if (view.state === 'retained') throw new LearningError(422, 'Item sudah retained pada policy review saat ini.');
+    if (view.state === 'retained') throw new LearningError(422, 'Semua jadwal review untuk materi ini sudah selesai.');
 
     const now = this.now();
     const currentRow = storedFromView(view);

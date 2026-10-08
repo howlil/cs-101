@@ -196,6 +196,22 @@ test('retry identik tidak menggandakan sesi, bahkan setelah revision berubah', (
   }
 });
 
+test('hambatan saja cukup untuk menyimpan sesi progress', () => {
+  const { db, service } = fixture();
+  try {
+    const saved = service.saveSession({
+      ...session(1),
+      continueFrom: '',
+      blocker: 'Masih bingung NULL + NOT IN',
+    });
+    assert.equal(saved.revision, 2);
+    const exported = service.export().sessions[0] as { blocker?: string };
+    assert.equal(exported.blocker, 'Masih bingung NULL + NOT IN');
+  } finally {
+    db.close();
+  }
+});
+
 test('dua tab dengan revision lama mendapat konflik tanpa menulis sesi kedua', () => {
   const { db, service } = fixture();
   try {
@@ -274,7 +290,7 @@ test('hard prerequisite memblokir aktivasi sampai prerequisite passed', () => {
   }
 });
 
-test('fingerprint stale dan lesson belum valid memblokir kelulusan', () => {
+test('fingerprint stale memblokir, tetapi lesson MDX bukan syarat kelulusan', () => {
   const { db, service } = fixture(false);
   try {
     assert.throws(
@@ -284,18 +300,17 @@ test('fingerprint stale dan lesson belum valid memblokir kelulusan', () => {
       }),
       /Curriculum berubah/,
     );
-    assert.throws(
-      () => service.saveSession({
-        ...session(1),
-        kind: 'passed',
-        evidence: requiredEvidenceForItem(unit).map((criterion) => ({
-          criterionId: criterion.id,
-          text: 'Evidence',
-        })),
-      }),
-      /Materi valid belum tersedia/,
-    );
-    assert.equal(service.export().sessions.length, 0);
+
+    const saved = service.saveSession({
+      ...session(1),
+      kind: 'passed',
+      evidence: requiredEvidenceForItem(unit).map((criterion) => ({
+        criterionId: criterion.id,
+        text: 'Evidence',
+      })),
+    });
+    assert.equal(saved.progress.find((entry) => entry.itemId === unit.id)?.status, 'passed');
+    assert.equal(service.export().sessions.length, 1);
   } finally {
     db.close();
   }

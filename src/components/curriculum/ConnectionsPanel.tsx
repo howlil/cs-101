@@ -1,4 +1,4 @@
-import { GitBranch, Link2 } from 'lucide-react';
+import { Link2 } from 'lucide-react';
 
 export type ConnectionGroupData = {
   label: string;
@@ -17,10 +17,7 @@ export default function ConnectionsPanel({
 
   return <section className={['connections-panel', compact ? 'connections-panel--compact' : ''].filter(Boolean).join(' ')}>
     <div className="connections-heading">
-      <div>
-        <p className="eyebrow"><GitBranch size={13} strokeWidth={1.8} aria-hidden="true" /> CONNECTIONS</p>
-        <h2>Hubungan materi</h2>
-      </div>
+      <h2>Hubungan materi</h2>
       <span>{total}</span>
     </div>
 
@@ -42,7 +39,7 @@ export default function ConnectionsPanel({
     </div>
 
     <p className="connections-note">
-      Hanya <strong>Requires</strong> yang memblokir readiness. Relation lain adalah konteks belajar.
+      Hanya <strong>Harus selesai dulu</strong> yang wajib. Hubungan lain hanya referensi.
     </p>
   </section>;
 }

@@ -26,8 +26,8 @@ export default function SessionLogger({
     lastAnchor={lastAnchor}
     groups={[{
       key: 'criteria',
-      title: 'Target selesai',
-      description: 'Tambahkan bukti hanya ketika kamu memang ingin menyelesaikan unit.',
+      title: 'Selesai jika',
+      description: 'Tambahkan bukti ketika target ini sudah benar-benar terpenuhi.',
       criteria,
     }]}
   />;

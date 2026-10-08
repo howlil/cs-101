@@ -66,7 +66,7 @@ export default function IntegrationPage({
         <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
         <span>Kurikulum</span>
       </a>
-      <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> INTEGRASI</p>
+      <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> LATIHAN GABUNGAN</p>
       <div className="integration-kicker">
         <code>{id}</code>
         <span>{prerequisites.length} prasyarat</span>
@@ -85,7 +85,7 @@ export default function IntegrationPage({
         ) : active ? (
           <Badge tone="info" icon={<Boxes size={14} strokeWidth={1.8} />}>Sedang dikerjakan</Badge>
         ) : ready ? (
-          <ActivateItem itemId={id} label="Mulai integrasi" />
+          <ActivateItem itemId={id} label="Mulai latihan gabungan" />
         ) : (
           <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
             Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prasyarat'}
@@ -95,12 +95,12 @@ export default function IntegrationPage({
     </header>
 
     <div className="integration-body">
-      <aside className="integration-sidecar" aria-label="Readiness integrasi">
+      <aside className="integration-sidecar" aria-label="Prasyarat latihan gabungan">
         <section className="integration-side-section">
           <div className="integration-section-heading">
             <div>
-              <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> READINESS</p>
-              <h2>Prasyarat</h2>
+              <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> PRASYARAT</p>
+              <h2>Harus selesai dulu</h2>
             </div>
             <span>{prerequisites.filter((entry) => entry.passed).length}/{prerequisites.length}</span>
           </div>
@@ -122,15 +122,15 @@ export default function IntegrationPage({
 
       <main className="integration-main">
         <section className="integration-section">
-          <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> SCOPE</p>
-          <h2>Apa yang diintegrasikan</h2>
+          <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> YANG DIPELAJARI</p>
+          <h2>Yang perlu digabungkan</h2>
           <ul className="integration-list">{scope.map((entry) => <li key={entry}>{entry}</li>)}</ul>
         </section>
 
         <section className="integration-section integration-challenge">
           <div className="integration-section-heading">
             <h2><Target size={14} strokeWidth={1.8} aria-hidden="true" /> {challenge.title}</h2>
-            <span>Challenge</span>
+            <span>Latihan</span>
           </div>
           {challenge.steps.length > 0 && (
             <ol className="integration-list">{challenge.steps.map((step) => <li key={step}>{step}</li>)}</ol>
@@ -140,7 +140,7 @@ export default function IntegrationPage({
         <section className="integration-section">
           <div className="integration-section-heading">
             <div>
-              <p className="eyebrow"><CheckCircle2 size={13} strokeWidth={1.8} aria-hidden="true" /> DONE</p>
+              <p className="eyebrow"><CheckCircle2 size={13} strokeWidth={1.8} aria-hidden="true" /> SELESAI JIKA</p>
               <h2>Target selesai</h2>
             </div>
             <span>{criteria.length}</span>
@@ -152,8 +152,8 @@ export default function IntegrationPage({
           <section className="integration-section">
             <div className="integration-section-heading">
               <div>
-                <p className="eyebrow"><PackageCheck size={13} strokeWidth={1.8} aria-hidden="true" /> OUTPUT</p>
-                <h2>Artifact</h2>
+                <p className="eyebrow"><PackageCheck size={13} strokeWidth={1.8} aria-hidden="true" /> HASIL</p>
+                <h2>Hasil yang dibuat</h2>
               </div>
               <span>{requirements.length}</span>
             </div>
@@ -174,8 +174,8 @@ export default function IntegrationPage({
           />
         ) : !passed && (
           <section className="integration-section integration-evidence-placeholder">
-            <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> EVIDENCE</p>
-            <h2>{ready ? 'Mulai integrasi untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
+            <p className="eyebrow"><LockKeyhole size={13} strokeWidth={1.8} aria-hidden="true" /> BUKTI</p>
+            <h2>{ready ? 'Mulai latihan gabungan untuk mencatat bukti.' : 'Bukti belum dapat dicatat.'}</h2>
             {!ready && <p className="muted">Selesaikan seluruh prasyarat terlebih dahulu.</p>}
           </section>
         )}

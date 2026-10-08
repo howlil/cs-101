@@ -60,6 +60,7 @@ export default function EvidenceForm({
   const criteria = useMemo(() => groups.flatMap((group) => group.criteria), [groups]);
   const [evidence, setEvidence] = useState<EvidenceMap>({});
   const [nextStep, setNextStep] = useState(continueFrom);
+  const [blocker, setBlocker] = useState('');
   const [minutes, setMinutes] = useState('');
   const [reflection, setReflection] = useState<SessionReflection>(emptyReflection);
   const [completionOpen, setCompletionOpen] = useState(false);
@@ -89,6 +90,7 @@ export default function EvidenceForm({
       .map((criterion) => ({ criterionId: criterion.id, text: evidence[criterion.id]?.trim() ?? '' }))
       .filter((entry) => entry.text),
     continueFrom: nextStep.trim(),
+    blocker: blocker.trim(),
     lastAnchor: window.location.hash.slice(1) || lastAnchor,
     ...(minuteValue() ? { minutes: minuteValue() } : {}),
     ...(reflectionPayload() ? { reflection: reflectionPayload() } : {}),
@@ -99,6 +101,7 @@ export default function EvidenceForm({
     if (draft?.fingerprint === fingerprint) {
       setEvidence(Object.fromEntries(draft.evidence.map((entry) => [entry.criterionId, entry.text])));
       setNextStep(draft.continueFrom);
+      setBlocker(draft.blocker ?? '');
       setMinutes(draft.minutes ? String(draft.minutes) : '');
       setReflection({ ...emptyReflection(), ...(draft.reflection ?? {}) });
       setCompletionOpen(draft.evidence.length > 0);
@@ -121,11 +124,12 @@ export default function EvidenceForm({
         .map((criterion) => ({ criterionId: criterion.id, text: evidence[criterion.id]?.trim() ?? '' }))
         .filter((entry) => entry.text),
       continueFrom: nextStep,
+      blocker,
       lastAnchor,
       ...(minuteValue() ? { minutes: minuteValue() } : {}),
       ...(reflectionPayload() ? { reflection: reflectionPayload() } : {}),
     });
-  }, [criteria, evidence, fingerprint, hydrated, itemId, lastAnchor, minutes, nextStep, reflection]);
+  }, [blocker, criteria, evidence, fingerprint, hydrated, itemId, lastAnchor, minutes, nextStep, reflection]);
 
   const submit = async (kind: 'progress' | 'passed') => {
     if (loadingKind) return;
@@ -143,10 +147,10 @@ export default function EvidenceForm({
       }
     }
 
-    if (kind === 'progress' && !nextStep.trim() && !reflectionPayload()) {
+    if (kind === 'progress' && !nextStep.trim() && !blocker.trim() && !reflectionPayload()) {
       setFeedback({
-        title: 'Tentukan titik lanjut',
-        message: 'Tulis satu langkah kecil untuk sesi berikutnya, atau simpan satu refleksi.',
+        title: 'Tambahkan satu catatan',
+        message: 'Tulis titik lanjut, hambatan, atau catatan singkat sebelum menyimpan sesi.',
         tone: 'warning',
       });
       return;
@@ -197,15 +201,7 @@ export default function EvidenceForm({
         onChange={(event) => setReflection((current) => ({ ...current, wrongAssumption: event.currentTarget.value }))}
       />
       <Textarea
-        label="Bukti yang mengubah pemahaman saya…"
-        name="reflection:evidenceChangedMind"
-        rows={2}
-        maxLength={4000}
-        value={reflection.evidenceChangedMind}
-        onChange={(event) => setReflection((current) => ({ ...current, evidenceChangedMind: event.currentTarget.value }))}
-      />
-      <Textarea
-        label="Trade-off yang saya pilih…"
+        label="Pilihan atau trade-off yang saya ambil…"
         name="reflection:tradeoffChosen"
         rows={2}
         maxLength={4000}
@@ -253,26 +249,47 @@ export default function EvidenceForm({
         placeholder="Contoh: ulangi 3 kasus NOT IN + NULL, lalu tulis invariant-nya."
       />
 
-      <div className="session-meta-field">
-        <Input
-          label="Menit belajar (opsional)"
-          name="minutes"
-          type="number"
-          min={1}
-          max={1440}
-          inputMode="numeric"
-          value={minutes}
-          onChange={(event) => setMinutes(event.currentTarget.value)}
-        />
-      </div>
-
       <div className="session-reflection">
         <Accordion
           defaultOpen={-1}
           size="sm"
           items={[{
-            title: 'Refleksi sesi (opsional)',
-            content: reflectionFields,
+            title: 'Catatan sesi (opsional)',
+            content: <div className="reflection-fields">
+              <Textarea
+                label="Apa yang menghambat?"
+                name="blocker"
+                rows={2}
+                maxLength={4000}
+                value={blocker}
+                onChange={(event) => setBlocker(event.currentTarget.value)}
+                placeholder="Contoh: masih bingung kenapa NOT IN + NULL menghasilkan hasil ini."
+              />
+              <Textarea
+                label="Apa yang berubah dari pemahamanmu?"
+                name="reflection:evidenceChangedMind"
+                rows={2}
+                maxLength={4000}
+                value={reflection.evidenceChangedMind}
+                onChange={(event) => setReflection((current) => ({ ...current, evidenceChangedMind: event.currentTarget.value }))}
+              />
+              <div className="session-meta-field">
+                <Input
+                  label="Menit belajar"
+                  name="minutes"
+                  type="number"
+                  min={1}
+                  max={1440}
+                  inputMode="numeric"
+                  value={minutes}
+                  onChange={(event) => setMinutes(event.currentTarget.value)}
+                />
+              </div>
+              <div className="deep-reflection">
+                <p className="muted small">Kalau perlu refleksi lebih dalam:</p>
+                {reflectionFields}
+              </div>
+            </div>,
           }]}
         />
       </div>
@@ -305,7 +322,7 @@ export default function EvidenceForm({
       <section className="evidence-completion">
         <div className="completion-rule">
           <strong>Aturan selesai</strong>
-          <span>Semua target harus punya bukti. Waktu belajar, scroll, atau merasa sudah paham tidak cukup.</span>
+          <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
         </div>
 
         {groups.map((group) => (
@@ -326,6 +343,9 @@ export default function EvidenceForm({
                 }]} />
               </div>
             ) : null}
+            <p className="muted small evidence-hint">
+              Bukti bisa berupa link commit/PR, hasil test atau command, benchmark, screenshot, diagram, atau catatan yang membuktikan target.
+            </p>
             <fieldset>
               <legend className="sr-only">{group.title}</legend>
               {group.criteria.map((criterion) => (

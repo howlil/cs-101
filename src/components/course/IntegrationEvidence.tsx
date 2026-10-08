@@ -25,23 +25,23 @@ export default function IntegrationEvidence({
   const groups = [
     {
       key: 'dod',
-      eyebrow: 'EVIDENCE',
-      title: 'Definition of Done',
+      eyebrow: 'BUKTI',
+      title: 'Selesai jika',
       criteria,
       className: 'integration-evidence-section',
     },
     ...(requirements.length ? [{
       key: 'artifact',
-      eyebrow: 'ARTIFACT',
-      title: 'Output yang harus dibawa',
+      eyebrow: 'HASIL',
+      title: 'Hasil yang harus dibuat',
       criteria: requirements,
       className: 'integration-evidence-section',
     }] : []),
     {
       key: 'challenge',
-      eyebrow: 'CHALLENGE',
+      eyebrow: 'LATIHAN',
       title: challengeCriterion.text,
-      criteria: [{ ...challengeCriterion, text: 'Bukti challenge' }],
+      criteria: [{ ...challengeCriterion, text: 'Bukti latihan' }],
       rows: 3,
       className: 'integration-evidence-section',
     },
@@ -55,6 +55,6 @@ export default function IntegrationEvidence({
     lastAnchor={lastAnchor}
     groups={groups}
     className="integration-evidence-form"
-    passLabel="Kirim bukti & selesaikan integration"
+    passLabel="Kirim bukti & selesaikan latihan"
   />;
 }

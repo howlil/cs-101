@@ -40,6 +40,40 @@ Aturan implementasi:
 - Product composition seperti `ActionLink`, `EmptyAction`, atau wrapper domain tinggal di `src/components/ui`/feature folder, bukan di root `arc/`.
 - Jika primitive Arc perlu dependency baru, gunakan pnpm dan commit `pnpm-lock.yaml`; jangan edit dependency tanpa lockfile yang sinkron.
 
+### Bahasa learner-facing
+
+Domain model boleh tetap presisi dengan istilah internal seperti `unit`, `checkpoint`, `integration`, `ready`, `retained`, `delta`, `inherited`, dan relation type. **Jangan bocorkan istilah internal itu ke UI jika bahasa yang lebih langsung tersedia.**
+
+Gunakan vocabulary learner-facing berikut:
+
+| Internal | UI |
+| --- | --- |
+| unit | Materi |
+| checkpoint | Project |
+| integration | Latihan gabungan |
+| ready | Bisa dimulai |
+| active | Sedang dikerjakan |
+| passed | Selesai |
+| stale | Perlu diperbarui |
+| scope | Yang perlu dikuasai |
+| challenge | Latihan |
+| criteria / Definition of Done | Selesai jika |
+| requirement | Yang harus dipenuhi |
+| evidence | Bukti |
+| readiness | Prasyarat |
+| retention | Jadwal review |
+| delta | Yang baru |
+| inherited guarantee | Dari project sebelumnya / Yang harus tetap benar |
+| artifact | Hasil yang dibuat |
+| deep_dive | Pendalaman |
+| contributes_to | Dipakai di project |
+
+- Jangan membuat glossary sebagai solusi utama. Copy utama harus bisa dipahami tanpa menghafal ontology CS-101.
+- Metadata/policy sekunder seperti interval review 1/3/7/14/30 memakai progressive disclosure.
+- Generated lesson bukan syarat kelulusan. Jika lesson belum tersedia, route belajar wajib tetap executable dari scope, latihan, kriteria selesai, sumber, session, dan bukti curriculum.
+- Session default harus ringan: titik lanjut adalah input utama; durasi, hambatan, dan refleksi bersifat opsional/progressive disclosure.
+- Jangan menghidupkan weekly planner, planned-hours dashboard, streak, atau antrean spreadsheet sebagai product surface tanpa user problem baru yang konkret.
+
 Sebelum menambah primitive baru:
 
 ```text

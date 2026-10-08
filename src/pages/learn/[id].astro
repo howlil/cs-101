@@ -6,6 +6,7 @@ import LessonPage from '../../components/pages/LessonPage';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
 import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
 import { curriculumGraph } from '../../server/curriculum';
+import { connectionLabels } from '../../lib/learning-language';
 import { learning } from '../../server/runtime';
 
 const item = curriculumGraph.itemsById.get(Astro.params.id ?? '');
@@ -22,13 +23,13 @@ const progress = state.progress.find((entry) => entry.itemId === item.id);
 
 const groups = getConnectionGroups(curriculumGraph, item.id);
 const connections = [
-  ['Prasyarat', groups.requires],
-  ['Dipakai nanti', groups.usedLaterBy],
-  ['Terkait', groups.related],
-  ['Deep dive', groups.deepDive],
-  ['Fondasi dari', groups.builtOnFoundation],
-  ['Fondasi untuk', groups.foundationFor],
-  ['Berkontribusi ke', groups.contributesTo],
+  [connectionLabels.requires, groups.requires],
+  [connectionLabels.usedLaterBy, groups.usedLaterBy],
+  [connectionLabels.related, groups.related],
+  [connectionLabels.deepDive, groups.deepDive],
+  [connectionLabels.builtOnFoundation, groups.builtOnFoundation],
+  [connectionLabels.foundationFor, groups.foundationFor],
+  [connectionLabels.contributesTo, groups.contributesTo],
 ] as const;
 const connectionData = connections
   .filter(([, entries]) => entries.length)
@@ -56,6 +57,9 @@ const nextSmallStep =
     marketExpectation={item.marketExpectation}
     nextSmallStep={nextSmallStep}
     estimatedMinutes={item.estimatedMinutes}
+    scope={item.scope}
+    challenge={item.challenge}
+    source={item.source}
     available={Boolean(lesson && Content)}
     stale={stale}
     active={state.activeItemId === item.id}

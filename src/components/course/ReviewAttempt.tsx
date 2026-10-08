@@ -67,13 +67,12 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
   if (result) {
     return <div className="review-result">
       <Alert
-        title={result.result === 'passed' ? 'Review lulus.' : 'Review perlu diulang.'}
+        title={result.score + ' dari 5 benar'}
         tone={result.result === 'passed' ? 'success' : 'warning'}
       >
-        Score {result.score}/5.
         {result.result === 'passed'
-          ? ' Review berikutnya sudah dijadwalkan.'
-          : ' Completion tetap lulus. Pelajari bagian yang miss, lalu ulangi review.'}
+          ? 'Review selesai. Review berikutnya sudah dijadwalkan.'
+          : (5 - result.score) + ' bagian belum tepat. Materi tetap selesai. Pelajari pembahasan di bawah lalu ulangi review.'}
       </Alert>
 
       <div className="review-feedback-list">
@@ -82,12 +81,12 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
           if (!itemFeedback) return null;
           return <section className="review-feedback" key={question.id}>
             <div>
-              <strong>{itemFeedback.correct ? 'Benar' : 'Miss'} · {String(index + 1).padStart(2, '0')}</strong>
+              <strong>{itemFeedback.correct ? 'Benar' : 'Belum tepat'} · {String(index + 1).padStart(2, '0')}</strong>
               <span>{question.prompt}</span>
             </div>
             {!itemFeedback.correct && (
               <p>
-                Jawaban: <strong>{question.options[itemFeedback.answer]}</strong>. {itemFeedback.explanation}
+                Jawaban yang benar: <strong>{question.options[itemFeedback.answer]}</strong>. {itemFeedback.explanation}
               </p>
             )}
           </section>;
@@ -103,8 +102,8 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
 
   return <form className="review-attempt" onSubmit={submit}>
     <div className="review-instruction">
-      <strong>Recall tanpa membuka materi.</strong>
-      <span>Jawaban dan remediation baru ditampilkan setelah seluruh attempt disubmit.</span>
+      <strong>Jawab tanpa membuka catatan.</strong>
+      <span>Pembahasan muncul setelah semua jawaban dikirim.</span>
     </div>
 
     {questions.map((question, index) => {
@@ -130,7 +129,7 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
 
     <Button type="submit" variant="primary" disabled={!complete || submitting}>
       <Send size={15} strokeWidth={1.8} aria-hidden="true" />
-      <span>{submitting ? 'Menyimpan…' : 'Submit 5 jawaban'}</span>
+      <span>{submitting ? 'Menyimpan…' : 'Kirim jawaban'}</span>
     </Button>
   </form>;
 }

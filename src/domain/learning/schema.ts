@@ -23,6 +23,7 @@ const canonicalSessionFields = z.object({
     text: z.string().trim().min(1).max(8000),
   })).max(100),
   continueFrom: z.string().trim().max(4000).default(''),
+  blocker: z.string().trim().max(4000).default(''),
   lastAnchor: z.string().regex(/^[a-zA-Z0-9_-]*$/).max(200).default(''),
   minutes: z.number().int().min(0).max(1440).optional(),
   reflection: sessionReflectionSchema.optional(),
