@@ -1,0 +1,19 @@
+---
+/**
+ * Authored MDX stage boundary, used by the SQL-001 vertical slice.
+ * Stage content remains server-rendered in document order and Astro owns MDX rendering.
+ * React only chooses which stage is visible; no DOM reparenting or duplication.
+ */
+interface Props { stage: 'understand' | 'practice' | 'evidence' }
+const { stage } = Astro.props;
+---
+<section
+  class="lesson-stage-panel"
+  data-lesson-stage={stage}
+  id={'lesson-panel-' + stage}
+  role="tabpanel"
+  aria-labelledby={'lesson-tab-' + stage}
+  tabindex="0"
+>
+  <slot />
+</section>

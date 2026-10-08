@@ -33,6 +33,7 @@ type Props = {
   saveLabel?: string;
   passLabel?: string;
   className?: string;
+  initialCompletionOpen?: boolean;
 };
 
 type EvidenceMap = Record<string, string>;
@@ -56,6 +57,7 @@ export default function EvidenceForm({
   saveLabel = 'Simpan & lanjut nanti',
   passLabel = 'Kirim bukti & selesaikan',
   className = '',
+  initialCompletionOpen = false,
 }: Props) {
   const criteria = useMemo(() => groups.flatMap((group) => group.criteria), [groups]);
   const [evidence, setEvidence] = useState<EvidenceMap>({});
@@ -63,7 +65,7 @@ export default function EvidenceForm({
   const [blocker, setBlocker] = useState('');
   const [minutes, setMinutes] = useState('');
   const [reflection, setReflection] = useState<SessionReflection>(emptyReflection);
-  const [completionOpen, setCompletionOpen] = useState(false);
+  const [completionOpen, setCompletionOpen] = useState(initialCompletionOpen);
   const [currentRevision, setCurrentRevision] = useState(revision);
   const [hydrated, setHydrated] = useState(false);
   const [loadingKind, setLoadingKind] = useState<'progress' | 'passed'>();
@@ -104,7 +106,7 @@ export default function EvidenceForm({
       setBlocker(draft.blocker ?? '');
       setMinutes(draft.minutes ? String(draft.minutes) : '');
       setReflection({ ...emptyReflection(), ...(draft.reflection ?? {}) });
-      setCompletionOpen(draft.evidence.length > 0);
+      setCompletionOpen(initialCompletionOpen || draft.evidence.length > 0);
       setFeedback({
         title: 'Draft dipulihkan',
         message: 'Catatan lokal dipulihkan. Belum tersimpan sebagai sesi.',
@@ -112,7 +114,7 @@ export default function EvidenceForm({
       });
     }
     setHydrated(true);
-  }, [fingerprint, itemId]);
+  }, [fingerprint, itemId, initialCompletionOpen]);
 
   useEffect(() => {
     if (!hydrated) return;

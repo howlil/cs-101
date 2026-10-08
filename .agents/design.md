@@ -686,3 +686,8 @@ The application chrome now uses one route-aware sidebar for global navigation an
 - Astro ClientRouter continues swapping route workspaces. SSR remains Cache-Control: no-store.
 - Howlil neutrals and typography are shared through tokens.css rather than adding an independent component palette.
 - The second phase will move lesson content into structured Pahami/Latihan/Bukti stages without changing learning-domain semantics.
+
+
+## SQL-001 lesson vertical slice — October 2026
+
+SQL-001 is the first staged curriculum lesson. Its original MDX content is retained, but authored Astro LessonStage boundaries separate concept reading, practice, and evidence. LessonPage switches the visible stage using accessible tabs and a URL hash without DOM reparenting, and keeps references with the reading content and contextual connections behind an optional disclosure. QuizClient remains the original learning UI. The existing SessionLogger/EvidenceForm and /api/sessions validation remain the sole owners of saving progress and passing; SQL-001 opens its existing evidence group by default. No client-side quiz score sets domain completion. All other lessons and the demo retain their prior linear rendering until separately migrated.
