@@ -4,20 +4,15 @@ import {
   Boxes,
   BrainCircuit,
   Download,
-  History,
-  Check,
+  History
 } from 'lucide-react';
 import EmptyAction from '../ui/EmptyAction';
 import { Button } from '../arc/button/button';
-
-const REVIEW_DAYS = [1, 3, 7, 14, 30] as const;
 
 type ReviewRow = {
   id: string;
   title: string;
   state: 'due' | 'retry';
-  step: number;
-  dueAt: string | null;
 };
 type ModuleRow = {
   id: string;
@@ -56,19 +51,6 @@ type SessionRow = {
   reflectionSummary?: string;
   blocker?: string;
 };
-
-function RetentionSteps({ step }: { step: number }) {
-  return <div className="retention-steps" aria-label="Jadwal review">
-    {REVIEW_DAYS.map((day, index) => (
-      <span
-        key={day}
-        className={index < step ? 'is-done' : index === step ? 'is-current' : ''}
-      >
-        {index < step && <Check size={10} strokeWidth={2} aria-hidden="true" />}D{day}
-      </span>
-    ))}
-  </div>;
-}
 
 export default function ProgressPage({
   reviews,
@@ -178,7 +160,7 @@ export default function ProgressPage({
                     <BrainCircuit size={14} strokeWidth={1.8} aria-hidden="true" />
                     <div className="progress-review-copy">
                       <span><code>{review.id}</code> {review.title}</span>
-                      <RetentionSteps step={review.step} />
+                      <small>5 pertanyaan · tanpa catatan</small>
                     </div>
                     <small>{review.state === 'retry' ? 'Ulangi' : 'Hari ini'}</small>
                   </a>

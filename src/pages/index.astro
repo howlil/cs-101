@@ -16,7 +16,7 @@ const nextStepFor = (view: NonNullable<typeof primary>) => {
   if (item.kind === 'unit' || item.kind === 'integration') {
     return item.challenge.steps[0] ?? item.scope[0] ?? 'Buka materi dan kerjakan satu bagian kecil.';
   }
-  return item.requirements[0]?.text ?? 'Buka checkpoint dan kerjakan requirement pertama.';
+  return item.requirements[0]?.text ?? 'Buka project dan kerjakan target pertama.';
 };
 
 const primaryAction = primary
@@ -37,7 +37,7 @@ const primaryCard = primary ? (() => {
   const blocker = typeof lastSession?.blocker === 'string' && lastSession.blocker.trim()
     ? lastSession.blocker.trim()
     : undefined;
-  const breadcrumb = [location.track?.title ?? 'Cross-track', location.module?.title]
+  const breadcrumb = [location.track?.title ?? 'Lintas jalur', location.module?.title]
     .filter(Boolean)
     .join(' / ');
   const whyNext = today.primaryMode === 'continue'

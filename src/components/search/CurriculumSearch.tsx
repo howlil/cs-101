@@ -28,7 +28,7 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
     id: entry.itemId,
     label: entry.itemId + " · " + entry.title,
     description: entry.moduleTitle,
-    group: entry.trackTitle || "Cross-track",
+    group: entry.trackTitle || "Lintas jalur",
     keywords: [entry.searchText],
     icon: entry.kind === "checkpoint"
       ? <FolderKanban size={14} strokeWidth={1.8} />

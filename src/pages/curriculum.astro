@@ -63,7 +63,7 @@ const selected = selectedItem && selectedLocation ? {
   id: selectedItem.id,
   kind: selectedItem.kind,
   title: selectedItem.title,
-  breadcrumb: [selectedLocation.track?.title ?? 'Cross-track', selectedLocation.module?.title].filter(Boolean).join(' / '),
+  breadcrumb: [selectedLocation.track?.title ?? 'Lintas jalur', selectedLocation.module?.title].filter(Boolean).join(' / '),
   href: itemHref(graph, selectedItem.id),
   state: selectedView?.displayState,
   missingPrerequisites: selectedView?.missingPrerequisites ?? [],

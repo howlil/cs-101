@@ -4,17 +4,12 @@ import ProgressPage from '../components/pages/ProgressPage';
 import { curriculumGraph } from '../server/curriculum';
 import { learning } from '../server/runtime';
 import { getProgressOverview, type ItemLearningView } from '../domain/learning/view-models';
+import { reviewStateLabel } from '../lib/learning-language';
 
 const state = await (await learning()).export();
 const overview = getProgressOverview(curriculumGraph, state);
 
-const reviewLabel = (review: ItemLearningView['review']) => {
-  if (review === 'due') return 'Review hari ini';
-  if (review === 'retry') return 'Perlu diulang';
-  if (review === 'retained') return 'Teringat';
-  if (review === 'scheduled') return 'Terjadwal';
-  return '';
-};
+const reviewLabel = (review: ItemLearningView['review']) => reviewStateLabel(review);
 
 const stateLabel = (view: ItemLearningView) => {
   if (view.displayState === 'passed') return 'Selesai';
@@ -30,8 +25,6 @@ const reviews = overview.actionableReviews.map(({ review, item }) => ({
   id: item.item.id,
   title: item.item.title,
   state: review.state === 'retry' ? 'retry' as const : 'due' as const,
-  step: review.step,
-  dueAt: review.dueAt,
 }));
 
 const tracks = overview.tracks.map((track) => ({
