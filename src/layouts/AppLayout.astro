@@ -3,7 +3,7 @@ import '../styles/global.css';
 import '../styles/app-shell.css';
 import '../styles/workspace.css';
 import '../styles/curriculum.css';
-import { AppHeader, AppNavigation } from '../components/app/AppShell';
+import { AppHeaderActions, AppNavigation } from '../components/app/AppShell';
 import NavigationProgress from '../components/app/NavigationProgress';
 import ContextualCurriculumSidebar from '../components/curriculum/ContextualCurriculumSidebar';
 import { ClientRouter, fade } from 'astro:transitions';
@@ -129,7 +129,13 @@ Astro.response.headers.set('Cache-Control', 'no-store');
   </head>
   <body transition:animate="none">
     <a class="skip-link" href="#main">Langsung ke isi</a>
-    <AppHeader client:load transition:persist="app-header" searchEntries={searchEntries} />
+    <header class="topbar" transition:persist="app-header">
+      <a class="brand" href="/" aria-label="CS-101 · Hari ini">
+        <span class="brand-mark" aria-hidden="true">CS</span>
+        <span>CS-101</span>
+      </a>
+      <AppHeaderActions client:load searchEntries={searchEntries} />
+    </header>
     <div class:list={['app-shell', contextualExplorer && 'app-shell--with-context']}>
       <AppNavigation currentPath={path} />
       {contextualExplorer && <ContextualCurriculumSidebar client:load data={contextualExplorer} />}

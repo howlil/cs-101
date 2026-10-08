@@ -8,19 +8,13 @@ import type { CurriculumSearchEntry } from '../../domain/curriculum-v2/selectors
 
 type SearchEntry = CurriculumSearchEntry & { href: string };
 
-// Only the stable header is hydrated and persisted. Route content must remain
+// Only stable header controls are hydrated. The Astro header element persists. Route content must remain
 // outside this island so ClientRouter can replace it on every navigation.
-export function AppHeader({ searchEntries }: { searchEntries: SearchEntry[] }) {
-  return <header className="topbar">
-    <a className="brand" href="/" aria-label="CS-101 · Hari ini">
-      <span className="brand-mark" aria-hidden="true">CS</span>
-      <span>CS-101</span>
-    </a>
-    <div className="header-actions">
-      <CurriculumSearch entries={searchEntries} />
-      <ThemePreference />
-    </div>
-  </header>;
+export function AppHeaderActions({ searchEntries }: { searchEntries: SearchEntry[] }) {
+  return <div className="header-actions">
+    <CurriculumSearch entries={searchEntries} />
+    <ThemePreference />
+  </div>;
 }
 
 // Rendered by Astro on each route so aria-current stays correct after swaps,
