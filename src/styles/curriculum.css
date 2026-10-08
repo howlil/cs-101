@@ -90,3 +90,10 @@
   .curriculum-detail { padding:22px 14px 40px; }
   .item-header h2 { font-size:24px; }
 }
+
+/* Curriculum index is a concise selection preview, not another lesson page. */
+.curriculum-detail { width:min(760px,100%); }
+.item-brief-note { color:var(--text-muted); font-size:13px; margin:14px 0 0; }
+.item-section:first-child { border-top:0; }
+.item-workbench .item-section { padding:19px 0; }
+.item-details-disclosure { margin-top:24px; }

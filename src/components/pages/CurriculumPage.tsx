@@ -73,13 +73,6 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
               </div>}
           <div className="item-workbench">
             <div className="item-main">
-              {selected.marketExpectation?.length ? (
-                <section className="item-section item-why">
-                  <h3>Kenapa materi ini ada</h3>
-                  <ul className="compact-list">{selected.marketExpectation.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul>
-                </section>
-              ) : null}
-
               {selected.nextSmallStep && (
                 <section className="item-section item-next-step">
                   <span className="explorer-label">BERIKUTNYA</span>
@@ -87,29 +80,18 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
                 </section>
               )}
 
-              {selected.kind === 'unit' && <>
-                <section className="item-section">
-                  <h3>Yang perlu dikuasai</h3>
-                  <ul className="compact-list">{selected.scope?.map((scope) => <li key={scope}>{scope}</li>)}</ul>
-                </section>
-                <section className="item-section challenge-preview">
-                  <div className="compact-section-heading">
-                    <h3><Target size={15} strokeWidth={1.8} aria-hidden="true" /> {selected.challenge?.title ?? 'Latihan'}</h3>
-                    <span>Latihan</span>
-                  </div>
-                  <ul className="compact-list">{selected.challenge?.steps.map((step) => <li key={step}>{step}</li>)}</ul>
-                </section>
-                <section className="item-section">
-                  <h3><CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" /> Selesai jika</h3>
-                  <ol className="criteria-list">{selected.criteria?.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
-                </section>
-              </>}
+              {selected.kind === 'unit' && <section className="item-section">
+                <h3>Yang akan dipelajari</h3>
+                <ul className="compact-list">{selected.scope?.slice(0, 3).map((scope) => <li key={scope}>{scope}</li>)}</ul>
+                {(selected.scope?.length ?? 0) > 3 && <p className="item-brief-note">
+                  +{selected.scope!.length - 3} kompetensi lain dijelaskan di materi.
+                </p>}
+              </section>}
 
               {selected.kind === 'checkpoint' && (
                 <section className="item-section">
                   <h3><FolderKanban size={15} strokeWidth={1.8} aria-hidden="true" /> Project</h3>
                   <p>{selected.problemStatement}</p>
-                  <ActionLink href={selected.href} label="Buka project" />
                 </section>
               )}
 
@@ -117,15 +99,20 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
                 <section className="item-section">
                   <h3><Boxes size={15} strokeWidth={1.8} aria-hidden="true" /> Latihan gabungan</h3>
                   <p>{selected.brief}</p>
-                  <ActionLink href={selected.href} label="Buka latihan" />
                 </section>
               )}
 
             </div>
             <section className="item-details-disclosure" aria-label="Konteks kurikulum">
               <Accordion size="sm" defaultOpen={-1} items={[{
-                title: 'Prasyarat & sumber',
+                title: 'Detail tambahan · prasyarat, manfaat & sumber',
                 content: <aside className="item-context" aria-label="Prasyarat dan referensi">
+              {selected.marketExpectation?.length ? (
+                <section className="item-context-section">
+                  <h3>Kenapa materi ini penting</h3>
+                  <ul className="compact-list">{selected.marketExpectation.map((item) => <li key={item}>{item}</li>)}</ul>
+                </section>
+              ) : null}
 
               {selected.prerequisites.length > 0 && (
                 <section className="item-context-section">
