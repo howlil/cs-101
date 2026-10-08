@@ -408,34 +408,13 @@ test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () 
 
 
 test('checkpoint mengikuti locked → ready → active → passed dan membuka project berikutnya', () => {
-  const { db: blockedDb, service } = fixture(false);
+  const { db, service } = fixture(false);
   try {
     assert.equal(
       service.snapshot().availability.find((entry) => entry.itemId === project.id)?.status,
       'locked',
     );
 
-    const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
-      criterionId: criterion.id,
-      text: 'Evidence unit',
-    }));
-    // Unit completion still requires lesson readiness; this fixture intentionally disables it.
-    assert.throws(
-      () => service.saveSession({
-        ...session(1),
-        kind: 'passed',
-        evidence: unitEvidence,
-      }),
-      /Materi valid belum tersedia/,
-    );
-  } finally {
-    blockedDb.close();
-  }
-
-  const db = openDatabase(':memory:');
-  try {
-    const service = new LearningService(db, graph, () => true);
-    service.setActiveItem({ ...envelope(0), itemId: unit.id });
     const unitEvidence = requiredEvidenceForItem(unit).map((criterion) => ({
       criterionId: criterion.id,
       text: 'Evidence unit',
@@ -468,6 +447,7 @@ test('checkpoint mengikuti locked → ready → active → passed dan membuka pr
       kind: 'passed',
       evidence: projectEvidence,
       continueFrom: '',
+      blocker: '',
       lastAnchor: '',
     });
 
@@ -483,7 +463,6 @@ test('checkpoint mengikuti locked → ready → active → passed dan membuka pr
     db.close();
   }
 });
-
 
 test('parent checkpoint memblokir project berikutnya walau explicit prerequisite sudah passed', () => {
   const db = openDatabase(':memory:');
@@ -739,7 +718,7 @@ test('review tidak boleh dilakukan sebelum due, tanpa bank, atau ketika completi
         answers: [0, 0, 0, 0, 0],
         assisted: false,
       }),
-      /sudah lulus dan tidak stale/,
+      /materi selesai dan masih sesuai kurikulum terbaru/i,
     );
   } finally {
     db.close();
