@@ -112,7 +112,7 @@ export default function ReviewPage({
           />
         </aside>
 
-        <main className="review-main">
+        <section className="review-main">
           {review.state === 'retained' ? (
             <Alert title="Review selesai" tone="success">
               Semua jadwal review untuk materi ini sudah dilewati.
@@ -145,7 +145,7 @@ export default function ReviewPage({
           ) : (
             <ActionLink href={itemHref} label="Kembali ke materi" />
           )}
-        </main>
+        </section>
       </div>
     )}
   </article>;

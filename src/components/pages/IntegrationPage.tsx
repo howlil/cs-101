@@ -14,6 +14,7 @@ import {
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import ActivateItem from '../learning/ActivateItem';
 import { Badge } from '../arc/badge/badge';
+import { Accordion } from '../arc/accordion/accordion';
 import IntegrationEvidence from '../course/IntegrationEvidence';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
@@ -94,8 +95,14 @@ export default function IntegrationPage({
       </div>
     </header>
 
-    <div className="integration-body">
-      <aside className="integration-sidecar" aria-label="Prasyarat latihan gabungan">
+    <section className="integration-reference" aria-label="Konteks integration">
+      <Accordion
+        size="sm"
+        defaultOpen={-1}
+        items={[{
+          title: 'Prasyarat ' + prerequisites.filter((entry) => entry.passed).length + '/' + prerequisites.length + ' terpenuhi · lihat detail',
+          content: <div className="integration-reference-content">
+            <aside className="integration-sidecar" aria-label="Prasyarat latihan gabungan">
         <section className="integration-side-section">
           <div className="integration-section-heading">
             <div>
@@ -119,8 +126,15 @@ export default function IntegrationPage({
 
         <ConnectionsPanel groups={connections} compact />
       </aside>
+          </div>,
+        }]}
+      />
+    </section>
 
-      <main className="integration-main">
+    <div className="integration-body">
+
+
+      <div className="integration-main">
         <section className="integration-section">
           <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> YANG DIPELAJARI</p>
           <h2>Yang perlu digabungkan</h2>
@@ -179,7 +193,7 @@ export default function IntegrationPage({
             {!ready && <p className="muted">Selesaikan seluruh prasyarat terlebih dahulu.</p>}
           </section>
         )}
-      </main>
+      </div>
     </div>
   </article>;
 }
