@@ -704,3 +704,11 @@ Navigation hierarchy belongs solely to AppSidebar across Today, Curriculum, Prog
 - Review is a single centered recall workspace; status and optional schedule sit inline before the attempt, with no permanent context rail.
 - There is exactly one semantic page main region, owned by AppLayout. Individual workspaces use sections/divs, never nested main.
 - No changes to curriculum schema, learning domain, evidence persistence, review scheduling, or API contracts. Maintain focusable controls and reduced-motion behavior through Arc primitives.
+
+
+## Phase 06 — CSS and accessibility guardrails (October 2026)
+
+- Mobile drawer CSS must target the actual Arc Dialog class (`sidebar-mobile-dialog`), with full-height side-sheet geometry, scrolling, keyboard focus trapping, and readable minimum 12–13px labels.
+- Curriculum detail is a single content workspace; primary action remains visible while prerequisites/sources live in one Arc Accordion. There must be only one main landmark, owned by AppLayout.
+- Retired `.curriculum-shell` / `.curriculum-explorer` CSS is deleted. Search, track selector, tree, item rows and deep-linked context remain supported in the shared sidebar.
+- QA checks target 1440/900/390/320 viewport widths, collapsed state persistence, mobile drawer, route navigation, dark mode, and zero document horizontal overflow.

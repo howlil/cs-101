@@ -77,5 +77,15 @@ jobs:
           for page in project/JAV-P01 integration/INT-001 review/SQL-001; do
             curl --fail --silent --show-error "http://127.0.0.1:4321/$page" >/dev/null
           done
+          node scripts/browser-qa.mjs
 
 
+
+      - name: Upload responsive screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cs101-responsive-qa
+          path: /tmp/cs101-qa/*.png
+          if-no-files-found: ignore
+          retention-days: 14
