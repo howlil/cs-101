@@ -8,6 +8,7 @@ import { ClientRouter } from 'astro:transitions';
 import type { ContextualCurriculumData } from '../components/curriculum/ContextualCurriculumSidebar';
 import { curriculumGraph } from '../server/curriculum';
 import { snapshotForRequest } from '../server/request-snapshot';
+import type { LearningSnapshot } from '../server/learning';
 import {
   buildCurriculumSearchIndex,
   getItemLocation,
@@ -58,7 +59,7 @@ if (contextualMatch) {
       activeTrackId = anchor && anchor.kind !== 'integration' ? anchor.trackId : tracks[0]?.id;
     }
 
-    let learningState: Awaited<ReturnType<Awaited<ReturnType<typeof learning>>['snapshot']>> | undefined;
+    let learningState: LearningSnapshot | undefined;
     try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
 
     const stateFor = (id: string) =>
