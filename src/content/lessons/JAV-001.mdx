@@ -7,12 +7,15 @@ curriculumFingerprint: "sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602a
 ---
 
 import MentalModel from '../../components/course/MentalModel.astro';
+import LessonStage from '../../components/course/LessonStage.astro';
 import ConceptGraph from '../../components/course/ConceptGraph.astro';
 import Quiz from '../../components/course/Quiz.astro';
 import Challenge from '../../components/course/Challenge.astro';
 import ExitCriteria from '../../components/course/ExitCriteria.astro';
 import SourceList from '../../components/course/SourceList.astro';
 import Reveal from '../../components/course/Reveal.astro';
+
+<LessonStage stage="understand">
 
 > Java proficiency di materi ini berarti proyek bisa **dibangun, ditest, dipackage, dan dijalankan dari clean checkout tanpa IDE**, lalu perilaku dasar bahasanya bisa lo prediksi.
 
@@ -225,45 +228,21 @@ record Id(String value) {}
 System.out.println(new Id("1").equals(new Id("1")));
 ```
 
-<Quiz items={[
-  { question: 'Kalau tujuanmu menghasilkan JAR, Maven phase utama yang sesuai adalah?', options: ['compile', 'test', 'package'], answer: 2, explanation: 'Phase package menjalankan phase sebelumnya yang diperlukan lalu membuat artifact distributable seperti JAR.' },
-  { question: 'Dua String object berbeda berisi "paid". Operator/method mana yang menyatakan content equality?', options: ['==', 'equals', '='], answer: 1, explanation: '== membandingkan reference identity pada object; String.equals membandingkan content.' },
-  { question: 'Apa yang disimpan variable reference?', options: ['Selalu seluruh bytes object', 'Reference ke object atau null', 'Hanya primitive value'], answer: 1, explanation: 'Reference variable menyimpan reference value; null adalah null reference.' },
-  { question: 'Dua record dengan tipe dan component values yang sama biasanya bagaimana?', options: ['equals mengembalikan true', '== selalu true', 'Tidak punya equals'], answer: 0, explanation: 'Record menyediakan value-based equals dari component values; object identity tetap berbeda.' },
-  { question: 'Bukti terkuat bahwa build tidak bergantung IDE adalah?', options: ['Project bisa dibuka di IDE', 'Clean checkout lolos mvn test/package dan java -jar dari terminal', 'Semua file ada di src/'], answer: 1, explanation: 'Build contract harus bisa dijalankan dari repository dan toolchain standar tanpa konfigurasi IDE.' }
-]} />
-
-<Challenge
-  title="Reproducible Build Trap"
-  brief="Buat satu executable Maven JAR yang membaca transaction records dari stdin dan menghasilkan output deterministik. Sebelum menjalankan kasus bahasa, tulis prediksi lalu encode prediksi itu sebagai test."
-  acceptanceCriteria={[
-    'Clean checkout menjalankan mvn test dan mvn package dengan sukses 5 dari 5 kali.',
-    'Minimal 11 dari 12 prediksi reference, String equality, null, record, dan primitive benar sebelum eksekusi.',
-    'Input yang sama menghasilkan output byte-identical pada 3 run.',
-    'Build dan run tidak membutuhkan konfigurasi IDE.',
-    'Executable dapat dijalankan dengan java -jar.'
-  ]}
-/>
-
-<ExitCriteria items={[
-  'Clean checkout passes mvn test and mvn package 5/5 times',
-  'Predict at least 11 of 12 Java reference, equality, null, record, and primitive cases correctly before execution',
-  'Same input produces byte-identical program output across 3 repeated runs',
-  'Build and run require no IDE-specific configuration'
-]} />
-
-## Bukti yang perlu disimpan
-
-- commit dari clean repository state;
-- output 5 run `mvn test` dan `mvn package`;
-- 12 prediction tests beserta hasil;
-- transcript 3 kali `java -jar` dengan input yang sama;
-- hash/diff output untuk menunjukkan hasil byte-identical;
-- README command minimum untuk build dan run.
-
 <SourceList sources={[
   { title: 'Dev.java — Learn Java', url: 'https://dev.java/learn/' },
   { title: 'Apache Maven — Introduction to the Build Lifecycle', url: 'https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html' },
   { title: 'Java Language Specification 17 — Types, Values, and Variables', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html' },
   { title: 'Java Language Specification 17 — Classes / Records', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html' }
 ]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+
+
+</LessonStage>

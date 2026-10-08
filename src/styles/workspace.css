@@ -476,15 +476,16 @@
 .deep-reflection>p{margin:0 0 8px}
 
 
-/* SQL-001 stage-based vertical slice: prose stays readable, context is on demand.
-   MDX authored stages stay mounted (including quiz state); CSS controls visibility. */
-.lesson-grid.lesson-sql001 {
+/* Shared lesson workspace: no permanent context rail. All units use 3 stages. */
+.lesson-grid.lesson-staged,
+.lesson-grid.lesson-demo {
   display:block;
   width:min(760px,100%);
   max-width:760px;
   margin-inline:auto;
 }
-.lesson-grid.lesson-sql001 > .prose { grid-area:auto; width:100%; max-width:100%; }
+.lesson-grid.lesson-staged > .prose,
+.lesson-grid.lesson-demo > .prose { grid-area:auto; width:100%; max-width:100%; }
 .lesson-stage-toolbar {
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; flex-wrap:wrap; margin:22px 0 32px;
@@ -494,47 +495,44 @@
   padding:4px; background:var(--surface);
 }
 .lesson-stage-tab {
-  min-height:34px!important;
-  border:0!important;
-  padding:6px 16px!important;
-  border-radius:9999px!important;
-  color:var(--text-secondary)!important;
-  background:transparent!important;
+  min-height:34px!important; border:0!important;
+  padding:6px 16px!important; border-radius:9999px!important;
+  color:var(--text-secondary)!important; background:transparent!important;
   box-shadow:none!important;
 }
 .lesson-stage-tab[aria-selected="true"] {
-  background:var(--background)!important;
-  color:var(--foreground)!important;
+  background:var(--background)!important; color:var(--foreground)!important;
   box-shadow:0 1px 3px rgb(0 0 0 / .06)!important;
 }
-.lesson-context-toggle {
-  border-radius:9999px!important;
-  color:var(--text-secondary);
+.lesson-toolbar-actions { display:flex; align-items:center; gap:5px; }
+.lesson-context-toggle,.lesson-focus-toggle {
+  border-radius:9999px!important; color:var(--text-secondary);
 }
-.lesson-sql001-context {
-  padding:4px 18px 14px;
-  border-left:1px solid var(--line);
+.lesson-staged-context {
+  padding:4px 18px 14px; border-left:1px solid var(--line);
   margin:0 0 34px;
 }
-.lesson-sql001-context .lesson-execution-context { margin:0 0 12px; }
-.lesson-sql001-context .lesson-stuck { border-bottom:0; }
-.lesson-sql001-context .lesson-small-step { padding:9px 0; }
-.lesson-sql001-context .lesson-why { padding:9px 0; }
+.lesson-staged-context .lesson-execution-context { margin:0 0 12px; }
+.lesson-staged-context .lesson-small-step,
+.lesson-staged-context .lesson-why { padding:9px 0; }
+.lesson-context-toc { display:grid; gap:7px; margin:17px 0; }
+.lesson-context-toc a { color:var(--text-secondary); font-size:13px; text-decoration:none; }
+.lesson-context-toc a:hover { color:var(--foreground); }
 .lesson-stage-panel { min-width:0; outline-offset:4px; }
-.lesson-sql001[data-active-stage="understand"] .lesson-stage-panel:not([data-lesson-stage="understand"]),
-.lesson-sql001[data-active-stage="practice"] .lesson-stage-panel:not([data-lesson-stage="practice"]),
-.lesson-sql001[data-active-stage="evidence"] .lesson-stage-panel:not([data-lesson-stage="evidence"]) { display:none; }
-.lesson-sql001-evidence-form { display:none; }
-.lesson-sql001[data-active-stage="evidence"] .lesson-sql001-evidence-form { display:block; }
-.lesson-sql001 .lesson-stage-next { margin:24px 0 34px; display:flex; }
-.lesson-sql001 .session-form { margin-top:20px; }
-.lesson-sql001 .evidence-completion { border-top:0; padding-top:6px; margin-top:16px; }
-@media(max-width:520px) {
+.lesson-staged[data-active-stage="understand"] .lesson-stage-panel:not([data-lesson-stage="understand"]),
+.lesson-staged[data-active-stage="practice"] .lesson-stage-panel:not([data-lesson-stage="practice"]),
+.lesson-staged[data-active-stage="evidence"] .lesson-stage-panel:not([data-lesson-stage="evidence"]) { display:none; }
+.lesson-staged-evidence-form { display:none; }
+.lesson-staged[data-active-stage="evidence"] .lesson-staged-evidence-form { display:block; }
+.lesson-staged .lesson-stage-next { margin:24px 0 34px; display:flex; }
+.lesson-staged .session-form { margin-top:20px; }
+.lesson-staged .evidence-completion { border-top:0; padding-top:6px; margin-top:16px; }
+@media(max-width:600px) {
   .lesson-stage-toolbar { gap:9px; align-items:flex-start; }
   .lesson-stage-tabs { flex:1; }
   .lesson-stage-tab { flex:1; padding:6px 11px!important; }
+  .lesson-toolbar-actions { width:100%; justify-content:flex-end; }
 }
-
 
 /* Phase 05: task-first Today and globally consistent sidebar hierarchy. */
 .today-page { width:min(960px,100%); margin-inline:auto; }
