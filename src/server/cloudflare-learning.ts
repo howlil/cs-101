@@ -160,6 +160,7 @@ export class CloudflareLearningService {
       return {
         ...row, ...parsed, itemId: id, taskId: id,
         continueFrom: typeof parsed.continueFrom === 'string' ? parsed.continueFrom : '',
+        blocker: typeof parsed.blocker === 'string' ? parsed.blocker : undefined,
       };
     });
   }
