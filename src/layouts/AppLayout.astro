@@ -102,13 +102,43 @@ if (contextualMatch) {
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---
 <!doctype html>
-<html lang="id" data-accent="blue" data-density="compact">
+<html lang="id" data-accent="blue" data-density="compact" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <title>{title} · CS-101</title>
     <ClientRouter fallback="swap" />
+    <script>
+      // Keep old content visible while SSR/D1 prepares the next view. Show a
+      // small progress cue only when the fetch is perceptibly slow.
+      let loadingTimer: number | undefined;
+      const stopLoading = () => {
+        window.clearTimeout(loadingTimer);
+        loadingTimer = undefined;
+        delete document.documentElement.dataset.routeLoading;
+      };
+
+      document.addEventListener('astro:before-preparation', () => {
+        stopLoading();
+        loadingTimer = window.setTimeout(() => {
+          document.documentElement.dataset.routeLoading = 'true';
+        }, 160);
+      });
+      document.addEventListener('astro:after-preparation', stopLoading);
+      document.addEventListener('astro:after-swap', stopLoading);
+      document.addEventListener('astro:page-load', stopLoading);
+      window.addEventListener('pagehide', stopLoading);
+
+      // Astro swaps <html> attributes too. Carry the active preference forward
+      // before the next frame to prevent a light/dark flash mid-transition.
+      document.addEventListener('astro:before-swap', (event) => {
+        const current = document.documentElement.dataset;
+        const next = event.newDocument.documentElement.dataset;
+        if (current.theme) next.theme = current.theme;
+        if (current.themePreference) next.themePreference = current.themePreference;
+      });
+    </script>
     <script is:inline>
       // The new SSR document defaults to light. Copy the current preference
       // before the DOM swap to avoid a theme flash during client navigation.
