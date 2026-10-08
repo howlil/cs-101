@@ -1,3 +1,4 @@
+import { navigate } from 'astro:transitions/client';
 "use client";
 
 import { BookOpen, Boxes, FolderKanban, Search } from "lucide-react";
@@ -59,7 +60,7 @@ export default function CurriculumSearch({ entries }: { entries: SearchEntry[] }
           const target = entries.find((entry) => entry.itemId === item.id);
           if (!target) return;
           setOpen(false);
-          window.location.assign(target.href);
+          navigate(target.href);
         }}
       />
     </DialogContent>

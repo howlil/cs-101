@@ -1,3 +1,4 @@
+import { navigate } from 'astro:transitions/client';
 import { useMemo, useState } from 'react';
 import {
   Boxes,
@@ -128,7 +129,7 @@ export default function CurriculumExplorer({
           onValueChange={(next) => {
             if (next !== activeTrackId) {
               try { sessionStorage.removeItem('cs101:curriculum-explorer-scroll'); } catch {}
-              window.location.assign('/curriculum?track=' + encodeURIComponent(next));
+              navigate('/curriculum?track=' + encodeURIComponent(next));
             }
           }}
         />

@@ -1,3 +1,4 @@
+import { navigate } from 'astro:transitions/client';
 "use client";
 
 import { useRef, useState } from 'react';
@@ -46,7 +47,8 @@ export default function ActivateItem({
       });
 
       if (previousItemId) removeDraft(previousItemId);
-      window.location.reload();
+      // Re-fetch SSR state without a full document reload.
+      navigate(window.location.href, { history: 'replace' });
     } catch (error) {
       setFeedback({
         title: 'Item belum diubah',

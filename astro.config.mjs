@@ -7,6 +7,8 @@ const privateOrigin = process.env.CS101_ORIGIN ? new URL(process.env.CS101_ORIGI
 
 export default defineConfig({
   output: 'server',
+  // ClientRouter prefetches all links by default. Limit it to explicit links.
+  prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   session: false,
   adapter: cloudflare({ imageService: 'passthrough' }),
   integrations: [mdx(), react()],

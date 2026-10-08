@@ -59,7 +59,7 @@ export default function TodayPage({
               <strong>{primary.nextStep}</strong>
               <small>{primary.whyNext}</small>
             </div>
-            <ActionLink href={primary.href} label={primary.actionLabel} />
+            <ActionLink href={primary.href} label={primary.actionLabel} prefetch />
           </section>
         ) : (
           <EmptyAction

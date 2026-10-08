@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
 import { BarChart3, BookOpen, Home } from 'lucide-react';
 import CurriculumSearch from '../search/CurriculumSearch';
 import ContextualCurriculumSidebar, { type ContextualCurriculumData } from '../curriculum/ContextualCurriculumSidebar';
@@ -13,20 +12,17 @@ type SearchEntry = CurriculumSearchEntry & { href: string };
 
 export default function AppShell({
   currentPath,
-  navigationKey,
   flush = false,
   searchEntries,
   contextualExplorer,
   children,
 }: {
   currentPath: string;
-  navigationKey: string;
   flush?: boolean;
   searchEntries: SearchEntry[];
   contextualExplorer?: ContextualCurriculumData;
   children: ReactNode;
 }) {
-  const reduce = useReducedMotion() ?? false;
   const materialActive =
     currentPath === '/curriculum' ||
     currentPath.startsWith('/learn/') ||
@@ -56,6 +52,7 @@ export default function AppShell({
             <a
               className="rail-link"
               href="/"
+              data-astro-prefetch="hover"
               aria-label="Hari ini"
               aria-current={currentPath === '/' ? 'page' : undefined}
             >
@@ -66,6 +63,7 @@ export default function AppShell({
             <a
               className="rail-link"
               href="/curriculum"
+              data-astro-prefetch="hover"
               aria-label="Kurikulum"
               aria-current={materialActive ? 'page' : undefined}
             >
@@ -76,6 +74,7 @@ export default function AppShell({
             <a
               className="rail-link"
               href="/progress"
+              data-astro-prefetch="hover"
               aria-label="Progres"
               aria-current={currentPath === '/progress' ? 'page' : undefined}
             >
@@ -87,17 +86,13 @@ export default function AppShell({
 
       {contextualExplorer && <ContextualCurriculumSidebar data={contextualExplorer} />}
 
-      <motion.main
+      <main
         id="main"
         tabIndex={-1}
         className={['app-main', flush ? 'app-main--flush' : ''].filter(Boolean).join(' ')}
-        key={navigationKey}
-        initial={reduce ? false : { opacity: 0, y: 3 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={reduce ? { duration: 0 } : { duration: .14, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
-      </motion.main>
+      </main>
     </div>
   </>;
 }
