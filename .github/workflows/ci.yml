@@ -74,6 +74,13 @@ jobs:
           grep -q 'data-lesson-stage="understand"' /tmp/cs101-sql001.html
           grep -q 'data-lesson-stage="practice"' /tmp/cs101-sql001.html
           grep -q 'data-lesson-stage="evidence"' /tmp/cs101-sql001.html
+          for id in JAV-001 SQL-002 JAV-002; do
+            curl --fail --silent --show-error "http://127.0.0.1:4321/learn/$id" > "/tmp/cs101-$id.html"
+            grep -q 'data-lesson-stage="understand"' "/tmp/cs101-$id.html"
+            grep -q 'data-lesson-stage="practice"' "/tmp/cs101-$id.html"
+            grep -q 'data-lesson-stage="evidence"' "/tmp/cs101-$id.html"
+          done
+
           for page in project/JAV-P01 integration/INT-001 review/SQL-001; do
             curl --fail --silent --show-error "http://127.0.0.1:4321/$page" >/dev/null
           done

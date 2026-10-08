@@ -26,6 +26,7 @@ export type ExplorerItem = {
   kind: ItemKind;
   state: DisplayState;
   active: boolean;
+  position?: { index: number; total: number };
 };
 
 type ModuleOption = { id: string; title: string; items: ExplorerItem[] };
@@ -51,7 +52,7 @@ function ItemRow({ item, search = false }: { item: ExplorerItem; search?: boolea
   >
     <span className="item-marker" aria-hidden="true"><ItemIcon item={item} /></span>
     <span className="item-copy">
-      <span className="item-id">{item.id}</span>
+      <span className="item-id">{item.id}{item.active && item.position ? ` · ${item.position.index} dari ${item.position.total}` : ''}</span>
       <span className="item-title">{item.title}</span>
     </span>
   </a>;
@@ -138,7 +139,7 @@ export default function CurriculumExplorer({
       {accordionItems.length > 0 && (
         <div className="module-tree module-tree--uiarc">
           <p className="explorer-label"><FolderKanban size={12} strokeWidth={1.8} aria-hidden="true" /> MODUL</p>
-          <Accordion items={accordionItems} defaultOpen={defaultOpen} size="sm" />
+          <Accordion key={activeTrackId + ':' + (selectedModuleId || '')} items={accordionItems} defaultOpen={defaultOpen} size="sm" />
         </div>
       )}
 

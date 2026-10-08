@@ -7,12 +7,15 @@ curriculumFingerprint: "sha256:f0ec68c669f80657924f14af124554673580e015a3fe0602a
 ---
 
 import MentalModel from '../../components/course/MentalModel.astro';
+import LessonStage from '../../components/course/LessonStage.astro';
 import ConceptGraph from '../../components/course/ConceptGraph.astro';
 import Quiz from '../../components/course/Quiz.astro';
 import Challenge from '../../components/course/Challenge.astro';
 import ExitCriteria from '../../components/course/ExitCriteria.astro';
 import SourceList from '../../components/course/SourceList.astro';
 import Reveal from '../../components/course/Reveal.astro';
+
+<LessonStage stage="understand">
 
 > Java proficiency di materi ini berarti proyek bisa **dibangun, ditest, dipackage, dan dijalankan dari clean checkout tanpa IDE**, lalu perilaku dasar bahasanya bisa lo prediksi.
 
@@ -225,6 +228,19 @@ record Id(String value) {}
 System.out.println(new Id("1").equals(new Id("1")));
 ```
 
+
+
+<SourceList sources={[
+  { title: 'Dev.java — Learn Java', url: 'https://dev.java/learn/' },
+  { title: 'Apache Maven — Introduction to the Build Lifecycle', url: 'https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html' },
+  { title: 'Java Language Specification 17 — Types, Values, and Variables', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html' },
+  { title: 'Java Language Specification 17 — Classes / Records', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html' }
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
 <Quiz items={[
   { question: 'Kalau tujuanmu menghasilkan JAR, Maven phase utama yang sesuai adalah?', options: ['compile', 'test', 'package'], answer: 2, explanation: 'Phase package menjalankan phase sebelumnya yang diperlukan lalu membuat artifact distributable seperti JAR.' },
   { question: 'Dua String object berbeda berisi "paid". Operator/method mana yang menyatakan content equality?', options: ['==', 'equals', '='], answer: 1, explanation: '== membandingkan reference identity pada object; String.equals membandingkan content.' },
@@ -245,6 +261,11 @@ System.out.println(new Id("1").equals(new Id("1")));
   ]}
 />
 
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
 <ExitCriteria items={[
   'Clean checkout passes mvn test and mvn package 5/5 times',
   'Predict at least 11 of 12 Java reference, equality, null, record, and primitive cases correctly before execution',
@@ -261,9 +282,4 @@ System.out.println(new Id("1").equals(new Id("1")));
 - hash/diff output untuk menunjukkan hasil byte-identical;
 - README command minimum untuk build dan run.
 
-<SourceList sources={[
-  { title: 'Dev.java — Learn Java', url: 'https://dev.java/learn/' },
-  { title: 'Apache Maven — Introduction to the Build Lifecycle', url: 'https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html' },
-  { title: 'Java Language Specification 17 — Types, Values, and Variables', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html' },
-  { title: 'Java Language Specification 17 — Classes / Records', url: 'https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html' }
-]} />
+</LessonStage>

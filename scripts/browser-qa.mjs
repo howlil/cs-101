@@ -185,7 +185,7 @@ try {
   // Exercise Astro ClientRouter rather than only hard Page.navigate calls.
   await client.eval('localStorage.setItem("cs101:theme","dark"); document.documentElement.dataset.theme="dark"; document.documentElement.dataset.themePreference="dark"');
   const originalNavigation = await client.eval('performance.timeOrigin');
-  await client.eval('document.querySelector(\'.sidebar-nav-link[href="/curriculum"]\').click()');
+  await client.eval('document.querySelector(\'.sidebar-nav-link[aria-label="Kurikulum"]\').click()');
   await client.wait(async () => await client.eval('location.pathname === "/curriculum"'), 'Astro client navigation to curriculum', 20000);
   await client.wait(async () => await client.eval('document.querySelectorAll("astro-island[ssr]").length === 0'), 'Astro next route hydration', 20000);
   m = await client.metrics();
@@ -202,6 +202,46 @@ try {
   assert.equal(Math.round(m.sidebar), 248, '901px should use desktop layout');
   assert.ok(m.doc <= m.vw + 1, '901px horizontal overflow');
   await client.screenshot('lesson-desktop-901.png');
+
+  // Real user journey: lesson stage tabs, unchanged evidence, Focus Mode,
+  // contextual return to Curriculum. No server completion mutations.
+  assert.equal(await client.eval('document.querySelectorAll(".lesson-stage-tab").length'), 3,
+    'SQL-001 should offer three lesson stages');
+  assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
+    [1,1,1], 'SQL-001 must have one tabpanel per stage');
+  await client.eval('document.querySelector("#lesson-tab-practice").click()');
+  await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
+  const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
+  if (evidenceExists) {
+    assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
+      'Already-active item must show the existing evidence form');
+  } // Never force lesson activation simply to make a visual smoke test pass.
+  await client.eval('document.querySelector(".lesson-focus-toggle").click()');
+  await client.wait(async () => await client.eval('document.documentElement.dataset.focus === "true"'), 'Focus Mode');
+  assert.equal(await client.eval('getComputedStyle(document.querySelector(".app-sidebar")).display'), 'none', 'Focus Mode sidebar must be hidden');
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await client.wait(async () => await client.eval('document.documentElement.dataset.focus !== "true"'), 'Focus Mode Escape');
+  const contextualHref = await client.eval('document.querySelector(".sidebar-nav-link[aria-label=\\"Kurikulum\\"]").getAttribute("href")');
+  assert.ok(contextualHref.includes('SQL-001'), 'Curriculum link should remember SQL-001: ' + contextualHref);
+  await client.eval('document.querySelector(".sidebar-nav-link[aria-label=\\"Kurikulum\\"]").click()');
+  await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).get("item") === "SQL-001"'), 'Contextual return');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'Curriculum preview hydrated');
+  assert.equal(await client.eval('document.querySelector(".item-id-standalone").textContent'), 'SQL-001');
+  console.log('PASS learning journey: Pahami/Latihan/Bukti, evidence, focus, context preservation');
+
+  for (const id of ['SQL-002', 'JAV-001', 'JAV-002']) {
+    await client.goto('/learn/' + id);
+    assert.equal(await client.eval('document.querySelectorAll(".lesson-stage-tab").length'), 3, id + ' tabs');
+    assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
+      [1,1,1], id + ' tabpanels');
+    assert.equal(await client.eval('Boolean(document.querySelector(".lesson-sidecar"))'), false,
+      id + ' must not have the legacy permanent sidecar');
+  }
+  console.log('PASS other authored lessons and manifest-only fallback parity');
+
 
   await client.resize(900, 800);
   await client.goto('/curriculum');
@@ -246,6 +286,7 @@ try {
       '320px document horizontal overflow at ' + route + ': ' + JSON.stringify(m));
     assert.equal(m.mainCount, 1, 'Duplicate main at ' + route);
   }
+  await client.goto('/learn/SQL-001');
   await client.screenshot('lesson-mobile-320.png');
   await client.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   assert.equal(await client.eval('matchMedia("(prefers-reduced-motion: reduce)").matches'), true,

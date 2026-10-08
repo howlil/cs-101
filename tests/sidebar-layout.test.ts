@@ -50,3 +50,14 @@ test('curriculum detail has one page main and no old explorer layout', () => {
   assert.doesNotMatch(styles, /\.curriculum-shell\b/);
   assert.doesNotMatch(styles, /\.curriculum-explorer\b/);
 });
+
+test('curriculum link retains selected track and item position', () => {
+  const layout = source('src/layouts/AppLayout.astro');
+  const sidebar = source('src/components/app/AppSidebar.tsx');
+  const explorer = source('src/components/curriculum/CurriculumExplorer.tsx');
+  assert.match(layout, /curriculumHref,/);
+  assert.match(layout, /position: \{ index: index \+ 1, total: module\.items\.length \}/);
+  assert.match(sidebar, /href=\{href === '\/curriculum' \? curriculumHref : href\}/);
+  assert.match(explorer, /item\.position\.index/);
+  assert.match(source('src/pages/curriculum.astro'), /Astro\.url\.searchParams\.has\('track'\)/);
+});
