@@ -228,7 +228,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.wrongAssumption}
-        onChange={(event) => setReflection((current) => ({ ...current, wrongAssumption: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, wrongAssumption: value })); }}
       />
       <Textarea
         label="Pilihan atau trade-off yang saya ambil…"
@@ -236,7 +236,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.tradeoffChosen}
-        onChange={(event) => setReflection((current) => ({ ...current, tradeoffChosen: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, tradeoffChosen: value })); }}
       />
       <Textarea
         label="Tanpa catatan, saya sekarang bisa menjelaskan…"
@@ -244,7 +244,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.explainWithoutNotes}
-        onChange={(event) => setReflection((current) => ({ ...current, explainWithoutNotes: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, explainWithoutNotes: value })); }}
       />
       <Textarea
         label="Kalau ini production, saya akan monitor…"
@@ -252,7 +252,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.monitorInProduction}
-        onChange={(event) => setReflection((current) => ({ ...current, monitorInProduction: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, monitorInProduction: value })); }}
       />
     </div>
   );
@@ -339,10 +339,10 @@ export default function EvidenceForm({
                     rows={group.rows ?? 2}
                     maxLength={8000}
                     value={evidence[criterion.id] ?? ''}
-                    onChange={(event) => setEvidence((current) => ({
-                      ...current,
-                      [criterion.id]: event.currentTarget.value,
-                    }))}
+                    onChange={(event) => {
+                      const value = event.currentTarget.value;
+                      setEvidence((current) => ({ ...current, [criterion.id]: value }));
+                    }}
                   />
                 ))}
               </fieldset>
@@ -409,7 +409,7 @@ export default function EvidenceForm({
                 rows={2}
                 maxLength={4000}
                 value={reflection.evidenceChangedMind}
-                onChange={(event) => setReflection((current) => ({ ...current, evidenceChangedMind: event.currentTarget.value }))}
+                onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, evidenceChangedMind: value })); }}
               />
               <div className="session-meta-field">
                 <Input
