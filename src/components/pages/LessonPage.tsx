@@ -9,7 +9,7 @@ import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Alert } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { Accordion } from '../arc/accordion/accordion';
-import SessionLogger from '../course/SessionLogger';
+import SessionLogger from '../learning/SessionLogger';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
 type StageId = 'understand' | 'practice' | 'evidence';

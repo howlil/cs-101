@@ -1,7 +1,7 @@
 "use client";
 
 import type { Criterion } from '../../domain/curriculum-v2/schema';
-import EvidenceForm, { type EvidenceGroup } from '../learning/EvidenceForm';
+import EvidenceForm, { type EvidenceGroup } from './EvidenceForm';
 
 export default function ProjectEvidence({
   itemId,

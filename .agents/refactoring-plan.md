@@ -1,6 +1,6 @@
 # CS-101 — UI folder boundaries: refactor plan
 
-**Status: IN PROGRESS; PR A and B (app + lesson locality) implemented** · 9 Oktober 2026 · Based on `master` `5f75d866` after backend refactor PR #11.
+**Status: UI ownership migration implemented (A/B/C); compatibility review remains conditional** · 9 Oktober 2026 · Based on `master` `5f75d866` after backend refactor PR #11.
 
 This plan extends the **active** [`architecture.md`](architecture.md) and [`AGENTS.md`](../AGENTS.md). Refactor must improve *change locality* rather than optimize directory count; do not introduce `features/` or layers of `application/use-cases/ports/repositories`.
 
@@ -66,7 +66,7 @@ Each PR records before/after file mapping, exact changed imports, test evidence,
 
 - [x] A: Search/theme grouped under App
 - [x] B: Lesson blocks + MDX content/template references migrated atomically
-- [ ] C: Evidence/review UI grouped under Learning; orphan folders removed
+- [x] C: Evidence/review UI grouped under Learning; orphan folders removed
 - [ ] D: Boundary checker extended to implemented layout, legacy compatibility audited
 - [ ] Active `architecture.md` / `AGENTS.md` / `engineering-design.md` / generator references updated to **actual** paths after each PR
 - [ ] `master` CI green after each merge; production Cloudflare deploy verification remains a separate gate

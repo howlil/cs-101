@@ -23,7 +23,7 @@ Lihat [`.agents/architecture.md`](.agents/architecture.md) sebagai kontrak **akt
 
 ### UI ownership: current and planned (no moves yet)
 
-`src/components/{course,project}/` **still exist** for session/evidence/review and guarantee disclosure; MDX blocks and quiz/reveal islands already live in `lesson`. Do not create duplicate components in target folders early.
+Ownership migration is complete: Astro lesson blocks, quiz and reveal are under `lesson`; evidence/review/activation under `learning`; search/theme under `app`, project guarantee disclosure colocated with its page. Do not create duplicate components in target folders early.
 
 **Future ownership** after the staged refactor:
 
