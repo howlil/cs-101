@@ -1,5 +1,6 @@
 "use client";
 
+import { navigate } from 'astro:transitions/client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import type { SessionFields, SessionReflection } from '../../domain/learning/schema';
@@ -181,6 +182,10 @@ export default function EvidenceForm({
           : 'Titik lanjut dan refleksi sesi sudah tersimpan.',
         tone: 'success',
       });
+      // A successful mutation invalidates every SSR-derived status/CTA/sidebar
+      // on this route. React local feedback alone cannot refresh those views.
+      // Re-fetch private HTML via Astro ClientRouter; keep the stage hash.
+      navigate(window.location.href, { history: 'replace' });
     } catch (error) {
       setFeedback({
         title: 'Sesi belum tersimpan',

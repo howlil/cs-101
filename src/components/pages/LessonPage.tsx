@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { BookOpen, ExternalLink, ListTree, Target, TriangleAlert } from 'lucide-react';
+import { BookOpen, ExternalLink, ListTree, Target, TriangleAlert, ArrowLeft, ArrowRight } from 'lucide-react';
+import type { ItemActionState } from '../../domain/learning/item-action';
+import ItemStatusAction from '../learning/ItemStatusAction';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Alert } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { Accordion } from '../arc/accordion/accordion';
-import ActivateItem from '../learning/ActivateItem';
 import SessionLogger from '../course/SessionLogger';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
@@ -28,6 +29,13 @@ export default function LessonPage({
   available,
   stale,
   active,
+  actionState,
+  prerequisites = [],
+  breadcrumb,
+  previous,
+  next,
+  reviewHref,
+  curriculumHref,
   revision,
   continueFrom,
   lastAnchor,
@@ -50,6 +58,12 @@ export default function LessonPage({
   available: boolean;
   stale: boolean;
   active: boolean;
+  actionState?: ItemActionState;
+  prerequisites?: Array<{ id: string; title: string; href: string }>;
+  breadcrumb?: { track: string; module: string; position: number; total: number };
+  previous?: { id: string; title: string; href: string };
+  next?: { id: string; title: string; href: string };
+  reviewHref?: string;
   revision: number;
   continueFrom?: string;
   lastAnchor?: string;
@@ -62,6 +76,12 @@ export default function LessonPage({
   children?: ReactNode;
 }) {
   const toc = headings.filter((heading) => heading.depth === 2);
+  const visibleState: ItemActionState = actionState ?? {
+    status: active ? 'active' : 'unknown',
+    isFocused: active,
+    canActivate: false,
+    missingPrerequisites: [],
+  };
   // All curriculum units expose the same stages. Authored MDX defines its own
   // boundaries; missing lessons use structured manifest content, not fake MDX.
   const staged = !demo;
@@ -142,6 +162,12 @@ export default function LessonPage({
 
   return <div className={staged ? 'lesson-grid lesson-staged' : 'lesson-grid lesson-demo'} data-active-stage={staged ? stage : undefined}>
     <article className="prose">
+      {!demo && <nav className="lesson-location" aria-label="Posisi di kurikulum">
+        <a href={curriculumHref}>Kurikulum</a>
+        {breadcrumb?.track && <span>{breadcrumb.track}</span>}
+        {breadcrumb?.module && <span>{breadcrumb.module}</span>}
+        {breadcrumb?.total ? <span>Materi {breadcrumb.position} dari {breadcrumb.total}</span> : null}
+      </nav>}
       <p className="eyebrow"><BookOpen size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId}</p>
       <h1>{title}</h1>
       {demo && <Alert title="Mode contoh" tone="info">Tidak masuk progres.</Alert>}
@@ -152,9 +178,13 @@ export default function LessonPage({
       {!available && !demo && <Alert title="Materi lengkap belum tersedia" tone="info">
         Gunakan ringkasan scope, latihan, dan kriteria kurikulum ini. Konten MDX lengkap untuk {itemId} belum tersedia.
       </Alert>}
-      {!demo && !active && <div className="actions">
-        <ActivateItem itemId={itemId} label="Mulai belajar" />
-      </div>}
+      {!demo && actionState && <ItemStatusAction
+        itemId={itemId}
+        kind="unit"
+        state={visibleState}
+        prerequisites={prerequisites}
+      />}
+      {!demo && reviewHref && <p className="lesson-review-link"><a href={reviewHref}>Lihat jadwal review</a></p>}
 
       {staged && <>
         <div className="lesson-stage-toolbar">
@@ -215,7 +245,7 @@ export default function LessonPage({
       {staged && stage === 'practice' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('evidence')}>Catat bukti</Button>
       </div>}
-      {!demo && active && <div className={staged ? 'lesson-staged-evidence-form' : undefined}>
+      {!demo && active && visibleState.status !== 'passed' && <div className={staged ? 'lesson-staged-evidence-form' : undefined}>
         <SessionLogger
           initialCompletionOpen={staged}
           itemId={itemId}
@@ -226,6 +256,16 @@ export default function LessonPage({
           lastAnchor={lastAnchor}
         />
       </div>}
+      {!demo && (previous || next) && <nav className="lesson-sequence" aria-label="Navigasi materi">
+        {previous ? <a href={previous.href} rel="prev">
+          <ArrowLeft size={15} aria-hidden="true" />
+          <span><small>Sebelumnya · {previous.id}</small><strong>{previous.title}</strong></span>
+        </a> : <span />}
+        {next ? <a href={next.href} rel="next">
+          <span><small>Berikutnya · {next.id}</small><strong>{next.title}</strong></span>
+          <ArrowRight size={15} aria-hidden="true" />
+        </a> : <span />}
+      </nav>}
     </article>
   </div>;
 }
