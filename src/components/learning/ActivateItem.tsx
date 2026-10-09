@@ -30,7 +30,7 @@ export default function ActivateItem({
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<PendingSwitch>();
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone: AlertTone }>();
-  const request = useRef<{ key: string; id: string }>();
+  const request = useRef<{ key: string; id: string } | undefined>(undefined);
 
   const commit = async (revision: number, previousItemId?: string, previousSession?: SessionFields) => {
     setLoading(true);
