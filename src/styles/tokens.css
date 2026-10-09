@@ -6,7 +6,7 @@
   --line: var(--border);
   --control: var(--border-strong);
   --on-accent: var(--accent-foreground);
-  --focus-ring: color-mix(in oklab, var(--accent) 34%, transparent);
+  --focus-ring: var(--accent-strong);
   --radius-control: .625rem;
   --radius-panel: .875rem;
   --radius-surface: 1rem;

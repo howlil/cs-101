@@ -538,7 +538,7 @@ Tampilan tetap minimal dan utilitarian.
 - Utility Star/Donate secondary; tidak boleh mengalahkan learning action.
 - Empty state compact, horizontal bila ruang cukup.
 - Status selalu punya label/shape; warna saja tidak cukup.
-- Motion 120–160ms dan hormati `prefers-reduced-motion`.
+- Motion route dimiliki `ClientRouter` melalui satu `transition:name`/`transition:animate` pada main workspace. Feedback fetch lambat hanya satu progress line di bawah topbar; jangan menambah persisted React navigation indicator kedua. Hormati `prefers-reduced-motion`.
 
 ## Copy
 
@@ -584,7 +584,7 @@ UIArc
 
 Jangan menambah `querySelector`, global `addEventListener` untuk feature interaction, atau native interactive disclosure baru di Astro. Native anchor/navigation tetap boleh karena itu semantic navigation, bukan client state.
 
-Product decision: **tidak memakai focus ring/halo**. Keyboard focus tetap harus terlihat melalui perubahan border/background/foreground pada primitive UIArc.
+Keyboard focus wajib terlihat dengan outline 2px memakai `--focus-ring` (accent kuat), tanpa layout shift; pointer click tidak menampilkan outline. Jangan meniadakan focus indicator secara global, dan pertahankan affordance border/background bawaan UIArc.
 
 Box/surface baru tidak boleh membuat radius, border, shadow, atau motion language sendiri. Gunakan primitive UIArc jika interaktif; untuk content statis gunakan token UIArc seperti `--radius-control`, `--radius-panel`, `--border`, `--surface`, dan `--shadow-resting`.
 
