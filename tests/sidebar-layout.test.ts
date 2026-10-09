@@ -59,7 +59,7 @@ test('curriculum link retains selected track and item position', () => {
   assert.match(layout, /position: \{ index: index \+ 1, total: module\.items\.length \}/);
   assert.match(sidebar, /href=\{href === '\/curriculum' \? curriculumHref : href\}/);
   assert.match(explorer, /item\.position\.index/);
-  assert.match(source('src/pages/curriculum.astro'), /Astro\.url\.searchParams\.has\('track'\)/);
+  assert.match(source('src/pages/curriculum.astro'), /const requestedItemId = Astro\.url\.searchParams\.get\('item'\);/);
 });
 
 
