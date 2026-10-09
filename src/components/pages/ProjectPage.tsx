@@ -98,6 +98,7 @@ export default function ProjectPage({
           title: 'Materi terkait & perjalanan project',
           content: <div className="project-reference-content">
             <aside className="project-sidecar" aria-label="Konteks project">
+              {contributors.length > 0 && (
         <section className="project-side-section">
             <div className="project-section-heading">
               <div>
