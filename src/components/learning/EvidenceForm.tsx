@@ -86,6 +86,8 @@ export default function EvidenceForm({
     return Number.isInteger(value) && value > 0 ? value : undefined;
   };
 
+  const completedEvidenceCount = criteria.filter((criterion) => evidence[criterion.id]?.trim()).length;
+
   const session = (kind: 'progress' | 'passed'): SessionFields => ({
     itemId,
     fingerprint,
@@ -149,6 +151,10 @@ export default function EvidenceForm({
           title: 'Bukti belum lengkap',
           message: `Lengkapi ${missing.length} target selesai sebelum menyelesaikan item.`,
           tone: 'warning',
+        });
+        window.requestAnimationFrame(() => {
+          const firstMissing = document.getElementsByName('evidence:' + missing[0].id)[0];
+          if (firstMissing instanceof HTMLElement) firstMissing.focus();
         });
         return;
       }
@@ -249,6 +255,11 @@ export default function EvidenceForm({
       <p className="muted small">
         Simpan satu titik lanjut yang konkret. Durasi tidak menentukan kelulusan.
       </p>
+      <p className="session-draft-state" role="status">
+        {!hydrated ? 'Memeriksa draft lokal…' : dirty
+          ? 'Draft otomatis tersimpan di browser ini; belum tercatat sebagai sesi.'
+          : 'Belum ada perubahan sesi baru.'}
+      </p>
 
       <Textarea
         label="Lanjut dari mana?"
@@ -333,6 +344,7 @@ export default function EvidenceForm({
       <section className="evidence-completion">
         <div className="completion-rule">
           <strong>Aturan selesai</strong>
+          <span className="evidence-coverage" role="status">{completedEvidenceCount} dari {criteria.length} target memiliki bukti</span>
           <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
         </div>
 

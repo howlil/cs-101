@@ -12,6 +12,7 @@ type SelectedItem = {
   id: string;
   kind: 'unit' | 'checkpoint' | 'integration';
   title: string;
+  hasLesson?: boolean;
   breadcrumb: string;
   href: string;
   state?: 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
@@ -34,7 +35,7 @@ type TrackOverview = {
   title: string;
   completed: number;
   total: number;
-  modules: Array<{ id: string; title: string; completed: number; total: number; href: string }>;
+  modules: Array<{ id: string; title: string; completed: number; total: number; href: string; firstItemTitle: string }>; 
 };
 
 export default function CurriculumPage({ selected, overview }: { selected?: SelectedItem; overview?: TrackOverview }) {
@@ -45,6 +46,9 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
             <p className="breadcrumb">{selected.breadcrumb}</p>
             <code className="item-id-standalone">{selected.id}</code>
             <h2>{selected.title}</h2>
+            {selected.kind === 'unit' && !selected.hasLesson && (
+              <p className="item-outline-status">Kerangka materi · penjelasan dan kuis lengkap belum tersedia. Latihan dilakukan secara mandiri.</p>
+            )}
           </header>
 
 
@@ -71,7 +75,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
                 <h3>Yang akan dipelajari</h3>
                 <ul className="compact-list">{selected.scope?.slice(0, 3).map((scope) => <li key={scope}>{scope}</li>)}</ul>
                 {(selected.scope?.length ?? 0) > 3 && <p className="item-brief-note">
-                  +{selected.scope!.length - 3} kompetensi lain dijelaskan di materi.
+                  +{selected.scope!.length - 3} kompetensi lain {selected.hasLesson ? 'dijelaskan di materi.' : 'tercantum di kurikulum.'}
                 </p>}
               </section>}
 
@@ -140,7 +144,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
               <p className="breadcrumb">Kurikulum / Jalur</p>
               <h2>{overview.title}</h2>
               <p className="curriculum-overview-summary">
-                {overview.completed} dari {overview.total} materi dan project selesai. Pilih modul untuk membuka pratinjau materi pertamanya.
+                {overview.completed} dari {overview.total} materi dan project selesai. Pilih modul untuk melihat materi pertamanya.
               </p>
             </header>
             <nav className="curriculum-overview-modules" aria-label="Modul di jalur">
@@ -150,6 +154,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
                   <span className="curriculum-overview-copy">
                     <strong>{module.title}</strong>
                     <small>{module.completed}/{module.total} selesai</small>
+                    <span className="curriculum-module-first">Materi pertama: {module.firstItemTitle}</span>
                   </span>
                   <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
                 </a>

@@ -181,7 +181,25 @@ try {
   await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
   await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
+  await client.goto('/curriculum?item=JAV-002');
+  assert.ok(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), 'Missing authored lesson must be disclosed in preview');
+  assert.equal(await client.eval("document.body.textContent.includes('tercantum di kurikulum.')"), true, 'Missing authored text must not be claimed available');
+  await client.screenshot('curriculum-outline-desktop-1440.png');
+  await client.goto('/curriculum?item=SQL-003');
+  assert.equal(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), false, 'Authored SQL-003 must not be marked outline');
+  console.log('PASS Curriculum preview distinguishes authored content from manifest outlines');
   console.log('PASS curriculum overview → module selection');
+
+  // Search must not silently discard matches after 16 items. Type through
+  // Chrome input events to exercise the hydrated React explorer.
+  await client.goto('/curriculum');
+  await client.eval('document.querySelector(".curriculum-search-uiarc input").focus()');
+  await client.send('Input.insertText', { text: 'java' });
+  await client.wait(async () => await client.eval('document.querySelectorAll(".search-row").length === 16 && Boolean(document.querySelector(".search-more"))'), 'Search exposes more than first 16 matches');
+  await client.eval('document.querySelector(".search-more").click()');
+  await client.wait(async () => await client.eval('document.querySelectorAll(".search-row").length > 16'), 'Search reveals additional matches');
+  await client.screenshot('curriculum-search-expanded-1440.png');
+  console.log('PASS curriculum search count and load-more recovery');
 
   // Visual contract checks on the live browser, not just static CSS snapshots.
   await client.goto('/');
@@ -193,6 +211,12 @@ try {
   }
   assert.equal(await client.eval('document.querySelectorAll(".topbar-workspace").length'), 0,
     'Decorative legacy workspace label must not return');
+  const todayPanel = await client.eval('(() => { const panel = document.querySelector(".today-focus"); if (!panel) return null; const css = getComputedStyle(panel); return { color:css.backgroundColor, radius:css.borderRadius, width:panel.getBoundingClientRect().width }; })()');
+  if (todayPanel) {
+    assert.equal(todayPanel.color, 'rgba(0, 0, 0, 0)', 'Today main block must be flat rather than a filled card');
+    assert.equal(todayPanel.radius, '0px', 'Today block should not have decorative card corners');
+    assert.ok(todayPanel.width <= 820, 'Today reading measure must be bounded');
+  }
   await client.screenshot('today-desktop-1440.png');
   await client.goto('/curriculum');
   console.log('PASS Today CTA hierarchy and current shell visuals');
@@ -245,10 +269,17 @@ try {
     'SQL-001 should offer three lesson stages');
   assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
     [1,1,1], 'SQL-001 must have one tabpanel per stage');
-  await client.eval('document.querySelector("#lesson-tab-practice").click()');
+  // Test the *bottom* CTA, not only the top tab. Long reading must
+  // move keyboard focus to the newly visible practice panel.
+  await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
-  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-practice"'), 'Practice panel receives focus');
+  assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
+  await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
+  await client.wait(async () => await client.eval('["lesson-panel-evidence","lesson-evidence-gate"].includes(document.activeElement?.id)'), 'Evidence stage receives focus');
+  assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Inactive learner must not reach an empty evidence dead end');
+  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-evidence-gate', 'Inactive learner must land on the eligibility guidance first');
   const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
   if (evidenceExists) {
     assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
@@ -268,14 +299,34 @@ try {
   assert.equal(await client.eval('document.querySelector(".item-id-standalone").textContent'), 'SQL-001');
   console.log('PASS learning journey: Pahami/Latihan/Bukti, evidence, focus, context preservation');
 
-  for (const id of ['SQL-002', 'JAV-001', 'JAV-002']) {
+  for (const id of ['SQL-002', 'SQL-003', 'JAV-001', 'JAV-002']) {
     await client.goto('/learn/' + id);
     assert.equal(await client.eval('document.querySelectorAll(".lesson-stage-tab").length'), 3, id + ' tabs');
     assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
       [1,1,1], id + ' tabpanels');
     assert.equal(await client.eval('Boolean(document.querySelector(".lesson-sidecar"))'), false,
       id + ' must not have the legacy permanent sidecar');
+    if (id === 'SQL-003') {
+      assert.equal(await client.eval('Boolean(document.querySelector(".lesson-stage-panel pre"))'), true, 'SQL-003 must include authored SQL examples');
+      await client.screenshot('sql003-desktop-901.png');
+    }
+    if (id === 'JAV-002') {
+      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
+    }
   }
+  // A locked authored unit can still be read and practiced, but evidence
+  // must provide prerequisite guidance rather than an empty final stage.
+  await client.goto('/learn/SQL-003');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
+  const gateY = await client.eval('document.querySelector(".lesson-evidence-gate").getBoundingClientRect().top');
+  const panelY = await client.eval('document.querySelector("#lesson-panel-evidence").getBoundingClientRect().top');
+  assert.ok(gateY < panelY, 'Eligibility guidance must precede evidence checklist visually');
+  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Selesaikan prasyarat untuk menyimpan bukti")'), 'Locked state must be explained in evidence stage');
+  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 0, 'Avoid repeating the locked badge and prerequisite block inside the evidence gate');
+  assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
+  await client.screenshot('lesson-locked-evidence-901.png');
+  console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');
   console.log('PASS other authored lessons and manifest-only fallback parity');
 
 
@@ -332,13 +383,15 @@ try {
     assert.ok(back, 'Expected back navigation on ' + route);
     assert.equal(back.radius, '9999px', 'Back navigation pill radius at ' + route);
     assert.equal(back.size, '13px', 'Back navigation size at ' + route);
+    await client.screenshot(route.startsWith('/project/') ? 'project-desktop-1440.png'
+      : route.startsWith('/integration/') ? 'integration-desktop-1440.png' : 'review-desktop-1440.png');
   }
   console.log('PASS consistent Project/Integration/Review back navigation');
 
   console.log('PASS project/integration single-column workspace');
 
   await client.resize(320, 720);
-  for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001',
+  for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001', '/learn/SQL-003',
     '/project/JAV-P01', '/integration/INT-001', '/review/SQL-001']) {
     await client.goto(route);
     m = await client.metrics();
@@ -346,6 +399,13 @@ try {
       '320px document horizontal overflow at ' + route + ': ' + JSON.stringify(m));
     assert.equal(m.mainCount, 1, 'Duplicate main at ' + route);
   }
+  await client.goto('/learn/SQL-003');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile locked evidence guidance');
+  m = await client.metrics();
+  assert.ok(m.doc <= m.vw + 1 && m.body <= m.vw + 1,
+    'Locked evidence guidance must not overflow 320px: ' + JSON.stringify(m));
+  await client.screenshot('lesson-locked-evidence-320.png');
   await client.goto('/learn/SQL-001');
   const mobileToolbar = await client.eval('(() => { const tabs=document.querySelector(".lesson-stage-tabs"); const secondary=document.querySelector(".lesson-toolbar-actions"); if (!tabs || !secondary) return null; const a=tabs.getBoundingClientRect(), b=secondary.getBoundingClientRect(); return { display:getComputedStyle(document.querySelector(".lesson-stage-toolbar")).display, first:{left:a.left,right:a.right,bottom:a.bottom}, second:{left:b.left,top:b.top} }; })()');
   assert.ok(mobileToolbar, 'Lesson mobile toolbar must be present');

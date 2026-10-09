@@ -18,7 +18,7 @@ pre { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-
 hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 .content { max-width: 720px; }
-.prose { min-width: 0; }
+.prose { min-width:0; font-size:16px; line-height:1.65; }
 .lede { color: var(--muted); max-width: 60ch; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
@@ -235,8 +235,6 @@ hr { margin: 24px 0; }
 .review-retention h2 { font-size: 15px; }
 
 @media (max-width: 640px) {
-  .today-focus { padding: 0; }
-  .today-focus h2 { font-size: 20px; }
   .today-review-row { grid-template-columns: 18px minmax(0,1fr); }
   .today-review-cta { grid-column: 2; }
 }
@@ -282,3 +280,11 @@ body::-webkit-scrollbar,
 .app-main :is(.project-back, .integration-back, .review-back):hover {
   color: var(--foreground); background: var(--surface-muted); border-color: var(--border-strong);
 }
+
+/* Authored teaching visuals explain concepts, not clickable controls. */
+.concept-flow { max-width:100%; margin:20px 0 28px; padding:0; border:0; }
+.concept-flow pre { margin:0; padding:16px 18px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-control); overflow-x:auto; }
+.challenge-execution-note { color:var(--text-secondary); font-size:13px; line-height:20px; border-left:2px solid var(--border-strong); padding:3px 0 3px 12px; margin:12px 0; }
+
+.session-draft-state { margin:4px 0 14px; color:var(--text-secondary); font-size:12px; line-height:18px; }
+.completion-rule .evidence-coverage { color:var(--foreground); font-size:13px; font-weight:500; }

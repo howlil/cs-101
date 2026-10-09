@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { test } from 'node:test';
 
 const src = (path: string) => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
@@ -47,4 +47,38 @@ test('Curriculum module rows show progress without duplicate inline CTA copy', (
   assert.match(page, /<small>\{module\.completed\}\/\{module\.total\} selesai<\/small>/);
   assert.doesNotMatch(page, /selesai · Buka materi pertama/);
   assert.match(src('src/styles/workspace.css'), /\.progress-integration-copy code \{ width: max-content/);
+});
+
+
+test('block layouts use one neutral visual grammar rather than a floating demo card', () => {
+  const workspace = src('src/styles/workspace.css');
+  const prose = src('src/styles/global.css');
+  const curriculum = src('src/styles/curriculum.css');
+  assert.match(workspace, /\.today-focus \{[\s\S]*?background:transparent/);
+  assert.match(prose, /\.prose \{ min-width:0; font-size:16px; line-height:1\.65; \}/);
+  assert.doesNotMatch(curriculum, /\.module-tree,\.integration-list/);
+  assert.doesNotMatch(curriculum, /\.challenge-preview \{/);
+});
+
+test('retired demo route and unused interactive card are not bundled', () => {
+  const url = (path: string) => new URL('../' + path, import.meta.url);
+  for (const path of ['src/pages/demo.astro', 'src/content/lessons/demo.mdx',
+    'src/components/arc/card/card.tsx', 'src/components/arc/card/card.module.css']) {
+    assert.equal(existsSync(url(path)), false, path);
+  }
+});
+
+test('unavailable content and review are disclosed, not fake completion actions', () => {
+  const curriculum = src('src/components/pages/CurriculumPage.tsx');
+  const lesson = src('src/components/pages/LessonPage.tsx');
+  const progress = src('src/pages/progress.astro');
+  assert.match(curriculum, /item-outline-status/);
+  assert.match(lesson, /latihan manual/i);
+  assert.match(progress, /unavailableReviewCount/);
+});
+
+
+test('manifest-only previews never claim missing authored lesson content', () => {
+  const curriculum = src('src/components/pages/CurriculumPage.tsx');
+  assert.match(curriculum, /selected\.hasLesson \? 'dijelaskan di materi\.' : 'tercantum di kurikulum\.'/);
 });

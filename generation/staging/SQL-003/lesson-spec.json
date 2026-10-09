@@ -1,0 +1,161 @@
+{
+  "itemId": "SQL-003",
+  "curriculumFingerprint": "sha256:7b18c39edb6674de6df1e1e875b3ea56fa18bdce02c25d487653d324881168fd",
+  "payoff": "Query analitik yang benar mempertahankan grain atau sengaja mereduksinya, dan setiap saldo berjalan bisa direkonsiliasi.",
+  "learningOutcomes": [
+    "Mengelompokkan transaksi menggunakan GROUP BY/HAVING/FILTER",
+    "Menjelaskan perbedaan output grain aggregate dan window",
+    "Membuat running balance deterministic dengan frame ROWS",
+    "Memakai ROW_NUMBER/RANK/LAG/LEAD pada rangkaian peristiwa",
+    "Menguji total settlement tanpa perulangan aplikasi"
+  ],
+  "mentalModel": "GROUP BY mengubah grain: banyak row input menjadi satu row per group. Window OVER membiarkan row tetap utuh sambil membaca partition/order/frame.",
+  "relationshipGraph": "Rows → WHERE → GROUP BY/HAVING (bila diperlukan) → WINDOW OVER → ORDER BY final → reconciliation",
+  "concepts": [
+    {
+      "id": "aggregate",
+      "title": "GROUP BY, HAVING, FILTER",
+      "mechanism": "GROUP BY mengelompokkan berdasarkan key; HAVING memfilter group; FILTER memfilter row untuk satu aggregate.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial-agg.html",
+        "https://www.postgresql.org/docs/18/sql-select.html"
+      ]
+    },
+    {
+      "id": "window",
+      "title": "Windowing vs aggregate",
+      "mechanism": "OVER mempertahankan setiap row; PARTITION BY membatasi peer set; ORDER BY dan frame ROWS menetapkan urutan akumulasi.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial-window.html",
+        "https://www.postgresql.org/docs/18/sql-select.html"
+      ]
+    },
+    {
+      "id": "ranking",
+      "title": "ROW_NUMBER and RANK",
+      "mechanism": "ROW_NUMBER membedakan setiap row, RANK memberi peringkat sama untuk ties dan dapat melompati angka.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-window.html"
+      ]
+    },
+    {
+      "id": "neighbors",
+      "title": "LAG and LEAD",
+      "mechanism": "LAG/LEAD membaca row tetangga dalam partition menurut urutan; time-window logic perlu kondisi jarak waktu eksplisit.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-window.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "GROUP BY sama dengan PARTITION BY — salah; GROUP BY mereduksi row",
+    "ORDER BY window membuat output final otomatis terurut — salah",
+    "RUNNING SUM dengan ORDER BY timestamp tanpa tie breaker selalu deterministik — salah",
+    "SUM(... OVER) default frame selalu ROWS — salah, definisikan explicit ROWS ketika dimaksud"
+  ],
+  "practice": [
+    "Prediksi jumlah row sebelum dan sesudah GROUP BY pada 5 transaksi",
+    "Buat running total transaksi dengan posted_at + entry_id sebagai total-order",
+    "Bandingkan saldo akhir per account dengan SUM(amount) GROUP BY",
+    "Hitung failures menggunakan FILTER dan deteksi event beruntun memakai LAG"
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-bea7264601",
+      "taughtAt": "GROUP BY, FILTER, window functions and LAG/LEAD",
+      "assessedAt": "Quiz + Settlement Window Drill",
+      "evidenceExpected": "10 queries with expected grain and no application-side loop"
+    },
+    {
+      "criterionId": "criterion-9051ea9e97",
+      "taughtAt": "Deterministic SUM OVER ROWS and independent GROUP BY control",
+      "assessedAt": "Quiz + Settlement Window Drill",
+      "evidenceExpected": "Per-account final running balances equal independently computed control totals"
+    },
+    {
+      "criterionId": "criterion-eb1662cae7",
+      "taughtAt": "GROUP BY collapses rows; OVER preserves input-row identity",
+      "assessedAt": "Quiz + Settlement Window Drill",
+      "evidenceExpected": "Written cardinality comparison on the same ledger dataset"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Settlement examples and analytic query patterns",
+      "assessedAt": "Settlement Window Drill",
+      "evidenceExpected": "Per-merchant totals, running balances, failed-to-success transitions, ranks, burst detection, and reconciliation"
+    }
+  ],
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Tiga transaksi berada pada satu account. GROUP BY account_id menghasilkan berapa row untuk account tersebut?",
+      "options": [
+        "Satu row",
+        "Tiga row",
+        "Nol, karena amount berbeda"
+      ],
+      "answer": 0,
+      "explanation": "GROUP BY mereduksi semua row dengan account_id yang sama menjadi satu hasil group.",
+      "criterionIds": [
+        "criterion-eb1662cae7"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Query mana memberi running balance sambil mempertahankan satu row untuk tiap transaksi?",
+      "options": [
+        "SUM(amount) GROUP BY account_id",
+        "SUM(amount) OVER (PARTITION BY account_id ORDER BY posted_at, entry_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)",
+        "SELECT DISTINCT account_id"
+      ],
+      "answer": 1,
+      "explanation": "SUM OVER dengan urutan deterministik dan frame ROWS menghitung akumulasi tanpa menghilangkan identitas transaksi.",
+      "criterionIds": [
+        "criterion-9051ea9e97",
+        "criterion-eb1662cae7"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Dua merchant punya total sama. Fungsi mana memberi ranking yang sama pada keduanya?",
+      "options": [
+        "ROW_NUMBER()",
+        "RANK() dengan ORDER BY total DESC",
+        "LAG()"
+      ],
+      "answer": 1,
+      "explanation": "RANK memberikan rank identik untuk nilai ORDER BY yang setara; ROW_NUMBER memberi nomor berbeda.",
+      "criterionIds": [
+        "criterion-bea7264601"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Bagaimana menghitung payment gagal dalam satu query per merchant, tanpa loop aplikasi?",
+      "options": [
+        "COUNT(*) FILTER (WHERE status = 'failed') lalu GROUP BY merchant_id",
+        "Ambil semua payment dan hitung dengan for-loop aplikasi",
+        "Gunakan LIMIT 1"
+      ],
+      "answer": 0,
+      "explanation": "FILTER membatasi input aggregate tertentu, sehingga kondisional agregasi dihitung di SQL per group.",
+      "criterionIds": [
+        "criterion-bea7264601"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Pengecekan yang benar untuk final running balance account ialah…",
+      "options": [
+        "Membandingkan dengan hasil ROW_NUMBER",
+        "Membandingkan nilai final dengan SUM(amount) GROUP BY account_id secara terpisah",
+        "Memilih row terakhir tanpa ORDER BY"
+      ],
+      "answer": 1,
+      "explanation": "Kontrol aggregate yang dihitung terpisah harus sama dengan running balance terakhir per account dengan ordering deterministik.",
+      "criterionIds": [
+        "criterion-9051ea9e97"
+      ]
+    }
+  ]
+}

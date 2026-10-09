@@ -665,7 +665,7 @@ The application chrome now uses one route-aware sidebar for global navigation an
 
 ## SQL-001 lesson vertical slice — October 2026
 
-SQL-001 is the first staged curriculum lesson. Its original MDX content is retained, but authored Astro LessonStage boundaries separate concept reading, practice, and evidence. LessonPage switches the visible stage using accessible tabs and a URL hash without DOM reparenting, and keeps references with the reading content and contextual connections behind an optional disclosure. QuizClient remains the original learning UI. The existing SessionLogger/EvidenceForm and /api/sessions validation remain the sole owners of saving progress and passing; SQL-001 opens its existing evidence group by default. No client-side quiz score sets domain completion. All other lessons and the demo retain their prior linear rendering until separately migrated.
+SQL-001 is the first staged curriculum lesson. Its original MDX content is retained, but authored Astro LessonStage boundaries separate concept reading, practice, and evidence. LessonPage switches the visible stage using accessible tabs and a URL hash without DOM reparenting, and keeps references with the reading content and contextual connections behind an optional disclosure. QuizClient remains the original learning UI. The existing SessionLogger/EvidenceForm and /api/sessions validation remain the sole owners of saving progress and passing; SQL-001 opens its existing evidence group by default. No client-side quiz score sets domain completion. The demo route has since been retired. Each curriculum unit uses staged navigation; authored lessons provide deeper examples and review banks, while manifest-only units explicitly disclose incomplete content.
 
 
 ## Phase 05 — task-first workspace parity (October 2026)
@@ -702,3 +702,33 @@ The normal lesson layout uses a readable centered column, optional contextual di
 Curriculum without an explicit item is a track overview: summary of each module, completed/total, and a link to the first item. Explicit item links still open the compact item preview. Sidebar track and module labels show passed/total, while current-page semantics distinguish selected learner state from actual route selection. Integrations return to their own preview. A session of learning can begin from Today without forcing the global browse page to preselect the learner's active item.
 
 The MDX table of contents is stage-aware, mapped from authored LessonStage boundaries on the server instead of querying client DOM. Deep links to headings in the evidence section must reveal the matching stage before readers follow the anchor.
+
+## Phase 07 — block design / content parity (October 2026)
+
+This section supersedes historic layout sketches and old demo screenshots above. Do not reintroduce dashboard-like cards, phantom rails, or duplicate module explorers.
+
+- **Today**: next task is an unboxed content block bounded by a readable measure. Path → item → one next step → one primary action → optional blocker/why. Secondary due review is a separate compact list, never a CTA without a current bank.
+- **Curriculum**: sidebar remains the sole hierarchy owner. Browse rows show first-unit title and progress; selected unit preview explicitly indicates when only the manifest outline exists. No second module tree.
+- **Lesson**: reading content is 16px/1.65. Authored stages contain conceptual explanation, examples, quiz, practice and evidence. Manifest-only stages keep an honest outline and manual practice notice; a quiz is formative, never completion.
+- **Project / Integration / Review**: keep requirements and evidence operational. Minimize duplicated eyebrow+heading and visual count pills; relationships and schedules stay in disclosures. Real state, not decorative placeholders, controls interactions.
+- **Dead UI**: the unused Arc Card quick-look implementation and the unused /demo route were retired. New interactive primitives require at least one production owner. `ConceptGraph` represents an accessible static text diagram; `Challenge` has explicitly manual execution until a real runner and grader exist.
+- **Review**: domain continues tracking due/retry, but Today/Progress only advertise actionable attempts when a current validated question bank exists. Other pending reviews are disclosed as unavailable, not linked as if ready.
+- **Content publication**: follow `.agents/skill/course-generator/SKILL.md` one unit at a time: canonical manifest → official sources → coverage/spec → three-stage MDX → 5-question review bank → validation. No bulk filler content.
+- **QA**: verify mobile 320/390, desktop 901/1440, dark, keyboard/focus, authored and manifest-only units, and project/integration/review workspaces. Avoid changing a shared stylesheet selector across unrelated route blocks.
+
+## Learning flow UX — continuity and recovery (October 2026)
+
+**Job:** Return to one useful activity, practice actively, and preserve what was learned without confusing local draft, saved session, mastery evidence, and spaced review.
+
+Happy path: Hari ini → open task → Pahami → Latihan (formative) → Bukti → activate if eligible → save partial session **or** submit complete evidence → review when due and a current question bank exists.
+
+- **Read vs act:** Browsing never activates or completes a task. Reading and practicing remain accessible even for locked items; saving requires eligibility and explicit activation.
+- **Stage continuity:** Primary end-of-stage CTAs reveal the next panel and move keyboard focus to it; tab controls keep tab semantics and Arrow/Home/End behavior. No forced focus movement from passive hash navigation.
+- **No final-stage dead end:** The Bukti stage must explain locked/inactive/passed states and offer the real next action/prerequisite links. Do not conceal activation behind a far-away header CTA.
+- **Formative vs completion:** Quiz feedback is immediate and retryable; answers are not recorded as completed. Completion is only through server-validated evidence via `/api/sessions`.
+- **Draft vs saved:** Changes persist as a local draft in this browser, but only explicit saving commits a session. Show that distinction adjacent to the form; display live count of evidence-covered targets and focus the first missing evidence on invalid completion.
+- **Review:** Show answered/total before final submission; keep grading server-side and answer keys inaccessible before submit. Failed reviews do not revoke completion.
+- **Navigation scale:** Curriculum search may be truncated for performance only when results show their total count and users have an accessible way to fetch additional matches. Do not silently drop results after 16.
+- **Responsive/a11y:** Validate tab-panel focus from end-of-content CTA, locked unit recovery, no 320px overflow, keyboard, reduced-motion, pending/draft/error states.
+
+**Deliberately not built:** gamified streaks, forced timers, invented AI graders, local quiz completion, a second curriculum tree, planner, or redundant permanent sidecar.
