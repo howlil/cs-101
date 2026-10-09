@@ -168,12 +168,9 @@ try {
     'Legacy duplicate navigation progress bar must not render');
   assert.equal(await client.eval('document.querySelectorAll(".topbar").length'), 1,
     'Only one navigation loading owner should render');
-  const focus = await client.eval('(() => {
-    const link = document.querySelector(".brand");
-    link.focus();
-    const style = getComputedStyle(link);
-    return { outline: style.outlineStyle, width: parseFloat(style.outlineWidth), color: style.outlineColor };
-  })()'.replace(/\n/g, ' '));
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  const focus = await client.eval('(() => { const node = document.activeElement; const style = getComputedStyle(node); return { tag: node?.tagName, outline: style.outlineStyle, width: parseFloat(style.outlineWidth) }; })()');
   assert.equal(focus.outline, 'solid', 'Keyboard links must have a visible focus outline: ' + JSON.stringify(focus));
   assert.ok(focus.width >= 2, 'Keyboard focus indicator must be at least 2px: ' + JSON.stringify(focus));
   await client.screenshot('curriculum-desktop-1440.png');
