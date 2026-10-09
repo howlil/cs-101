@@ -183,6 +183,20 @@ try {
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
   console.log('PASS curriculum overview → module selection');
 
+  // Visual contract checks on the live browser, not just static CSS snapshots.
+  await client.goto('/');
+  const todayAction = await client.eval('(() => { const link = document.querySelector(".today-focus > a"); if (!link) return null; const css = getComputedStyle(link); return { background: css.backgroundColor, color: css.color, height: link.getBoundingClientRect().height }; })()');
+  if (todayAction) {
+    assert.equal(todayAction.background, 'rgb(18, 18, 18)', 'Today primary action must have high contrast');
+    assert.equal(todayAction.color, 'rgb(254, 254, 254)', 'Today primary label must be readable');
+    assert.ok(todayAction.height >= 34, 'Today primary action must remain tappable');
+  }
+  assert.equal(await client.eval('document.querySelectorAll(".topbar-workspace").length'), 0,
+    'Decorative legacy workspace label must not return');
+  await client.screenshot('today-desktop-1440.png');
+  await client.goto('/curriculum');
+  console.log('PASS Today CTA hierarchy and current shell visuals');
+
   console.log('PASS desktop 1440: expanded sidebar, semantics, no overflow');
 
   await client.eval('document.querySelector(".sidebar-collapse").click()');
@@ -307,6 +321,16 @@ try {
     assert.equal(await client.eval('getComputedStyle(document.querySelector(' + JSON.stringify(className) + ')).display'),
       'block', route + ' should not allocate an empty rail');
   }
+  // Project, Integration and Review keep semantic back links with one pill treatment.
+  for (const route of ['/project/JAV-P01', '/integration/INT-001', '/review/SQL-001']) {
+    await client.goto(route);
+    const back = await client.eval('(() => { const node = document.querySelector(".project-back, .integration-back, .review-back"); if (!node) return null; const css=getComputedStyle(node); return { radius: css.borderRadius, size: css.fontSize, minHeight: css.minHeight, border: css.borderStyle }; })()');
+    assert.ok(back, 'Expected back navigation on ' + route);
+    assert.equal(back.radius, '9999px', 'Back navigation pill radius at ' + route);
+    assert.equal(back.size, '13px', 'Back navigation size at ' + route);
+  }
+  console.log('PASS consistent Project/Integration/Review back navigation');
+
   console.log('PASS project/integration single-column workspace');
 
   await client.resize(320, 720);
@@ -319,6 +343,11 @@ try {
     assert.equal(m.mainCount, 1, 'Duplicate main at ' + route);
   }
   await client.goto('/learn/SQL-001');
+  const mobileToolbar = await client.eval('(() => { const tabs=document.querySelector(".lesson-stage-tabs"); const secondary=document.querySelector(".lesson-toolbar-actions"); if (!tabs || !secondary) return null; const a=tabs.getBoundingClientRect(), b=secondary.getBoundingClientRect(); return { display:getComputedStyle(document.querySelector(".lesson-stage-toolbar")).display, first:{left:a.left,right:a.right,bottom:a.bottom}, second:{left:b.left,top:b.top} }; })()');
+  assert.ok(mobileToolbar, 'Lesson mobile toolbar must be present');
+  assert.equal(mobileToolbar.display, 'grid', 'Mobile Lesson toolbar must have explicit grid layout');
+  assert.ok(mobileToolbar.second.top >= mobileToolbar.first.bottom, 'Secondary reading actions belong on a distinct row');
+  assert.ok(Math.abs(mobileToolbar.second.left - mobileToolbar.first.left) <= 1, 'Secondary reading actions align with tabs');
   await client.screenshot('lesson-mobile-320.png');
   await client.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   assert.equal(await client.eval('matchMedia("(prefers-reduced-motion: reduce)").matches'), true,
