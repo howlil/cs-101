@@ -1,4 +1,4 @@
-import type { LearningSnapshot } from './learning';
+import type { LearningSnapshot } from './learning/contract';
 
 // Astro.locals is unique per SSR request. No data is shared between requests.
 const snapshots = new WeakMap<object, Promise<LearningSnapshot>>();

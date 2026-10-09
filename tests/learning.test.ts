@@ -12,7 +12,7 @@ import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { requiredEvidenceForItem } from '../src/domain/learning/rules';
 import { reviewBankSchema } from '../src/domain/review/schema';
 import { openDatabase } from '../src/server/storage';
-import { LearningService, LearningError } from '../src/server/learning';
+import { LearningService, LearningError } from '../src/server/learning/sqlite';
 
 const unitBase = {
   id: 'TEST-001',

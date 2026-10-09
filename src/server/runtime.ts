@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { curriculumGraph } from './curriculum';
-import { LearningService } from './learning';
-import { CloudflareLearningService, type D1Database } from './cloudflare-learning';
+import { LearningService } from './learning/sqlite';
+import { CloudflareLearningService, type D1Database } from './learning/d1';
 import { reviewBankFor } from './review-bank';
 
 let service: LearningService | undefined;

@@ -6,8 +6,8 @@ import { curriculumItemFingerprint, type CurriculumManifestV2 } from '../src/dom
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { requiredEvidenceForItem } from '../src/domain/learning/rules';
 import { reviewBankSchema } from '../src/domain/review/schema';
-import { LearningService } from '../src/server/learning';
-import { CloudflareLearningService, type D1Database } from '../src/server/cloudflare-learning';
+import { LearningService } from '../src/server/learning/sqlite';
+import { CloudflareLearningService, type D1Database } from '../src/server/learning/d1';
 import { openDatabase } from '../src/server/storage';
 
 const fp = <T extends object>(item: T) => ({
