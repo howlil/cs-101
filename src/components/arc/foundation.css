@@ -38,7 +38,7 @@
   --control-on-subtle: color-mix(in oklab, var(--control-on) 10%, transparent);
   /* Slider fills. Same as --control-on except neutral dark, where a mid grey keeps the white thumb distinct. */
   --control-fill: var(--control-on);
-  /* Product decision: no focus rings anywhere. Kept as a token so existing rules resolve to nothing. */
+  /* Keyboard focus-visible is 2px and remains visible (overridden by app palette). */
   --focus-ring: var(--accent-strong);
   --success: oklch(49% .19 150);
   --warning: oklch(58% .18 75);

@@ -517,28 +517,31 @@ Answer key review tidak dikirim ke client sebelum submit. Server melakukan gradi
 | Item ID tidak ditemukan | Pesan singkat + kembali ke curriculum |
 | Relation unresolved | Jangan crash UI; tandai sebagai validation issue saat build |
 
-## Visual direction
+## Visual direction — current canonical contract (October 2026)
 
-Tampilan tetap minimal dan utilitarian.
+CS-101 uses the neutral-first, calm Howlil UI. **`src/styles/tokens.css` owns the app palette and final spacing overrides** on top of the source-owned Arc primitives in `src/components/arc/foundation.css`. The historic warm-neutral and saturated-blue tables are retired: do not reintroduce them from older docs.
 
-| Token | Terang | Gelap |
+| Token | Light | Dark |
 | --- | --- | --- |
-| Canvas | `#FAFAF9` | `#111110` |
-| Surface | `#FFFFFF` | `#1C1C1A` |
-| Teks | `#1C1C1A` | `#F5F5F4` |
-| Teks sekunder | `#575752` | `#B7B7AD` |
-| Divider | `#E5E5E1` | `#343430` |
-| Outline | `#73736B` | `#85857B` |
-| Accent | `#1D4ED8` | `#93C5FD` |
+| Canvas / `--background` | `#FEFEFE` | `#080808` |
+| Surface / `--surface` | `#F7F7F7` | `#121212` |
+| Text / `--foreground` | `#121212` | `#FEFEFE` |
+| Secondary / `--text-secondary` | `#626262` | `#BFBFBF` |
+| Border / `--border` | `#E7E7E7` | `#262626` |
+| Accent selection / `--accent` | `#9BB1FF` | `#9BB1FF` |
+| Focus/action accent / `--accent-strong` | `#465C9A` | `#B4C5FF` |
 
-- System sans; monospace untuk ID/kode.
-- Body lesson 16px/1.65; UI 13–14px.
-- Spacing utama 4, 8, 12, 16, 24, 32.
-- Radius 6–10px; shadow hanya overlay.
-- Utility Star/Donate secondary; tidak boleh mengalahkan learning action.
-- Empty state compact, horizontal bila ruang cukup.
-- Status selalu punya label/shape; warna saja tidak cukup.
-- Motion route dimiliki `ClientRouter` melalui satu `transition:name`/`transition:animate` pada main workspace. Feedback fetch lambat hanya satu progress line di bawah topbar; jangan menambah persisted React navigation indicator kedua. Hormati `prefers-reduced-motion`.
+- System sans (SF Pro/Segoe UI fallback); SF Mono / Consolas for IDs and code.
+- App prose starts at 15px; full lesson reading is 16px/1.65. Meta 12px, UI control 14px, titles 18/20/28px. Do not author 8–11px learner-facing page metadata.
+- Compact spacing: 4, 8, 12, 16, 20, 24, 32px. Use `--space-*` and Arc foundation tokens; do not invent per-page spacing scales.
+- Current component radii are `--radius-control` 10px, `--radius-panel` 14px, and `--radius-surface` 16px; pill controls use `--radius-pill`.
+- Flat minimal surfaces. `--shadow-resting` is none; use elevated shadows only when required by overlays and subtle selected-state indicators.
+- **One primary next-action per workspace.** Today uses an explicit primary ActionLink, secondary routes use the neutral ActionLink or ordinary semantic anchors. Back navigation across Project/Integration/Review uses the same compact pill appearance.
+- Empty/error states stay compact; statuses must not rely on color alone.
+- Keyboard `:focus-visible` has a 2px visible focus outline with no layout shift; pointer clicks do not receive the ring.
+- Route motion belongs to Astro `ClientRouter` / one workspace transition. There is only one delayed navigation loading indicator. Respect `prefers-reduced-motion`.
+- Visual regression acceptance requires route screenshots at 1440/901/390/320, light/dark and task-state variants, not merely a successful build.
+
 
 ## Copy
 
