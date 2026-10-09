@@ -21,7 +21,7 @@ Lihat [`.agents/architecture.md`](.agents/architecture.md) sebagai kontrak **akt
 - **Enforcement:** jalankan `pnpm validate:architecture`, `pnpm validate:ui`, `pnpm test`, `pnpm check`, dan `pnpm build:node`. Untuk SQLite/D1 state mutation, uji parity, conflict, retry, dan transactional invariants. Mock D1 bukan substitusi test race pada D1 asli.
 
 
-### UI ownership: implemented in stacked refactor PRs
+### UI ownership: active on master
 
 Ownership migration is complete: Astro lesson blocks, quiz and reveal are under `lesson`; evidence/review/activation under `learning`; search/theme under `app`, project guarantee disclosure colocated with its page. Do not recreate retired folders or duplicate UI owners.
 
@@ -59,8 +59,10 @@ Aturan implementasi:
 - Navigation tetap semantic: gunakan `<a href>` untuk perpindahan route. Jangan mengganti link menjadi Button hanya demi visual consistency.
 - `AppLayout.astro` owns ClientRouter navigation. Keep the Astro header persistent, but let the route workspace and route-aware rail swap; never persist a React wrapper around `<slot />`.
 - SSR HTML includes private learner progress/revision and stays `Cache-Control: no-store`. Do not enable document prefetch or shared HTML caching until immutable curriculum content is separated from mutable learner state.
-- Card/surface bukan default container. Gunakan Card hanya bila containment memang membawa makna; untuk content linear gunakan heading, spacing, divider, atau accent line.
+- Card/surface bukan default container. Gunakan surface hanya bila containment memang membawa makna; untuk content linear gunakan heading, spacing, divider, atau accent line. Unused Arc Card quick-look telah dihapus.
 - Density default adalah `data-density="compact"`. Gunakan token layout/control; jangan hard-code versi density baru per halaman.
+- Audit wajib pada level page block: tiap block harus memiliki user job, state sumber, interaksi nyata, dan style owner. Komponen preview/demo tanpa consumer production harus dihapus atau dinyatakan fixture eksplisit; jangan menyamarkan outline manifest sebagai materi authored.
+- Lesson 16px/1.65; Today unboxed; modules single sidebar owner; review CTA hanya jika bank valid. Lihat Phase 07 di `.agents/design.md`.
 - Jangan mengatasi ruang kosong desktop dengan melebarkan prose. Bedakan **page frame** dari **reading measure**: workbench desktop centered boleh sampai ±1500 px, sedangkan prose tetap ±72–76ch.
 - Jangan membuat max-width page yang menempel kiri sehingga seluruh surplus width jatuh di sisi kanan. Semua non-curriculum workbench desktop harus centered.
 - Jika ada secondary context, gunakan primary region elastis + context rail 300–320 px. Primary boleh melebar untuk rows, matrix, evidence, requirement, dan progress; paragraf tetap bounded.

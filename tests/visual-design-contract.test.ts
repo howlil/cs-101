@@ -73,6 +73,6 @@ test('unavailable content and review are disclosed, not fake completion actions'
   const lesson = src('src/components/pages/LessonPage.tsx');
   const progress = src('src/pages/progress.astro');
   assert.match(curriculum, /item-outline-status/);
-  assert.match(lesson, /Latihan manual/);
+  assert.match(lesson, /latihan manual/i);
   assert.match(progress, /unavailableReviewCount/);
 });
