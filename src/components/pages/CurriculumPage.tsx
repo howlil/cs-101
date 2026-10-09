@@ -75,7 +75,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
                 <h3>Yang akan dipelajari</h3>
                 <ul className="compact-list">{selected.scope?.slice(0, 3).map((scope) => <li key={scope}>{scope}</li>)}</ul>
                 {(selected.scope?.length ?? 0) > 3 && <p className="item-brief-note">
-                  +{selected.scope!.length - 3} kompetensi lain dijelaskan di materi.
+                  +{selected.scope!.length - 3} kompetensi lain {selected.hasLesson ? 'dijelaskan di materi.' : 'tercantum di kurikulum.'}
                 </p>}
               </section>}
 

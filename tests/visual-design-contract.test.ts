@@ -76,3 +76,9 @@ test('unavailable content and review are disclosed, not fake completion actions'
   assert.match(lesson, /latihan manual/i);
   assert.match(progress, /unavailableReviewCount/);
 });
+
+
+test('manifest-only previews never claim missing authored lesson content', () => {
+  const curriculum = src('src/components/pages/CurriculumPage.tsx');
+  assert.match(curriculum, /selected\.hasLesson \? 'dijelaskan di materi\.' : 'tercantum di kurikulum\.'/);
+});
