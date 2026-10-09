@@ -17,7 +17,7 @@ test('lesson transitions move focus after primary next CTA and preserve keyboard
 test('evidence tab never becomes an empty destination for ineligible learners', () => {
   const lesson = read('src/components/pages/LessonPage.tsx');
   assert.match(lesson, /lesson-evidence-gate/);
-  assert.match(lesson, /Prasyarat belum terpenuhi/);
+  assert.match(lesson, /Selesaikan prasyarat untuk menyimpan bukti/);
   assert.match(lesson, /Aktifkan materi untuk menyimpan bukti/);
   assert.match(lesson, /<ItemStatusAction itemId=\{itemId\} kind="unit"/);
   assert.match(lesson, /Materi sudah selesai/);

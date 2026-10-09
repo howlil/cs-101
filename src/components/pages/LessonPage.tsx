@@ -225,12 +225,23 @@ export default function LessonPage({
             {reviewHref && <a href={reviewHref}>Lihat status review</a>}
           </> : <>
             <strong>{visibleState.status === 'locked'
-              ? 'Prasyarat belum terpenuhi'
+              ? 'Selesaikan prasyarat untuk menyimpan bukti'
               : 'Aktifkan materi untuk menyimpan bukti'}</strong>
             <p>{visibleState.status === 'locked'
-              ? 'Kamu boleh membaca dan berlatih sekarang. Penyimpanan sesi tersedia setelah prasyarat diselesaikan.'
+              ? 'Kamu tetap bisa membaca dan mencoba latihan. Sesi baru dapat disimpan setelah prasyarat selesai.'
               : 'Kamu boleh membaca dan mencoba latihan tanpa mengaktifkan materi. Untuk menyimpan sesi dan bukti selesai, aktifkan materi terlebih dahulu.'}</p>
-            <ItemStatusAction itemId={itemId} kind="unit" state={visibleState} prerequisites={prerequisites} />
+            {visibleState.status === 'locked' ? (
+              <div className="lesson-evidence-prerequisites">
+                {visibleState.missingPrerequisites.map((id) => {
+                  const prerequisite = prerequisites.find((item) => item.id === id);
+                  return prerequisite
+                    ? <a key={id} href={prerequisite.href}>Kerjakan {id} · {prerequisite.title}</a>
+                    : <span key={id}>Prasyarat: {id}</span>;
+                })}
+              </div>
+            ) : (
+              <ItemStatusAction itemId={itemId} kind="unit" state={visibleState} prerequisites={prerequisites} />
+            )}
           </>}
         </aside>
       )}

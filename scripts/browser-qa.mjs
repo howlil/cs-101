@@ -322,7 +322,8 @@ try {
   const gateY = await client.eval('document.querySelector(".lesson-evidence-gate").getBoundingClientRect().top');
   const panelY = await client.eval('document.querySelector("#lesson-panel-evidence").getBoundingClientRect().top');
   assert.ok(gateY < panelY, 'Eligibility guidance must precede evidence checklist visually');
-  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Prasyarat belum terpenuhi")'), 'Locked state must be explained in evidence stage');
+  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Selesaikan prasyarat untuk menyimpan bukti")'), 'Locked state must be explained in evidence stage');
+  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 0, 'Avoid repeating the locked badge and prerequisite block inside the evidence gate');
   assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
   await client.screenshot('lesson-locked-evidence-901.png');
   console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');

@@ -310,3 +310,7 @@
 .lesson-evidence-gate .item-action-status { margin:7px 0 0; }
 
 .lesson-evidence-gate { scroll-margin-top:calc(var(--app-topbar-height) + 16px); outline-offset:4px; }
+
+.lesson-evidence-prerequisites { display:grid; gap:6px; width:100%; }
+.lesson-evidence-prerequisites a { width:fit-content; max-width:100%; color:var(--foreground); font-size:13px; line-height:20px; overflow-wrap:anywhere; }
+.lesson-evidence-prerequisites span { color:var(--text-secondary); font-size:13px; }
