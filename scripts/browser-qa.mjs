@@ -308,7 +308,7 @@ try {
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
   assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Prasyarat belum terpenuhi")'), 'Locked state must be explained in evidence stage');
-  assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate a[href*="SQL-002"]"))'), 'Locked evidence state must link to its prerequisite');
+  assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
   await client.screenshot('lesson-locked-evidence-901.png');
   console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');
   console.log('PASS other authored lessons and manifest-only fallback parity');
