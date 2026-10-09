@@ -41,3 +41,10 @@ test('metadata minimum and connected-item list use current typography', () => {
     assert.doesNotMatch(css, /font-size:\s*(?:8|9|10|11)px/, path);
   }
 });
+
+test('Curriculum module rows show progress without duplicate inline CTA copy', () => {
+  const page = src('src/components/pages/CurriculumPage.tsx');
+  assert.match(page, /<small>\{module\.completed\}\/\{module\.total\} selesai<\/small>/);
+  assert.doesNotMatch(page, /selesai · Buka materi pertama/);
+  assert.match(src('src/styles/workspace.css'), /\.progress-integration-copy code \{ width: max-content/);
+});

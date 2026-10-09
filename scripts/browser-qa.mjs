@@ -310,6 +310,10 @@ try {
   m = await client.metrics();
   assert.equal(m.theme, 'dark', 'Theme should survive full navigation');
   assert.equal(m.bodyBg, 'rgb(8, 8, 8)', 'Dark canvas should match Howlil token');
+  const integrationCode = await client.eval('(() => { const node = document.querySelector(".progress-integration-copy code"); if (!node) return null; return { width: node.getBoundingClientRect().width, justify: getComputedStyle(node).justifySelf }; })()');
+  assert.ok(integrationCode, 'Integration ID should be visible in Progress');
+  assert.equal(integrationCode.justify, 'start', 'Integration ID chip must not stretch across the row');
+  assert.ok(integrationCode.width < 120, 'Integration ID chip should fit its text, not the full card');
   await client.screenshot('progress-mobile-dark-390.png');
   console.log('PASS dark theme persistence and surface');
 

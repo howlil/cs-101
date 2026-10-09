@@ -32,6 +32,7 @@
 .today-sidecar .today-review-cta { grid-column: 2; justify-self: start; }
 
 .progress-integration-copy { min-width: 0; display: grid; gap: 1px; }
+.progress-integration-copy code { width: max-content; max-width: 100%; justify-self: start; }
 .progress-integration-copy strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* Project, Integration and Review now use in-flow disclosures and
@@ -68,7 +69,7 @@
 /* Learner-facing simplification */
 .today-blocker{grid-column:1;padding:9px 0 9px 10px;border-left:2px solid var(--warning)}
 .today-blocker span,.today-blocker p{margin:0}
-.today-blocker span{display:block;margin-bottom:4px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.today-blocker span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .today-blocker p{font-size:12px;line-height:1.45}
 .lesson-fallback{display:grid;gap:0;margin-top:18px}
 .lesson-fallback>section{padding:18px 0;border-top:1px solid var(--line)}
@@ -79,8 +80,8 @@
 .lesson-fallback a{display:inline-flex;align-items:center;gap:6px}
 .review-summary{display:grid;gap:4px;padding-bottom:14px}
 .review-summary strong{font-size:13px}
-.review-summary>span:last-child:not(.eyebrow){color:var(--muted);font-size:11px}
-.history-blocker{margin:6px 0 0;color:var(--muted);font-size:11px}
+.review-summary>span:last-child:not(.eyebrow){color:var(--muted);font-size:12px}
+.history-blocker{margin:6px 0 0;color:var(--muted);font-size:12px}
 .evidence-hint{margin:8px 0 10px;max-width:72ch}
 .deep-reflection{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .deep-reflection>p{margin:0 0 8px}

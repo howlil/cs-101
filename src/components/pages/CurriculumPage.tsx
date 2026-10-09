@@ -149,7 +149,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
                   <span className="curriculum-overview-number">{String(index + 1).padStart(2, '0')}</span>
                   <span className="curriculum-overview-copy">
                     <strong>{module.title}</strong>
-                    <small>{module.completed}/{module.total} selesai · Buka materi pertama</small>
+                    <small>{module.completed}/{module.total} selesai</small>
                   </span>
                   <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
                 </a>
