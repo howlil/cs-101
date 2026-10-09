@@ -258,10 +258,16 @@ try {
     'SQL-001 should offer three lesson stages');
   assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
     [1,1,1], 'SQL-001 must have one tabpanel per stage');
-  await client.eval('document.querySelector("#lesson-tab-practice").click()');
+  // Test the *bottom* CTA, not only the top tab. Long reading must
+  // move keyboard focus to the newly visible practice panel.
+  await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
-  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-practice"'), 'Practice panel receives focus');
+  assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
+  await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-evidence"'), 'Evidence panel receives focus');
+  assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Inactive learner must not reach an empty evidence dead end');
   const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
   if (evidenceExists) {
     assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
@@ -296,6 +302,15 @@ try {
       assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
     }
   }
+  // A locked authored unit can still be read and practiced, but evidence
+  // must provide prerequisite guidance rather than an empty final stage.
+  await client.goto('/learn/SQL-003');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
+  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Prasyarat belum terpenuhi")'), 'Locked state must be explained in evidence stage');
+  assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate a[href*="SQL-002"]"))'), 'Locked evidence state must link to its prerequisite');
+  await client.screenshot('lesson-locked-evidence-901.png');
+  console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');
   console.log('PASS other authored lessons and manifest-only fallback parity');
 
 

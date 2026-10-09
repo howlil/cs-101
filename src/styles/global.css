@@ -287,4 +287,4 @@ body::-webkit-scrollbar,
 .challenge-execution-note { color:var(--text-secondary); font-size:13px; line-height:20px; border-left:2px solid var(--border-strong); padding:3px 0 3px 12px; margin:12px 0; }
 
 .session-draft-state { margin:4px 0 14px; color:var(--text-secondary); font-size:12px; line-height:18px; }
-.evidence-coverage { color:var(--foreground); font-size:13px; font-weight:500; }
+.completion-rule .evidence-coverage { color:var(--foreground); font-size:13px; font-weight:500; }

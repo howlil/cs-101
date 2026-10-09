@@ -715,3 +715,20 @@ This section supersedes historic layout sketches and old demo screenshots above.
 - **Review**: domain continues tracking due/retry, but Today/Progress only advertise actionable attempts when a current validated question bank exists. Other pending reviews are disclosed as unavailable, not linked as if ready.
 - **Content publication**: follow `.agents/skill/course-generator/SKILL.md` one unit at a time: canonical manifest → official sources → coverage/spec → three-stage MDX → 5-question review bank → validation. No bulk filler content.
 - **QA**: verify mobile 320/390, desktop 901/1440, dark, keyboard/focus, authored and manifest-only units, and project/integration/review workspaces. Avoid changing a shared stylesheet selector across unrelated route blocks.
+
+## Learning flow UX — continuity and recovery (October 2026)
+
+**Job:** Return to one useful activity, practice actively, and preserve what was learned without confusing local draft, saved session, mastery evidence, and spaced review.
+
+Happy path: Hari ini → open task → Pahami → Latihan (formative) → Bukti → activate if eligible → save partial session **or** submit complete evidence → review when due and a current question bank exists.
+
+- **Read vs act:** Browsing never activates or completes a task. Reading and practicing remain accessible even for locked items; saving requires eligibility and explicit activation.
+- **Stage continuity:** Primary end-of-stage CTAs reveal the next panel and move keyboard focus to it; tab controls keep tab semantics and Arrow/Home/End behavior. No forced focus movement from passive hash navigation.
+- **No final-stage dead end:** The Bukti stage must explain locked/inactive/passed states and offer the real next action/prerequisite links. Do not conceal activation behind a far-away header CTA.
+- **Formative vs completion:** Quiz feedback is immediate and retryable; answers are not recorded as completed. Completion is only through server-validated evidence via `/api/sessions`.
+- **Draft vs saved:** Changes persist as a local draft in this browser, but only explicit saving commits a session. Show that distinction adjacent to the form; display live count of evidence-covered targets and focus the first missing evidence on invalid completion.
+- **Review:** Show answered/total before final submission; keep grading server-side and answer keys inaccessible before submit. Failed reviews do not revoke completion.
+- **Navigation scale:** Curriculum search may be truncated for performance only when results show their total count and users have an accessible way to fetch additional matches. Do not silently drop results after 16.
+- **Responsive/a11y:** Validate tab-panel focus from end-of-content CTA, locked unit recovery, no 320px overflow, keyboard, reduced-motion, pending/draft/error states.
+
+**Deliberately not built:** gamified streaks, forced timers, invented AI graders, local quiz completion, a second curriculum tree, planner, or redundant permanent sidecar.
