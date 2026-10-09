@@ -1,6 +1,6 @@
 # CS-101
 
-Kerangka course pribadi: Astro + MDX, TypeScript, dan SQLite bawaan Node 24.
+Learning execution workspace: Astro + MDX + React, TypeScript, SQLite (Node 24) untuk local, dan Cloudflare D1 untuk production.
 
 ## Jalankan
 

@@ -11,7 +11,7 @@ h2 { font-size: 21px; margin: 24px 0 12px; }
 h3 { font-size: 17px; margin: 20px 0 8px; }
 p { margin: 0 0 12px; }
 ul, ol { padding-left: 20px; }
-code, pre, .task-code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
 code { font-size: .875em; }
 :not(pre) > code { background: var(--surface-muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; overflow-wrap: anywhere; }
 pre { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-control); overflow-x: auto; font-size: 14px; line-height: 1.7; }
@@ -19,9 +19,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 .content { max-width: 720px; }
 .prose { min-width: 0; }
-.toc { position: sticky; top: 112px; align-self: start; font-size: 13px; }
-.toc a { display: block; color: var(--muted); text-decoration: none; padding: 6px 0; }
-.toc .eyebrow { display: block; margin-bottom: 12px; }
 .lede { color: var(--muted); max-width: 60ch; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
@@ -29,27 +26,17 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .mental-model { border-left: 2px solid var(--accent); padding: 4px 0 4px 20px; margin: 24px 0; }
 .mental-model p:last-child { margin-bottom: 0; }
 .mental-model h2, .mental-model h3 { margin-top: 0; }
-.task-list { list-style: none; padding: 0; }
-.task-list li { border-top: 1px solid var(--line); padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.task-list a { color: var(--text); text-decoration: none; }
 .history-entry { border-top: 1px solid var(--line); padding: 16px 0; }
 .history-entry p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .session-form { border-top: 1px solid var(--line); margin-top: 32px; padding-top: 8px; }
 .session-form fieldset { border: 0; padding: 0; margin: 0; }
 .session-form legend { font-weight: 600; margin-bottom: 12px; }
-.session-form .arc-field { margin: 16px 0; }
-.session-form .arc-feedback { margin-top: 12px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; top: -100px; left: 16px; z-index: 5; padding: 8px 16px; background: var(--surface); }
 .skip-link:focus { top: 8px; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
 
-.progress-tracks { display: grid; gap: 18px; margin-top: 24px; }
-.progress-track { border-top: 1px solid var(--line); padding-top: 12px; }
-.progress-track-heading { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-bottom: 8px; }
-.progress-track-heading a { color: var(--text); font-weight: 650; text-decoration: none; }
-.progress-track-heading span { color: var(--muted); font: 600 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .progress-modules { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 12px; }
 .progress-modules a { display: flex; justify-content: space-between; gap: 12px; padding: 7px 8px; border-radius: var(--radius-control); color: var(--muted); text-decoration: none; font-size: 12px; }
 .progress-modules a:hover { color: var(--text); background: var(--surface-muted); }
@@ -59,8 +46,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .today-review { margin-top: 26px; }
 .today-review-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .today-review-heading h2 { margin-bottom: 8px; }
-.today-review-heading span, .today-review-empty { color: var(--muted); font-size: 12px; }
-.today-review-empty { margin-top: 24px; }
+.today-review-heading span { color: var(--muted); font-size: 12px; }
 
 .progress-review-queue, .progress-integrations { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); }
 .progress-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
@@ -88,9 +74,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .evidence-reference ol { margin: 0; padding-left: var(--space-6); }
 .evidence-continuation { padding-top: var(--space-5); border-top: 1px solid var(--border); }
 
-@media (max-width: 1199px) {
-  .toc { display: none; }
-}
 @media (max-width: 767px) {
   h1 { font-size: 26px; }
   pre { padding: 12px; }
@@ -133,7 +116,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
   gap: 10px;
   margin: 24px 0 30px;
 }
-.lesson-why, .lesson-small-step, .lesson-stuck {
+.lesson-why, .lesson-small-step {
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
@@ -143,8 +126,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .lesson-why li { margin: 5px 0; }
 .lesson-small-step strong { display: block; margin-top: 4px; }
 .lesson-small-step small { display: block; margin-top: 6px; color: var(--muted); }
-.lesson-stuck ol { margin: 0; padding-left: 20px; }
-.lesson-stuck li { margin: 7px 0; }
 
 .session-close {
   padding: 20px 0;
@@ -226,7 +207,6 @@ hr { margin: 24px 0; }
 .actions { margin: 12px 0; }
 .history-entry { padding: 12px 0; }
 .session-form { margin-top: 24px; }
-.progress-tracks { gap: 14px; margin-top: 20px; }
 .progress-review-queue, .progress-integrations { margin-top: 22px; padding-top: 14px; }
 .progress-history { margin-top: 22px; }
 
@@ -292,7 +272,6 @@ hr { margin: 24px 0; }
 .lesson-why li { margin: 3px 0; }
 .lesson-small-step strong { margin-top: 2px; }
 .lesson-small-step small { margin-top: 4px; }
-.lesson-stuck li { margin: 5px 0; }
 
 .session-close { padding: 16px 0; }
 .session-meta-field { max-width: 180px; }
