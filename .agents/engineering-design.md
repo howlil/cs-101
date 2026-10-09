@@ -2,7 +2,7 @@
 
 > Kontrak folder dan dependency yang **aktif** ada di [`architecture.md`](architecture.md). Target tree dalam dokumen ini bersifat evolusi, bukan instruksi membuat layer yang belum diperlukan.
 
-Updated · 7 Oktober 2026 · Mengikuti [product design](design.md)
+Updated · 9 Oktober 2026 · UI structure roadmap aligned with active [architecture contract](architecture.md)
 
 CS-101 memakai **hierarchical curriculum + dependency graph + runtime learning state**. Curriculum adalah build-time/source data; progress dan evidence adalah runtime data. Production berjalan di Astro Cloudflare Workers + D1, sedangkan local development tetap dapat memakai Astro Node + SQLite.
 
@@ -703,46 +703,55 @@ Migration dilakukan bertahap:
 
 Historical Task ID tetap valid karena unit ID existing dipertahankan.
 
-## Repository target
+## Repository structure: active server + planned UI
+
+Active ownership contract: [`architecture.md`](architecture.md). **The server refactor is already merged**: shared pure decisions in `src/domain/learning/decisions.ts`, shared snapshot types in `src/server/learning/contract.ts`, and independent `src/server/learning/{sqlite,d1}.ts` persistence. Do not recreate `src/server/learning.ts`, `src/server/cloudflare-learning.ts`, or add another `learning-contract.ts` wrapper. `pnpm validate:architecture` already runs in the repository validation script.
+
+The *remaining* refactoring scope is component-locality and content-generation path references:
 
 ```text
-cs-101/
-├── curriculum/
-│   ├── raw/
-│   ├── manifest.v2.json
-│   └── import-report.json
-├── generation/
-│   └── <ITEM-ID>.json
-├── scripts/
-│   ├── import-curriculum.ts
-│   ├── validate-curriculum.ts
-│   └── validate-content.ts
-├── src/
-│   ├── content/lessons/
-│   ├── domain/
-│   │   ├── curriculum/
-│   │   │   ├── schema.ts
-│   │   │   ├── graph.ts
-│   │   │   ├── selectors.ts
-│   │   │   └── fingerprint.ts
-│   │   └── learning/
-│   │       ├── rules.ts
-│   │       └── schema.ts
-│   ├── server/
-│   │   ├── learning-service.ts
-│   │   └── storage/
-│   │       ├── d1.ts
-│   │       └── sqlite.ts
-│   ├── components/
-│   │   ├── curriculum/
-│   │   └── course/
-│   ├── layouts/
-│   └── pages/
-├── migrations/
-└── tests/
+src/
+  pages/                  # Astro routes + API; unchanged
+  layouts/                # AppLayout.astro; unchanged
+  components/
+    arc/                  # UIArc + CSS modules; unchanged
+    app/                  # app chrome, sidebar, search, theme (target)
+    curriculum/           # contextual explorer/connections; unchanged
+    lesson/               # MDX blocks, QuizClient, RevealAccordion (target)
+    learning/             # activation, session, evidence, review UI (target)
+    pages/                # page compositions; unchanged
+    ui/                   # reusable product composition; remain small
+  domain/
+    curriculum-v2/        # graph, schema, selectors; V1 compatibility separate
+    learning/             # schemas, decisions, view models, progression
+    review/               # grading and policy
+    generation/           # generator context and validation
+  server/
+    learning/
+      contract.ts
+      sqlite.ts
+      d1.ts
+    runtime.ts
+    request-snapshot.ts
+    ...                    # storage, HTTP, source, review bank
+  content/lessons/        # unchanged MDX location
+  styles/                # no CSS rewrite in folder move
+scripts/                  # validation, generation and tooling
+curriculum/               # normalized snapshots
+generation/               # provenance metadata
+review-banks/             # assessment banks
+migrations/               # SQLite/D1 changes
+tests/                    # tests and browser QA
 ```
 
-Struktur boleh disederhanakan selama boundaries tetap sama.
+`course/`, `search/`, `project/` folders are valid **legacy UI layout** until their *atomic relocation* PRs are merged. Do not add parallel implementations in target directories. Keep `components/pages` as page composition instead of introducing an extra `features/*/{ui,model,api}` hierarchy. Keep `arc/<primitive>` subfolders with source-owned CSS Modules.
+
+Allowed dependencies: Astro route/layout → server/domain + UI; page composition → feature UI/Arc + domain types/selectors; feature UI → Arc + domain public types/view-models, HTTP client for mutations; server → domain and persistence; domain → domain only; Arc → primitive deps only. UI must never import server/DB modules. Only explicitly justified composition edges may cross feature owners (e.g. AppSidebar consumes CurriculumExplorer).
+
+**Extraction rubric:** a new folder/interface/helper must solve observable change scattering, remove genuine duplicated behaviour, or enforce a necessary tested boundary. Prefer colocated component or pure function. Avoid generic use-case/controller/DI/ports/repository layers. Keep V1 compatibility, MDX generation, and SQLite/D1 parity intact.
+
+The exact move map, content/template references, acceptance gates, and rollback plan are in [`refactoring-plan.md`](refactoring-plan.md). Folder counts are not acceptance criteria; change locality, dependency direction, CI and behaviour preservation are.
+
 
 ## Test strategy
 

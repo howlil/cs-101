@@ -37,6 +37,25 @@ Dependencies move in one direction: **UI / Astro routes → server orchestration
 
 Existing component folders remain; do not add a parallel `features/` hierarchy.
 
+## UI component boundaries (migration target)
+
+Backend ownership in this file is **already implemented and active** (shared decisions + `src/server/learning/{contract,sqlite,d1}.ts`). UI folder migration is **planned**, not implemented. Full checklist: [`refactoring-plan.md`](refactoring-plan.md).
+
+```text
+Astro routes/layout → page compositions and server/SSR
+page compositions → app/curriculum/lesson/learning/ui + Arc
+lesson MDX → lesson presentation blocks + interactive quiz/reveal
+learning UI → HTTP API + domain types/view models + Arc
+server → domain rules + SQLite/D1 (never React)
+domain → domain (never server, browser, Astro UI)
+Arc → generic React/Radix primitives (never CS-101 domain)
+```
+
+When migrating existing `components/course`: authored MDX/lesson presentation blocks belong in `lesson`; session/evidence/review components belong in `learning`. `components/search` and `ui/ThemePreference` move to `app`; the one-consumer `project/GuaranteeAccordion` should be colocated, not expanded into a new architecture slice. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
+
+**Folder creation test:** does the directory own a stable behaviour/contract, or contain files changed together? If no, colocate. No abstraction just for a clean-looking tree, no barrel exports per folder, no special import API unless it measurably reduces coupling. The current `pnpm validate:architecture` enforces core cross-layer restrictions; only add folder-specific checks after the move.
+
+
 ## Place new code by ownership
 
 1. **Prerequisite/completion/evidence/review eligibility changes:** update one pure function in `src/domain/learning/decisions.ts` or existing domain rules. Cover it with a focused test.

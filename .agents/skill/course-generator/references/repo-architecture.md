@@ -1,58 +1,27 @@
 # Recommended `cs-101` Repository Architecture
 
+> **Current vs future:** This document must follow the active [architecture contract](../../../architecture.md) and [UI refactoring plan](../../../refactoring-plan.md). `src/components/course/*.astro` imports are **currently correct** in authored MDX and `lesson-template.mdx`; do not change them until the atomic lesson relocation PR. The server already uses `src/server/learning/{contract,sqlite,d1}.ts`.
+
 Use Astro as the renderer and content system. Generated lessons should be MDX/content entries that compile to HTML, not hand-authored standalone HTML documents.
 
 ```text
-cs-101/
-├─ AGENTS.md
-├─ astro.config.mjs
-├─ package.json
-├─ tsconfig.json
-├─ skills/
-│  └─ course-generator/
-│     ├─ SKILL.md
-│     ├─ references/
-│     └─ assets/
-├─ curriculum/
-│  ├─ manifest.json              # normalized source-of-truth snapshot
-│  └─ schema.ts
-├─ generation/
-│  └─ <TASK-ID>.json             # provenance/fingerprint/validation
-├─ learning/
-│  ├─ state.json                 # active task + review state
-│  └─ sessions.jsonl             # append-only learning evidence
-├─ scripts/
-│  ├─ sync-curriculum.ts
-│  ├─ generate-course.ts
-│  └─ validate-course.ts
-├─ src/
-│  ├─ content.config.ts
-│  ├─ content/
-│  │  └─ lessons/
-│  │     ├─ JAV-001.mdx
-│  │     └─ SQL-001.mdx
-│  ├─ components/
-│  │  └─ course/
-│  │     ├─ MentalModel.astro
-│  │     ├─ ConceptGraph.astro
-│  │     ├─ Quiz.astro
-│  │     ├─ Challenge.astro
-│  │     ├─ ExitCriteria.astro
-│  │     ├─ SourceList.astro
-│  │     ├─ ContinueFrom.astro
-│  │     ├─ SessionLogger.tsx
-│  │     ├─ ReviewMode.astro
-│  │     └─ Reveal.astro
-│  ├─ layouts/
-│  │  └─ LessonPage.tsx
-│  └─ pages/
-│     ├─ index.astro
-│     ├─ learn/[id].astro
-│     ├─ review/[id].astro
-│     └─ progress.astro
-└─ public/
+cs-101/                       # Current layout, not future structure
+├── curriculum/               # manifest.v2.json
+├── generation/               # provenance records
+├── review-banks/             # quiz/review artifacts
+├── scripts/                  # generate / validate / promote
+├── migrations/               # SQLite + D1 migrations
+├── src/
+│   ├── content/lessons/       # MDX content
+│   ├── components/course/     # current MDX blocks (planned → lesson/)
+│   ├── components/ui/         # QuizClient and RevealAccordion (planned → lesson/)
+│   ├── components/learning/   # current evidence/activation UI
+│   ├── domain/                # curriculum graph + learning/review/generation
+│   ├── server/learning/       # contract.ts, sqlite.ts, d1.ts (already refactored)
+│   ├── layouts/              # Astro application layout
+│   └── pages/                # Astro file-based routing
+└── .agents/refactoring-plan.md
 ```
-
 ## Data ownership
 
 ```text
@@ -65,7 +34,7 @@ src/content/lessons/**/<TASK-ID>.mdx
 HTML course page
 ```
 
-The generated MDX is a cache/artifact. `curriculum/manifest.json` remains the local specification snapshot.
+The generated MDX is a cache/artifact. `curriculum/manifest.v2.json` is the current curriculum specification; `curriculum/manifest.json` is retained for V1 compatibility.
 
 ## Why MDX instead of raw HTML
 
