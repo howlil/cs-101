@@ -16,10 +16,6 @@ import { getItemActionState } from '../domain/learning/item-action';
 
 const graph = curriculumGraph;
 const tracks = [...graph.manifest.tracks].sort((a, b) => a.order - b.order);
-const integrations = graph.manifest.items
-  .filter((item) => item.kind === 'integration')
-  .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
-
 let learningState: LearningSnapshot | undefined;
 try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
 

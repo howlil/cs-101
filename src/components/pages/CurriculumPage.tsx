@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Boxes, Clock3, ExternalLink, FolderKanban, Link2,
+  ArrowRight, Boxes, Clock3, ExternalLink, FolderKanban, Link2,
 } from 'lucide-react';
 import ItemStatusAction from '../learning/ItemStatusAction';
 import type { ItemActionState } from '../../domain/learning/item-action';
@@ -151,7 +151,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
                     <strong>{module.title}</strong>
                     <small>{module.completed}/{module.total} selesai</small>
                   </span>
-                  <span aria-hidden="true">→</span>
+                  <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
                 </a>
               ))}
             </nav>

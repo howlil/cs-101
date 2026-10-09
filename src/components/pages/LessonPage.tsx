@@ -249,7 +249,9 @@ export default function LessonPage({
       {staged && stage === 'practice' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('evidence')}>Catat bukti</Button>
       </div>}
-      {!demo && active && visibleState.status !== 'passed' && <div className={staged ? 'lesson-staged-evidence-form' : undefined}>
+      {!demo && active && visibleState.status !== 'passed' && <div className={staged ? 'lesson-staged-evidence-form' : undefined}
+        role={staged ? 'group' : undefined}
+        aria-labelledby={staged ? 'lesson-tab-evidence' : undefined}>
         <SessionLogger
           initialCompletionOpen={staged}
           itemId={itemId}
