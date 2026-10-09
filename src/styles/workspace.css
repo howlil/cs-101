@@ -71,13 +71,6 @@
 .today-blocker span,.today-blocker p{margin:0}
 .today-blocker span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .today-blocker p{font-size:12px;line-height:1.45}
-.lesson-fallback{display:grid;gap:0;margin-top:18px}
-.lesson-fallback>section{padding:18px 0;border-top:1px solid var(--line)}
-.lesson-fallback h2{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:16px}
-.lesson-fallback h3{margin:0 0 7px;font-size:13px}
-.lesson-fallback ul,.lesson-fallback ol{margin:0;padding-left:19px}
-.lesson-fallback li{margin:5px 0}
-.lesson-fallback a{display:inline-flex;align-items:center;gap:6px}
 .review-summary{display:grid;gap:4px;padding-bottom:14px}
 .review-summary strong{font-size:13px}
 .review-summary>span:last-child:not(.eyebrow){color:var(--muted);font-size:12px}
@@ -98,15 +91,13 @@
 .lesson-staged blockquote > :last-child { margin-bottom:0; }
 
 /* Shared lesson workspace: no permanent context rail. All units use 3 stages. */
-.lesson-grid.lesson-staged,
-.lesson-grid.lesson-demo {
+.lesson-grid.lesson-staged {
   display:block;
   width:min(760px,100%);
   max-width:760px;
   margin-inline:auto;
 }
-.lesson-grid.lesson-staged > .prose,
-.lesson-grid.lesson-demo > .prose { grid-area:auto; width:100%; max-width:100%; }
+.lesson-grid.lesson-staged > .prose { grid-area:auto; width:100%; max-width:100%; }
 .lesson-stage-toolbar {
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; flex-wrap:wrap; margin:22px 0 32px;

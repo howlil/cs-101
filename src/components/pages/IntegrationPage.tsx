@@ -4,10 +4,8 @@ import {
   ArrowLeft,
   Boxes,
   Check,
-  CheckCircle2,
   Circle,
   LockKeyhole,
-  PackageCheck,
   Target,
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';

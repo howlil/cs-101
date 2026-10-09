@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   FolderKanban,
-  Layers3,
   Link2,
   LockKeyhole,
 } from 'lucide-react';

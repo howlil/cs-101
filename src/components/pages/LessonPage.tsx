@@ -44,7 +44,6 @@ export default function LessonPage({
   criteria,
   headings,
   connections,
-  demo = false,
   children,
 }: {
   itemId: string;
@@ -73,7 +72,6 @@ export default function LessonPage({
   headings: StagedLessonHeading[];
   connections: ConnectionGroupData[];
   curriculumHref: string;
-  demo?: boolean;
   children?: ReactNode;
 }) {
   const toc = headings.filter((heading) => heading.depth === 2);
@@ -85,13 +83,11 @@ export default function LessonPage({
   };
   // All curriculum units expose the same stages. Authored MDX defines its own
   // boundaries; missing lessons use structured manifest content, not fake MDX.
-  const staged = !demo;
   const [stage, setStage] = useState<StageId>('understand');
   const [contextOpen, setContextOpen] = useState(false);
   const [focus, setFocus] = useState(false);
 
   useEffect(() => {
-    if (!staged) return;
     const updateFromHash = () => {
       const hash = window.location.hash.slice(1);
       const mapped = toc.find((heading) => heading.slug === hash);
@@ -103,7 +99,7 @@ export default function LessonPage({
     updateFromHash();
     window.addEventListener('hashchange', updateFromHash);
     return () => window.removeEventListener('hashchange', updateFromHash);
-  }, [itemId, staged, headings]);
+  }, [itemId, headings]);
 
   useEffect(() => {
     if (!staged) return;
@@ -116,7 +112,7 @@ export default function LessonPage({
       delete document.documentElement.dataset.focus;
       window.removeEventListener('keydown', handleEscape);
     };
-  }, [focus, staged]);
+  }, [focus]);
 
   const chooseStage = (next: StageId) => {
     setStage(next);
@@ -164,34 +160,32 @@ export default function LessonPage({
     </>
   );
 
-  return <div className={staged ? 'lesson-grid lesson-staged' : 'lesson-grid lesson-demo'} data-active-stage={staged ? stage : undefined}>
+  return <div className="lesson-grid lesson-staged" data-active-stage={stage}>
     <article className="prose">
-      {!demo && <nav className="lesson-location" aria-label="Posisi di kurikulum">
+      <nav className="lesson-location" aria-label="Posisi di kurikulum">
         <a href={curriculumHref}>Kurikulum</a>
         {breadcrumb?.track && <span>{breadcrumb.track}</span>}
         {breadcrumb?.module && <span>{breadcrumb.module}</span>}
         {breadcrumb?.total ? <span>Materi {breadcrumb.position} dari {breadcrumb.total}</span> : null}
-      </nav>}
+      </nav>
       <p className="eyebrow"><BookOpen size={13} strokeWidth={1.8} aria-hidden="true" /> {itemId}</p>
       <h1>{title}</h1>
-      {demo && <Alert title="Mode contoh" tone="info">Tidak masuk progres.</Alert>}
       {stale && <Alert title="Perlu diperbarui" tone="warning">
         <TriangleAlert size={14} strokeWidth={1.8} aria-hidden="true" /> Bukti lama tetap tersimpan.
       </Alert>}
       {continueFrom && <Alert title="Lanjut dari">{continueFrom}</Alert>}
-      {!available && !demo && <Alert title="Materi lengkap belum tersedia" tone="info">
-        Gunakan ringkasan scope, latihan, dan kriteria kurikulum ini. Konten MDX lengkap untuk {itemId} belum tersedia.
+      {!available && <Alert title="Kerangka kurikulum — materi belum ditulis" tone="info">
+        Halaman ini berisi cakupan, latihan manual, dan target dari kurikulum. Penjelasan, contoh, dan kuis authored untuk {itemId} belum tersedia; tidak ada penilaian latihan otomatis.
       </Alert>}
-      {!demo && actionState && <ItemStatusAction
+      {actionState && <ItemStatusAction
         itemId={itemId}
         kind="unit"
         state={visibleState}
         prerequisites={prerequisites}
       />}
-      {!demo && reviewHref && <p className="lesson-review-link"><a href={reviewHref}>Lihat jadwal review</a></p>}
+      {reviewHref && <p className="lesson-review-link"><a href={reviewHref}>Lihat status dan jadwal review</a></p>}
 
-      {staged && <>
-        <div className="lesson-stage-toolbar">
+      <div className="lesson-stage-toolbar">
           <div className="lesson-stage-tabs" role="tablist" aria-label="Tahapan belajar">
             {stages.map(({ id, label }, index) => <Button
               key={id} id={'lesson-tab-' + id} type="button"
@@ -213,10 +207,9 @@ export default function LessonPage({
             >{focus ? 'Keluar fokus' : 'Mode fokus'}</Button>
           </div>
         </div>
-        <aside id="lesson-context" className="lesson-staged-context" aria-label="Konteks materi" hidden={!contextOpen}>{context}</aside>
-      </>}
+      <aside id="lesson-context" className="lesson-staged-context" aria-label="Konteks materi" hidden={!contextOpen}>{context}</aside>
 
-      {available ? children : staged ? <>
+      {available ? children : <>
         <section className="lesson-stage-panel" data-lesson-stage="understand"
           id="lesson-panel-understand" role="tabpanel" aria-labelledby="lesson-tab-understand" tabIndex={0}>
           <h2>Yang perlu dikuasai</h2>
@@ -236,24 +229,20 @@ export default function LessonPage({
           <h2>Selesai jika</h2>
           <ol>{criteria.map((criterion) => <li key={criterion.id}>{criterion.text}</li>)}</ol>
         </section>
-      </> : <div className="lesson-fallback">
-        <h2>Contoh materi</h2>
-        <ul>{scope.map((item) => <li key={item}>{item}</li>)}</ul>
-      </div>}
+      </>}
 
-      {!staged && <ConnectionsPanel groups={connections} compact />}
 
-      {staged && stage === 'understand' && <div className="lesson-stage-next">
+      {stage === 'understand' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('practice')}>Mulai latihan</Button>
       </div>}
-      {staged && stage === 'practice' && <div className="lesson-stage-next">
+      {stage === 'practice' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('evidence')}>Catat bukti</Button>
       </div>}
-      {!demo && active && visibleState.status !== 'passed' && <div className={staged ? 'lesson-staged-evidence-form' : undefined}
-        role={staged ? 'group' : undefined}
-        aria-labelledby={staged ? 'lesson-tab-evidence' : undefined}>
+      {active && visibleState.status !== 'passed' && <div className="lesson-staged-evidence-form"
+        role="group"
+        aria-labelledby="lesson-tab-evidence">
         <SessionLogger
-          initialCompletionOpen={staged}
+          initialCompletionOpen
           itemId={itemId}
           fingerprint={fingerprint}
           criteria={criteria}
@@ -262,7 +251,7 @@ export default function LessonPage({
           lastAnchor={lastAnchor}
         />
       </div>}
-      {!demo && (previous || next) && <nav className="lesson-sequence" aria-label="Navigasi materi">
+      {(previous || next) && <nav className="lesson-sequence" aria-label="Navigasi materi">
         {previous ? <a href={previous.href} rel="prev">
           <ArrowLeft size={15} aria-hidden="true" />
           <span><small>Sebelumnya · {previous.id}</small><strong>{previous.title}</strong></span>
