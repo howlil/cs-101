@@ -4,7 +4,8 @@ import {
   Boxes, CheckCircle2, Clock3, ExternalLink, FolderKanban,
   Link2, LockKeyhole, Target, TriangleAlert,
 } from 'lucide-react';
-import ActivateItem from '../learning/ActivateItem';
+import ItemStatusAction from '../learning/ItemStatusAction';
+import type { ItemActionState } from '../../domain/learning/item-action';
 import ActionLink from '../ui/ActionLink';
 import { Badge } from '../arc/badge/badge';
 import { Accordion } from '../arc/accordion/accordion';
@@ -17,6 +18,7 @@ type SelectedItem = {
   breadcrumb: string;
   href: string;
   state?: 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
+  actionState?: ItemActionState;
   missingPrerequisites: string[];
   marketExpectation?: string[];
   nextSmallStep?: string;
@@ -41,36 +43,16 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
           </header>
 
 
-          {selected.state && <div className="item-state-actions">
-                {selected.state === 'passed' ? (
-                  <>
-                    <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Selesai</Badge>
-                    <ActionLink href={selected.href} label="Buka materi" />
-                  </>
-                ) : selected.state === 'stale' ? (
-                  <>
-                    <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu diperbarui</Badge>
-                    <ActionLink href={selected.href} label="Buka & validasi" />
-                  </>
-                ) : selected.state === 'active' ? (
-                  <ActionLink href={selected.href} label="Lanjut belajar" />
-                ) : selected.state === 'ready' || selected.state === 'started' ? (
-                  <ActivateItem
-                    itemId={selected.id}
-                    label={selected.state === 'started'
-                      ? 'Lanjut'
-                      : selected.kind === 'unit'
-                        ? 'Mulai belajar'
-                        : selected.kind === 'checkpoint'
-                          ? 'Mulai project'
-                          : 'Mulai latihan gabungan'}
-                  />
-                ) : selected.state === 'locked' ? (
-                  <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
-                    Terkunci · {selected.missingPrerequisites.join(', ')}
-                  </Badge>
-                ) : null}
-              </div>}
+          {selected.actionState && <div className="item-state-actions">
+            <ItemStatusAction
+              itemId={selected.id}
+              kind={selected.kind}
+              href={selected.href}
+              mode="preview"
+              state={selected.actionState}
+              prerequisites={selected.prerequisites}
+            />
+          </div>}
           <div className="item-workbench">
             <div className="item-main">
               {selected.nextSmallStep && (

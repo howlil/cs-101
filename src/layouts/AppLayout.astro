@@ -17,6 +17,7 @@ import {
   itemHref,
 } from '../domain/curriculum-v2/selectors';
 import { getItemLearningView } from '../domain/learning/view-models';
+import { getItemActionState } from '../domain/learning/item-action';
 
 interface Props {
   title: string;
@@ -81,7 +82,9 @@ if (showCurriculum) {
   const selectedLocation = selectedItem ? getItemLocation(curriculumGraph, selectedItem.id) : undefined;
 
   const stateFor = (id: string) =>
-    learningState ? getItemLearningView(curriculumGraph, learningState, id).displayState : 'unknown';
+    learningState
+      ? getItemActionState(getItemLearningView(curriculumGraph, learningState, id)).status
+      : 'unknown';
 
   const previewHref = (item: typeof curriculumGraph.manifest.items[number]) =>
     item.kind === 'integration'

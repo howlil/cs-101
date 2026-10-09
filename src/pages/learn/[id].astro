@@ -4,7 +4,9 @@ import '../../styles/connections.css';
 import AppLayout from '../../layouts/AppLayout.astro';
 import LessonPage from '../../components/pages/LessonPage';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
-import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
+import { getConnectionGroups, getItemLocation, getTrackExplorer, itemHref } from '../../domain/curriculum-v2/selectors';
+import { getItemLearningView } from '../../domain/learning/view-models';
+import { getItemActionState } from '../../domain/learning/item-action';
 import { curriculumGraph } from '../../server/curriculum';
 import { connectionLabels } from '../../lib/learning-language';
 import { snapshotForRequest } from '../../server/request-snapshot';
@@ -20,6 +22,20 @@ const Content = rendered?.Content;
 const stale = !!lesson && lesson.data.curriculumFingerprint !== item.fingerprint;
 const state = await snapshotForRequest(Astro.locals);
 const progress = state.progress.find((entry) => entry.itemId === item.id);
+const view = getItemLearningView(curriculumGraph, state, item.id);
+const actionState = getItemActionState(view);
+const location = getItemLocation(curriculumGraph, item.id);
+const moduleItems = curriculumGraph.moduleItems.get(item.moduleId) ?? [];
+const modulePosition = moduleItems.indexOf(item.id) + 1;
+const trackItems = getTrackExplorer(curriculumGraph, item.trackId).modules.flatMap((module) => module.items);
+const trackPosition = trackItems.findIndex((entry) => entry.id === item.id);
+const before = trackPosition > 0 ? trackItems[trackPosition - 1] : undefined;
+const after = trackPosition >= 0 ? trackItems[trackPosition + 1] : undefined;
+const curriculumHref = '/curriculum?track=' + encodeURIComponent(item.trackId) + '&item=' + encodeURIComponent(item.id);
+const prerequisites = view.missingPrerequisites.map((id) => {
+  const entry = curriculumGraph.itemsById.get(id);
+  return entry ? { id, title: entry.title, href: itemHref(curriculumGraph, id) } : { id, title: id, href: '/curriculum' };
+});
 
 const groups = getConnectionGroups(curriculumGraph, item.id);
 const connections = [
@@ -63,6 +79,12 @@ const nextSmallStep =
     available={Boolean(lesson && Content)}
     stale={stale}
     active={state.activeItemId === item.id}
+    actionState={actionState}
+    prerequisites={prerequisites}
+    breadcrumb={{ track: location.track?.title ?? '', module: location.module?.title ?? '', position: modulePosition, total: moduleItems.length }}
+    previous={before ? { id: before.id, title: before.title, href: itemHref(curriculumGraph, before.id) } : undefined}
+    next={after ? { id: after.id, title: after.title, href: itemHref(curriculumGraph, after.id) } : undefined}
+    reviewHref={view.review !== 'none' ? '/review/' + encodeURIComponent(item.id) : undefined}
     revision={state.revision}
     continueFrom={progress?.continueFrom}
     lastAnchor={progress?.lastAnchor}
@@ -70,7 +92,7 @@ const nextSmallStep =
     criteria={requiredEvidenceForItem(item)}
     headings={rendered?.headings ?? []}
     connections={connectionData}
-    curriculumHref={'/curriculum?item=' + encodeURIComponent(item.id)}
+    curriculumHref={curriculumHref}
   >
     {Content && <Content />}
   </LessonPage>

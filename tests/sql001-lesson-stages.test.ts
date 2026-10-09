@@ -57,3 +57,26 @@ test('legacy permanent lesson rail styles are removed', () => {
   assert.doesNotMatch(css, /\.lesson-sidecar/);
   assert.match(css, /\.lesson-staged blockquote/);
 });
+
+
+test('lesson uses the shared server-owned state projection and navigates linearly', () => {
+  const lesson = src('src/components/pages/LessonPage.tsx');
+  const route = src('src/pages/learn/[id].astro');
+  assert.match(route, /getItemLearningView/);
+  assert.match(route, /getItemActionState/);
+  assert.match(route, /getTrackExplorer/);
+  assert.match(route, /missingPrerequisites/);
+  assert.match(lesson, /<ItemStatusAction/);
+  assert.doesNotMatch(lesson, /!active && <div className="actions"/);
+  assert.match(lesson, /className="lesson-location"/);
+  assert.match(lesson, /className="lesson-sequence"/);
+  assert.match(lesson, /rel="next"/);
+  assert.match(lesson, /rel="prev"/);
+});
+
+test('session submission re-fetches the authoritative SSR view', () => {
+  const evidence = src('src/components/learning/EvidenceForm.tsx');
+  assert.match(evidence, /navigate\(window\.location\.href, \{ history: 'replace' \}\)/);
+  assert.match(evidence, /removeDraft\(itemId\)/);
+  assert.match(evidence, /postJson<MutationResult>\('\/api\/sessions'/);
+});

@@ -12,6 +12,7 @@ import {
   itemHref,
 } from '../domain/curriculum-v2/selectors';
 import { getItemLearningView } from '../domain/learning/view-models';
+import { getItemActionState } from '../domain/learning/item-action';
 
 const graph = curriculumGraph;
 const tracks = [...graph.manifest.tracks].sort((a, b) => a.order - b.order);
@@ -54,6 +55,7 @@ const selected = selectedItem && selectedLocation ? {
   breadcrumb: [selectedLocation.track?.title ?? 'Lintas jalur', selectedLocation.module?.title].filter(Boolean).join(' / '),
   href: itemHref(graph, selectedItem.id),
   state: selectedView?.displayState,
+  actionState: selectedView ? getItemActionState(selectedView) : undefined,
   missingPrerequisites: selectedView?.missingPrerequisites ?? [],
   marketExpectation: selectedItem.kind === 'unit' ? selectedItem.marketExpectation : undefined,
   nextSmallStep: selectedView?.continueFrom ||
