@@ -27,7 +27,8 @@ class DevTools {
     this.ws.addEventListener('message', (event) => {
       const message = JSON.parse(event.data);
       if (message.method === 'Runtime.exceptionThrown') {
-        this.exceptions.push(message.params?.exceptionDetails?.text || 'Uncaught runtime exception');
+        const details = message.params?.exceptionDetails;
+        this.exceptions.push(details?.exception?.description || details?.text || 'Uncaught runtime exception');
       }
       const entry = this.pending.get(message.id);
       if (!entry) return;
