@@ -51,7 +51,7 @@ domain → domain (never server, browser, Astro UI)
 Arc → generic React/Radix primitives (never CS-101 domain)
 ```
 
-When migrating existing `components/course`: authored MDX/lesson presentation blocks belong in `lesson`; session/evidence/review components belong in `learning`. `components/search` and `ui/ThemePreference` move to `app`; the one-consumer `project/GuaranteeAccordion` should be colocated, not expanded into a new architecture slice. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
+When migrating existing `components/course`: authored MDX/lesson presentation blocks belong in `lesson`; session/evidence/review components belong in `learning`. `components/app` now owns search and theme preference; the one-consumer `project/GuaranteeAccordion` should be colocated, not expanded into a new architecture slice. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
 
 **Folder creation test:** does the directory own a stable behaviour/contract, or contain files changed together? If no, colocate. No abstraction just for a clean-looking tree, no barrel exports per folder, no special import API unless it measurably reduces coupling. The current `pnpm validate:architecture` enforces core cross-layer restrictions; only add folder-specific checks after the move.
 
