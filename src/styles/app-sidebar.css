@@ -100,7 +100,6 @@ html[data-sidebar="collapsed"] .app-sidebar .sidebar-nav-link { justify-content:
     width:100%; margin-left:0;
   }
   html[data-focus="true"] .topbar .brand { display:inline-flex; }
-  html[data-focus="true"]
 }
 @media(max-width:900px) {
   html[data-focus="true"] .sidebar-mobile-trigger { display:none!important; }
