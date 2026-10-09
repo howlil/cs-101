@@ -12,7 +12,7 @@ import ActionLink from '../ui/ActionLink';
 import EmptyAction from '../ui/EmptyAction';
 import { Alert } from '../arc/alert/alert';
 import { Accordion } from '../arc/accordion/accordion';
-import ReviewAttempt from '../course/ReviewAttempt';
+import ReviewAttempt from '../learning/ReviewAttempt';
 
 const REVIEW_DAYS = [1, 3, 7, 14, 30] as const;
 
