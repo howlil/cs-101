@@ -30,19 +30,19 @@ export default function ActivateItem({
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<PendingSwitch>();
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone: AlertTone }>();
-  const requestId = useRef<string | undefined>(undefined);
+  const request = useRef<{ key: string; id: string }>();
 
   const commit = async (revision: number, previousItemId?: string, previousSession?: SessionFields) => {
     setLoading(true);
     setFeedback({ title: 'Mengubah item aktif', message: 'Progres sedang diperbarui.', tone: 'info' });
     try {
-      requestId.current ??= crypto.randomUUID();
-      await postJson('/api/active-item', {
-        requestId: requestId.current,
-        itemId,
-        revision,
-        ...(previousSession ? { previousSession } : {}),
-      });
+      const input = { itemId, revision, ...(previousSession ? { previousSession } : {}) };
+      const key = JSON.stringify(input);
+      if (!request.current || request.current.key !== key) {
+        request.current = { key, id: crypto.randomUUID() };
+      }
+      await postJson('/api/active-item', { ...input, requestId: request.current.id });
+      request.current = undefined;
       // Never discard a draft when the user chose to switch without saving it.
       if (previousSession && previousItemId) removeDraft(previousItemId);
       setPending(undefined);

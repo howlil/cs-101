@@ -208,6 +208,10 @@ try {
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
   m = await client.metrics();
+  assert.equal(await client.eval('document.querySelector(\'.sidebar-nav-link[aria-label="Kurikulum"]\').getAttribute("aria-current")'), null,
+    'Item route is a curriculum section, not the curriculum page');
+  assert.equal(await client.eval('document.querySelector(\'.sidebar-nav-link[aria-label="Kurikulum"]\').dataset.sectionCurrent'), 'true',
+    'Item route should still highlight its navigation section');
   assert.equal(Math.round(m.sidebar), 248, '901px should use desktop layout');
   assert.ok(m.doc <= m.vw + 1, '901px horizontal overflow');
   await client.screenshot('lesson-desktop-901.png');
@@ -285,6 +289,16 @@ try {
   assert.equal(m.bodyBg, 'rgb(8, 8, 8)', 'Dark canvas should match Howlil token');
   await client.screenshot('progress-mobile-dark-390.png');
   console.log('PASS dark theme persistence and surface');
+
+  // Project/Integration relationships are disclosed in-flow; no phantom right rail.
+  await client.resize(1440, 900);
+  for (const route of ['/project/JAV-P01', '/integration/INT-001']) {
+    await client.goto(route);
+    const className = route.startsWith('/project/') ? '.project-body' : '.integration-body';
+    assert.equal(await client.eval('getComputedStyle(document.querySelector(' + JSON.stringify(className) + ')).display'),
+      'block', route + ' should not allocate an empty rail');
+  }
+  console.log('PASS project/integration single-column workspace');
 
   await client.resize(320, 720);
   for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001',

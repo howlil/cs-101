@@ -19,3 +19,5 @@
   .app-main .review-workspace .review-sidecar { display:block; }
   .app-main .review-workspace .review-sidecar > :last-child { margin-top:12px; }
 }
+
+.review-next-state{margin:12px 0 0;padding:11px 13px;border-left:2px solid var(--accent-strong);background:var(--surface);color:var(--foreground);font-size:13px;line-height:20px}

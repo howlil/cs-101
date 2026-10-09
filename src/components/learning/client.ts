@@ -11,7 +11,13 @@ export function hasSessionNotes(draft: SessionFields | undefined): boolean {
 
 export function readDraft(itemId: string): SessionFields | undefined {
   try {
-    return JSON.parse(localStorage.getItem('cs101:draft:' + itemId) || 'null') ?? undefined;
+    const draft: unknown = JSON.parse(localStorage.getItem('cs101:draft:' + itemId) || 'null');
+    if (!draft || typeof draft !== 'object') return undefined;
+    const value = draft as Record<string, unknown>;
+    if (typeof value.itemId !== 'string' || typeof value.fingerprint !== 'string' ||
+      !Array.isArray(value.evidence) || typeof value.continueFrom !== 'string' ||
+      typeof value.lastAnchor !== 'string') return undefined;
+    return value as SessionFields;
   } catch {
     return undefined;
   }
