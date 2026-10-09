@@ -165,6 +165,15 @@ try {
     'Desktop expanded state must expose the Collapse button');
   assert.ok(m.doc <= m.vw + 1, 'Desktop document horizontal overflow: ' + JSON.stringify(m));
   await client.screenshot('curriculum-desktop-1440.png');
+  assert.ok(await client.eval('document.querySelectorAll(".curriculum-overview-modules a").length > 0'),
+    'Browse route should show module overview, not an arbitrary first-item preview');
+  assert.equal(await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), false,
+    'Bare Curriculum route should not select an item');
+  await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
+  await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
+  console.log('PASS curriculum overview → module selection');
+
   console.log('PASS desktop 1440: expanded sidebar, semantics, no overflow');
 
   await client.eval('document.querySelector(".sidebar-collapse").click()');

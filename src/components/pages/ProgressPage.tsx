@@ -77,6 +77,7 @@ export default function ProgressPage({
             <div><p className="eyebrow">JALUR BELAJAR</p><h2>Yang sudah diselesaikan</h2></div>
             <span>{tracks.reduce((sum, track) => sum + track.completed, 0)} / {tracks.reduce((sum, track) => sum + track.total, 0)}</span>
           </div>
+          <p className="progress-integrations-note">Materi dan project dikelompokkan dalam {tracks.length} jalur; {integrations.length} latihan gabungan dihitung terpisah.</p>
           <Accordion
             size="sm"
             defaultOpen={tracks.findIndex((track) => track.modules.some((module) => module.active))}

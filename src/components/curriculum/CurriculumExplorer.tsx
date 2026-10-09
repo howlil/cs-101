@@ -18,7 +18,7 @@ import { Accordion } from '../arc/accordion/accordion';
 type ItemKind = 'unit' | 'checkpoint' | 'integration';
 type DisplayState = 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
 
-type TrackOption = { id: string; title: string; total: number };
+type TrackOption = { id: string; title: string; total: number; completed: number };
 export type ExplorerItem = {
   id: string;
   title: string;
@@ -29,7 +29,7 @@ export type ExplorerItem = {
   position?: { index: number; total: number };
 };
 
-type ModuleOption = { id: string; title: string; items: ExplorerItem[] };
+type ModuleOption = { id: string; title: string; completed: number; items: ExplorerItem[] };
 type SearchEntry = ExplorerItem & { searchText: string };
 
 function ItemIcon({ item }: { item: ExplorerItem }) {
@@ -44,11 +44,13 @@ function ItemIcon({ item }: { item: ExplorerItem }) {
   return <Circle {...props} />;
 }
 
-function ItemRow({ item, search = false }: { item: ExplorerItem; search?: boolean }) {
+function ItemRow({ item, search = false, currentPath }: { item: ExplorerItem; search?: boolean; currentPath: string }) {
+  const isCurrentPage = item.active && (currentPath === '/curriculum' || item.href === currentPath);
   return <a
     className={search ? 'search-row' : 'item-row'}
     href={item.href}
-    aria-current={item.active ? 'page' : undefined}
+    aria-current={isCurrentPage ? 'page' : undefined}
+    data-selected={item.active ? 'true' : undefined}
   >
     <span className="item-marker" aria-hidden="true"><ItemIcon item={item} /></span>
     <span className="item-copy">
@@ -65,7 +67,9 @@ export default function CurriculumExplorer({
   integrations,
   searchEntries,
   selectedModuleId,
+  currentPath,
 }: {
+  currentPath: string;
   tracks: TrackOption[];
   activeTrackId: string;
   modules: ModuleOption[];
@@ -84,10 +88,10 @@ export default function CurriculumExplorer({
 
   const defaultOpen = Math.max(0, modules.findIndex((module) => module.id === selectedModuleId));
   const accordionItems = modules.map((module) => ({
-    title: module.title + ' · ' + module.items.length,
+    title: module.title + ' · ' + module.completed + '/' + module.items.length,
     content: (
       <nav aria-label={module.title} className="module-items">
-        {module.items.map((item) => <ItemRow key={item.id} item={item} />)}
+        {module.items.map((item) => <ItemRow key={item.id} item={item} currentPath={currentPath} />)}
       </nav>
     ),
   }));
@@ -115,7 +119,7 @@ export default function CurriculumExplorer({
       <div className="search-results" aria-live="polite">
         <p className="explorer-label"><Search size={12} strokeWidth={1.8} aria-hidden="true" /> HASIL</p>
         {results.length
-          ? results.map((entry) => <ItemRow key={entry.id} item={entry} search />)
+          ? results.map((entry) => <ItemRow key={entry.id} item={entry} search currentPath={currentPath} />)
           : <p className="search-empty">Tidak ada materi yang cocok.</p>}
       </div>
     ) : <>
@@ -125,7 +129,7 @@ export default function CurriculumExplorer({
           value={activeTrackId}
           options={tracks.map((track) => ({
             value: track.id,
-            label: track.title + ' · ' + track.total,
+            label: track.title + ' · ' + track.completed + '/' + track.total,
           }))}
           onValueChange={(next) => {
             if (next !== activeTrackId) {
@@ -146,7 +150,7 @@ export default function CurriculumExplorer({
       {integrations.length > 0 && (
         <div className="integration-list">
           <p className="explorer-label"><Boxes size={12} strokeWidth={1.8} aria-hidden="true" /> LATIHAN GABUNGAN</p>
-          {integrations.map((item) => <ItemRow key={item.id} item={item} />)}
+          {integrations.map((item) => <ItemRow key={item.id} item={item} currentPath={currentPath} />)}
         </div>
       )}
     </>}

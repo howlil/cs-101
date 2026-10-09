@@ -25,7 +25,7 @@ const { Content, headings } = await render(lesson);
     revision={0}
     fingerprint={lesson.data.curriculumFingerprint ?? 'sha256:' + '0'.repeat(64)}
     criteria={[]}
-    headings={headings}
+    headings={headings.map((heading) => ({ ...heading, stage: 'understand' as const }))}
     connections={[]}
     curriculumHref="/curriculum"
   >

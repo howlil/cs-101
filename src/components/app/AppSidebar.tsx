@@ -15,8 +15,8 @@ export type SidebarData = {
   curriculumHref: string;
   activeTrackId: string;
   selectedModuleId?: string;
-  tracks: Array<{ id: string; title: string; total: number }>;
-  modules: Array<{ id: string; title: string; items: ExplorerItem[] }>;
+  tracks: Array<{ id: string; title: string; total: number; completed: number }>;
+  modules: Array<{ id: string; title: string; completed: number; items: ExplorerItem[] }>;
   integrations: ExplorerItem[];
   searchEntries: Array<ExplorerItem & { searchText: string }>;
 };
@@ -62,6 +62,7 @@ function SidebarSections({ currentPath, data, compact = false, scrollRef, scroll
         <a href={data.curriculumHref}>Kurikulum</a><span>{data.total} item</span>
       </div>
       <CurriculumExplorer
+        currentPath={currentPath}
         activeTrackId={data.activeTrackId}
         selectedModuleId={data.selectedModuleId}
         tracks={data.tracks}

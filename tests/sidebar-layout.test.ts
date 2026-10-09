@@ -59,5 +59,18 @@ test('curriculum link retains selected track and item position', () => {
   assert.match(layout, /position: \{ index: index \+ 1, total: module\.items\.length \}/);
   assert.match(sidebar, /href=\{href === '\/curriculum' \? curriculumHref : href\}/);
   assert.match(explorer, /item\.position\.index/);
-  assert.match(source('src/pages/curriculum.astro'), /Astro\.url\.searchParams\.has\('track'\)/);
+  assert.match(source('src/pages/curriculum.astro'), /const requestedItemId = Astro\.url\.searchParams\.get\('item'\);/);
+});
+
+
+test('browse overview is distinct from a selected-item preview', () => {
+  const route = source('src/pages/curriculum.astro');
+  const page = source('src/components/pages/CurriculumPage.tsx');
+  const layout = source('src/layouts/AppLayout.astro');
+  assert.match(route, /const selectedItem = requestedItem;/);
+  assert.match(route, /const trackOverview = explorer/);
+  assert.match(page, /className="curriculum-overview-modules"/);
+  assert.match(layout, /const selectedItem = currentItem;/);
+  assert.match(layout, /completed: module\.items\.filter/);
+  assert.match(source('src/components/curriculum/CurriculumExplorer.tsx'), /module\.completed \+ '\/' \+ module\.items\.length/);
 });

@@ -720,3 +720,10 @@ Unified navigation preserves route-specific track/item context. A sidebar curric
 Every unit offers Pahami, Latihan, Bukti stages. SQL-001, SQL-002, and JAV-001 preserve their full authored MDX through Astro LessonStage; manifest-only units use honest scope/challenge/evidence fallbacks. Evidence persistence and completion remain server-owned. Other stages never mark a unit complete.
 
 The normal lesson layout uses a readable centered column, optional contextual disclosure, and a lesson-only Focus Mode with Escape exit. Curriculum preview exposes only one actionable short summary, not a second lesson. Desktop chrome aligns the fixed sidebar to the viewport top and the toolbar to the workspace.
+
+
+## Curriculum IA and staged TOC follow-up (October 2026)
+
+Curriculum without an explicit item is a track overview: summary of each module, completed/total, and a link to the first item. Explicit item links still open the compact item preview. Sidebar track and module labels show passed/total, while current-page semantics distinguish selected learner state from actual route selection. Integrations return to their own preview. A session of learning can begin from Today without forcing the global browse page to preselect the learner's active item.
+
+The MDX table of contents is stage-aware, mapped from authored LessonStage boundaries on the server instead of querying client DOM. Deep links to headings in the evidence section must reveal the matching stage before readers follow the anchor.

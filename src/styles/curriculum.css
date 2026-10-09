@@ -100,3 +100,22 @@
 
 .item-state-actions .item-action-status { width:100%; }
 .item-state-actions .item-action-prerequisites { width:100%; }
+
+
+/* Browse overview is a different surface from item preview. */
+.curriculum-overview-summary {
+  margin:14px 0 0; color:var(--text-secondary);
+  font-size:14px; line-height:22px;
+}
+.curriculum-overview-modules { display:grid; margin-top:15px; }
+.curriculum-overview-modules a {
+  display:grid; grid-template-columns:32px minmax(0,1fr) auto;
+  gap:14px; align-items:center; min-height:72px; padding:14px 6px;
+  border-bottom:1px solid var(--line);
+  text-decoration:none; color:var(--text-secondary);
+}
+.curriculum-overview-modules a:hover { color:var(--foreground); background:var(--surface-muted); }
+.curriculum-overview-number { font:400 12px/16px var(--font-mono); color:var(--text-muted); }
+.curriculum-overview-copy { display:grid; gap:4px; }
+.curriculum-overview-copy strong { font-size:15px; line-height:22px; font-weight:500; color:var(--foreground); }
+.curriculum-overview-copy small { font:400 12px/16px var(--font-mono); color:var(--text-muted); }
