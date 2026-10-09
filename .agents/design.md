@@ -732,3 +732,15 @@ Happy path: Hari ini → open task → Pahami → Latihan (formative) → Bukti 
 - **Responsive/a11y:** Validate tab-panel focus from end-of-content CTA, locked unit recovery, no 320px overflow, keyboard, reduced-motion, pending/draft/error states.
 
 **Deliberately not built:** gamified streaks, forced timers, invented AI graders, local quiz completion, a second curriculum tree, planner, or redundant permanent sidecar.
+
+### Low-ceremony learning UI contract (October 2026)
+
+**Protect the existing engine:** `domain/learning/rules.ts`, `domain/learning/decisions.ts`, server persistence, endpoints and review policy remain the owners of progress, activation, completion, prerequisites, revision conflict, and review scheduling. UI browsing and formative quiz answers never mutate progress.
+
+- **Lesson evidence** shows a compact count and two choices: **Tambahkan bukti** and **Lanjut nanti**. No required notes at page entry. Clicking Bukti does not create a session.
+- **Completion** expands unchanged mandatory evidence inputs with the existing `/api/sessions` mutation (`kind: 'passed'`). Validation opens groups containing missing evidence and moves focus to the first missing field. The count is not a grade.
+- **Partial session** expands one next-step note and optional reflection, submitted only when the user explicitly saves (`kind: 'progress'`). Existing local drafts remain local until submitted, with explicit status copy.
+- **Project/Integration** use the same form ownership, evidence schema and commit path. Inherited guarantees and artifact groups may be collapsed visually, but must be expanded on validation failure and remain required for completion.
+- **No progress redesign:** do not introduce scroll-based pass, on-enter activation, automatic note submission, extra progress tables, gamification, or fabricated assessment.
+- **Non-ceremonial browser QA:** the real path verifies stage change leaves revision alone, manual session save does not mark passed, required-evidence submission does mark passed, and review scheduling remains automatic.
+

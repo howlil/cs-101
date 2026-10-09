@@ -421,6 +421,50 @@ try {
   await client.send('Emulation.setEmulatedMedia', { features: [] });
   assert.equal(client.exceptions.length, 0, 'Browser runtime exceptions: ' + JSON.stringify(client.exceptions));
   console.log('PASS 320px route matrix: no document overflow, no nested main, zero runtime errors');
+
+  // Exercise the real mutation path on the CI-owned disposable runtime.
+  // Stage/quiz browsing must not write progress, while explicit session
+  // saving and completing still run through the unchanged server engine.
+  await client.resize(901, 800);
+  await client.goto('/learn/SQL-001');
+  const beforeLearning = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
+  await client.eval('document.querySelector(".react-action-stack button").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), 'Activated lesson shows compact evidence workbench');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Evidence summary visible after stage');
+  assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');
+  assert.equal(await client.eval('Boolean(document.querySelector("#session-notes"))'), false, 'Session notes should be optional, not an upfront form');
+  const beforePractice = await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision)()');
+  await client.eval('document.querySelector("#lesson-tab-practice").click()');
+  const afterPractice = await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision)()');
+  assert.equal(afterPractice, beforePractice, 'Stage navigation must never mutate automatic progress');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.eval('document.querySelector(".evidence-summary-actions button:nth-child(2)").click()');
+  assert.ok(await client.eval('Boolean(document.querySelector("#session-notes textarea[name=continueFrom]"))'), 'Manual session notes opened on demand');
+  await client.eval('document.querySelector("#session-notes textarea[name=continueFrom]").focus()');
+  await client.send('Input.insertText', { text: 'Ulangi SQL NULL dan tulis invariant.' });
+  await client.wait(async () => await client.eval('document.querySelector(".session-draft-state")?.textContent.includes("Draft otomatis")'), 'Local draft is explicitly disclosed');
+  await client.eval('document.querySelector("#session-notes .actions button").click()');
+  await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision > ' + String(beforePractice) + ')()'), 'Explicit save commits session to server');
+  const savedState = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
+  assert.ok(savedState.progress.some(p => p.itemId === 'SQL-001' && p.status === 'active'), 'Saved partial session must not mark completion');
+  await client.goto('/learn/SQL-001#evidence');
+  assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Server session does not auto-expand evidence form');
+  await client.eval('document.querySelector(".evidence-summary-actions button:first-child").click()');
+  const required = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
+  assert.ok(required >= 2, 'Complete lesson must require real criteria and challenge evidence');
+  for (let index = 0; index < required; index++) {
+    await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]")[' + index + '].focus()');
+    await client.send('Input.insertText', { text: 'QA verified result ' + String(index + 1) + ': query output and explanation' });
+  }
+  await client.wait(async () => await client.eval('document.querySelector(".evidence-count")?.textContent.trim() === "' + String(required) + '/' + String(required) + '"'), 'Coverage reflects all supplied evidence');
+  await client.screenshot('lesson-active-evidence-901.png');
+  await client.eval('document.querySelector("#completion-evidence .actions button").click()');
+  await client.wait(async () => await client.eval('(async () => { const s = await (await fetch("/api/learning")).json(); return s.progress.some(p => p.itemId === "SQL-001" && p.status === "passed"); })()'), 'Automatic completion still follows server evidence validation');
+  const completedState = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
+  assert.ok(completedState.reviews.some(r => r.itemId === 'SQL-001'), 'Automatic review scheduling must still run');
+  assert.ok(completedState.revision > savedState.revision, 'Completion still increments the server-owned revision');
+  console.log('PASS real low-ceremony learner journey: browse → activate → draft → save → evidence → automatic completion/review');
   console.log('PASS screenshots saved at ' + screenshotDir);
 } finally {
   try { client?.ws.close(); } catch {}
