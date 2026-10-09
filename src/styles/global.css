@@ -308,3 +308,8 @@ body::-webkit-scrollbar,
   .evidence-summary-actions { display:grid; grid-template-columns:minmax(0,1fr); }
   .evidence-summary-actions > button { justify-content:center; width:100%; }
 }
+
+.session-form--quiet .evidence-completion > .evidence-hint { margin:0 0 16px; }
+.session-form--quiet .evidence-completion .evidence-heading { margin-bottom:8px; }
+.session-form--quiet .evidence-completion .evidence-heading > span { font-weight:500; }
+.session-form--quiet .evidence-completion > section > button { margin:2px 0 8px; }

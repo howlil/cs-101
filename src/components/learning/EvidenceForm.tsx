@@ -19,6 +19,7 @@ export type EvidenceGroup = {
   description?: string;
   criteria: Criterion[];
   rows?: number;
+  collapsible?: boolean;
   className?: string;
   referenceTitle?: string;
   referenceItems?: string[];
@@ -68,6 +69,7 @@ export default function EvidenceForm({
   const [reflection, setReflection] = useState<SessionReflection>(emptyReflection);
   const [completionOpen, setCompletionOpen] = useState(initialCompletionOpen);
   const [sessionNotesOpen, setSessionNotesOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [currentRevision, setCurrentRevision] = useState(revision);
   const [hydrated, setHydrated] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -150,6 +152,14 @@ export default function EvidenceForm({
       const missing = criteria.filter((criterion) => !evidence[criterion.id]?.trim());
       if (missing.length) {
         setCompletionOpen(true);
+        // Hidden optional groups must open before focusing missing evidence.
+        setExpandedGroups((current) => ({
+          ...current,
+          ...Object.fromEntries(groups.filter((group) =>
+            group.collapsible && group.criteria.some((criterion) =>
+              missing.some((entry) => entry.id === criterion.id)),
+          ).map((group) => [group.key, true])),
+        }));
         setFeedback({
           title: 'Bukti belum lengkap',
           message: `Lengkapi ${missing.length} target selesai sebelum menyelesaikan item.`,
@@ -287,46 +297,58 @@ export default function EvidenceForm({
           <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
         </div>
 
-        {groups.map((group) => (
-          <section key={group.key} className={group.className}>
+        <p className="muted small evidence-hint">
+          Bukti bisa berupa link commit/PR, hasil test, output, benchmark, screenshot, atau penjelasan yang bisa diperiksa.
+        </p>
+        {groups.map((group) => {
+          const groupOpen = !group.collapsible ||
+            (expandedGroups[group.key] ?? group.criteria.some((criterion) => Boolean(evidence[criterion.id]?.trim())));
+          const covered = group.criteria.filter((criterion) => evidence[criterion.id]?.trim()).length;
+          return <section key={group.key} className={group.className}>
             <div className="evidence-heading">
               <div>
                 {group.eyebrow && <p className="eyebrow">{group.eyebrow}</p>}
                 <h2>{group.title}</h2>
               </div>
-              <span>{group.criteria.length}</span>
+              <span>{covered}/{group.criteria.length}</span>
             </div>
             {group.description && <p className="muted small">{group.description}</p>}
-            {group.referenceTitle && group.referenceItems?.length ? (
-              <div className="evidence-reference">
-                <Accordion size="sm" items={[{
-                  title: group.referenceTitle,
-                  content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
-                }]} />
-              </div>
-            ) : null}
-            <p className="muted small evidence-hint">
-              Bukti bisa berupa link commit/PR, hasil test atau command, benchmark, screenshot, diagram, atau catatan yang membuktikan target.
-            </p>
-            <fieldset>
-              <legend className="sr-only">{group.title}</legend>
-              {group.criteria.map((criterion) => (
-                <Textarea
-                  key={criterion.id}
-                  label={criterion.text}
-                  name={'evidence:' + criterion.id}
-                  rows={group.rows ?? 2}
-                  maxLength={8000}
-                  value={evidence[criterion.id] ?? ''}
-                  onChange={(event) => setEvidence((current) => ({
-                    ...current,
-                    [criterion.id]: event.currentTarget.value,
-                  }))}
-                />
-              ))}
-            </fieldset>
-          </section>
-        ))}
+            {group.collapsible && (
+              <Button type="button" variant="ghost" size="sm"
+                aria-expanded={groupOpen} aria-controls={'evidence-group-' + group.key}
+                onClick={() => setExpandedGroups((current) => ({ ...current, [group.key]: !groupOpen }))}>
+                {groupOpen ? 'Tutup bukti' : 'Isi / periksa bukti'}
+              </Button>
+            )}
+            {groupOpen && <div id={'evidence-group-' + group.key}>
+              {group.referenceTitle && group.referenceItems?.length ? (
+                <div className="evidence-reference">
+                  <Accordion size="sm" items={[{
+                    title: group.referenceTitle,
+                    content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
+                  }]} />
+                </div>
+              ) : null}
+              <fieldset>
+                <legend className="sr-only">{group.title}</legend>
+                {group.criteria.map((criterion) => (
+                  <Textarea
+                    key={criterion.id}
+                    label={criterion.text}
+                    name={'evidence:' + criterion.id}
+                    rows={group.rows ?? 2}
+                    maxLength={8000}
+                    value={evidence[criterion.id] ?? ''}
+                    onChange={(event) => setEvidence((current) => ({
+                      ...current,
+                      [criterion.id]: event.currentTarget.value,
+                    }))}
+                  />
+                ))}
+              </fieldset>
+            </div>}
+          </section>;
+        })}
 
         <div className="actions">
           <Button
