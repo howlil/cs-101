@@ -447,6 +447,11 @@ try {
   await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision > ' + String(beforePractice) + ')()'), 'Explicit save commits session to server');
   const savedState = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
   assert.ok(savedState.progress.some(p => p.itemId === 'SQL-001' && p.status === 'active'), 'Saved partial session must not mark completion');
+  // Wait for the post-save ClientRouter refresh and then make a full clean
+  // navigation via Curriculum; otherwise the old island can still unmount
+  // while the browser test begins typing in the newly opened evidence form.
+  await client.wait(async () => await client.eval('document.body.textContent.includes("Ulangi SQL NULL dan tulis invariant.")'), 'Saved session reflected in server-rendered lesson');
+  await client.goto('/curriculum');
   await client.goto('/learn/SQL-001#evidence');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Server session does not auto-expand evidence form');
   await client.eval('document.querySelector(".evidence-summary-actions button:first-child").click()');
@@ -457,6 +462,8 @@ try {
     assert.ok(fieldCount > index, 'Evidence field disappeared during controlled input at index ' + index);
     await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]")[' + index + '].focus()');
     await client.send('Input.insertText', { text: 'QA verified result ' + String(index + 1) + ': query output and explanation' });
+    const formState = await client.eval('({ count: document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length, stage: document.querySelector(".lesson-staged")?.dataset.activeStage, href: location.href, summary: document.querySelector(".evidence-count")?.textContent })');
+    assert.equal(formState.count, required, 'Evidence form must remain open after typing: ' + JSON.stringify(formState));
   }
   await client.wait(async () => await client.eval('document.querySelector(".evidence-count")?.textContent.trim() === "' + String(required) + '/' + String(required) + '"'), 'Coverage reflects all supplied evidence');
   await client.screenshot('lesson-active-evidence-901.png');
