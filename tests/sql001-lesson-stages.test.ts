@@ -24,7 +24,9 @@ test('staged navigation never replaces server evidence persistence', () => {
   assert.match(page, /role="tab"/);
   assert.match(page, /aria-selected=\{stage === id\}/);
   assert.match(page, /onKeyDown=\{\(event\) => onTabKeyDown/);
-  assert.match(page, /initialCompletionOpen/);
+  // Session logging remains server-backed but completion details now open only on demand.
+  assert.doesNotMatch(page, /<SessionLogger\s+initialCompletionOpen/);
+  assert.match(page, /<SessionLogger/);
   assert.match(form, /postJson<MutationResult>\('\/api\/sessions'/);
   assert.match(form, /const missing = criteria\.filter/);
   assert.match(form, /setCompletionOpen\(initialCompletionOpen \|\| draft\.evidence\.length > 0\)/);
