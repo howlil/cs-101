@@ -19,11 +19,12 @@ test('SQL-001 uses authored stage boundaries with original quiz and challenge', 
 test('staged navigation never replaces server evidence persistence', () => {
   const page = src('src/components/pages/LessonPage.tsx');
   const form = src('src/components/learning/EvidenceForm.tsx');
-  assert.match(page, /const staged = !demo/);
+  assert.doesNotMatch(page, /const staged = !demo/);
+  assert.match(page, /className="lesson-grid lesson-staged"/);
   assert.match(page, /role="tab"/);
   assert.match(page, /aria-selected=\{stage === id\}/);
   assert.match(page, /onKeyDown=\{\(event\) => onTabKeyDown/);
-  assert.match(page, /initialCompletionOpen=\{staged\}/);
+  assert.match(page, /initialCompletionOpen/);
   assert.match(form, /postJson<MutationResult>\('\/api\/sessions'/);
   assert.match(form, /const missing = criteria\.filter/);
   assert.match(form, /setCompletionOpen\(initialCompletionOpen \|\| draft\.evidence\.length > 0\)/);
@@ -44,8 +45,8 @@ test('all authored lessons own three stage boundaries and original assessments',
 
 test('units without MDX render honest scope/challenge/evidence fallback', () => {
   const page = src('src/components/pages/LessonPage.tsx');
-  assert.match(page, /available \? children : staged \? <>/);
-  assert.match(page, /Konten MDX lengkap untuk \{itemId\} belum tersedia/);
+  assert.match(page, /available \? children : <>/);
+  assert.match(page, /Kerangka kurikulum — materi belum ditulis/);
   assert.match(page, /challenge\.steps\.map/);
   assert.match(page, /criteria\.map/);
   assert.match(page, /<SessionLogger/);
