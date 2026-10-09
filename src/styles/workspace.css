@@ -22,254 +22,29 @@
   margin-inline: auto;
 }
 
-/* Today */
+/* Today and Progress use one-column workbenches. The old two-column
+   sticky sidecars were retired; keep only the styles still used by current JSX. */
 .today-header,
-.progress-page > .compact-page-header {
-  max-width: var(--workspace-readable);
-}
+.progress-page > .compact-page-header { max-width: var(--workspace-readable); }
 
-.today-workbench,
-.progress-workbench {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  gap: var(--workspace-gap);
-  align-items: start;
-}
+.today-sidecar .today-review-heading { margin-bottom: 8px; }
+.today-sidecar .today-review-row { grid-template-columns: 18px minmax(0, 1fr); padding: 9px 0; }
+.today-sidecar .today-review-cta { grid-column: 2; justify-self: start; }
 
-.today-workbench:not(.has-review),
-.progress-workbench:not(:has(.progress-sidecar)) {
-  grid-template-columns: minmax(0, 1fr);
-}
+.progress-integration-copy { min-width: 0; display: grid; gap: 1px; }
+.progress-integration-copy code { width: max-content; max-width: 100%; justify-self: start; }
+.progress-integration-copy strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
-.today-primary,
-.progress-primary {
-  min-width: 0;
-}
-
-.today-focus {
-  max-width: none;
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
-  column-gap: 28px;
-  align-items: start;
-}
-
-.today-path,
-.today-title-line {
-  grid-column: 1 / -1;
-}
-
-.today-why {
-  grid-column: 1;
-}
-
-.today-next-step {
-  grid-column: 2;
-}
-
-.today-focus:not(:has(.today-why)) .today-next-step {
-  grid-column: 1 / -1;
-  max-width: var(--workspace-readable);
-}
-
-.today-focus > a {
-  grid-column: 1 / -1;
-  justify-self: start;
-  margin-top: 10px;
-}
-
-.today-sidecar,
-.progress-sidecar {
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.today-sidecar .today-review-heading {
-  margin-bottom: 8px;
-}
-
-.today-sidecar .today-review-row {
-  grid-template-columns: 18px minmax(0, 1fr);
-  padding: 9px 0;
-}
-
-.today-sidecar .today-review-cta {
-  grid-column: 2;
-  justify-self: start;
-}
-
-/* Progress */
-.progress-modules {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.progress-sidecar {
-  display: grid;
-  gap: 22px;
-}
-
-.progress-sidecar .progress-review-queue,
-.progress-sidecar .progress-integrations {
-  margin: 0;
-  padding: 0;
-  border-top: 0;
-}
-
-.progress-sidecar .progress-review-items,
-.progress-sidecar .progress-integration-items {
-  gap: 0;
-}
-
-.progress-sidecar .progress-review-items a,
-.progress-sidecar .progress-integration-items a {
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-}
-
-.progress-sidecar .progress-review-items a:hover,
-.progress-sidecar .progress-integration-items a:hover {
-  background: transparent;
-}
-
-.progress-integration-copy {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.progress-integration-copy strong {
-  overflow: hidden;
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.progress-history {
-  max-width: none;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
-}
-
-.progress-history > .progress-section-heading,
-.progress-history > .empty-state {
-  grid-column: 1 / -1;
-}
-
-/* Project / Integration: page frame fills the workbench.
-   Long-form children keep a readable measure while rules/dividers span the primary region. */
-.project-header,
-.integration-header {
-  max-width: none;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  column-gap: var(--workspace-gap);
-}
-
-.project-header > :not(.project-status-row),
-.integration-header > :not(.integration-status-row) {
-  grid-column: 1;
-}
-
-.project-status-row,
-.integration-status-row {
-  grid-column: 2;
-  grid-row: 1 / -1;
-  align-self: end;
-  justify-self: start;
-  margin: 0 0 4px;
-}
-
+/* Project, Integration and Review now use in-flow disclosures and
+   single-column workspaces. Only shared readable measures belong here. */
 .project-header h1,
 .integration-header h1,
 .project-problem,
-.integration-brief {
-  max-width: var(--workspace-readable);
-}
-
-.project-body,
-.integration-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  grid-template-areas: "main side";
-  gap: var(--workspace-gap);
-  align-items: start;
-}
-
-.project-main,
-.integration-main {
-  grid-area: main;
-  min-width: 0;
-}
-
-.project-sidecar,
-.integration-sidecar {
-  grid-area: side;
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.project-section,
-.project-evidence-section,
-.integration-section,
-.integration-evidence-section {
-  max-width: none;
-}
-
-.project-section > *,
-.integration-section > * {
-  max-width: var(--workspace-readable);
-}
-
-.project-evidence-form,
-.integration-evidence-form {
-  max-width: 980px;
-}
-
-/* Review */
-.review-header {
-  max-width: none;
-}
-
+.integration-brief,
 .review-header h1,
-.review-instruction-line {
-  max-width: var(--workspace-readable);
-}
-
-.review-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  grid-template-areas: "main side";
-  gap: var(--workspace-gap);
-  align-items: start;
-}
-
-.review-main {
-  grid-area: main;
-  min-width: 0;
-}
-
-.review-sidecar {
-  grid-area: side;
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.review-attempt,
-.review-main > .arc-alert,
-.review-main > .empty-state {
-  max-width: 980px;
-}
+.review-instruction-line,
+.project-section > *,
+.integration-section > * { max-width: var(--workspace-readable); }
 
 /* Keep the full desktop workbench balanced instead of leaving all spare width on the right. */
 @media (min-width: 1180px) {
@@ -283,72 +58,18 @@
   }
 }
 
-@media (max-width: 1100px) {
-  .today-workbench,
-  .progress-workbench,
-  .project-body,
-  .integration-body,
-  .review-body {
-    grid-template-columns: 1fr;
-    grid-template-areas: none;
-    gap: 20px;
-  }
-
-  .today-focus {
-    grid-template-columns: 1fr;
-  }
-
-  .today-path,
-  .today-title-line,
-  .today-why,
-  .today-next-step,
-  .today-focus:not(:has(.today-why)) .today-next-step,
-  .today-focus > a {
-    grid-column: 1;
-  }
-
-  .today-sidecar,
-  .progress-sidecar,
-  .project-sidecar,
-  .integration-sidecar,
-  .review-sidecar {
-    position: static;
-    padding: 16px 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
-  }
-
-  .project-header,
-  .integration-header {
-    display: block;
-  }
-
-  .project-status-row,
-  .integration-status-row {
-    margin-top: 12px;
-  }
-
-  .progress-history {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 767px) {
   .app-main:not(.app-main--flush) {
     padding-inline: 14px;
   }
 
-  .today-workbench,
-  .progress-workbench {
-    gap: 16px;
-  }
 }
 
 
 /* Learner-facing simplification */
 .today-blocker{grid-column:1;padding:9px 0 9px 10px;border-left:2px solid var(--warning)}
 .today-blocker span,.today-blocker p{margin:0}
-.today-blocker span{display:block;margin-bottom:4px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.today-blocker span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .today-blocker p{font-size:12px;line-height:1.45}
 .lesson-fallback{display:grid;gap:0;margin-top:18px}
 .lesson-fallback>section{padding:18px 0;border-top:1px solid var(--line)}
@@ -359,8 +80,8 @@
 .lesson-fallback a{display:inline-flex;align-items:center;gap:6px}
 .review-summary{display:grid;gap:4px;padding-bottom:14px}
 .review-summary strong{font-size:13px}
-.review-summary>span:last-child:not(.eyebrow){color:var(--muted);font-size:11px}
-.history-blocker{margin:6px 0 0;color:var(--muted);font-size:11px}
+.review-summary>span:last-child:not(.eyebrow){color:var(--muted);font-size:12px}
+.history-blocker{margin:6px 0 0;color:var(--muted);font-size:12px}
 .evidence-hint{margin:8px 0 10px;max-width:72ch}
 .deep-reflection{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .deep-reflection>p{margin:0 0 8px}
@@ -428,10 +149,14 @@
 .lesson-staged .session-form { margin-top:20px; }
 .lesson-staged .evidence-completion { border-top:0; padding-top:6px; margin-top:16px; }
 @media(max-width:600px) {
-  .lesson-stage-toolbar { gap:9px; align-items:flex-start; }
-  .lesson-stage-tabs { flex:1; }
-  .lesson-stage-tab { flex:1; padding:6px 11px!important; }
-  .lesson-toolbar-actions { width:100%; justify-content:flex-end; }
+  /* Mobile separates the primary stage switcher from secondary reading controls. */
+  .lesson-stage-toolbar { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin-bottom:24px; }
+  .lesson-stage-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; min-width:0; }
+  .lesson-stage-tab { width:100%; min-width:0; padding:6px 8px!important; }
+  .lesson-toolbar-actions {
+    width:100%; justify-content:flex-start; gap:8px;
+    padding-top:9px; border-top:1px solid var(--line);
+  }
 }
 
 /* Phase 05: task-first Today and globally consistent sidebar hierarchy. */
@@ -440,7 +165,7 @@
 .today-focus {
   display:flex; flex-direction:column; align-items:flex-start; gap:0;
   width:100%; max-width:820px; padding:26px 30px;
-  background:var(--surface); border:0; border-radius:14px;
+  background:var(--surface); border:0; border-radius:var(--radius-panel);
 }
 .today-focus .today-title-line { width:100%; }
 .today-focus .today-title-line h2 { max-width:650px; }
@@ -456,13 +181,13 @@
 .today-focus .today-next-step strong {
   display:block; font:500 16px/25px var(--font-body); color:var(--foreground);
 }
-.today-focus .today-next-step small { font-size:12px; line-height:18px; }
+.today-focus .today-next-step small { color:var(--text-secondary); font-size:12px; line-height:18px; }
 .today-focus .today-blocker {
   width:100%; max-width:680px; margin:0 0 18px; padding:8px 0 8px 12px;
   border-left:2px solid var(--warning); align-self:flex-start;
 }
 .today-focus .today-blocker span { font:500 12px/17px var(--font-mono); letter-spacing:0; }
-.today-focus > a { margin:0 0 4px; }
+.today-focus > a { margin:0 0 4px; min-height:40px; }
 .today-focus .today-why {
   width:100%; grid-column:auto; max-width:680px;
   margin:17px 0 0; padding:10px 0 0;

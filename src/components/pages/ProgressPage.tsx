@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   BookOpen,
   Boxes,
   BrainCircuit,
@@ -66,7 +65,6 @@ export default function ProgressPage({
 }) {
   return <div className="progress-page">
     <header className="compact-page-header">
-      <p className="eyebrow"><BarChart3 size={13} strokeWidth={1.8} aria-hidden="true" /> PROGRES</p>
       <h1>Progres</h1>
     </header>
 

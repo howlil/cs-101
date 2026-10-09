@@ -26,8 +26,8 @@ function iconFor(label: string): ReactNode {
   return <ArrowRight size={13} strokeWidth={1.8} aria-hidden="true" />;
 }
 
-export default function ActionLink({ href, label, className }: { href: string; label: string; className?: string }) {
-  return <a className={[styles.action, className].filter(Boolean).join(' ')} href={href}>
+export default function ActionLink({ href, label, className, variant = 'default' }: { href: string; label: string; className?: string; variant?: 'default' | 'primary' }) {
+  return <a className={[styles.action, variant === 'primary' && styles.primary, className].filter(Boolean).join(' ')} href={href}>
     {iconFor(label)}
     <span>{label}</span>
   </a>;

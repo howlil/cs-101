@@ -631,7 +631,7 @@ Rules:
 - `pnpm validate:ui` memblokir page markup di route Astro, native interactive controls dan direct Radix imports di luar UIArc, product composition di root `arc/`, dan glyph teks yang dipakai sebagai icon.
 - Tidak ada imperative DOM orchestration seperti `document.querySelector(...).addEventListener(...)` untuk application behavior.
 - Tidak ada native `<details>` untuk product disclosure; gunakan React + UIArc Accordion.
-- Focus ring/halo dilarang oleh product decision; focus-visible harus tetap dibedakan lewat border/background.
+- Keyboard `:focus-visible` wajib memiliki outline 2px menggunakan `--focus-ring` (warna accent kuat). Pointer click tidak menampilkan ring; border/background tetap boleh memberi feedback tambahan.
 - Astro dapat merender React component tanpa hydration bila benar-benar statis. Tambahkan `client:*` hanya jika component membutuhkan interaction.
 
 ## UI view models
@@ -703,7 +703,7 @@ Migration dilakukan bertahap:
 
 Historical Task ID tetap valid karena unit ID existing dipertahankan.
 
-## Repository structure: active server + planned UI
+## Repository structure: active ownership
 
 Active ownership contract: [`architecture.md`](architecture.md). **The server refactor is already merged**: shared pure decisions in `src/domain/learning/decisions.ts`, shared snapshot types in `src/server/learning/contract.ts`, and independent `src/server/learning/{sqlite,d1}.ts` persistence. Do not recreate `src/server/learning.ts`, `src/server/cloudflare-learning.ts`, or add another `learning-contract.ts` wrapper. `pnpm validate:architecture` already runs in the repository validation script.
 
@@ -715,10 +715,10 @@ src/
   layouts/                # AppLayout.astro; unchanged
   components/
     arc/                  # UIArc + CSS modules; unchanged
-    app/                  # app chrome, sidebar, search, theme (target)
+    app/                  # app chrome, sidebar, search, theme (active)
     curriculum/           # contextual explorer/connections; unchanged
     lesson/               # MDX blocks, QuizClient, RevealAccordion (target)
-    learning/             # activation, session, evidence, review UI (target)
+    learning/             # activation, session, evidence, review UI (active)
     pages/                # page compositions; unchanged
     ui/                   # reusable product composition; remain small
   domain/
@@ -744,7 +744,7 @@ migrations/               # SQLite/D1 changes
 tests/                    # tests and browser QA
 ```
 
-`course/`, `search/`, `project/` folders are valid **legacy UI layout** until their *atomic relocation* PRs are merged. Do not add parallel implementations in target directories. Keep `components/pages` as page composition instead of introducing an extra `features/*/{ui,model,api}` hierarchy. Keep `arc/<primitive>` subfolders with source-owned CSS Modules.
+The `course/`, `search/`, and `project/` component folders have been retired by UI ownership refactoring; do not recreate them. Canonical owners are `app/`, `lesson/`, `learning/`, and colocated page composition. Keep `components/pages` as page composition instead of introducing an extra `features/*/{ui,model,api}` hierarchy. Keep `arc/<primitive>` subfolders with source-owned CSS Modules.
 
 Allowed dependencies: Astro route/layout → server/domain + UI; page composition → feature UI/Arc + domain types/selectors; feature UI → Arc + domain public types/view-models, HTTP client for mutations; server → domain and persistence; domain → domain only; Arc → primitive deps only. UI must never import server/DB modules. Only explicitly justified composition edges may cross feature owners (e.g. AppSidebar consumes CurriculumExplorer).
 

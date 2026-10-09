@@ -1,13 +1,13 @@
 # CS-101 — UI folder boundaries: refactor plan
 
-**Status: PLANNED, not executed** · 9 Oktober 2026 · Based on `master` `5f75d866` after backend refactor PR #11.
+**Status: UI ownership migration implemented in stacked PRs #16–#18, awaiting merge; legacy data compatibility retained** · 9 Oktober 2026.
 
 This plan extends the **active** [`architecture.md`](architecture.md) and [`AGENTS.md`](../AGENTS.md). Refactor must improve *change locality* rather than optimize directory count; do not introduce `features/` or layers of `application/use-cases/ports/repositories`.
 
 ## Current baseline and invariants
 
 - Backend architectural work from PR #11 is **done**: `src/domain/learning/decisions.ts`; `src/server/learning/{contract,sqlite,d1}.ts`; `scripts/validate-architecture.ts`; `pnpm validate:architecture`. Do not repeat/revert it.
-- Current UI still includes `src/components/course/`, `src/components/search/`, `src/components/project/`, and `src/components/ui/{QuizClient,RevealAccordion,ThemePreference}.tsx`; `src/components/lesson/` does not exist.
+- Migration result: `components/app` owns global search/theme; `components/lesson` owns MDX blocks + Quiz/Reveal; `components/learning` owns evidence/session/review; project disclosure is colocated with its page. The retired component folders are removed.
 - Keep Astro SSR + ClientRouter, learner `no-store`, manifest, staged lessons, evidence/review API, fingerprint, idempotency/revision conflicts, SQLite/D1 state parity and Cloudflare handling unchanged.
 - Build-time content generation **never** writes learner progress. Legacy V1 adapters remain until consumer/migration tests prove safe removal.
 - `arc` source folders, file-based Astro route directories, `domain` boundaries and existing `server/learning` split are deliberate. Do not flatten or introduce parallel implementations.
@@ -64,10 +64,11 @@ Before creating a folder/interface ask: Which single owner changes this code? Is
 
 Each PR records before/after file mapping, exact changed imports, test evidence, and independent rollback. A structural PR **must not** mix code moves with CSS redesign, dependency upgrades, runtime schema/API changes or Cloudflare deployment. Failures in build, content validation, generated MDX, keyboard focus, review/evidence, Node/SQLite/D1 parity, or the UI QA block merge.
 
-- [ ] A: Search/theme grouped under App
-- [ ] B: Lesson blocks + MDX content/template references migrated atomically
-- [ ] C: Evidence/review UI grouped under Learning; orphan folders removed
-- [ ] D: Boundary checker extended to implemented layout, legacy compatibility audited
-- [ ] Active `architecture.md` / `AGENTS.md` / `engineering-design.md` / generator references updated to **actual** paths after each PR
+- [x] A: Search/theme grouped under App
+- [x] B: Lesson blocks + MDX content/template references migrated atomically
+- [x] C: Evidence/review UI grouped under Learning; orphan folders removed
+- [x] D (UI): Boundary checker extended to reject retired UI folders/imports
+- [ ] D (data): V1 storage compatibility is deliberately retained pending backfill/export and D1 migration tests
+- [x] Active `architecture.md` / `AGENTS.md` / generator references updated to **actual** paths; engineering design remains a historical target, not runtime authority
 - [ ] `master` CI green after each merge; production Cloudflare deploy verification remains a separate gate
 

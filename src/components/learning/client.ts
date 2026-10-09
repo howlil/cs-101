@@ -1,8 +1,23 @@
 import type { SessionFields } from '../../domain/learning/schema';
 
+// Empty or time-only drafts are not valid progress sessions; switching items
+// must not accidentally submit them.
+export function hasSessionNotes(draft: SessionFields | undefined): boolean {
+  if (!draft) return false;
+  return draft.evidence.some((entry) => entry.text.trim().length > 0) ||
+    Boolean(draft.continueFrom?.trim() || draft.blocker?.trim()) ||
+    Object.values(draft.reflection ?? {}).some((entry) => entry.trim().length > 0);
+}
+
 export function readDraft(itemId: string): SessionFields | undefined {
   try {
-    return JSON.parse(localStorage.getItem('cs101:draft:' + itemId) || 'null') ?? undefined;
+    const draft: unknown = JSON.parse(localStorage.getItem('cs101:draft:' + itemId) || 'null');
+    if (!draft || typeof draft !== 'object') return undefined;
+    const value = draft as Record<string, unknown>;
+    if (typeof value.itemId !== 'string' || typeof value.fingerprint !== 'string' ||
+      !Array.isArray(value.evidence) || typeof value.continueFrom !== 'string' ||
+      typeof value.lastAnchor !== 'string') return undefined;
+    return value as SessionFields;
   } catch {
     return undefined;
   }

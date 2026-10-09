@@ -1,7 +1,7 @@
 "use client";
 
 import type { Criterion } from '../../domain/curriculum-v2/schema';
-import EvidenceForm from '../learning/EvidenceForm';
+import EvidenceForm from './EvidenceForm';
 
 export default function IntegrationEvidence({
   itemId,

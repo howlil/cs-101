@@ -1,4 +1,4 @@
-import { ChevronRight, Home, RotateCcw } from 'lucide-react';
+import { ChevronRight, RotateCcw } from 'lucide-react';
 import EmptyAction from '../ui/EmptyAction';
 import ActionLink from '../ui/ActionLink';
 import { Accordion } from '../arc/accordion/accordion';
@@ -30,7 +30,6 @@ export default function TodayPage({
 }) {
   return <div className="content today-page">
     <header className="compact-page-header today-header">
-      <p className="eyebrow"><Home size={13} strokeWidth={1.8} aria-hidden="true" /> HARI INI</p>
       <h1>Hari ini</h1>
     </header>
 
@@ -54,7 +53,7 @@ export default function TodayPage({
                 <p>{primary.blocker}</p>
               </div>
             )}
-            <ActionLink href={primary.href} label={primary.actionLabel} />
+            <ActionLink href={primary.href} label={primary.actionLabel} variant="primary" />
             {primary.whyMatters && (
               <div className="today-why">
                 <Accordion size="sm" defaultOpen={-1} items={[{

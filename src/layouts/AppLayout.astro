@@ -6,7 +6,6 @@ import '../styles/workspace.css';
 import '../styles/curriculum.css';
 import { AppHeaderActions } from '../components/app/AppShell';
 import AppSidebar, { type SidebarData } from '../components/app/AppSidebar';
-import NavigationProgress from '../components/app/NavigationProgress';
 import { ClientRouter, fade } from 'astro:transitions';
 import { curriculumGraph, curriculumSearchIndex, curriculumSearchEntries } from '../server/curriculum';
 import { snapshotForRequest } from '../server/request-snapshot';
@@ -173,14 +172,6 @@ Astro.response.headers.set('Cache-Control', 'no-store');
       document.addEventListener('astro:page-load', stopLoading);
       window.addEventListener('pagehide', stopLoading);
 
-      // Astro swaps <html> attributes too. Carry the active preference forward
-      // before the next frame to prevent a light/dark flash mid-transition.
-      document.addEventListener('astro:before-swap', (event) => {
-        const current = document.documentElement.dataset;
-        const next = event.newDocument.documentElement.dataset;
-        if (current.theme) next.theme = current.theme;
-        if (current.themePreference) next.themePreference = current.themePreference;
-      });
     </script>
     <script is:inline>
       // The new SSR document defaults to light. Copy the current preference
@@ -207,7 +198,6 @@ Astro.response.headers.set('Cache-Control', 'no-store');
         <span class="brand-mark" aria-hidden="true">CS</span>
         <span>CS-101</span>
       </a>
-      <span class="topbar-workspace" aria-hidden="true">Learning workspace</span>
       <AppHeaderActions client:load searchEntries={searchEntries} />
     </header>
     <div class="app-shell">
@@ -222,6 +212,5 @@ Astro.response.headers.set('Cache-Control', 'no-store');
         <slot />
       </main>
     </div>
-    <NavigationProgress client:load transition:persist="navigation-progress" />
   </body>
 </html>

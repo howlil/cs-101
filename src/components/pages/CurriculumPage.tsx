@@ -140,7 +140,7 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
               <p className="breadcrumb">Kurikulum / Jalur</p>
               <h2>{overview.title}</h2>
               <p className="curriculum-overview-summary">
-                {overview.completed} dari {overview.total} materi dan project selesai. Pilih modul untuk melihat materi.
+                {overview.completed} dari {overview.total} materi dan project selesai. Pilih modul untuk membuka pratinjau materi pertamanya.
               </p>
             </header>
             <nav className="curriculum-overview-modules" aria-label="Modul di jalur">

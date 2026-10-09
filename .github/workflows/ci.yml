@@ -42,6 +42,9 @@ jobs:
       - name: Astro check
         run: pnpm check
 
+      - name: CSS parse
+        run: node scripts/validate-css.mjs
+
       - name: Safe Node build
         run: pnpm build:node
 

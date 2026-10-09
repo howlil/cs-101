@@ -33,13 +33,13 @@ Dependencies move in one direction: **UI / Astro routes → server orchestration
 | `src/lib/connection-view.ts` | UI connection labels and link projection | Curriculum graph semantics |
 | `src/components/arc/` | Source-owned UI primitives | Product/domain imports |
 | `src/components/ui/` | Reusable product compositions | Primitive reimplementation and DB access |
-| `src/components/{app,pages,curriculum,learning,course,project,search}/` | Feature/page interactions and render | Direct server database access |
+| `src/components/{app,pages,curriculum,lesson,learning}/` | Feature/page interactions and render | Direct server database access |
 
 Existing component folders remain; do not add a parallel `features/` hierarchy.
 
-## UI component boundaries (migration target)
+## UI component boundaries (implemented)
 
-Backend ownership in this file is **already implemented and active** (shared decisions + `src/server/learning/{contract,sqlite,d1}.ts`). UI folder migration is **planned**, not implemented. Full checklist: [`refactoring-plan.md`](refactoring-plan.md).
+Backend ownership in this file is **already implemented and active** (shared decisions + `src/server/learning/{contract,sqlite,d1}.ts`). UI folder migration is implemented in stacked PRs (#16–#18), pending merge. Full checklist: [`refactoring-plan.md`](refactoring-plan.md).
 
 ```text
 Astro routes/layout → page compositions and server/SSR
@@ -51,9 +51,9 @@ domain → domain (never server, browser, Astro UI)
 Arc → generic React/Radix primitives (never CS-101 domain)
 ```
 
-When migrating existing `components/course`: authored MDX/lesson presentation blocks belong in `lesson`; session/evidence/review components belong in `learning`. `components/search` and `ui/ThemePreference` move to `app`; the one-consumer `project/GuaranteeAccordion` should be colocated, not expanded into a new architecture slice. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
+Authored MDX/lesson presentation blocks now live in `lesson`; session/evidence/review UI now lives under `components/learning` and GuaranteeAccordion is colocated with ProjectPage. `components/app` owns search and theme preference; one-consumer GuaranteeAccordion is colocated next to ProjectPage. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
 
-**Folder creation test:** does the directory own a stable behaviour/contract, or contain files changed together? If no, colocate. No abstraction just for a clean-looking tree, no barrel exports per folder, no special import API unless it measurably reduces coupling. The current `pnpm validate:architecture` enforces core cross-layer restrictions; only add folder-specific checks after the move.
+**Folder creation test:** does the directory own a stable behaviour/contract, or contain files changed together? If no, colocate. No abstraction just for a clean-looking tree, no barrel exports per folder, no special import API unless it measurably reduces coupling. `pnpm validate:architecture` enforces core cross-layer restrictions and rejects retired UI folders/imports.
 
 
 ## Place new code by ownership

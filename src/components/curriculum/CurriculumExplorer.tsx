@@ -14,6 +14,7 @@ import {
 import { Input } from '../arc/input/input';
 import { Select } from '../arc/select/select';
 import { Accordion } from '../arc/accordion/accordion';
+import { matchesQuery } from '../arc/lib/matches-query';
 
 type ItemKind = 'unit' | 'checkpoint' | 'integration';
 type DisplayState = 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
@@ -81,7 +82,7 @@ export default function CurriculumExplorer({
   const normalizedQuery = query.trim().toLocaleLowerCase('id-ID');
   const results = useMemo(
     () => normalizedQuery
-      ? searchEntries.filter((entry) => entry.searchText.includes(normalizedQuery)).slice(0, 16)
+      ? searchEntries.filter((entry) => matchesQuery(entry.searchText, normalizedQuery)).slice(0, 16)
       : [],
     [normalizedQuery, searchEntries],
   );
