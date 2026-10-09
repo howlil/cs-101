@@ -47,3 +47,19 @@ test('Today, Progress and Review retain their critical actions', () => {
   assert.match(review, /<ReviewSchedule/);
   assert.match(review, /bank\.current/);
 });
+
+
+test('Project and Integration status use shared learning projection', () => {
+  for (const route of ['project', 'integration']) {
+    const source = src('src/pages/' + route + '/[id].astro');
+    const page = src('src/components/pages/' + (route === 'project' ? 'ProjectPage' : 'IntegrationPage') + '.tsx');
+    assert.match(source, /getItemActionState\(getItemLearningView/);
+    assert.match(page, /<ItemStatusAction/);
+    assert.doesNotMatch(page, /<ActivateItem/);
+  }
+});
+test('Today, Progress, Review do not duplicate the curriculum tree', () => {
+  const layout = src('src/layouts/AppLayout.astro');
+  assert.match(layout, /const showCurriculum = curriculumRoute \|\| Boolean\(contextualMatch\)/);
+  assert.doesNotMatch(layout, /reviewMatch/);
+});

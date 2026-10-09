@@ -9,11 +9,10 @@ import {
   LockKeyhole,
   PackageCheck,
   Target,
-  TriangleAlert,
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
-import ActivateItem from '../learning/ActivateItem';
-import { Badge } from '../arc/badge/badge';
+import ItemStatusAction from '../learning/ItemStatusAction';
+import type { ItemActionState } from '../../domain/learning/item-action';
 import { Accordion } from '../arc/accordion/accordion';
 import IntegrationEvidence from '../course/IntegrationEvidence';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
@@ -32,10 +31,9 @@ export default function IntegrationPage({
   requirements,
   challengeCriterion,
   passed,
-  stale,
   active,
   ready,
-  missingPrerequisites,
+  actionState,
   revision,
   continueFrom,
   lastAnchor,
@@ -52,10 +50,9 @@ export default function IntegrationPage({
   requirements: Criterion[];
   challengeCriterion: Criterion;
   passed: boolean;
-  stale: boolean;
   active: boolean;
   ready: boolean;
-  missingPrerequisites: string[];
+  actionState: ItemActionState;
   revision: number;
   continueFrom?: string;
   lastAnchor?: string;
@@ -76,22 +73,12 @@ export default function IntegrationPage({
       <p className="integration-brief">{brief}</p>
 
       <div className="integration-status-row">
-        {passed ? (
-          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Selesai</Badge>
-        ) : stale && !active ? (
-          <>
-            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu diperbarui</Badge>
-            {ready && <ActivateItem itemId={id} label="Perbarui & validasi" />}
-          </>
-        ) : active ? (
-          <Badge tone="info" icon={<Boxes size={14} strokeWidth={1.8} />}>Sedang dikerjakan</Badge>
-        ) : ready ? (
-          <ActivateItem itemId={id} label="Mulai latihan gabungan" />
-        ) : (
-          <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
-            Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prasyarat'}
-          </Badge>
-        )}
+        <ItemStatusAction
+          itemId={id}
+          kind="integration"
+          state={actionState}
+          prerequisites={prerequisites}
+        />
       </div>
     </header>
 

@@ -6,6 +6,8 @@ import ProjectPage from '../../components/pages/ProjectPage';
 import { curriculumGraph } from '../../server/curriculum';
 import { connectionLabels } from '../../lib/learning-language';
 import { snapshotForRequest } from '../../server/request-snapshot';
+import { getItemLearningView } from '../../domain/learning/view-models';
+import { getItemActionState } from '../../domain/learning/item-action';
 import {
   getConnectionGroups,
   getItemConnections,
@@ -32,7 +34,11 @@ const progress = state.progress.find((entry) => entry.itemId === project.id);
 const availability = state.availability.find((entry) => entry.itemId === project.id);
 const active = state.activeItemId === project.id;
 const passed = progress?.status === 'passed';
-const stale = progress?.status === 'stale';
+const actionState = getItemActionState(getItemLearningView(curriculumGraph, state, project.id));
+const prerequisiteLinks = actionState.missingPrerequisites.map((id) => {
+  const item = curriculumGraph.itemsById.get(id);
+  return { id, title: item?.title ?? id, href: item ? itemHref(curriculumGraph, id) : '/curriculum' };
+});
 const inheritanceCriteria = delta.inheritanceClauses.length
   ? delta.inheritanceClauses
   : delta.inherited.filter((criterion) =>
@@ -72,10 +78,10 @@ const projectHref = (id: string) => '/project/' + encodeURIComponent(id);
     curriculumHref={'/curriculum?track=' + encodeURIComponent(project.trackId) + '&item=' + encodeURIComponent(project.id)}
     fingerprint={project.fingerprint}
     passed={passed}
-    stale={stale}
     active={active}
     ready={availability?.status === 'ready'}
-    missingPrerequisites={availability?.missingPrerequisites ?? []}
+    actionState={actionState}
+    prerequisites={prerequisiteLinks}
     revision={state.revision}
     continueFrom={progress?.continueFrom}
     lastAnchor={progress?.lastAnchor}
