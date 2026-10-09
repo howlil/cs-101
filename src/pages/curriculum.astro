@@ -23,8 +23,7 @@ const integrations = graph.manifest.items
 let learningState: LearningSnapshot | undefined;
 try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
 
-const requestedItemId = Astro.url.searchParams.get('item') ??
-  (Astro.url.searchParams.has('track') ? null : learningState?.activeItemId);
+const requestedItemId = Astro.url.searchParams.get('item');
 const requestedItem = requestedItemId ? graph.itemsById.get(requestedItemId) : undefined;
 const requestedTrackId = Astro.url.searchParams.get('track');
 const activeTrackId =
@@ -35,8 +34,7 @@ const activeTrackId =
       : tracks[0]?.id;
 
 const explorer = activeTrackId ? getTrackExplorer(graph, activeTrackId) : undefined;
-const defaultItem = explorer?.modules.flatMap((module) => module.items)[0] ?? integrations[0];
-const selectedItem = requestedItem ?? defaultItem;
+const selectedItem = requestedItem;
 const selectedLocation = selectedItem ? getItemLocation(graph, selectedItem.id) : undefined;
 const connections = selectedItem ? getItemConnections(graph, selectedItem.id) : undefined;
 
@@ -48,6 +46,22 @@ const previewHref = (item: typeof graph.manifest.items[number]) =>
     : '/curriculum?track=' + encodeURIComponent(item.trackId) + '&item=' + encodeURIComponent(item.id);
 
 const selectedView = selectedItem ? viewFor(selectedItem.id) : undefined;
+const trackOverview = explorer ? {
+  id: explorer.track.id,
+  title: explorer.track.title,
+  completed: explorer.modules.reduce((total, module) =>
+    total + module.items.filter((item) => viewFor(item.id)?.completion === 'passed').length, 0),
+  total: explorer.modules.reduce((total, module) => total + module.items.length, 0),
+  modules: explorer.modules.map((module) => ({
+    id: module.id,
+    title: module.title,
+    completed: module.items.filter((item) => viewFor(item.id)?.completion === 'passed').length,
+    total: module.items.length,
+    href: '/curriculum?track=' + encodeURIComponent(explorer.track.id) +
+      '&item=' + encodeURIComponent(module.items[0]?.id ?? ''),
+  })),
+} : undefined;
+
 const selected = selectedItem && selectedLocation ? {
   id: selectedItem.id,
   kind: selectedItem.kind,
@@ -76,5 +90,5 @@ const selected = selectedItem && selectedLocation ? {
 } : undefined;
 ---
 <AppLayout title="Kurikulum" description="Jelajahi materi berdasarkan jalur, modul, dan prasyarat." flush>
-  <CurriculumPage client:load selected={selected} />
+  <CurriculumPage client:load selected={selected} overview={trackOverview} />
 </AppLayout>

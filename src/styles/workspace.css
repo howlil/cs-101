@@ -574,3 +574,8 @@
   .lesson-sequence { grid-template-columns:minmax(0,1fr); gap:0; }
   .lesson-sequence a:last-child { width:100%; justify-content:flex-end; }
 }
+
+.progress-integrations-note {
+  color:var(--text-secondary); font-size:13px; line-height:21px;
+  margin:8px 0 17px;
+}

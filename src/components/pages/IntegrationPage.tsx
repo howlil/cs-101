@@ -63,7 +63,7 @@ export default function IntegrationPage({
 }) {
   return <article className="integration-workspace">
     <header className="integration-header">
-      <a className="integration-back" href="/curriculum">
+      <a className="integration-back" href={'/curriculum?item=' + encodeURIComponent(id)}>
         <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
         <span>Kurikulum</span>
       </a>

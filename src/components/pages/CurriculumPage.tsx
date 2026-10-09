@@ -1,13 +1,10 @@
 "use client";
 
 import {
-  Boxes, CheckCircle2, Clock3, ExternalLink, FolderKanban,
-  Link2, LockKeyhole, Target, TriangleAlert,
+  Boxes, Clock3, ExternalLink, FolderKanban, Link2,
 } from 'lucide-react';
 import ItemStatusAction from '../learning/ItemStatusAction';
 import type { ItemActionState } from '../../domain/learning/item-action';
-import ActionLink from '../ui/ActionLink';
-import { Badge } from '../arc/badge/badge';
 import { Accordion } from '../arc/accordion/accordion';
 
 type Criterion = { id: string; text: string };
@@ -32,7 +29,15 @@ type SelectedItem = {
   prerequisites: Array<{ id: string; title: string; href: string }>;
 };
 
-export default function CurriculumPage({ selected }: { selected?: SelectedItem }) {
+type TrackOverview = {
+  id: string;
+  title: string;
+  completed: number;
+  total: number;
+  modules: Array<{ id: string; title: string; completed: number; total: number; href: string }>;
+};
+
+export default function CurriculumPage({ selected, overview }: { selected?: SelectedItem; overview?: TrackOverview }) {
   return <section className="curriculum-workspace" aria-label="Detail kurikulum">
       <div className="curriculum-detail">
         {selected ? <>
@@ -129,10 +134,30 @@ export default function CurriculumPage({ selected }: { selected?: SelectedItem }
               }]} />
             </section>
           </div>
-        </> : (
-          <div className="curriculum-empty">
-            <h2>Kurikulum belum tersedia.</h2>
+        </> : overview ? (
+          <div className="curriculum-overview">
+            <header className="item-header">
+              <p className="breadcrumb">Kurikulum / Jalur</p>
+              <h2>{overview.title}</h2>
+              <p className="curriculum-overview-summary">
+                {overview.completed} dari {overview.total} materi dan project selesai. Pilih modul untuk melihat materi.
+              </p>
+            </header>
+            <nav className="curriculum-overview-modules" aria-label="Modul di jalur">
+              {overview.modules.map((module, index) => (
+                <a href={module.href} key={module.id}>
+                  <span className="curriculum-overview-number">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="curriculum-overview-copy">
+                    <strong>{module.title}</strong>
+                    <small>{module.completed}/{module.total} selesai</small>
+                  </span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              ))}
+            </nav>
           </div>
+        ) : (
+          <div className="curriculum-empty"><h2>Kurikulum belum tersedia.</h2></div>
         )}
       </div>
     </section>;
