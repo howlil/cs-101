@@ -97,3 +97,6 @@
 .item-section:first-child { border-top:0; }
 .item-workbench .item-section { padding:19px 0; }
 .item-details-disclosure { margin-top:24px; }
+
+.item-state-actions .item-action-status { width:100%; }
+.item-state-actions .item-action-prerequisites { width:100%; }

@@ -523,3 +523,54 @@
   .progress-actions { display:block; }
   .progress-actions > section + section { margin-top:25px; }
 }
+
+
+/* Design graph: navigation orientation and state must remain visible without
+ * requiring the sidebar (mobile, collapsed, and Focus Mode). */
+.lesson-location {
+  display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px;
+  margin:0 0 15px; color:var(--text-secondary);
+  font-size:12px; line-height:18px;
+}
+.lesson-location a { color:var(--text-secondary); text-decoration:none; }
+.lesson-location a:hover { color:var(--foreground); text-decoration:underline; }
+.lesson-location span { min-width:0; overflow-wrap:anywhere; }
+.lesson-location span::before { content:'/'; margin-right:10px; color:var(--text-muted); }
+.item-action-status {
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px;
+}
+.lesson-staged .item-action-status { margin:18px 0 5px; }
+.item-action-locked { align-items:flex-start; flex-direction:column; }
+.item-action-prerequisites {
+  display:grid; gap:7px; min-width:0; margin:6px 0 2px;
+  font-size:13px; line-height:20px;
+}
+.item-action-prerequisites a {
+  color:var(--text-secondary); text-decoration:underline;
+  text-underline-offset:3px; overflow-wrap:anywhere;
+}
+.lesson-review-link { margin:12px 0 0; font-size:13px; }
+.lesson-review-link a { color:var(--text-secondary); }
+.lesson-sequence {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px; margin:42px 0 8px; padding:19px 0 0;
+  border-top:1px solid var(--line);
+}
+.lesson-sequence a {
+  display:flex; align-items:center; gap:11px; min-width:0;
+  padding:10px 0; color:var(--foreground); text-decoration:none;
+}
+.lesson-sequence a:last-child { justify-self:end; text-align:right; }
+.lesson-sequence a > span { display:grid; gap:4px; min-width:0; }
+.lesson-sequence small {
+  color:var(--text-muted); font:400 12px/16px var(--font-mono);
+}
+.lesson-sequence strong {
+  color:var(--foreground); font-size:14px; line-height:20px;
+  font-weight:500; overflow-wrap:anywhere;
+}
+.lesson-sequence a:hover strong { text-decoration:underline; text-underline-offset:3px; }
+@media(max-width:530px) {
+  .lesson-sequence { grid-template-columns:minmax(0,1fr); gap:0; }
+  .lesson-sequence a:last-child { width:100%; justify-content:flex-end; }
+}
