@@ -77,10 +77,17 @@ class DevTools {
   }
   async goto(route) {
     const url = new URL(route, base);
+    const previousPath = await this.eval('location.pathname').catch(() => '');
+    const crossingRoutes = Boolean(previousPath && previousPath !== url.pathname);
+    // CDP's Page.navigate acknowledges navigation before the *new* document
+    // replaces the old one; a pathname alone can reflect the destination
+    // while the stale app-shell still exists. Require the old marker to vanish.
+    if (crossingRoutes) await this.eval('document.documentElement.dataset.qaOldDocument = "true"');
     await this.send('Page.navigate', { url: url.href });
     await this.wait(async () => await this.eval(
       'location.pathname === ' + JSON.stringify(url.pathname) +
-      ' && document.readyState === "complete" && Boolean(document.querySelector(".app-shell"))'
+      ' && document.readyState === "complete" && Boolean(document.querySelector(".app-shell"))' +
+      (crossingRoutes ? ' && document.documentElement.dataset.qaOldDocument !== "true"' : '')
     ), 'document at ' + url.pathname, 24000);
     // React client:load islands must hydrate before exercising click behavior.
     await this.wait(async () => await this.eval(
@@ -462,8 +469,8 @@ try {
     assert.ok(fieldCount > index, 'Evidence field disappeared during controlled input at index ' + index);
     await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]")[' + index + '].focus()');
     await client.send('Input.insertText', { text: 'QA verified result ' + String(index + 1) + ': query output and explanation' });
-    const formState = await client.eval('({ count: document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length, stage: document.querySelector(".lesson-staged")?.dataset.activeStage, href: location.href, summary: document.querySelector(".evidence-count")?.textContent })');
-    assert.equal(formState.count, required, 'Evidence form must remain open after typing: ' + JSON.stringify(formState));
+    const formState = await client.eval('({ count: document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length, stage: document.querySelector(".lesson-staged")?.dataset.activeStage, ready:document.readyState, shell: Boolean(document.querySelector(".app-shell")), title:document.title, href: location.href, summary: document.querySelector(".evidence-count")?.textContent })');
+    assert.equal(formState.count, required, 'Evidence form must remain open after typing: ' + JSON.stringify(formState) + '; browser errors: ' + JSON.stringify(client.exceptions));
   }
   await client.wait(async () => await client.eval('document.querySelector(".evidence-count")?.textContent.trim() === "' + String(required) + '/' + String(required) + '"'), 'Coverage reflects all supplied evidence');
   await client.screenshot('lesson-active-evidence-901.png');
