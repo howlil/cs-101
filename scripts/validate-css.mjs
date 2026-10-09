@@ -3,7 +3,8 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 
-const fromVite = createRequire(createRequire(import.meta.url).resolve('vite'));
+const fromAstro = createRequire(createRequire(import.meta.url).resolve('astro'));
+const fromVite = createRequire(fromAstro.resolve('vite'));
 const { transform } = fromVite('lightningcss');
 
 function walk(dir) {
