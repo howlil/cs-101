@@ -113,11 +113,18 @@ export default function LessonPage({
     };
   }, [focus]);
 
-  const chooseStage = (next: StageId) => {
+  const chooseStage = (next: StageId, focusPanel = false) => {
     setStage(next);
     const url = new URL(window.location.href);
     url.hash = next;
     window.history.replaceState(window.history.state, '', url);
+    // The bottom-of-lesson CTA switches content far above the current
+    // viewport. Move focus to the newly visible panel, not to a dead spot.
+    if (focusPanel) {
+      window.requestAnimationFrame(() => {
+        document.getElementById('lesson-panel-' + next)?.focus();
+      });
+    }
   };
 
   const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -232,11 +239,28 @@ export default function LessonPage({
 
 
       {stage === 'understand' && <div className="lesson-stage-next">
-        <Button type="button" variant="primary" onClick={() => chooseStage('practice')}>Mulai latihan</Button>
+        <Button type="button" variant="primary" onClick={() => chooseStage('practice', true)}>Mulai latihan</Button>
       </div>}
       {stage === 'practice' && <div className="lesson-stage-next">
-        <Button type="button" variant="primary" onClick={() => chooseStage('evidence')}>Catat bukti</Button>
+        <Button type="button" variant="primary" onClick={() => chooseStage('evidence', true)}>Catat bukti</Button>
       </div>}
+      {stage === 'evidence' && (!active || visibleState.status === 'passed') && (
+        <aside className="lesson-evidence-gate" aria-label="Status penyimpanan bukti">
+          {visibleState.status === 'passed' ? <>
+            <strong>Materi sudah selesai.</strong>
+            <p>Bukti sebelumnya tetap tersimpan. Review dijadwalkan terpisah dari latihan ini.</p>
+            {reviewHref && <a href={reviewHref}>Lihat status review</a>}
+          </> : <>
+            <strong>{visibleState.status === 'locked'
+              ? 'Prasyarat belum terpenuhi'
+              : 'Aktifkan materi untuk menyimpan bukti'}</strong>
+            <p>{visibleState.status === 'locked'
+              ? 'Kamu boleh membaca dan berlatih sekarang. Penyimpanan sesi tersedia setelah prasyarat diselesaikan.'
+              : 'Kamu boleh membaca dan mencoba latihan tanpa mengaktifkan materi. Untuk menyimpan sesi dan bukti selesai, aktifkan materi terlebih dahulu.'}</p>
+            <ItemStatusAction itemId={itemId} kind="unit" state={visibleState} prerequisites={prerequisites} />
+          </>}
+        </aside>
+      )}
       {active && visibleState.status !== 'passed' && <div className="lesson-staged-evidence-form"
         role="group"
         aria-labelledby="lesson-tab-evidence">

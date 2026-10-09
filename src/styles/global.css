@@ -285,3 +285,6 @@ body::-webkit-scrollbar,
 .concept-flow { max-width:100%; margin:20px 0 28px; padding:0; border:0; }
 .concept-flow pre { margin:0; padding:16px 18px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-control); overflow-x:auto; }
 .challenge-execution-note { color:var(--text-secondary); font-size:13px; line-height:20px; border-left:2px solid var(--border-strong); padding:3px 0 3px 12px; margin:12px 0; }
+
+.session-draft-state { margin:4px 0 14px; color:var(--text-secondary); font-size:12px; line-height:18px; }
+.evidence-coverage { color:var(--foreground); font-size:13px; font-weight:500; }

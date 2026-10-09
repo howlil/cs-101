@@ -296,3 +296,15 @@
 }
 
 .progress-availability-note { max-width:68ch; margin:10px 0 0; color:var(--text-secondary); font-size:12px; line-height:19px; }
+
+/* Learning continuity: bottom-of-lesson navigation must land at the next panel. */
+.lesson-stage-panel { scroll-margin-top:calc(var(--app-topbar-height) + 18px); }
+.lesson-evidence-gate {
+  display:grid; justify-items:start; gap:8px;
+  margin:18px 0 28px; padding:16px 0;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.lesson-evidence-gate strong { color:var(--foreground); font-size:16px; line-height:24px; }
+.lesson-evidence-gate p { max-width:65ch; margin:0; color:var(--text-secondary); font-size:14px; line-height:22px; }
+.lesson-evidence-gate > a { font-size:14px; }
+.lesson-evidence-gate .item-action-status { margin:7px 0 0; }
