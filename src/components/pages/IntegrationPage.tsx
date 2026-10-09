@@ -16,6 +16,7 @@ import type { ItemActionState } from '../../domain/learning/item-action';
 import { Accordion } from '../arc/accordion/accordion';
 import IntegrationEvidence from '../course/IntegrationEvidence';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
+import ActionLink from '../ui/ActionLink';
 
 type Prerequisite = { id: string; title: string; href: string; passed: boolean };
 
@@ -81,6 +82,10 @@ export default function IntegrationPage({
         />
       </div>
     </header>
+
+    {passed && <div className="integration-complete-next">
+      <ActionLink href="/progress" label="Lihat progres belajar" />
+    </div>}
 
     <section className="integration-reference" aria-label="Konteks integration">
       <Accordion
