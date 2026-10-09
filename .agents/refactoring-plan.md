@@ -45,7 +45,7 @@ Move `search/CurriculumSearch*` and `ui/ThemePreference` to `app/`. Update impor
 
 ### PR B — Lesson MDX and interactive blocks (medium risk)
 
-Move `course/*.astro` to `lesson/`; also move `QuizClient`, `RevealAccordion`, and `quiz.module.css`. Update Astro-relative imports, all authored `JAV-001` / `SQL-001` / `SQL-002` / `demo` MDX, generator lesson template, generator documentation, any path-based validators/test fixtures. Preserve `LessonStage` boundary markup, quiz/reveal behaviour, source metadata, content hashes.
+Move `course/*.astro` to `lesson/`; also move `QuizClient`, `RevealAccordion`, and `quiz.module.css`. Update Astro-relative imports, all authored `src/content/lessons/{JAV-001,SQL-001,SQL-002,demo}.mdx`, `.agents/skill/course-generator/assets/lesson-template.mdx`, `.agents/skill/course-generator/references/repo-architecture.md`, related generator documentation, any path-based validators/test fixtures. Preserve `LessonStage` boundary markup, quiz/reveal behaviour, source metadata, content hashes.
 
 **Done when:** `pnpm validate`, `pnpm test`, `pnpm check`, `pnpm build:node` pass; rendered SSR routes for all three lessons + demo include expected stages/quiz; a valid generator fixture still produces a correct MDX lesson; no orphan `course/` import to moved lesson components. Rollback by reverting entire atomic PR.
 
