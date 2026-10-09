@@ -37,9 +37,7 @@ const searchEntries = curriculumSearchEntries;
 
 const curriculumRoute = path === '/curriculum';
 const contextualMatch = path.match(/^\/(learn|project|integration)\/([^/]+)$/);
-const reviewMatch = path.match(/^\/review\/([^/]+)$/);
-const showCurriculum = curriculumRoute || Boolean(contextualMatch) ||
-  Boolean(reviewMatch) || path === '/' || path === '/progress';
+const showCurriculum = curriculumRoute || Boolean(contextualMatch);
 let sidebarData: SidebarData | undefined;
 
 if (showCurriculum) {
@@ -50,11 +48,9 @@ if (showCurriculum) {
 
   const currentItemId = contextualMatch
     ? decodeURIComponent(contextualMatch[2])
-    : reviewMatch
-      ? decodeURIComponent(reviewMatch[1])
-      : curriculumRoute
-        ? Astro.url.searchParams.get('item')
-        : learningState?.activeItemId;
+    : curriculumRoute
+      ? Astro.url.searchParams.get('item')
+      : learningState?.activeItemId;
   const currentItem = currentItemId ? curriculumGraph.itemsById.get(currentItemId) : undefined;
   const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
   const integrations = curriculumGraph.manifest.items

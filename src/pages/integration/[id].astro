@@ -6,6 +6,8 @@ import IntegrationPage from '../../components/pages/IntegrationPage';
 import { curriculumGraph } from '../../server/curriculum';
 import { connectionLabels } from '../../lib/learning-language';
 import { snapshotForRequest } from '../../server/request-snapshot';
+import { getItemLearningView } from '../../domain/learning/view-models';
+import { getItemActionState } from '../../domain/learning/item-action';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
 import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
 
@@ -17,7 +19,7 @@ const progress = state.progress.find((entry) => entry.itemId === integration.id)
 const availability = state.availability.find((entry) => entry.itemId === integration.id);
 const active = state.activeItemId === integration.id;
 const passed = progress?.status === 'passed';
-const stale = progress?.status === 'stale';
+const actionState = getItemActionState(getItemLearningView(curriculumGraph, state, integration.id));
 const prerequisites = integration.prerequisites.map((id) => {
   const item = curriculumGraph.itemsById.get(id)!;
   const itemProgress = state.progress.find((entry) => entry.itemId === id);
@@ -61,10 +63,9 @@ const serializeConnections = (itemId: string) => {
     requirements={integration.requirements}
     challengeCriterion={challengeCriterion}
     passed={passed}
-    stale={stale}
     active={active}
     ready={availability?.status === 'ready'}
-    missingPrerequisites={availability?.missingPrerequisites ?? []}
+    actionState={actionState}
     revision={state.revision}
     continueFrom={progress?.continueFrom}
     lastAnchor={progress?.lastAnchor}

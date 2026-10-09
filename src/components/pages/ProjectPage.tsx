@@ -3,17 +3,15 @@
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   FolderKanban,
   Layers3,
   Link2,
   LockKeyhole,
-  TriangleAlert,
 } from 'lucide-react';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
-import { Badge } from '../arc/badge/badge';
 import { Accordion } from '../arc/accordion/accordion';
-import ActivateItem from '../learning/ActivateItem';
+import ItemStatusAction from '../learning/ItemStatusAction';
+import type { ItemActionState } from '../../domain/learning/item-action';
 import ProjectEvidence from '../course/ProjectEvidence';
 import GuaranteeAccordion from '../project/GuaranteeAccordion';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
@@ -28,10 +26,10 @@ export default function ProjectPage({
   curriculumHref,
   fingerprint,
   passed,
-  stale,
   active,
   ready,
-  missingPrerequisites,
+  actionState,
+  prerequisites,
   revision,
   continueFrom,
   lastAnchor,
@@ -51,10 +49,10 @@ export default function ProjectPage({
   curriculumHref: string;
   fingerprint: string;
   passed: boolean;
-  stale: boolean;
   active: boolean;
   ready: boolean;
-  missingPrerequisites: string[];
+  actionState: ItemActionState;
+  prerequisites: Array<{ id: string; title: string; href: string }>;
   revision: number;
   continueFrom?: string;
   lastAnchor?: string;
@@ -83,22 +81,7 @@ export default function ProjectPage({
       <p className="project-problem">{problemStatement}</p>
 
       <div className="project-status-row">
-        {passed ? (
-          <Badge tone="success" icon={<CheckCircle2 size={14} strokeWidth={1.8} />}>Selesai</Badge>
-        ) : stale && !active ? (
-          <>
-            <Badge tone="warning" icon={<TriangleAlert size={14} strokeWidth={1.8} />}>Perlu diperbarui</Badge>
-            {ready && <ActivateItem itemId={id} label="Perbarui & validasi" />}
-          </>
-        ) : active ? (
-          <Badge tone="info" icon={<FolderKanban size={14} strokeWidth={1.8} />}>Sedang dikerjakan</Badge>
-        ) : ready ? (
-          <ActivateItem itemId={id} label="Mulai project" />
-        ) : (
-          <Badge tone="neutral" icon={<LockKeyhole size={14} strokeWidth={1.8} />}>
-            Terkunci · selesaikan {missingPrerequisites.join(', ') || 'prasyarat'}
-          </Badge>
-        )}
+        <ItemStatusAction itemId={id} kind="checkpoint" state={actionState} prerequisites={prerequisites} />
       </div>
     </header>
 

@@ -128,7 +128,7 @@ Navigasi global hanya tiga tujuan:
 | Route | Label | Job |
 | --- | --- | --- |
 | `/` | Hari ini | Apa yang perlu dikerjakan sekarang |
-| `/curriculum` | Materi | Browse hierarchy curriculum |
+| `/curriculum` | Kurikulum | Browse jalur dan modul |
 | `/progress` | Progres | Melihat state keseluruhan |
 
 Route item:
@@ -144,61 +144,29 @@ Route item:
 
 Review dan Project tidak perlu menjadi global navigation. Keduanya masuk dari workflow yang relevan.
 
-## App shell
+## App shell — kontrak aktif
 
-Desktop memakai tiga layer:
+CS-101 memiliki **satu Persistent Sidebar**, bukan global rail + panel kedua.
+Desktop 248px expanded; Focus/collapsed 56px; mobile (<901px) menggunakan Arc Dialog drawer.
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ CS-101                                  Search  Theme │
-├────┬───────────────────────┬──────────────────────────┤
-│ 🏠 │ Contextual explorer   │ Main workspace           │
-│ 📚 │ independent scroll    │ independent scroll       │
-│ 📈 │                       │                          │
-└────┴───────────────────────┴──────────────────────────┘
- 56px        ~236px
-```
+Satu sidebar:
+- Global navigation: Hari Ini, Kurikulum, Progres.
+- Contextual track → module → item tree muncul pada /curriculum, /learn/*, /project/*, /integration/*.
+- Hari Ini, Progres, Review hanya menggunakan global navigation; tidak menduplikasi tree ketika learner sedang mengerjakan next action, melihat statistik, atau mengerjakan recall.
+- Track lain dipilih melalui track selector; modul relevan yang terbuka secara default. Label track/modul menunjukkan passed/total; jangan expand keseluruhan 206 item sekaligus.
+- Item aktif/selected ditandai secara visual, tetapi aria-current="page" hanya untuk item yang memang mewakili halaman saat ini.
+- Sidebar item dari halaman lesson/project/integration langsung membuka route asli; pada Curriculum, memilih item membuka preview dengan query item.
+- AppLayout dan learner snapshot dari server memiliki ownership navigasi; browsing tidak mengubah aktivasi. Satu main landmark, route workspace diswap oleh Astro ClientRouter.
 
-### Global rail
+Desktop menaruh identitas aplikasi dan tree di sidebar penuh dari atas viewport; header aplikasi berada di area workspace sebelah kanan. Collapse 56px memakai icon-only dan tooltip, tanpa floating tab. Mobile mengubah tree menjadi drawer yang mempunyai focus trap serta Escape-to-close. Teks navigasi minimum tetap dapat dibaca pada 320px dan zoom.
 
-- Compact density memakai `data-density="compact"`.
-- Lebar rail 56 px.
-- Icon-only untuk Hari ini, Kurikulum, Progres.
-- Tooltip, `title`, dan accessible name wajib.
-- Active state jelas.
-- Tidak menaruh daftar materi di rail.
-- Utility seperti settings hanya jika benar-benar ada fungsi.
+### Dua mode Kurikulum
 
-### Contextual explorer
-
-Panel kedua muncul saat konteks membutuhkan hierarchy: `/curriculum`, `/learn/*`, `/project/*`, dan `/integration/*`. Pada route item, contextual explorer adalah bagian dari AppShell, bukan komponen lokal halaman.
-
-Pada desktop, explorer **visible by default** dan current item harus ter-highlight. Link item dari contextual explorer membuka artifact aslinya (`/learn`, `/project`, atau `/integration`), bukan kembali ke preview Curriculum.
-
-Explorer dan workspace adalah dua scroll container independen. Explorer mempertahankan posisi scroll ketika user membuka item lain; workspace detail selalu dapat dibaca tanpa menggeser hierarchy. Di viewport ≤900 px contextual explorer boleh disembunyikan sampai drawer/collapsible navigation tersedia.
-
-Explorer menunjukkan **satu track aktif** secara penuh. Track lain dipilih dari track switcher; jangan expand semua track sekaligus.
-
-Contoh:
-
-```text
-Java                                      2/21
-
-Java Core                                 2/5
-  ✓ JAV-001
-  ● JAV-002
-  ○ JAV-003
-  ○ JAV-004
-  ○ JAV-005
-  ◆ Project 1
-
-Java Design                               0/1
-Testing                                   0/3
-Runtime                                   0/3
-...
-```
-
-Item row cukup berisi status marker, ID, dan judul pendek. Metadata detail tetap di workspace.
+- /curriculum atau /curriculum?track=... → overview jalur dan modul (selesai/total).
+- /curriculum?track=...&item=... → preview singkat item dan CTA.
+- /learn/* → Pahami / Latihan / Bukti yang dipisah berdasarkan LessonStage MDX, atau manifest fallback jika konten belum tersedia.
+- Lesson header membawa breadcrumb + urutan bahkan ketika sidebar disembunyikan oleh Focus Mode.
+- Evidence dan review tetap dimiliki server; navigasi dan progress tidak mengubah state saat browsing.
 
 ### Main workspace
 

@@ -3,8 +3,8 @@
 .app-shell { grid-template-columns: 248px minmax(0, 1fr); }
 html[data-sidebar="collapsed"] .app-shell { grid-template-columns: 56px minmax(0, 1fr); }
 .app-sidebar {
-  position: sticky; top: var(--app-topbar-height);
-  height: calc(100dvh - var(--app-topbar-height));
+  position: fixed; top: 0; left: 0;
+  width: 248px; height: 100dvh; z-index: 35;
   min-width: 0; display: flex; flex-direction: column;
   border-right: 1px solid var(--line); background: var(--surface);
   overflow: hidden; align-self: start;
@@ -83,14 +83,7 @@ html[data-sidebar="collapsed"] .app-sidebar .sidebar-nav-link { justify-content:
 
 /* Compose the desktop chrome as one app shell: sidebar starts at viewport top. */
 @media (min-width:901px) {
-  .app-sidebar {
-    position:fixed;
-    left:0;
-    top:0;
-    width:248px;
-    height:100dvh;
-    z-index:35;
-  }
+  /* Fixed-sidebar geometry is owned by the base .app-sidebar rule. */
   html[data-sidebar="collapsed"] .app-sidebar { width:56px; }
   .app-main { grid-column:2; }
   .topbar {
