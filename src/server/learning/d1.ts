@@ -1,17 +1,16 @@
 import { createHash, randomUUID } from 'node:crypto';
-import type { CurriculumGraph } from '../domain/curriculum-v2/graph';
+import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
 import {
   deriveAvailability,
-  requiredEvidenceForItem,
   withCurrentCompletion,
   type ItemProgressState,
-} from '../domain/learning/rules';
+} from '../../domain/learning/rules';
 import {
   activeItemSchema,
   reviewAttemptSchema,
   sessionSchema,
   type SessionFields,
-} from '../domain/learning/schema';
+} from '../../domain/learning/schema';
 import {
   advanceReviewSchedule,
   gradeReview,
@@ -19,9 +18,10 @@ import {
   toReviewView,
   type ReviewScheduleRow,
   type ReviewScheduleView,
-} from '../domain/review/policy';
-import type { ReviewBank } from '../domain/review/schema';
-import { LearningError, type LearningSnapshot } from './learning';
+} from '../../domain/review/policy';
+import type { ReviewBank } from '../../domain/review/schema';
+import { LearningError, assertSessionAllowed, assertItemCanActivate, assertReviewAllowed } from '../../domain/learning/decisions';
+import type { LearningSnapshot } from './contract';
 
 type D1Row = Record<string, unknown>;
 type D1Result<T = D1Row> = { results: T[]; success: boolean };
@@ -171,36 +171,6 @@ export class CloudflareLearningService {
     return item;
   }
 
-  private validateSession(input: SessionFields, current: LearningSnapshot) {
-    const item = this.item(input.itemId);
-    if (input.fingerprint !== item.fingerprint) {
-      throw new LearningError(409, 'Curriculum berubah. Muat ulang materi.');
-    }
-    if (current.activeItemId !== item.id) {
-      throw new LearningError(409, 'Jadikan item ini aktif sebelum menyimpan sesi.');
-    }
-
-    const expected = requiredEvidenceForItem(item).map((entry) => entry.id);
-    const provided = input.evidence.map((entry) => entry.criterionId);
-    if (new Set(provided).size !== provided.length || provided.some((id) => !expected.includes(id))) {
-      throw new LearningError(422, 'Rujukan bukti tidak valid.');
-    }
-
-    if (input.kind === 'passed') {
-      if (expected.some((id) => !provided.includes(id))) {
-        throw new LearningError(422, 'Lengkapi bukti untuk semua target dan latihan.');
-      }
-    } else if (
-      !input.evidence.length &&
-      !input.continueFrom &&
-      !input.blocker &&
-      !Object.values(input.reflection ?? {}).some((value) => value.trim())
-    ) {
-      throw new LearningError(422, 'Isi titik lanjut, hambatan, bukti, atau catatan sesi.');
-    }
-    return item;
-  }
-
   private progressAfter(current: LearningSnapshot, input: SessionFields) {
     const previous = current.progress.find((entry) => entry.itemId === input.itemId);
     const next = {
@@ -236,17 +206,11 @@ export class CloudflareLearningService {
     if (current.revision !== raw.revision) {
       throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
     }
-    for (const session of sessions) this.validateSession(session, current);
+    for (const session of sessions) assertSessionAllowed(this.item(session.itemId), session, current.activeItemId);
 
     if (activeItemId !== undefined) {
       this.item(activeItemId);
-      const availability = current.availability.find((entry) => entry.itemId === activeItemId);
-      if (availability?.status === 'locked') {
-        throw new LearningError(
-          422,
-          `Item masih terkunci. Selesaikan: ${availability.missingPrerequisites.join(', ')}.`,
-        );
-      }
+      assertItemCanActivate(activeItemId, current.availability);
     }
 
     const now = this.now();
@@ -426,15 +390,10 @@ export class CloudflareLearningService {
     if (current.revision !== input.revision) {
       throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
     }
-    const completion = current.progress.find((entry) => entry.itemId === input.itemId);
-    if (completion?.status !== 'passed') {
-      throw new LearningError(422, 'Review tersedia setelah materi selesai dan masih sesuai kurikulum terbaru.');
-    }
+    assertReviewAllowed(input.itemId, current.progress, current.reviews);
 
     const view = current.reviews.find((entry) => entry.itemId === input.itemId);
     if (!view) throw new LearningError(422, 'Review belum terjadwal.');
-    if (view.state === 'scheduled') throw new LearningError(422, 'Review belum jatuh tempo.');
-    if (view.state === 'retained') throw new LearningError(422, 'Semua jadwal review untuk materi ini sudah selesai.');
 
     const now = this.now();
     const currentRow = storedFromView(view);

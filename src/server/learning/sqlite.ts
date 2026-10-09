@@ -1,53 +1,31 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import type { CurriculumGraph } from '../domain/curriculum-v2/graph';
+import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
 import {
   deriveAvailability,
-  requiredEvidenceForItem,
   withCurrentCompletion,
   type ItemProgressState,
-} from '../domain/learning/rules';
+} from '../../domain/learning/rules';
 import {
   activeItemSchema,
   sessionSchema,
   reviewAttemptSchema,
   type SessionFields,
-} from '../domain/learning/schema';
+} from '../../domain/learning/schema';
 import {
   advanceReviewSchedule,
   gradeReview,
   initialReviewSchedule,
   toReviewView,
   type ReviewScheduleRow,
-  type ReviewScheduleView,
-} from '../domain/review/policy';
-import type { ReviewBank } from '../domain/review/schema';
-
-export class LearningError extends Error {
-  constructor(public status: number, message: string) { super(message); }
-}
+} from '../../domain/review/policy';
+import type { ReviewBank } from '../../domain/review/schema';
+import { LearningError, assertSessionAllowed, assertItemCanActivate, assertReviewAllowed } from '../../domain/learning/decisions';
+import type { LearningSnapshot } from './contract';
+export { LearningError } from '../../domain/learning/decisions';
+export type { LearningSnapshot, LearningProgress } from './contract';
 
 type StateRow = { activeItemId: string | null; revision: number };
-export type LearningProgress = ItemProgressState & { taskId: string };
-export type ReviewAttemptRecord = {
-  id: string;
-  itemId: string;
-  questionSetVersion: string;
-  answers: number[];
-  gradingMode: 'multiple_choice';
-  score: number;
-  assisted: boolean;
-  result: 'passed' | 'again';
-  recordedAt: string;
-};
-export type LearningSnapshot = {
-  activeItemId: string | null;
-  activeTaskId: string | null;
-  revision: number;
-  progress: LearningProgress[];
-  availability: ReturnType<typeof deriveAvailability>;
-  reviews: ReviewScheduleView[];
-};
 
 type StoredReviewRow = {
   itemId: string;
@@ -212,33 +190,8 @@ export class LearningService {
 
   private writeSession(input: SessionFields) {
     const item = this.item(input.itemId);
-    if (input.fingerprint !== item.fingerprint) {
-      throw new LearningError(409, 'Curriculum berubah. Muat ulang materi.');
-    }
-
     const before = this.snapshot();
-    if (before.activeItemId !== item.id) {
-      throw new LearningError(409, 'Jadikan item ini aktif sebelum menyimpan sesi.');
-    }
-
-    const expected = requiredEvidenceForItem(item).map((entry) => entry.id);
-    const provided = input.evidence.map((entry) => entry.criterionId);
-    if (new Set(provided).size !== provided.length || provided.some((id) => !expected.includes(id))) {
-      throw new LearningError(422, 'Rujukan bukti tidak valid.');
-    }
-
-    if (input.kind === 'passed') {
-      if (expected.some((id) => !provided.includes(id))) {
-        throw new LearningError(422, 'Lengkapi bukti untuk semua target dan latihan.');
-      }
-    } else if (
-      !input.evidence.length &&
-      !input.continueFrom &&
-      !input.blocker &&
-      !Object.values(input.reflection ?? {}).some((value) => value.trim())
-    ) {
-      throw new LearningError(422, 'Isi titik lanjut, hambatan, bukti, atau catatan sesi.');
-    }
+    assertSessionAllowed(item, input, before.activeItemId);
 
     const wasCurrentPass = before.progress.find((entry) => entry.itemId === item.id)?.status === 'passed';
     const payload = JSON.stringify({ ...input, taskId: item.id });
@@ -284,13 +237,7 @@ export class LearningService {
     return this.mutate(input, 'active-item', () => {
       const item = this.item(input.itemId);
       const current = this.snapshot();
-      const availability = current.availability.find((entry) => entry.itemId === item.id);
-      if (availability?.status === 'locked') {
-        throw new LearningError(
-          422,
-          `Item masih terkunci. Selesaikan: ${availability.missingPrerequisites.join(', ')}.`,
-        );
-      }
+      assertItemCanActivate(item.id, current.availability);
       if (input.previousSession) this.writeSession(input.previousSession);
       this.db.prepare(
         'UPDATE learner_state SET active_item_id=?, active_task_id=? WHERE id=1',
@@ -316,10 +263,7 @@ export class LearningService {
     let grading: ReturnType<typeof gradeReview> | undefined;
     const response = this.mutate(input, 'review', () => {
       const current = this.snapshot();
-      const completion = current.progress.find((entry) => entry.itemId === input.itemId);
-      if (completion?.status !== 'passed') {
-        throw new LearningError(422, 'Review tersedia setelah materi selesai dan masih sesuai kurikulum terbaru.');
-      }
+      assertReviewAllowed(input.itemId, current.progress, current.reviews);
 
       const row = this.db.prepare(
         `SELECT item_id AS itemId, policy_version AS policyVersion, step,
@@ -327,14 +271,6 @@ export class LearningService {
          FROM review_schedule WHERE item_id=?`,
       ).get(input.itemId) as StoredReviewRow | undefined;
       if (!row) throw new LearningError(422, 'Review belum terjadwal.');
-
-      const view = toReviewView(row, this.now());
-      if (view.state === 'scheduled') {
-        throw new LearningError(422, 'Review belum jatuh tempo.');
-      }
-      if (view.state === 'retained') {
-        throw new LearningError(422, 'Semua jadwal review untuk materi ini sudah selesai.');
-      }
 
       try {
         grading = gradeReview(bank, input);
