@@ -34,116 +34,16 @@
 .progress-integration-copy { min-width: 0; display: grid; gap: 1px; }
 .progress-integration-copy strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
-/* Project / Integration: page frame fills the workbench.
-   Long-form children keep a readable measure while rules/dividers span the primary region. */
-.project-header,
-.integration-header {
-  max-width: none;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  column-gap: var(--workspace-gap);
-}
-
-.project-header > :not(.project-status-row),
-.integration-header > :not(.integration-status-row) {
-  grid-column: 1;
-}
-
-.project-status-row,
-.integration-status-row {
-  grid-column: 2;
-  grid-row: 1 / -1;
-  align-self: end;
-  justify-self: start;
-  margin: 0 0 4px;
-}
-
+/* Project, Integration and Review now use in-flow disclosures and
+   single-column workspaces. Only shared readable measures belong here. */
 .project-header h1,
 .integration-header h1,
 .project-problem,
-.integration-brief {
-  max-width: var(--workspace-readable);
-}
-
-.project-body,
-.integration-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  grid-template-areas: "main side";
-  gap: var(--workspace-gap);
-  align-items: start;
-}
-
-.project-main,
-.integration-main {
-  grid-area: main;
-  min-width: 0;
-}
-
-.project-sidecar,
-.integration-sidecar {
-  grid-area: side;
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.project-section,
-.project-evidence-section,
-.integration-section,
-.integration-evidence-section {
-  max-width: none;
-}
-
-.project-section > *,
-.integration-section > * {
-  max-width: var(--workspace-readable);
-}
-
-.project-evidence-form,
-.integration-evidence-form {
-  max-width: 980px;
-}
-
-/* Review */
-.review-header {
-  max-width: none;
-}
-
+.integration-brief,
 .review-header h1,
-.review-instruction-line {
-  max-width: var(--workspace-readable);
-}
-
-.review-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  grid-template-areas: "main side";
-  gap: var(--workspace-gap);
-  align-items: start;
-}
-
-.review-main {
-  grid-area: main;
-  min-width: 0;
-}
-
-.review-sidecar {
-  grid-area: side;
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.review-attempt,
-.review-main > .arc-alert,
-.review-main > .empty-state {
-  max-width: 980px;
-}
+.review-instruction-line,
+.project-section > *,
+.integration-section > * { max-width: var(--workspace-readable); }
 
 /* Keep the full desktop workbench balanced instead of leaving all spare width on the right. */
 @media (min-width: 1180px) {
@@ -157,65 +57,11 @@
   }
 }
 
-@media (max-width: 1100px) {
-  .today-workbench,
-  .progress-workbench,
-  .project-body,
-  .integration-body,
-  .review-body {
-    grid-template-columns: 1fr;
-    grid-template-areas: none;
-    gap: 20px;
-  }
-
-  .today-focus {
-    grid-template-columns: 1fr;
-  }
-
-  .today-path,
-  .today-title-line,
-  .today-why,
-  .today-next-step,
-  .today-focus:not(:has(.today-why)) .today-next-step,
-  .today-focus > a {
-    grid-column: 1;
-  }
-
-  .today-sidecar,
-  .progress-sidecar,
-  .project-sidecar,
-  .integration-sidecar,
-  .review-sidecar {
-    position: static;
-    padding: 16px 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
-  }
-
-  .project-header,
-  .integration-header {
-    display: block;
-  }
-
-  .project-status-row,
-  .integration-status-row {
-    margin-top: 12px;
-  }
-
-  .progress-history {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 767px) {
   .app-main:not(.app-main--flush) {
     padding-inline: 14px;
   }
 
-  .today-workbench,
-  .progress-workbench {
-    gap: 16px;
-  }
 }
 
 
