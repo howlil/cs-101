@@ -1,7 +1,7 @@
 "use client";
 
-import CurriculumSearch from '../search/CurriculumSearch';
-import ThemePreference from '../ui/ThemePreference';
+import CurriculumSearch from './CurriculumSearch';
+import ThemePreference from './ThemePreference';
 import type { CurriculumSearchEntry } from '../../domain/curriculum-v2/selectors';
 
 type SearchEntry = CurriculumSearchEntry & { href: string };
