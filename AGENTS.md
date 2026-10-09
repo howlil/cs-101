@@ -23,7 +23,7 @@ Lihat [`.agents/architecture.md`](.agents/architecture.md) sebagai kontrak **akt
 
 ### UI ownership: current and planned (no moves yet)
 
-`src/components/{course,project}/` and `ui/{QuizClient,RevealAccordion}` **still exist** and are valid during the planned migration. Do not create duplicate components in target folders early.
+`src/components/{course,project}/` **still exist** for session/evidence/review and guarantee disclosure; MDX blocks and quiz/reveal islands already live in `lesson`. Do not create duplicate components in target folders early.
 
 **Future ownership** after the staged refactor:
 
@@ -48,7 +48,7 @@ Keep `src/pages/`, `src/layouts/`, `src/content/`, `src/domain/`, `src/server/`,
 
 UI default adalah **compact, flat, dan source-owned**. Sebelum membuat komponen UI baru, cari primitive yang sudah ada di `src/components/arc`. Jika use case-nya adalah primitive umum yang tersedia di UIArc, gunakan/port source UIArc ke `src/components/arc/<primitive>`; jangan membuat implementasi paralel di feature folder.
 
-Boundary UI wajib: `arc/` generic primitives; `pages/` route composition; `ui/` product-reusable; `app/curriculum/learning` feature owners. `lesson/` masih target migrasi; `course/project` tetap path aktif sampai dipindahkan. Ikuti tabel di `UI ownership` di atas; jangan menciptakan owner ganda.
+Boundary UI wajib: `arc/` generic primitives; `pages/` route composition; `ui/` product-reusable; `app/curriculum/learning` feature owners. `lesson/` sudah aktif; `course/project` masih path aktif sampai komponen sisanya dipindahkan. Ikuti tabel di `UI ownership` di atas; jangan menciptakan owner ganda.
 
 Aturan implementasi:
 

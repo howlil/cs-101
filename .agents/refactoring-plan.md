@@ -1,6 +1,6 @@
 # CS-101 — UI folder boundaries: refactor plan
 
-**Status: IN PROGRESS; PR A (global search + theme) implemented** · 9 Oktober 2026 · Based on `master` `5f75d866` after backend refactor PR #11.
+**Status: IN PROGRESS; PR A and B (app + lesson locality) implemented** · 9 Oktober 2026 · Based on `master` `5f75d866` after backend refactor PR #11.
 
 This plan extends the **active** [`architecture.md`](architecture.md) and [`AGENTS.md`](../AGENTS.md). Refactor must improve *change locality* rather than optimize directory count; do not introduce `features/` or layers of `application/use-cases/ports/repositories`.
 
@@ -65,7 +65,7 @@ Before creating a folder/interface ask: Which single owner changes this code? Is
 Each PR records before/after file mapping, exact changed imports, test evidence, and independent rollback. A structural PR **must not** mix code moves with CSS redesign, dependency upgrades, runtime schema/API changes or Cloudflare deployment. Failures in build, content validation, generated MDX, keyboard focus, review/evidence, Node/SQLite/D1 parity, or the UI QA block merge.
 
 - [x] A: Search/theme grouped under App
-- [ ] B: Lesson blocks + MDX content/template references migrated atomically
+- [x] B: Lesson blocks + MDX content/template references migrated atomically
 - [ ] C: Evidence/review UI grouped under Learning; orphan folders removed
 - [ ] D: Boundary checker extended to implemented layout, legacy compatibility audited
 - [ ] Active `architecture.md` / `AGENTS.md` / `engineering-design.md` / generator references updated to **actual** paths after each PR

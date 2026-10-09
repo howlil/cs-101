@@ -33,7 +33,7 @@ Dependencies move in one direction: **UI / Astro routes → server orchestration
 | `src/lib/connection-view.ts` | UI connection labels and link projection | Curriculum graph semantics |
 | `src/components/arc/` | Source-owned UI primitives | Product/domain imports |
 | `src/components/ui/` | Reusable product compositions | Primitive reimplementation and DB access |
-| `src/components/{app,pages,curriculum,learning,course,project,search}/` | Feature/page interactions and render | Direct server database access |
+| `src/components/{app,pages,curriculum,lesson,learning,course,project}/` | Feature/page interactions and render | Direct server database access |
 
 Existing component folders remain; do not add a parallel `features/` hierarchy.
 
@@ -51,7 +51,7 @@ domain → domain (never server, browser, Astro UI)
 Arc → generic React/Radix primitives (never CS-101 domain)
 ```
 
-When migrating existing `components/course`: authored MDX/lesson presentation blocks belong in `lesson`; session/evidence/review components belong in `learning`. `components/app` now owns search and theme preference; the one-consumer `project/GuaranteeAccordion` should be colocated, not expanded into a new architecture slice. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
+Authored MDX/lesson presentation blocks now live in `lesson`; the remaining session/evidence/review TSX in `components/course` move to `learning` in the next slice. `components/app` now owns search and theme preference; the one-consumer `project/GuaranteeAccordion` should be colocated, not expanded into a new architecture slice. Page compositions remain flat in `components/pages`. `components/arc/*` directories stay separate for source-owned styles. Keep legitimate composition dependency `app/AppSidebar → curriculum/CurriculumExplorer`.
 
 **Folder creation test:** does the directory own a stable behaviour/contract, or contain files changed together? If no, colocate. No abstraction just for a clean-looking tree, no barrel exports per folder, no special import API unless it measurably reduces coupling. The current `pnpm validate:architecture` enforces core cross-layer restrictions; only add folder-specific checks after the move.
 

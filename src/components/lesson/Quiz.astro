@@ -1,5 +1,5 @@
 ---
-import QuizClient from '../ui/QuizClient';
+import QuizClient from './QuizClient';
 interface Props { items: { question: string; options: string[]; answer: number; explanation: string }[] }
 ---
 <QuizClient client:load items={Astro.props.items} />
