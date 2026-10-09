@@ -491,11 +491,15 @@ Answer key review tidak dikirim ke client sebelum submit. Server melakukan gradi
 
 **Continue.** Menyimpan `activeItemId`, anchor, dan `continueFrom`. Jika anchor sudah tidak ada setelah content berubah, buka awal item dan tetap tampilkan catatan terakhir.
 
-**Ganti active item.** Browsing item lain tetap boleh. Menjadikan item baru aktif harus menyimpan draft session sebelumnya terlebih dahulu. Hanya satu active item.
+**Ganti active item.** Browsing tidak pernah mengaktifkan item. Jika item sebelumnya memiliki draft lokal yang bermakna, tampilkan tiga pilihan: **Simpan sesi & ganti** (server mencatat sesi secara atomik dengan aktivasi), **Ganti tanpa simpan sesi** (draft tetap tersimpan lokal), dan **Batal**. Draft kosong, menit saja, atau form yang belum disentuh tidak boleh otomatis dikirim sebagai sesi. Hanya satu active item.
 
 **Simpan session.** Input dipertahankan saat gagal. Success hanya setelah commit storage.
 
 **Submit evidence.** Evidence dipetakan eksplisit ke criterion/requirement. URL atau checklist tidak otomatis membuktikan correctness.
+
+**CTA dan transisi.** Link ke workspace hanya menjanjikan membuka halaman; aktivasi adalah mutasi tersendiri. Aktivasi dari Curriculum preview boleh sekaligus membuka workspace setelah berhasil. Setelah project/integration `passed`, tampilkan aksi lanjut yang eksplisit. Simpan sesi progres boleh menggunakan evidence saja jika memenuhi aturan domain; validasi client tidak boleh lebih ketat daripada server.
+
+**Review feedback.** Setelah jawaban tersimpan, tampilkan jadwal review yang dikembalikan API dalam halaman yang sama sambil mempertahankan pembahasan attempt. Jangan memaksa refresh hanya untuk melihat status baru.
 
 **Curriculum stale.** Historical evidence tetap ada dengan fingerprint asal. Completion baru mengikuti curriculum aktif.
 
@@ -534,7 +538,7 @@ Tampilan tetap minimal dan utilitarian.
 - Utility Star/Donate secondary; tidak boleh mengalahkan learning action.
 - Empty state compact, horizontal bila ruang cukup.
 - Status selalu punya label/shape; warna saja tidak cukup.
-- Motion 120–160ms dan hormati `prefers-reduced-motion`.
+- Motion route dimiliki `ClientRouter` melalui satu `transition:name`/`transition:animate` pada main workspace. Feedback fetch lambat hanya satu progress line di bawah topbar; jangan menambah persisted React navigation indicator kedua. Hormati `prefers-reduced-motion`.
 
 ## Copy
 
@@ -580,7 +584,7 @@ UIArc
 
 Jangan menambah `querySelector`, global `addEventListener` untuk feature interaction, atau native interactive disclosure baru di Astro. Native anchor/navigation tetap boleh karena itu semantic navigation, bukan client state.
 
-Product decision: **tidak memakai focus ring/halo**. Keyboard focus tetap harus terlihat melalui perubahan border/background/foreground pada primitive UIArc.
+Keyboard focus wajib terlihat dengan outline 2px memakai `--focus-ring` (accent kuat), tanpa layout shift; pointer click tidak menampilkan outline. Jangan meniadakan focus indicator secara global, dan pertahankan affordance border/background bawaan UIArc.
 
 Box/surface baru tidak boleh membuat radius, border, shadow, atau motion language sendiri. Gunakan primitive UIArc jika interaktif; untuk content statis gunakan token UIArc seperti `--radius-control`, `--radius-panel`, `--border`, `--surface`, dan `--shadow-resting`.
 

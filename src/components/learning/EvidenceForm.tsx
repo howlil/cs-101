@@ -10,7 +10,7 @@ import { Button } from '../arc/button/button';
 import { Input } from '../arc/input/input';
 import { Textarea } from '../arc/textarea/textarea';
 import { CheckCircle2, Save } from 'lucide-react';
-import { postJson, readDraft, removeDraft, writeDraft } from './client';
+import { hasSessionNotes, postJson, readDraft, removeDraft, writeDraft } from './client';
 
 export type EvidenceGroup = {
   key: string;
@@ -69,6 +69,7 @@ export default function EvidenceForm({
   const [completionOpen, setCompletionOpen] = useState(initialCompletionOpen);
   const [currentRevision, setCurrentRevision] = useState(revision);
   const [hydrated, setHydrated] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [loadingKind, setLoadingKind] = useState<'progress' | 'passed'>();
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone: AlertTone }>();
   const request = useRef<{ key: string; id: string } | undefined>(undefined);
@@ -101,7 +102,8 @@ export default function EvidenceForm({
 
   useEffect(() => {
     const draft = readDraft(itemId);
-    if (draft?.fingerprint === fingerprint) {
+    if (draft?.fingerprint === fingerprint && hasSessionNotes(draft)) {
+      setDirty(true);
       setEvidence(Object.fromEntries(draft.evidence.map((entry) => [entry.criterionId, entry.text])));
       setNextStep(draft.continueFrom);
       setBlocker(draft.blocker ?? '');
@@ -118,8 +120,8 @@ export default function EvidenceForm({
   }, [fingerprint, itemId, initialCompletionOpen]);
 
   useEffect(() => {
-    if (!hydrated) return;
-    writeDraft(itemId, {
+    if (!hydrated || !dirty) return;
+    const draft: SessionFields = {
       itemId,
       fingerprint,
       kind: 'progress',
@@ -131,8 +133,10 @@ export default function EvidenceForm({
       lastAnchor,
       ...(minuteValue() ? { minutes: minuteValue() } : {}),
       ...(reflectionPayload() ? { reflection: reflectionPayload() } : {}),
-    });
-  }, [blocker, criteria, evidence, fingerprint, hydrated, itemId, lastAnchor, minutes, nextStep, reflection]);
+    };
+    if (hasSessionNotes(draft)) writeDraft(itemId, draft);
+    else removeDraft(itemId);
+  }, [blocker, criteria, dirty, evidence, fingerprint, hydrated, itemId, lastAnchor, minutes, nextStep, reflection]);
 
   const submit = async (kind: 'progress' | 'passed') => {
     if (loadingKind) return;
@@ -150,10 +154,10 @@ export default function EvidenceForm({
       }
     }
 
-    if (kind === 'progress' && !nextStep.trim() && !blocker.trim() && !reflectionPayload()) {
+    if (kind === 'progress' && !nextStep.trim() && !blocker.trim() && !reflectionPayload() && !Object.values(evidence).some((value) => value.trim())) {
       setFeedback({
         title: 'Tambahkan satu catatan',
-        message: 'Tulis titik lanjut, hambatan, atau catatan singkat sebelum menyimpan sesi.',
+        message: 'Tulis titik lanjut, hambatan, bukti, atau catatan singkat sebelum menyimpan sesi.',
         tone: 'warning',
       });
       return;
@@ -234,7 +238,7 @@ export default function EvidenceForm({
     </div>
   );
 
-  return <form className={['session-form', className].filter(Boolean).join(' ')}>
+  return <form className={['session-form', className].filter(Boolean).join(' ')} onChangeCapture={() => setDirty(true)}>
     <section className="session-close">
       <div className="evidence-heading">
         <div>

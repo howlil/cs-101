@@ -39,7 +39,7 @@
   /* Slider fills. Same as --control-on except neutral dark, where a mid grey keeps the white thumb distinct. */
   --control-fill: var(--control-on);
   /* Product decision: no focus rings anywhere. Kept as a token so existing rules resolve to nothing. */
-  --focus-ring: transparent;
+  --focus-ring: var(--accent-strong);
   --success: oklch(49% .19 150);
   --warning: oklch(58% .18 75);
   --danger: oklch(54% .21 25);
@@ -91,7 +91,7 @@
   --border: oklch(29% 0 0);
   --border-subtle: oklch(25% 0 0);
   --border-strong: oklch(40% 0 0);
-  --focus-ring: transparent;
+  --focus-ring: var(--accent-strong);
   --accent: oklch(80% 0 0);
   --accent-strong: oklch(91% 0 0);
   --accent-subtle: oklch(80% 0 0 / .13);
@@ -175,8 +175,13 @@
   }
 }
 
-/* No focus rings or outlines for any input method (product decision). */
-:is(*:focus, *:focus-visible, *:focus-within) { outline: none !important; }
+/* Keyboard focus must remain visible; pointer interaction does not receive a halo.
+   Keep the indicator outside controls to avoid layout changes and clipped borders. */
+:where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex="-1"]),
+  [role="button"], [role="tab"], [role="menuitem"], [role="option"]):focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px;
+}
 
 
 /* Compact on pointer-precise devices; restore touch-sized controls on coarse pointers. */

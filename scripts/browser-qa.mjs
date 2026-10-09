@@ -164,6 +164,15 @@ try {
   assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".sidebar-collapse")).display'), 'none',
     'Desktop expanded state must expose the Collapse button');
   assert.ok(m.doc <= m.vw + 1, 'Desktop document horizontal overflow: ' + JSON.stringify(m));
+  assert.equal(await client.eval('document.querySelectorAll(".navigation-progress").length'), 0,
+    'Legacy duplicate navigation progress bar must not render');
+  assert.equal(await client.eval('document.querySelectorAll(".topbar").length'), 1,
+    'Only one navigation loading owner should render');
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  const focus = await client.eval('(() => { const node = document.activeElement; const style = getComputedStyle(node); return { tag: node?.tagName, outline: style.outlineStyle, width: parseFloat(style.outlineWidth) }; })()');
+  assert.equal(focus.outline, 'solid', 'Keyboard links must have a visible focus outline: ' + JSON.stringify(focus));
+  assert.ok(focus.width >= 2, 'Keyboard focus indicator must be at least 2px: ' + JSON.stringify(focus));
   await client.screenshot('curriculum-desktop-1440.png');
   assert.ok(await client.eval('document.querySelectorAll(".curriculum-overview-modules a").length > 0'),
     'Browse route should show module overview, not an arbitrary first-item preview');
@@ -208,6 +217,10 @@ try {
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
   m = await client.metrics();
+  assert.equal(await client.eval('document.querySelector(\'.sidebar-nav-link[aria-label="Kurikulum"]\').getAttribute("aria-current")'), null,
+    'Item route is a curriculum section, not the curriculum page');
+  assert.equal(await client.eval('document.querySelector(\'.sidebar-nav-link[aria-label="Kurikulum"]\').dataset.sectionCurrent'), 'true',
+    'Item route should still highlight its navigation section');
   assert.equal(Math.round(m.sidebar), 248, '901px should use desktop layout');
   assert.ok(m.doc <= m.vw + 1, '901px horizontal overflow');
   await client.screenshot('lesson-desktop-901.png');
@@ -285,6 +298,16 @@ try {
   assert.equal(m.bodyBg, 'rgb(8, 8, 8)', 'Dark canvas should match Howlil token');
   await client.screenshot('progress-mobile-dark-390.png');
   console.log('PASS dark theme persistence and surface');
+
+  // Project/Integration relationships are disclosed in-flow; no phantom right rail.
+  await client.resize(1440, 900);
+  for (const route of ['/project/JAV-P01', '/integration/INT-001']) {
+    await client.goto(route);
+    const className = route.startsWith('/project/') ? '.project-body' : '.integration-body';
+    assert.equal(await client.eval('getComputedStyle(document.querySelector(' + JSON.stringify(className) + ')).display'),
+      'block', route + ' should not allocate an empty rail');
+  }
+  console.log('PASS project/integration single-column workspace');
 
   await client.resize(320, 720);
   for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001',

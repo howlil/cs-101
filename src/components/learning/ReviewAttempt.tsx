@@ -20,18 +20,34 @@ type ReviewFeedback = {
   explanation: string;
 };
 
+type ReviewSchedule = {
+  itemId: string;
+  state: 'scheduled' | 'due' | 'retry' | 'retained';
+  step: number;
+  dueAt: string | null;
+};
+
+type ReviewResponse = {
+  reviewAttempt: { score: number; assisted: boolean; result: 'passed' | 'again' };
+  reviewFeedback: ReviewFeedback[];
+  reviews: ReviewSchedule[];
+  error?: string;
+};
+
 type Props = {
   itemId: string;
   version: string;
   revision: number;
   questions: PublicReviewQuestion[];
+  onReviewed?: (schedule: ReviewSchedule) => void;
 };
 
-export default function ReviewAttempt({ itemId, version, revision, questions }: Props) {
+export default function ReviewAttempt({ itemId, version, revision, questions, onReviewed }: Props) {
   const [answers, setAnswers] = useState<string[]>(() => questions.map(() => ''));
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; assisted: boolean; result: 'passed' | 'again' }>();
   const [feedback, setFeedback] = useState<ReviewFeedback[]>([]);
+  const [nextReview, setNextReview] = useState<ReviewSchedule>();
   const [error, setError] = useState('');
   const complete = useMemo(() => answers.every((answer) => answer !== ''), [answers]);
 
@@ -53,10 +69,15 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
           assisted: false,
         }),
       });
-      const data = await response.json();
+      const data = await response.json() as ReviewResponse;
       if (!response.ok) throw new Error(data.error || 'Review belum tersimpan.');
       setResult(data.reviewAttempt);
       setFeedback(data.reviewFeedback ?? []);
+      const updated = data.reviews?.find((entry) => entry.itemId === itemId);
+      if (updated) {
+        setNextReview(updated);
+        onReviewed?.(updated);
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Review belum tersimpan.');
     } finally {
@@ -74,6 +95,16 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
           ? 'Review selesai. Review berikutnya sudah dijadwalkan.'
           : (5 - result.score) + ' bagian belum tepat. Materi tetap selesai. Pelajari pembahasan di bawah lalu ulangi review.'}
       </Alert>
+
+      {nextReview && <p className="review-next-state">
+        {nextReview.state === 'retained' ? 'Semua jadwal review sudah selesai.'
+          : nextReview.state === 'retry' ? 'Bisa mencoba review lagi sekarang.'
+          : nextReview.dueAt
+            ? 'Review berikutnya: ' + new Date(nextReview.dueAt).toLocaleDateString('id-ID', {
+              day: 'numeric', month: 'long', year: 'numeric',
+            }) + '.'
+            : 'Status review telah diperbarui.'}
+      </p>}
 
       <div className="review-feedback-list">
         {questions.map((question, index) => {
@@ -95,7 +126,7 @@ export default function ReviewAttempt({ itemId, version, revision, questions }: 
 
       <div className="actions">
         <ActionLink href="/" label="Kembali ke Hari ini" />
-        <ActionLink href={'/review/' + itemId} label="Muat status review" />
+        {result.result === 'again' && <ActionLink href={'/review/' + itemId} label="Ulangi review" />}
       </div>
     </div>;
   }

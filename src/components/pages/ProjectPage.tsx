@@ -12,9 +12,10 @@ import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Accordion } from '../arc/accordion/accordion';
 import ItemStatusAction from '../learning/ItemStatusAction';
 import type { ItemActionState } from '../../domain/learning/item-action';
-import ProjectEvidence from '../course/ProjectEvidence';
-import GuaranteeAccordion from '../project/GuaranteeAccordion';
+import ProjectEvidence from '../learning/ProjectEvidence';
+import GuaranteeAccordion from './GuaranteeAccordion';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
+import ActionLink from '../ui/ActionLink';
 
 type NavItem = { id: string; title: string; href: string };
 
@@ -84,6 +85,11 @@ export default function ProjectPage({
         <ItemStatusAction itemId={id} kind="checkpoint" state={actionState} prerequisites={prerequisites} />
       </div>
     </header>
+
+    {passed && <div className="project-complete-next">
+      <ActionLink href={next?.href ?? curriculumHref}
+        label={next ? 'Buka project berikutnya' : 'Kembali ke kurikulum'} />
+    </div>}
 
     <section className="project-reference" aria-label="Konteks project">
       <Accordion

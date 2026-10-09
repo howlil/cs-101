@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import {
   ArrowLeft,
   BrainCircuit,
@@ -11,7 +12,7 @@ import ActionLink from '../ui/ActionLink';
 import EmptyAction from '../ui/EmptyAction';
 import { Alert } from '../arc/alert/alert';
 import { Accordion } from '../arc/accordion/accordion';
-import ReviewAttempt from '../course/ReviewAttempt';
+import ReviewAttempt from '../learning/ReviewAttempt';
 
 const REVIEW_DAYS = [1, 3, 7, 14, 30] as const;
 
@@ -53,8 +54,10 @@ export default function ReviewPage({
   bank?: { version: string; current: boolean; questions: PublicQuestion[] };
   revision: number;
 }) {
-  const canAttempt = review?.state === 'due' || review?.state === 'retry';
-  const nextDate = review?.dueAt ? new Date(review.dueAt).toLocaleDateString('id-ID', {
+  const [currentReview, setCurrentReview] = useState(review);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const canAttempt = currentReview?.state === 'due' || currentReview?.state === 'retry';
+  const nextDate = currentReview?.dueAt ? new Date(currentReview.dueAt).toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -78,7 +81,7 @@ export default function ReviewPage({
         href={itemHref}
         actionLabel="Buka materi"
       />
-    ) : !review ? (
+    ) : !currentReview ? (
       <EmptyAction
         title="Review belum dijadwalkan."
         description="Jadwal dibuat otomatis setelah materi selesai."
@@ -91,15 +94,15 @@ export default function ReviewPage({
           <section className="review-summary">
             <span className="eyebrow">STATUS</span>
             <strong>
-              {review.state === 'retry'
+              {currentReview.state === 'retry'
                 ? 'Perlu diulang'
-                : review.state === 'due'
+                : currentReview.state === 'due'
                   ? 'Review hari ini'
-                  : review.state === 'retained'
+                  : currentReview.state === 'retained'
                     ? 'Review selesai'
                     : 'Review berikutnya'}
             </strong>
-            {review.state === 'scheduled' && nextDate && <span>{nextDate}</span>}
+            {currentReview.state === 'scheduled' && nextDate && <span>{nextDate}</span>}
           </section>
 
           <Accordion
@@ -107,17 +110,28 @@ export default function ReviewPage({
             size="sm"
             items={[{
               title: 'Lihat jadwal review',
-              content: <ReviewSchedule step={review.step} state={review.state} />,
+              content: <ReviewSchedule step={currentReview.step} state={currentReview.state} />,
             }]}
           />
         </aside>
 
         <section className="review-main">
-          {review.state === 'retained' ? (
+          {reviewSubmitted && bank?.current ? (
+            <ReviewAttempt
+              itemId={itemId}
+              version={bank.version}
+              revision={revision}
+              questions={bank.questions}
+              onReviewed={(schedule) => {
+                setCurrentReview(schedule);
+                setReviewSubmitted(true);
+              }}
+            />
+          ) : currentReview.state === 'retained' ? (
             <Alert title="Review selesai" tone="success">
               Semua jadwal review untuk materi ini sudah dilewati.
             </Alert>
-          ) : review.state === 'scheduled' ? (
+          ) : currentReview.state === 'scheduled' ? (
             <Alert title="Belum waktunya review" tone="info">
               {nextDate ? 'Review berikutnya: ' + nextDate + '.' : 'Tanggal review berikutnya belum ditentukan.'}
             </Alert>
@@ -141,6 +155,10 @@ export default function ReviewPage({
               version={bank.version}
               revision={revision}
               questions={bank.questions}
+              onReviewed={(schedule) => {
+                setCurrentReview(schedule);
+                setReviewSubmitted(true);
+              }}
             />
           ) : (
             <ActionLink href={itemHref} label="Kembali ke materi" />

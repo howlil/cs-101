@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, CornerDownLeft, Search } from "lucide-react";
 import { Input } from "../input/input";
 import styles from "./command-palette.module.css";
+import { matchesQuery } from '../lib/matches-query';
 
 export type CommandItem = {
   id: string;
@@ -36,8 +37,8 @@ export function CommandPalette({
       [item.label, item.description, item.group, ...(item.keywords ?? [])]
         .filter(Boolean)
         .join(" ")
-        .toLocaleLowerCase("id-ID")
-        .includes(q)
+        .trim()
+        .length > 0 && matchesQuery([item.label, item.description, item.group, ...(item.keywords ?? [])].filter(Boolean).join(" "), q)
     ).slice(0, 24);
   }, [items, query]);
 
