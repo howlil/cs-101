@@ -12,6 +12,7 @@ type SelectedItem = {
   id: string;
   kind: 'unit' | 'checkpoint' | 'integration';
   title: string;
+  hasLesson?: boolean;
   breadcrumb: string;
   href: string;
   state?: 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
@@ -45,6 +46,9 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
             <p className="breadcrumb">{selected.breadcrumb}</p>
             <code className="item-id-standalone">{selected.id}</code>
             <h2>{selected.title}</h2>
+            {selected.kind === 'unit' && !selected.hasLesson && (
+              <p className="item-outline-status">Kerangka materi · penjelasan dan kuis lengkap belum tersedia. Latihan dilakukan secara mandiri.</p>
+            )}
           </header>
 
 

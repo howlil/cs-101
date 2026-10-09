@@ -1,5 +1,6 @@
 ---
 import '../styles/curriculum.css';
+import { getCollection } from 'astro:content';
 import AppLayout from '../layouts/AppLayout.astro';
 import CurriculumPage from '../components/pages/CurriculumPage';
 import { snapshotForRequest } from '../server/request-snapshot';
@@ -15,6 +16,9 @@ import { getItemLearningView } from '../domain/learning/view-models';
 import { getItemActionState } from '../domain/learning/item-action';
 
 const graph = curriculumGraph;
+const authoredLessonIds = new Set((await getCollection('lessons'))
+  .filter((entry) => !entry.data.demo)
+  .map((entry) => entry.data.taskId));
 const tracks = [...graph.manifest.tracks].sort((a, b) => a.order - b.order);
 let learningState: LearningSnapshot | undefined;
 try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
@@ -63,6 +67,7 @@ const selected = selectedItem && selectedLocation ? {
   id: selectedItem.id,
   kind: selectedItem.kind,
   title: selectedItem.title,
+  hasLesson: selectedItem.kind === 'unit' ? authoredLessonIds.has(selectedItem.id) : undefined,
   breadcrumb: [selectedLocation.track?.title ?? 'Lintas jalur', selectedLocation.module?.title].filter(Boolean).join(' / '),
   href: itemHref(graph, selectedItem.id),
   state: selectedView?.displayState,

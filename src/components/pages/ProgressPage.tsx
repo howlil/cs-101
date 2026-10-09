@@ -54,11 +54,13 @@ type SessionRow = {
 
 export default function ProgressPage({
   reviews,
+  unavailableReviewCount = 0,
   tracks,
   integrations,
   sessions,
 }: {
   reviews: ReviewRow[];
+  unavailableReviewCount?: number;
   tracks: TrackRow[];
   integrations: IntegrationRow[];
   sessions: SessionRow[];
@@ -95,6 +97,9 @@ export default function ProgressPage({
               </div>,
             }))}
           />
+          {unavailableReviewCount > 0 && <p className="progress-availability-note">
+            {unavailableReviewCount} review sudah jatuh tempo, tetapi soal belum tersedia. Status belajar tidak berubah.
+          </p>}
         </section>
 
       {(reviews.length > 0 || integrations.length > 0) && (
