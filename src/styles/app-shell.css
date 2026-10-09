@@ -71,73 +71,10 @@
   .topbar { height:48px; min-height:48px; padding-inline:10px 8px; }
 }
 
-/* Feedback for SSR navigation (does not obscure the previous workspace). */
-.navigation-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 100;
-  width: 100%;
-  height: 2px;
-  background: var(--accent-strong);
-  transform-origin: left;
-  opacity: 0;
-  pointer-events: none;
-}
-.navigation-progress[data-pending="true"] {
-  animation: navigation-wait 1.2s 120ms ease-out both;
-}
-@keyframes navigation-wait {
-  0% { opacity: 0; transform: scaleX(0.08); }
-  10% { opacity: 1; transform: scaleX(0.18); }
-  100% { opacity: 1; transform: scaleX(0.9); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .navigation-progress[data-pending="true"] {
-    animation: none;
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-
-
-/*
- * Route motion belongs to the ClientRouter's View Transition, not React
- * hydration. Keep the app chrome in place and animate only the workspace.
- * No scale/blur: large curriculum pages stay readable and fast to composite.
- */
-.app-main {
-  view-transition-name: cs101-workspace;
-}
-
-/* Suppress the default full-document crossfade (including the app chrome). */
+/* Only Astro ClientRouter animates the named workspace.
+   The sticky header and navigation chrome never crossfade as a document. */
 ::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
-::view-transition-group(cs101-workspace) {
-  animation-duration: 190ms;
-  animation-timing-function: cubic-bezier(.16, 1, .3, 1);
-}
-
-::view-transition-old(cs101-workspace) {
-  animation: cs101-workspace-out 80ms ease-in both;
-}
-
-::view-transition-new(cs101-workspace) {
-  animation: cs101-workspace-in 190ms cubic-bezier(.16, 1, .3, 1) both;
-}
-
-@keyframes cs101-workspace-out {
-  from { opacity: 1; }
-  to { opacity: .86; }
-}
-
-@keyframes cs101-workspace-in {
-  from { opacity: 0; transform: translateY(7px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+::view-transition-new(root) { animation: none; }
 
 /* Delayed, unobtrusive loading affordance; never obscure or replace content. */
 .topbar::after {

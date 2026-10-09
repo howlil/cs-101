@@ -164,6 +164,15 @@ try {
   assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".sidebar-collapse")).display'), 'none',
     'Desktop expanded state must expose the Collapse button');
   assert.ok(m.doc <= m.vw + 1, 'Desktop document horizontal overflow: ' + JSON.stringify(m));
+  assert.equal(await client.eval('document.querySelectorAll(".navigation-progress").length'), 0,
+    'Legacy duplicate navigation progress bar must not render');
+  assert.equal(await client.eval('document.querySelectorAll(".topbar").length'), 1,
+    'Only one navigation loading owner should render');
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  const focus = await client.eval('(() => { const node = document.activeElement; const style = getComputedStyle(node); return { tag: node?.tagName, outline: style.outlineStyle, width: parseFloat(style.outlineWidth) }; })()');
+  assert.equal(focus.outline, 'solid', 'Keyboard links must have a visible focus outline: ' + JSON.stringify(focus));
+  assert.ok(focus.width >= 2, 'Keyboard focus indicator must be at least 2px: ' + JSON.stringify(focus));
   await client.screenshot('curriculum-desktop-1440.png');
   assert.ok(await client.eval('document.querySelectorAll(".curriculum-overview-modules a").length > 0'),
     'Browse route should show module overview, not an arbitrary first-item preview');
