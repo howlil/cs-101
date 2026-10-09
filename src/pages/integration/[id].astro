@@ -4,12 +4,12 @@ import '../../styles/connections.css';
 import AppLayout from '../../layouts/AppLayout.astro';
 import IntegrationPage from '../../components/pages/IntegrationPage';
 import { curriculumGraph } from '../../server/curriculum';
-import { connectionLabels } from '../../lib/learning-language';
+import { connectionGroupsForUI } from '../../lib/connection-view';
 import { snapshotForRequest } from '../../server/request-snapshot';
 import { getItemLearningView } from '../../domain/learning/view-models';
 import { getItemActionState } from '../../domain/learning/item-action';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
-import { getConnectionGroups, itemHref } from '../../domain/curriculum-v2/selectors';
+import { itemHref } from '../../domain/curriculum-v2/selectors';
 
 const integration = curriculumGraph.itemsById.get(Astro.params.id ?? '');
 if (!integration || integration.kind !== 'integration') return Astro.redirect('/404');
@@ -26,28 +26,6 @@ const prerequisites = integration.prerequisites.map((id) => {
   return { id, title: item.title, href: itemHref(curriculumGraph, id), passed: itemProgress?.status === 'passed' };
 });
 const challengeCriterion = requiredEvidenceForItem(integration).find((entry) => entry.id === 'challenge')!;
-const serializeConnections = (itemId: string) => {
-  const groups = getConnectionGroups(curriculumGraph, itemId);
-  const source = [
-    [connectionLabels.requires, groups.requires],
-    [connectionLabels.usedLaterBy, groups.usedLaterBy],
-    [connectionLabels.related, groups.related],
-    [connectionLabels.deepDive, groups.deepDive],
-    [connectionLabels.builtOnFoundation, groups.builtOnFoundation],
-    [connectionLabels.foundationFor, groups.foundationFor],
-    [connectionLabels.contributesTo, groups.contributesTo],
-  ] as const;
-  return source
-    .filter(([, items]) => items.length)
-    .map(([label, items]) => ({
-      label,
-      items: items.map(({ item }) => ({
-        id: item.id,
-        title: item.title,
-        href: itemHref(curriculumGraph, item.id),
-      })),
-    }));
-};
 ---
 <AppLayout title={integration.title} description={integration.brief}>
   <IntegrationPage
@@ -69,6 +47,6 @@ const serializeConnections = (itemId: string) => {
     revision={state.revision}
     continueFrom={progress?.continueFrom}
     lastAnchor={progress?.lastAnchor}
-    connections={serializeConnections(integration.id)}
+    connections={connectionGroupsForUI(curriculumGraph, integration.id)}
   />
 </AppLayout>
