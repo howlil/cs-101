@@ -1,0 +1,63 @@
+{
+  "itemId": "SQL-003",
+  "curriculumFingerprint": "sha256:7b18c39edb6674de6df1e1e875b3ea56fa18bdce02c25d487653d324881168fd",
+  "sources": [
+    {
+      "title": "CMU 15-445/645 — Database Systems",
+      "url": "https://15445.courses.cs.cmu.edu/fall2026/",
+      "tier": 0,
+      "supports": [
+        "data-system context",
+        "SQL relational operations"
+      ],
+      "notes": [
+        "Kurikulum menyebut source ini sebagai bacaan pengantar."
+      ]
+    },
+    {
+      "title": "PostgreSQL 18 — Aggregate Functions",
+      "url": "https://www.postgresql.org/docs/18/tutorial-agg.html",
+      "tier": 1,
+      "supports": [
+        "GROUP BY",
+        "HAVING",
+        "FILTER"
+      ],
+      "notes": []
+    },
+    {
+      "title": "PostgreSQL 18 — Window Functions Tutorial",
+      "url": "https://www.postgresql.org/docs/18/tutorial-window.html",
+      "tier": 1,
+      "supports": [
+        "partition vs group",
+        "running total frames"
+      ],
+      "notes": []
+    },
+    {
+      "title": "PostgreSQL 18 — Window Function Reference",
+      "url": "https://www.postgresql.org/docs/18/functions-window.html",
+      "tier": 1,
+      "supports": [
+        "ROW_NUMBER",
+        "RANK",
+        "LAG",
+        "LEAD"
+      ],
+      "notes": []
+    },
+    {
+      "title": "PostgreSQL 18 — SELECT",
+      "url": "https://www.postgresql.org/docs/18/sql-select.html",
+      "tier": 1,
+      "supports": [
+        "aggregation semantics",
+        "HAVING",
+        "window frame"
+      ],
+      "notes": []
+    }
+  ],
+  "unsupportedClaims": []
+}

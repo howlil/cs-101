@@ -1,0 +1,240 @@
+---
+taskId: "SQL-003"
+title: "Aggregation + window functions"
+description: "Bedakan grain aggregation dan window, hitung running balance dengan urutan deterministik, lalu rekonsiliasi hasil settlement."
+demo: false
+curriculumFingerprint: "sha256:7b18c39edb6674de6df1e1e875b3ea56fa18bdce02c25d487653d324881168fd"
+---
+
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import Reveal from '../../components/lesson/Reveal.astro';
+
+<LessonStage stage="understand">
+
+> Setelah join, query analitik sering terlihat benar tetapi salah secara uang. Kunci berikutnya: **tentukan grain output dan buktikan hasil akhir dengan kontrol independen.**
+
+## Setelah materi ini, lo harus bisa
+
+- menghitung agregat per merchant dengan `GROUP BY`, `HAVING`, dan `FILTER`;
+- membedakan kapan sebuah query mereduksi row dan kapan ia mempertahankannya;
+- membuat running balance per account yang deterministik, termasuk saat timestamp sama;
+- menggunakan `ROW_NUMBER`, `RANK`, `LAG`, dan `LEAD` untuk menganalisis rangkaian event;
+- merekonsiliasi hasil settlement dengan total dari query kontrol.
+
+## Prasyarat
+
+Selesaikan [SQL-002 — Joins, subqueries, CTEs](/learn/SQL-002) sebelum menggabungkan data pembayaran yang saling memiliki hubungan satu-ke-banyak.
+
+<MentalModel title="GROUP BY mereduksi, OVER mempertahankan">
+`GROUP BY account_id` menghasilkan **satu row per account**. `SUM(amount) OVER (PARTITION BY account_id ...)` menghasilkan **satu row per transaksi**, ditambah hasil aggregate untuk partition atau frame. Kalau baris detail masih dibutuhkan, windowing biasanya tepat; kalau hanya total per account, grouping cukup.
+</MentalModel>
+
+<ConceptGraph>
+<pre>{`base transaction rows
+   |
+   +--> WHERE --> GROUP BY --> HAVING --> totals per group
+   |
+   +--> WHERE --> OVER (PARTITION / ORDER / ROWS)
+                          |
+                          +--> running balance for every row
+                                  |
+                                  +--> compare final row vs GROUP BY control`}</pre>
+</ConceptGraph>
+
+## Mulai dari dataset kecil yang bisa dihitung manual
+
+Contoh memakai PostgreSQL. Nilai amount bertipe `numeric` agar angka settlement tidak memakai floating-point binary.
+
+~~~sql
+CREATE TEMP TABLE ledger_entries (
+  entry_id integer PRIMARY KEY,
+  account_id integer NOT NULL,
+  posted_at timestamp NOT NULL,
+  amount numeric(12,2) NOT NULL
+);
+
+INSERT INTO ledger_entries (entry_id, account_id, posted_at, amount) VALUES
+  (101, 7, '2026-10-01 09:00', 100.00),
+  (102, 7, '2026-10-01 09:00', -15.00),
+  (103, 7, '2026-10-01 10:00', 20.00),
+  (201, 8, '2026-10-01 09:30', 50.00),
+  (202, 8, '2026-10-01 11:00', -12.50);
+~~~
+
+Untuk account 7, saldo setelah setiap transaksi dalam urutan `posted_at, entry_id` adalah 100.00, 85.00, dan 105.00. Account 8 berakhir di 37.50. Tulis angka ini sebelum menjalankan query.
+
+## GROUP BY + HAVING + FILTER
+
+`WHERE` memilih row sebelum grouping. `GROUP BY` mereduksi menjadi satu row per key. `HAVING` membatasi group setelah aggregate dihitung.
+
+~~~sql
+SELECT
+  account_id,
+  COUNT(*) AS entry_count,
+  SUM(amount) AS net_amount,
+  COUNT(*) FILTER (WHERE amount < 0) AS debit_events
+FROM ledger_entries
+GROUP BY account_id
+HAVING COUNT(*) >= 2
+ORDER BY account_id;
+~~~
+
+Hasilnya **dua row**, bukan lima: account 7 dan 8. `FILTER` hanya mengubah input ke `COUNT(*)` yang memilikinya; ia tidak membuang entry positif dari `SUM(amount)`.
+
+<Reveal title="Mengapa WHERE amount < 0 tidak setara dengan FILTER?">
+Kalau `WHERE amount < 0` dipakai, baris positif hilang untuk **semua** aggregate. Sebaliknya `COUNT(*) FILTER (WHERE amount < 0)` hanya menghitung debit dan tetap membiarkan `SUM(amount)` memakai semua row. Gunakan `HAVING` untuk kriteria yang menilai hasil group.
+</Reveal>
+
+## Window: hasil tetap satu row per transaksi
+
+Gunakan `OVER` agar sebuah `SUM` menjadi window function. `PARTITION BY` membatasi masing-masing account. `ORDER BY` mengatur urutan per account.
+
+~~~sql
+SELECT
+  account_id, entry_id, posted_at, amount,
+  SUM(amount) OVER (
+    PARTITION BY account_id
+    ORDER BY posted_at, entry_id
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS running_balance
+FROM ledger_entries
+ORDER BY account_id, posted_at, entry_id;
+~~~
+
+Perhatikan dua keputusan correctness:
+
+1. `entry_id` menjadi tie-breaker. Dua transaksi account 7 punya timestamp sama; timestamp saja tidak menentukan urutan yang stabil.
+2. Frame `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` **eksplisit**. Default frame yang melibatkan ordering peers tidak selalu setara dengan satu row per langkah.
+
+Jumlah hasil tetap **lima row**. Itu perbedaan mendasar dari GROUP BY.
+
+## Reconciliation: jangan percaya running total hanya karena syntax valid
+
+Buat kontrol dengan jalan berbeda. Ambil saldo window terakhir per account, lalu bandingkan dengan total langsung dari tabel dasar.
+
+~~~sql
+WITH running AS (
+  SELECT account_id, entry_id, posted_at,
+    SUM(amount) OVER (
+      PARTITION BY account_id
+      ORDER BY posted_at, entry_id
+      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS balance
+  FROM ledger_entries
+),
+final_balances AS (
+  SELECT DISTINCT ON (account_id) account_id, balance
+  FROM running
+  ORDER BY account_id, posted_at DESC, entry_id DESC
+),
+control_totals AS (
+  SELECT account_id, SUM(amount) AS expected_total
+  FROM ledger_entries
+  GROUP BY account_id
+)
+SELECT f.account_id, f.balance, c.expected_total,
+       f.balance = c.expected_total AS reconciled
+FROM final_balances f
+JOIN control_totals c USING (account_id)
+ORDER BY f.account_id;
+~~~
+
+Semua `reconciled` harus `true`. Untuk sistem nyata, kontrol eksternal seperti batch total provider bisa menambah independensi yang tidak didapat dari satu dataset saja.
+
+## ROW_NUMBER vs RANK
+
+`ROW_NUMBER()` memberi nomor berbeda untuk setiap row; `RANK()` mempertahankan peringkat yang sama untuk merchant dengan nilai ranking identik.
+
+~~~sql
+WITH merchant_totals(merchant_id, amount) AS (
+  VALUES (1, 90::numeric), (2, 90::numeric), (3, 70::numeric)
+)
+SELECT merchant_id, amount,
+       ROW_NUMBER() OVER (ORDER BY amount DESC, merchant_id) AS seq,
+       RANK() OVER (ORDER BY amount DESC) AS position
+FROM merchant_totals
+ORDER BY amount DESC, merchant_id;
+~~~
+
+Merchant 1 dan 2 punya `position = 1`, sementara row ketiga punya `position = 3`. Tie-breaker hanya ada di `ROW_NUMBER` supaya urutan nomor stabil. Kalau `merchant_id` ditambahkan ke `ORDER BY` milik `RANK`, kedua merchant tidak lagi tie.
+
+## LAG / LEAD membaca event tetangga, bukan "waktu sebelumnya" otomatis
+
+~~~sql
+SELECT account_id, entry_id, posted_at, amount,
+       LAG(amount) OVER (
+         PARTITION BY account_id ORDER BY posted_at, entry_id
+       ) AS previous_amount,
+       LEAD(posted_at) OVER (
+         PARTITION BY account_id ORDER BY posted_at, entry_id
+       ) AS next_time
+FROM ledger_entries
+ORDER BY account_id, posted_at, entry_id;
+~~~
+
+Untuk mendeteksi burst, bandingkan `posted_at` dengan `LAG(posted_at)` lalu definisikan ambang durasi secara eksplisit. Nilai sebelumnya pada row pertama adalah `NULL`. Jika ingin menemukan pembayaran sukses pertama setelah kegagalan, tetapkan apakah "pertama" berdasarkan timestamp event atau urutan ingestion, dan selalu gunakan tie-breaker yang deterministik.
+
+<Reveal title="Mengapa window function tidak boleh langsung dipakai di WHERE?">
+Di PostgreSQL, window function dievaluasi setelah WHERE/GROUP BY/HAVING. Hitung `ROW_NUMBER()` atau `LAG()` pada subquery/CTE terlebih dulu, baru filter hasilnya pada query luar. Ini bukan pembatasan gaya, melainkan urutan pemrosesan query.
+</Reveal>
+
+<SourceList sources={[
+  { title: 'CMU 15-445/645 — Database Systems', url: 'https://15445.courses.cs.cmu.edu/fall2026/' },
+  { title: 'PostgreSQL 18 — Aggregate Functions', url: 'https://www.postgresql.org/docs/18/tutorial-agg.html' },
+  { title: 'PostgreSQL 18 — Window Functions Tutorial', url: 'https://www.postgresql.org/docs/18/tutorial-window.html' },
+  { title: 'PostgreSQL 18 — Window Function Reference', url: 'https://www.postgresql.org/docs/18/functions-window.html' },
+  { title: 'PostgreSQL 18 — SELECT', url: 'https://www.postgresql.org/docs/18/sql-select.html' }
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Periksa model mental sebelum menjalankan query
+
+<Quiz items={[
+  { question: 'Tiga transaksi punya account_id sama. GROUP BY account_id menghasilkan berapa row?', options: ['Satu', 'Tiga', 'Nol'], answer: 0, explanation: 'GROUP BY menggabungkan semua row dengan key sama dalam satu hasil group.' },
+  { question: 'Bagaimana menghitung saldo berjalan per transaksi?', options: ['SUM(amount) GROUP BY account_id', 'SUM(amount) OVER (PARTITION BY account_id ORDER BY posted_at, entry_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)', 'SELECT DISTINCT account_id'], answer: 1, explanation: 'SUM OVER mempertahankan detail row dan memerlukan urutan deterministik serta frame yang benar.' },
+  { question: 'Dua merchant punya total sama; fungsi mana memberi ranking sama?', options: ['ROW_NUMBER()', 'RANK() dengan ORDER BY total DESC', 'LAG()'], answer: 1, explanation: 'RANK memberi posisi sama untuk peers berdasarkan ranking key.' },
+  { question: 'Bagaimana menghitung transaksi gagal per merchant tanpa loop?', options: ['COUNT(*) FILTER (WHERE status = "failed") dan GROUP BY merchant_id', 'For loop di aplikasi', 'LIMIT 1'], answer: 0, explanation: 'FILTER membuat aggregate kondisional per key tanpa menghilangkan row dari aggregate lainnya.' },
+  { question: 'Kontrol yang benar untuk saldo akhir?', options: ['ROW_NUMBER', 'Bandingkan final running balance dengan SUM(amount) GROUP BY account_id', 'Ambil row terakhir tanpa ORDER BY'], answer: 1, explanation: 'Query aggregate terpisah harus merekonsiliasi nilai window terakhir untuk tiap account.' }
+]} />
+
+<Challenge
+  title="Settlement Window Drill"
+  brief="Gunakan data ledger dan transaksi merchant. Buat 10 query analitik, tulis grain output sebelum mengeksekusi, dan buktikan kontrol total secara terpisah. Kerjakan sendiri, bukan menyalin seluruh jawaban dari materi."
+  acceptanceCriteria={[
+    '10 query analitik selesai tanpa procedural/application-side loops.',
+    'Total harian settlement per merchant dihitung dan bisa diperiksa kembali.',
+    'Saldo berjalan per account berakhir tepat di total transaksi dasar.',
+    'Kegagalan lalu pembayaran sukses berikutnya diidentifikasi dengan urutan deterministik.',
+    'Ranking merchant mempertahankan rows detail ketika perlu.',
+    'Burst event terdeteksi lewat LAG atau LEAD dengan ambang waktu eksplisit.',
+    'Setiap hasil direkonsiliasi terhadap kontrol independen.'
+  ]}
+/>
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+<ExitCriteria items={[
+  'Solve 10 analytical queries without procedural loops',
+  'Running balances reconcile exactly with base transactions',
+  'Can explain the difference between aggregation and windowing from result cardinality'
+]} />
+
+## Bukti yang disimpan
+
+- 10 file SQL beserta pertanyaan bisnis, expected grain, dan actual row count.
+- Satu fixture ledger dengan dua account dan timestamp tie untuk membuktikan kebutuhan `entry_id`.
+- Query final running balance dan query kontrol GROUP BY dengan hasil reconciliation lengkap.
+- Ringkasan satu paragraf: mengapa GROUP BY mereduksi, sementara OVER mempertahankan row.
+
+</LessonStage>

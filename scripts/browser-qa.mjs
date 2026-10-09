@@ -181,6 +181,13 @@ try {
   await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
   await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
+  await client.goto('/curriculum?item=JAV-002');
+  assert.ok(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), 'Missing authored lesson must be disclosed in preview');
+  assert.equal(await client.eval("document.body.textContent.includes('tercantum di kurikulum.')"), true, 'Missing authored text must not be claimed available');
+  await client.screenshot('curriculum-outline-desktop-1440.png');
+  await client.goto('/curriculum?item=SQL-003');
+  assert.equal(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), false, 'Authored SQL-003 must not be marked outline');
+  console.log('PASS Curriculum preview distinguishes authored content from manifest outlines');
   console.log('PASS curriculum overview → module selection');
 
   // Visual contract checks on the live browser, not just static CSS snapshots.
@@ -193,6 +200,12 @@ try {
   }
   assert.equal(await client.eval('document.querySelectorAll(".topbar-workspace").length'), 0,
     'Decorative legacy workspace label must not return');
+  const todayPanel = await client.eval('(() => { const panel = document.querySelector(".today-focus"); if (!panel) return null; const css = getComputedStyle(panel); return { color:css.backgroundColor, radius:css.borderRadius, width:panel.getBoundingClientRect().width }; })()');
+  if (todayPanel) {
+    assert.equal(todayPanel.color, 'rgba(0, 0, 0, 0)', 'Today main block must be flat rather than a filled card');
+    assert.equal(todayPanel.radius, '0px', 'Today block should not have decorative card corners');
+    assert.ok(todayPanel.width <= 820, 'Today reading measure must be bounded');
+  }
   await client.screenshot('today-desktop-1440.png');
   await client.goto('/curriculum');
   console.log('PASS Today CTA hierarchy and current shell visuals');
@@ -268,13 +281,20 @@ try {
   assert.equal(await client.eval('document.querySelector(".item-id-standalone").textContent'), 'SQL-001');
   console.log('PASS learning journey: Pahami/Latihan/Bukti, evidence, focus, context preservation');
 
-  for (const id of ['SQL-002', 'JAV-001', 'JAV-002']) {
+  for (const id of ['SQL-002', 'SQL-003', 'JAV-001', 'JAV-002']) {
     await client.goto('/learn/' + id);
     assert.equal(await client.eval('document.querySelectorAll(".lesson-stage-tab").length'), 3, id + ' tabs');
     assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
       [1,1,1], id + ' tabpanels');
     assert.equal(await client.eval('Boolean(document.querySelector(".lesson-sidecar"))'), false,
       id + ' must not have the legacy permanent sidecar');
+    if (id === 'SQL-003') {
+      assert.equal(await client.eval('Boolean(document.querySelector(".lesson-stage-panel pre"))'), true, 'SQL-003 must include authored SQL examples');
+      await client.screenshot('sql003-desktop-901.png');
+    }
+    if (id === 'JAV-002') {
+      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
+    }
   }
   console.log('PASS other authored lessons and manifest-only fallback parity');
 
@@ -332,13 +352,15 @@ try {
     assert.ok(back, 'Expected back navigation on ' + route);
     assert.equal(back.radius, '9999px', 'Back navigation pill radius at ' + route);
     assert.equal(back.size, '13px', 'Back navigation size at ' + route);
+    await client.screenshot(route.startsWith('/project/') ? 'project-desktop-1440.png'
+      : route.startsWith('/integration/') ? 'integration-desktop-1440.png' : 'review-desktop-1440.png');
   }
   console.log('PASS consistent Project/Integration/Review back navigation');
 
   console.log('PASS project/integration single-column workspace');
 
   await client.resize(320, 720);
-  for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001',
+  for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001', '/learn/SQL-003',
     '/project/JAV-P01', '/integration/INT-001', '/review/SQL-001']) {
     await client.goto(route);
     m = await client.metrics();
