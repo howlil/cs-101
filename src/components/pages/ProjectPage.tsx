@@ -98,23 +98,7 @@ export default function ProjectPage({
           title: 'Materi terkait & perjalanan project',
           content: <div className="project-reference-content">
             <aside className="project-sidecar" aria-label="Konteks project">
-        <section className="project-context-strip">
-          <div>
-            <span>Melanjutkan dari</span>
-            {parent ? <a href={parent.href}><code>{parent.id}</code> {parent.title}</a> : <strong>Project awal</strong>}
-          </div>
-          <div>
-            <span>Materi terkait</span>
-            <strong>{contributors.length}</strong>
-          </div>
-          <div>
-            <span>Project berikutnya</span>
-            {next ? <a href={next.href}><code>{next.id}</code> {next.title}</a> : <strong>Selesai</strong>}
-          </div>
-        </section>
-
-        {contributors.length > 0 && (
-          <section className="project-side-section">
+        <section className="project-side-section">
             <div className="project-section-heading">
               <div>
                 <h2>Materi terkait</h2>
