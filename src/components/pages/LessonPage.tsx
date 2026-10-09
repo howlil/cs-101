@@ -278,7 +278,6 @@ export default function LessonPage({
         role="group"
         aria-labelledby="lesson-tab-evidence">
         <SessionLogger
-          initialCompletionOpen
           itemId={itemId}
           fingerprint={fingerprint}
           criteria={criteria}

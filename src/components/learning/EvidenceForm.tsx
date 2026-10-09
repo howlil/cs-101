@@ -67,6 +67,7 @@ export default function EvidenceForm({
   const [minutes, setMinutes] = useState('');
   const [reflection, setReflection] = useState<SessionReflection>(emptyReflection);
   const [completionOpen, setCompletionOpen] = useState(initialCompletionOpen);
+  const [sessionNotesOpen, setSessionNotesOpen] = useState(false);
   const [currentRevision, setCurrentRevision] = useState(revision);
   const [hydrated, setHydrated] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -112,6 +113,8 @@ export default function EvidenceForm({
       setMinutes(draft.minutes ? String(draft.minutes) : '');
       setReflection({ ...emptyReflection(), ...(draft.reflection ?? {}) });
       setCompletionOpen(initialCompletionOpen || draft.evidence.length > 0);
+      setSessionNotesOpen(Boolean(draft.continueFrom.trim() || draft.blocker?.trim() ||
+        draft.minutes || Object.values(draft.reflection ?? {}).some((value) => value.trim())));
       setFeedback({
         title: 'Draft dipulihkan',
         message: 'Catatan lokal dipulihkan. Belum tersimpan sebagai sesi.',
@@ -244,21 +247,112 @@ export default function EvidenceForm({
     </div>
   );
 
-  return <form className={['session-form', className].filter(Boolean).join(' ')} onChangeCapture={() => setDirty(true)}>
-    <section className="session-close">
-      <div className="evidence-heading">
+  return <form className={['session-form', className, 'session-form--quiet'].filter(Boolean).join(' ')} onChangeCapture={() => setDirty(true)}>
+    <section className="evidence-summary" aria-label="Pencatatan hasil belajar">
+      <div className="evidence-summary-heading">
         <div>
-          <p className="eyebrow">SESI</p>
-          <h2>Akhiri sesi</h2>
+          <h2>Catat hasil belajar</h2>
+          <p className="muted small">Kerjakan latihan terlebih dahulu. Tambahkan bukti saat target benar-benar terpenuhi.</p>
         </div>
+        <span className="evidence-count" aria-label={completedEvidenceCount + ' dari ' + criteria.length + ' target memiliki bukti'}>
+          {completedEvidenceCount}/{criteria.length}
+        </span>
       </div>
-      <p className="muted small">
-        Simpan satu titik lanjut yang konkret. Durasi tidak menentukan kelulusan.
-      </p>
+      <div className="evidence-summary-actions">
+        <Button type="button" variant="primary" disabled={Boolean(loadingKind)}
+          aria-controls="completion-evidence" aria-expanded={completionOpen}
+          onClick={() => setCompletionOpen((open) => !open)}>
+          <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+          <span>{completionOpen ? 'Tutup bukti' : 'Tambahkan bukti'}</span>
+        </Button>
+        <Button type="button" variant="secondary" disabled={Boolean(loadingKind)}
+          aria-controls="session-notes" aria-expanded={sessionNotesOpen}
+          onClick={() => setSessionNotesOpen((open) => !open)}>
+          <Save size={15} strokeWidth={1.8} aria-hidden="true" />
+          <span>{sessionNotesOpen ? 'Tutup catatan' : 'Lanjut nanti'}</span>
+        </Button>
+      </div>
       <p className="session-draft-state" role="status">
         {!hydrated ? 'Memeriksa draft lokal…' : dirty
           ? 'Draft otomatis tersimpan di browser ini; belum tercatat sebagai sesi.'
           : 'Belum ada perubahan sesi baru.'}
+      </p>
+    </section>
+
+    {completionOpen && (
+      <section id="completion-evidence" className="evidence-completion">
+        <div className="completion-rule">
+          <strong>Aturan selesai</strong>
+          <span className="evidence-coverage" role="status">{completedEvidenceCount} dari {criteria.length} target memiliki bukti</span>
+          <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
+        </div>
+
+        {groups.map((group) => (
+          <section key={group.key} className={group.className}>
+            <div className="evidence-heading">
+              <div>
+                {group.eyebrow && <p className="eyebrow">{group.eyebrow}</p>}
+                <h2>{group.title}</h2>
+              </div>
+              <span>{group.criteria.length}</span>
+            </div>
+            {group.description && <p className="muted small">{group.description}</p>}
+            {group.referenceTitle && group.referenceItems?.length ? (
+              <div className="evidence-reference">
+                <Accordion size="sm" items={[{
+                  title: group.referenceTitle,
+                  content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
+                }]} />
+              </div>
+            ) : null}
+            <p className="muted small evidence-hint">
+              Bukti bisa berupa link commit/PR, hasil test atau command, benchmark, screenshot, diagram, atau catatan yang membuktikan target.
+            </p>
+            <fieldset>
+              <legend className="sr-only">{group.title}</legend>
+              {group.criteria.map((criterion) => (
+                <Textarea
+                  key={criterion.id}
+                  label={criterion.text}
+                  name={'evidence:' + criterion.id}
+                  rows={group.rows ?? 2}
+                  maxLength={8000}
+                  value={evidence[criterion.id] ?? ''}
+                  onChange={(event) => setEvidence((current) => ({
+                    ...current,
+                    [criterion.id]: event.currentTarget.value,
+                  }))}
+                />
+              ))}
+            </fieldset>
+          </section>
+        ))}
+
+        <div className="actions">
+          <Button
+            type="button"
+            variant="primary"
+            loading={loadingKind === 'passed'}
+            disabled={Boolean(loadingKind)}
+            onClick={() => void submit('passed')}
+          >
+            <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+            <span>{passLabel}</span>
+          </Button>
+        </div>
+      </section>
+    )}
+
+    {sessionNotesOpen && (
+    <section id="session-notes" className="session-close">
+      <div className="evidence-heading">
+        <div>
+          <p className="eyebrow">SESI</p>
+          <h2>Lanjutkan nanti</h2>
+        </div>
+      </div>
+      <p className="muted small">
+        Simpan satu titik lanjut yang konkret. Durasi tidak menentukan kelulusan.
       </p>
 
       <Textarea
@@ -327,81 +421,9 @@ export default function EvidenceForm({
           <Save size={15} strokeWidth={1.8} aria-hidden="true" />
           <span>{saveLabel}</span>
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={Boolean(loadingKind)}
-          onClick={() => setCompletionOpen((open) => !open)}
-          aria-expanded={completionOpen}
-        >
-          <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
-          <span>{completionOpen ? 'Tutup bukti' : 'Tambahkan bukti & selesaikan'}</span>
-        </Button>
+
       </div>
     </section>
-
-    {completionOpen && (
-      <section className="evidence-completion">
-        <div className="completion-rule">
-          <strong>Aturan selesai</strong>
-          <span className="evidence-coverage" role="status">{completedEvidenceCount} dari {criteria.length} target memiliki bukti</span>
-          <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
-        </div>
-
-        {groups.map((group) => (
-          <section key={group.key} className={group.className}>
-            <div className="evidence-heading">
-              <div>
-                {group.eyebrow && <p className="eyebrow">{group.eyebrow}</p>}
-                <h2>{group.title}</h2>
-              </div>
-              <span>{group.criteria.length}</span>
-            </div>
-            {group.description && <p className="muted small">{group.description}</p>}
-            {group.referenceTitle && group.referenceItems?.length ? (
-              <div className="evidence-reference">
-                <Accordion size="sm" items={[{
-                  title: group.referenceTitle,
-                  content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
-                }]} />
-              </div>
-            ) : null}
-            <p className="muted small evidence-hint">
-              Bukti bisa berupa link commit/PR, hasil test atau command, benchmark, screenshot, diagram, atau catatan yang membuktikan target.
-            </p>
-            <fieldset>
-              <legend className="sr-only">{group.title}</legend>
-              {group.criteria.map((criterion) => (
-                <Textarea
-                  key={criterion.id}
-                  label={criterion.text}
-                  name={'evidence:' + criterion.id}
-                  rows={group.rows ?? 2}
-                  maxLength={8000}
-                  value={evidence[criterion.id] ?? ''}
-                  onChange={(event) => setEvidence((current) => ({
-                    ...current,
-                    [criterion.id]: event.currentTarget.value,
-                  }))}
-                />
-              ))}
-            </fieldset>
-          </section>
-        ))}
-
-        <div className="actions">
-          <Button
-            type="button"
-            variant="primary"
-            loading={loadingKind === 'passed'}
-            disabled={Boolean(loadingKind)}
-            onClick={() => void submit('passed')}
-          >
-            <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
-            <span>{passLabel}</span>
-          </Button>
-        </div>
-      </section>
     )}
 
     {feedback && (

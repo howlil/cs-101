@@ -288,3 +288,23 @@ body::-webkit-scrollbar,
 
 .session-draft-state { margin:4px 0 14px; color:var(--text-secondary); font-size:12px; line-height:18px; }
 .completion-rule .evidence-coverage { color:var(--foreground); font-size:13px; font-weight:500; }
+
+/* Quiet evidence workbench: evidence is the primary job; stopping is optional.
+   Both actions use the existing server session mutation and automatic progress. */
+.session-form--quiet { border-top:1px solid var(--line); padding-top:18px; }
+.evidence-summary { max-width:820px; }
+.evidence-summary-heading { display:flex; align-items:start; justify-content:space-between; gap:16px; }
+.evidence-summary-heading h2 { margin:0 0 5px; font-size:17px; line-height:24px; }
+.evidence-summary-heading p { margin:0; max-width:62ch; }
+.evidence-count { flex:none; color:var(--text-secondary); font:500 12px/22px var(--font-mono); }
+.evidence-summary-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.session-form--quiet .session-draft-state { margin:12px 0 0; }
+.session-form--quiet .evidence-completion { margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }
+.session-form--quiet .completion-rule { padding:0; margin:0 0 18px; background:transparent; border:0; }
+.session-form--quiet .session-close { margin-top:20px; padding:18px 0 0; border-top:1px solid var(--line); }
+.session-form--quiet .session-close > .evidence-heading { margin-bottom:4px; }
+.session-form--quiet .session-close .actions { margin:10px 0; }
+@media (max-width:480px) {
+  .evidence-summary-actions { display:grid; grid-template-columns:minmax(0,1fr); }
+  .evidence-summary-actions > button { justify-content:center; width:100%; }
+}
