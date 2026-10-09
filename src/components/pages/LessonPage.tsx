@@ -3,6 +3,7 @@
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { BookOpen, ExternalLink, ListTree, Target, TriangleAlert, ArrowLeft, ArrowRight } from 'lucide-react';
 import type { ItemActionState } from '../../domain/learning/item-action';
+import type { StagedLessonHeading } from '../../domain/learning/lesson-headings';
 import ItemStatusAction from '../learning/ItemStatusAction';
 import type { Criterion } from '../../domain/curriculum-v2/schema';
 import { Alert } from '../arc/alert/alert';
@@ -69,7 +70,7 @@ export default function LessonPage({
   lastAnchor?: string;
   fingerprint: string;
   criteria: Criterion[];
-  headings: Array<{ depth: number; slug: string; text: string }>;
+  headings: StagedLessonHeading[];
   connections: ConnectionGroupData[];
   curriculumHref: string;
   demo?: boolean;
@@ -93,15 +94,16 @@ export default function LessonPage({
     if (!staged) return;
     const updateFromHash = () => {
       const hash = window.location.hash.slice(1);
-      const next: StageId = hash === 'practice' || hash === 'challenge' ? 'practice'
-        : hash === 'evidence' || hash === 'exit-criteria' ? 'evidence'
-          : 'understand';
+      const mapped = toc.find((heading) => heading.slug === hash);
+      const next: StageId = mapped?.stage
+        ?? (hash === 'practice' || hash === 'challenge' ? 'practice'
+          : hash === 'evidence' || hash === 'exit-criteria' ? 'evidence' : 'understand');
       setStage(next);
     };
     updateFromHash();
     window.addEventListener('hashchange', updateFromHash);
     return () => window.removeEventListener('hashchange', updateFromHash);
-  }, [itemId, staged]);
+  }, [itemId, staged, headings]);
 
   useEffect(() => {
     if (!staged) return;
@@ -154,7 +156,9 @@ export default function LessonPage({
       </section>
       {toc.length > 0 && <nav className="lesson-context-toc" aria-label="Di halaman ini">
         <span className="eyebrow"><ListTree size={13} aria-hidden="true" /> DI HALAMAN INI</span>
-        {toc.map((heading) => <a key={heading.slug} href={'#' + heading.slug}>{heading.text}</a>)}
+        {toc.map((heading) => <a key={heading.slug} href={'#' + heading.slug}
+          onClick={() => setStage(heading.stage)}
+        >{heading.text}</a>)}
       </nav>}
       <ConnectionsPanel groups={connections} compact />
     </>

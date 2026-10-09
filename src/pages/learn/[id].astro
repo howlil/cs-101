@@ -7,6 +7,7 @@ import { requiredEvidenceForItem } from '../../domain/learning/rules';
 import { getConnectionGroups, getItemLocation, getTrackExplorer, itemHref } from '../../domain/curriculum-v2/selectors';
 import { getItemLearningView } from '../../domain/learning/view-models';
 import { getItemActionState } from '../../domain/learning/item-action';
+import { mapLessonHeadings } from '../../domain/learning/lesson-headings';
 import { curriculumGraph } from '../../server/curriculum';
 import { connectionLabels } from '../../lib/learning-language';
 import { snapshotForRequest } from '../../server/request-snapshot';
@@ -90,7 +91,7 @@ const nextSmallStep =
     lastAnchor={progress?.lastAnchor}
     fingerprint={item.fingerprint}
     criteria={requiredEvidenceForItem(item)}
-    headings={rendered?.headings ?? []}
+    headings={mapLessonHeadings(lesson?.body ?? '', rendered?.headings ?? [])}
     connections={connectionData}
     curriculumHref={curriculumHref}
   >
