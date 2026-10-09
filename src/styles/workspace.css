@@ -22,143 +22,17 @@
   margin-inline: auto;
 }
 
-/* Today */
+/* Today and Progress use one-column workbenches. The old two-column
+   sticky sidecars were retired; keep only the styles still used by current JSX. */
 .today-header,
-.progress-page > .compact-page-header {
-  max-width: var(--workspace-readable);
-}
+.progress-page > .compact-page-header { max-width: var(--workspace-readable); }
 
-.today-workbench,
-.progress-workbench {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, var(--context-rail-width));
-  gap: var(--workspace-gap);
-  align-items: start;
-}
+.today-sidecar .today-review-heading { margin-bottom: 8px; }
+.today-sidecar .today-review-row { grid-template-columns: 18px minmax(0, 1fr); padding: 9px 0; }
+.today-sidecar .today-review-cta { grid-column: 2; justify-self: start; }
 
-.today-workbench:not(.has-review),
-.progress-workbench:not(:has(.progress-sidecar)) {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.today-primary,
-.progress-primary {
-  min-width: 0;
-}
-
-.today-focus {
-  max-width: none;
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
-  column-gap: 28px;
-  align-items: start;
-}
-
-.today-path,
-.today-title-line {
-  grid-column: 1 / -1;
-}
-
-.today-why {
-  grid-column: 1;
-}
-
-.today-next-step {
-  grid-column: 2;
-}
-
-.today-focus:not(:has(.today-why)) .today-next-step {
-  grid-column: 1 / -1;
-  max-width: var(--workspace-readable);
-}
-
-.today-focus > a {
-  grid-column: 1 / -1;
-  justify-self: start;
-  margin-top: 10px;
-}
-
-.today-sidecar,
-.progress-sidecar {
-  position: sticky;
-  top: calc(var(--app-topbar-height) + 18px);
-  min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--line);
-}
-
-.today-sidecar .today-review-heading {
-  margin-bottom: 8px;
-}
-
-.today-sidecar .today-review-row {
-  grid-template-columns: 18px minmax(0, 1fr);
-  padding: 9px 0;
-}
-
-.today-sidecar .today-review-cta {
-  grid-column: 2;
-  justify-self: start;
-}
-
-/* Progress */
-.progress-modules {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.progress-sidecar {
-  display: grid;
-  gap: 22px;
-}
-
-.progress-sidecar .progress-review-queue,
-.progress-sidecar .progress-integrations {
-  margin: 0;
-  padding: 0;
-  border-top: 0;
-}
-
-.progress-sidecar .progress-review-items,
-.progress-sidecar .progress-integration-items {
-  gap: 0;
-}
-
-.progress-sidecar .progress-review-items a,
-.progress-sidecar .progress-integration-items a {
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-}
-
-.progress-sidecar .progress-review-items a:hover,
-.progress-sidecar .progress-integration-items a:hover {
-  background: transparent;
-}
-
-.progress-integration-copy {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.progress-integration-copy strong {
-  overflow: hidden;
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.progress-history {
-  max-width: none;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
-}
-
-.progress-history > .progress-section-heading,
-.progress-history > .empty-state {
-  grid-column: 1 / -1;
-}
+.progress-integration-copy { min-width: 0; display: grid; gap: 1px; }
+.progress-integration-copy strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* Project / Integration: page frame fills the workbench.
    Long-form children keep a readable measure while rules/dividers span the primary region. */
@@ -460,7 +334,7 @@
 .today-focus .today-next-step strong {
   display:block; font:500 16px/25px var(--font-body); color:var(--foreground);
 }
-.today-focus .today-next-step small { font-size:12px; line-height:18px; }
+.today-focus .today-next-step small { color:var(--text-secondary); font-size:12px; line-height:18px; }
 .today-focus .today-blocker {
   width:100%; max-width:680px; margin:0 0 18px; padding:8px 0 8px 12px;
   border-left:2px solid var(--warning); align-self:flex-start;

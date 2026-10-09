@@ -43,7 +43,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .progress-modules small { white-space: nowrap; }
 @media (max-width: 767px) { .progress-modules { grid-template-columns: 1fr; } }
 
-.today-review { margin-top: 26px; }
 .today-review-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .today-review-heading h2 { margin-bottom: 8px; }
 .today-review-heading span { color: var(--muted); font-size: 12px; }
@@ -79,37 +78,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
   pre { padding: 12px; }
 }
 
-
-/* Learning execution UX */
-.today-focus {
-  margin-top: 24px;
-  padding: 24px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-panel);
-  background: var(--surface);
-  box-shadow: var(--shadow-resting);
-}
-.today-path { margin: 0 0 8px; color: var(--muted); font-size: 12px; }
-.today-item-id { display: inline-block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
-.today-focus h2 { margin: 0 0 12px; font-size: 24px; }
-.today-why, .today-next-step {
-  margin: 18px 0;
-  padding: 14px 16px;
-  border-radius: var(--radius-control);
-  background: var(--surface-muted);
-}
-.today-why > span, .today-next-step > span {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.today-why p { margin: 0; font-size: 13px; }
-.today-next-step strong { display: block; font-size: 14px; line-height: 1.5; }
-.today-next-step small { display: block; margin-top: 6px; color: var(--muted); }
 
 .lesson-execution-context {
   display: grid;
@@ -199,7 +167,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 }
 
 
-/* Compact product density */
+/* Compact product density (runtime values; page layouts live in workspace.css). */
 body { font-size: 15px; line-height: 1.6; }
 h2 { margin: 20px 0 10px; }
 h3 { margin: 18px 0 7px; }
@@ -210,28 +178,9 @@ hr { margin: 24px 0; }
 .progress-review-queue, .progress-integrations { margin-top: 22px; padding-top: 14px; }
 .progress-history { margin-top: 22px; }
 
-.today-focus {
-  max-width: 680px;
-  margin-top: 20px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.today-path { margin-bottom: 5px; font-size: 12px; }
-.today-item-id { margin-bottom: 5px; font-size: 12px; }
+.today-path { margin: 0 0 5px; color: var(--muted); font-size: 12px; }
+.today-item-id { display: inline-block; margin: 0 0 5px; color: var(--muted); font-size: 12px; }
 .today-focus h2 { margin: 0 0 10px; font-size: 22px; }
-.today-why, .today-next-step {
-  margin: 0;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-}
-.today-next-step { margin-bottom: 10px; }
-.today-why > span, .today-next-step > span { margin-bottom: 3px; font-size: 12px; }
-.today-review { margin-top: 22px; }
 .today-review-heading h2 { margin: 0 0 6px; font-size: 15px; }
 .today-review-row {
   min-width: 0;
