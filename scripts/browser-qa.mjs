@@ -170,7 +170,7 @@ try {
   assert.equal(await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), false,
     'Bare Curriculum route should not select an item');
   await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
-  await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item"')), 'module opens selected preview');
+  await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
   console.log('PASS curriculum overview → module selection');
 
