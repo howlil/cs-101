@@ -1,61 +1,29 @@
 # Recommended `cs-101` Repository Architecture
 
-> **Reference scope (October 2026):** The tree below is a historical example, **not** the current repository layout or an approved migration target. The authoritative rules are [`AGENTS.md`](../../../../AGENTS.md) and [`.agents/engineering-design.md`](../../../engineering-design.md); the staged file moves are in [`.agents/refactoring-plan.md`](../../../refactoring-plan.md). Until the UI relocation PR is merged, authored lessons and the generator template **must keep importing** `src/components/course/*.astro`. After migration, update all lesson/template paths together; do not invent or keep parallel `course/` and `lesson/` implementations.
+> **Reference scope (October 2026):** The tree below shows **current ownership**, with upcoming relocations clearly marked. It is **not** permission to implement planned folder moves early. The authoritative rules are [`AGENTS.md`](../../../../AGENTS.md) and [`.agents/engineering-design.md`](../../../engineering-design.md); the staged file moves are in [`.agents/refactoring-plan.md`](../../../refactoring-plan.md). Until the UI relocation PR is merged, authored lessons and the generator template **must keep importing** `src/components/course/*.astro`. After migration, update all lesson/template paths together; do not invent or keep parallel `course/` and `lesson/` implementations.
 
 
 Use Astro as the renderer and content system. Generated lessons should be MDX/content entries that compile to HTML, not hand-authored standalone HTML documents.
 
 ```text
-cs-101/
-├─ AGENTS.md
-├─ astro.config.mjs
-├─ package.json
-├─ tsconfig.json
-├─ skills/
-│  └─ course-generator/
-│     ├─ SKILL.md
-│     ├─ references/
-│     └─ assets/
-├─ curriculum/
-│  ├─ manifest.json              # normalized source-of-truth snapshot
-│  └─ schema.ts
-├─ generation/
-│  └─ <TASK-ID>.json             # provenance/fingerprint/validation
-├─ learning/
-│  ├─ state.json                 # active task + review state
-│  └─ sessions.jsonl             # append-only learning evidence
-├─ scripts/
-│  ├─ sync-curriculum.ts
-│  ├─ generate-course.ts
-│  └─ validate-course.ts
-├─ src/
-│  ├─ content.config.ts
-│  ├─ content/
-│  │  └─ lessons/
-│  │     ├─ JAV-001.mdx
-│  │     └─ SQL-001.mdx
-│  ├─ components/
-│  │  └─ course/
-│  │     ├─ MentalModel.astro
-│  │     ├─ ConceptGraph.astro
-│  │     ├─ Quiz.astro
-│  │     ├─ Challenge.astro
-│  │     ├─ ExitCriteria.astro
-│  │     ├─ SourceList.astro
-│  │     ├─ ContinueFrom.astro
-│  │     ├─ SessionLogger.tsx
-│  │     ├─ ReviewMode.astro
-│  │     └─ Reveal.astro
-│  ├─ layouts/
-│  │  └─ LessonPage.tsx
-│  └─ pages/
-│     ├─ index.astro
-│     ├─ learn/[id].astro
-│     ├─ review/[id].astro
-│     └─ progress.astro
-└─ public/
+cs-101/                 # Current layout; do not pre-apply planned moves
+├── curriculum/         # manifest.v2.json + import records
+├── generation/         # generation records / provenance
+├── review-banks/       # assessment banks
+├── scripts/            # generation and validation pipeline
+├── migrations/         # SQLite / D1
+├── src/
+│   ├── content/lessons/                # authored/generated MDX
+│   ├── components/course/              # MDX blocks (current; planned → lesson/)
+│   ├── components/ui/QuizClient.tsx    # planned → lesson/
+│   ├── components/ui/RevealAccordion.tsx
+│   ├── components/learning/            # progress/evidence UI
+│   ├── domain/{curriculum-v2,learning,generation,review}/
+│   ├── server/                         # learning runtime and persistence
+│   ├── layouts/AppLayout.astro
+│   └── pages/                          # Astro file-based routes
+└── .agents/refactoring-plan.md        # staged path migrations
 ```
-
 ## Data ownership
 
 ```text
@@ -68,7 +36,7 @@ src/content/lessons/**/<TASK-ID>.mdx
 HTML course page
 ```
 
-The generated MDX is a cache/artifact. `curriculum/manifest.json` remains the local specification snapshot.
+The generated MDX is a cache/artifact. `curriculum/manifest.v2.json` is the current normalized curriculum specification; `curriculum/manifest.json` exists for compatibility.
 
 ## Why MDX instead of raw HTML
 
