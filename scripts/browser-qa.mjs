@@ -292,7 +292,7 @@ try {
       await client.screenshot('sql003-desktop-901.png');
     }
     if (id === 'JAV-002') {
-      assert.equal(await client.eval('document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')'), true, 'Manifest-only lesson must be distinguishable');
+      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
     }
   }
   console.log('PASS other authored lessons and manifest-only fallback parity');

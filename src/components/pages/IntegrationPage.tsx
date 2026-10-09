@@ -2,7 +2,6 @@
 
 import {
   ArrowLeft,
-  Boxes,
   Check,
   Circle,
   LockKeyhole,

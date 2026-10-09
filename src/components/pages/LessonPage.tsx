@@ -102,7 +102,6 @@ export default function LessonPage({
   }, [itemId, headings]);
 
   useEffect(() => {
-    if (!staged) return;
     document.documentElement.dataset.focus = focus ? 'true' : 'false';
     const handleEscape = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape' && focus) setFocus(false);
