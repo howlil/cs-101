@@ -4,12 +4,12 @@ import '../../styles/connections.css';
 import AppLayout from '../../layouts/AppLayout.astro';
 import LessonPage from '../../components/pages/LessonPage';
 import { requiredEvidenceForItem } from '../../domain/learning/rules';
-import { getConnectionGroups, getItemLocation, getTrackExplorer, itemHref } from '../../domain/curriculum-v2/selectors';
+import { getItemLocation, getTrackExplorer, itemHref } from '../../domain/curriculum-v2/selectors';
 import { getItemLearningView } from '../../domain/learning/view-models';
 import { getItemActionState } from '../../domain/learning/item-action';
 import { mapLessonHeadings } from '../../domain/learning/lesson-headings';
 import { curriculumGraph } from '../../server/curriculum';
-import { connectionLabels } from '../../lib/learning-language';
+import { connectionGroupsForUI } from '../../lib/connection-view';
 import { snapshotForRequest } from '../../server/request-snapshot';
 
 const item = curriculumGraph.itemsById.get(Astro.params.id ?? '');
@@ -37,27 +37,6 @@ const prerequisites = view.missingPrerequisites.map((id) => {
   const entry = curriculumGraph.itemsById.get(id);
   return entry ? { id, title: entry.title, href: itemHref(curriculumGraph, id) } : { id, title: id, href: '/curriculum' };
 });
-
-const groups = getConnectionGroups(curriculumGraph, item.id);
-const connections = [
-  [connectionLabels.requires, groups.requires],
-  [connectionLabels.usedLaterBy, groups.usedLaterBy],
-  [connectionLabels.related, groups.related],
-  [connectionLabels.deepDive, groups.deepDive],
-  [connectionLabels.builtOnFoundation, groups.builtOnFoundation],
-  [connectionLabels.foundationFor, groups.foundationFor],
-  [connectionLabels.contributesTo, groups.contributesTo],
-] as const;
-const connectionData = connections
-  .filter(([, entries]) => entries.length)
-  .map(([label, entries]) => ({
-    label,
-    items: entries.map(({ item: target }) => ({
-      id: target.id,
-      title: target.title,
-      href: itemHref(curriculumGraph, target.id),
-    })),
-  }));
 
 const nextSmallStep =
   progress?.continueFrom ||
@@ -92,7 +71,7 @@ const nextSmallStep =
     fingerprint={item.fingerprint}
     criteria={requiredEvidenceForItem(item)}
     headings={mapLessonHeadings(lesson?.body ?? '', rendered?.headings ?? [])}
-    connections={connectionData}
+    connections={connectionGroupsForUI(curriculumGraph, item.id)}
     curriculumHref={curriculumHref}
   >
     {Content && <Content />}

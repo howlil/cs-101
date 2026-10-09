@@ -4,12 +4,11 @@ import '../../styles/connections.css';
 import AppLayout from '../../layouts/AppLayout.astro';
 import ProjectPage from '../../components/pages/ProjectPage';
 import { curriculumGraph } from '../../server/curriculum';
-import { connectionLabels } from '../../lib/learning-language';
+import { connectionGroupsForUI } from '../../lib/connection-view';
 import { snapshotForRequest } from '../../server/request-snapshot';
 import { getItemLearningView } from '../../domain/learning/view-models';
 import { getItemActionState } from '../../domain/learning/item-action';
 import {
-  getConnectionGroups,
   getItemConnections,
   getItemLocation,
   getProjectDelta,
@@ -44,28 +43,6 @@ const inheritanceCriteria = delta.inheritanceClauses.length
   : delta.inherited.filter((criterion) =>
       project.requirements.some((candidate) => candidate.id === criterion.id)
     );
-const serializeConnections = (itemId: string) => {
-  const groups = getConnectionGroups(curriculumGraph, itemId);
-  const source = [
-    [connectionLabels.requires, groups.requires],
-    [connectionLabels.usedLaterBy, groups.usedLaterBy],
-    [connectionLabels.related, groups.related],
-    [connectionLabels.deepDive, groups.deepDive],
-    [connectionLabels.builtOnFoundation, groups.builtOnFoundation],
-    [connectionLabels.foundationFor, groups.foundationFor],
-    [connectionLabels.contributesTo, groups.contributesTo],
-  ] as const;
-  return source
-    .filter(([, items]) => items.length)
-    .map(([label, items]) => ({
-      label,
-      items: items.map(({ item }) => ({
-        id: item.id,
-        title: item.title,
-        href: itemHref(curriculumGraph, item.id),
-      })),
-    }));
-};
 const projectHref = (id: string) => '/project/' + encodeURIComponent(id);
 ---
 <AppLayout title={project.title} description={project.problemStatement}>
@@ -92,6 +69,6 @@ const projectHref = (id: string) => '/project/' + encodeURIComponent(id);
     inherited={delta.inherited}
     inheritanceCriteria={inheritanceCriteria}
     inheritanceTitle={delta.parent ? 'Target dari ' + delta.parent.id : undefined}
-    connections={serializeConnections(project.id)}
+    connections={connectionGroupsForUI(curriculumGraph, project.id)}
   />
 </AppLayout>

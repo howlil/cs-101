@@ -25,10 +25,11 @@
     "generation:prepare": "tsx scripts/prepare-generation.ts",
     "generation:validate": "tsx scripts/validate-generation.ts",
     "generation:promote": "tsx scripts/promote-generation.ts",
-    "validate": "pnpm run validate:curriculum && pnpm run validate:content && pnpm run validate:reviews && pnpm run validate:ui",
+    "validate": "pnpm run validate:curriculum && pnpm run validate:content && pnpm run validate:reviews && pnpm run validate:ui && pnpm run validate:architecture",
     "ci": "pnpm run test && pnpm run check && pnpm run build:node",
     "build:app": "pnpm run validate && astro build",
-    "validate:ui": "tsx scripts/validate-ui-boundary.ts"
+    "validate:ui": "tsx scripts/validate-ui-boundary.ts",
+    "validate:architecture": "tsx scripts/validate-architecture.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",

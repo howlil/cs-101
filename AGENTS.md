@@ -8,6 +8,18 @@ Instruksi ini berlaku untuk seluruh repository. Ikuti permintaan user dan instru
 - [`.agents/design.md`](.agents/design.md) memuat kontrak produk dan desain UI. [`.agents/engineering-design.md`](.agents/engineering-design.md) memuat target arsitektur. Keduanya berstatus draft; bedakan usulan dari perilaku yang sudah diterapkan.
 - Pertahankan perubahan lokal yang sudah ada. Jangan menimpa atau membuang pekerjaan yang tidak dibuat untuk tugas ini.
 
+## Architecture boundaries — wajib untuk setiap feature
+
+Lihat [`.agents/architecture.md`](.agents/architecture.md) sebagai kontrak **aktif** untuk ownership, arah dependency, dan aturan penempatan file. Untuk perubahan nontrivial, petakan `source → domain decision → persistence → API/SSR → UI` sebelum implementasi.
+
+- **Satu owner untuk business rule.** `src/domain/` memiliki schema, curriculum graph, learning decisions, dan review policy; domain tidak boleh import server, komponen UI, Astro, atau database.
+- **Storage bukan owner policy.** `src/server/learning/sqlite.ts` dan `src/server/learning/d1.ts` menjalankan transaksi masing-masing; keduanya wajib memakai fungsi bersama dari `src/domain/learning/decisions.ts`. Shared snapshot type ada di `src/server/learning/contract.ts`.
+- **Transport tetap tipis.** `src/pages/api/` hanya menangani HTTP; `src/pages/**/*.astro` melakukan SSR composition dengan props serializable, bukan logika completion/SQL.
+- **UI tidak mengakses storage langsung.** `src/components/arc/` hanya generic UI primitives; product composition tinggal di `components/ui/` atau feature folder. Jangan membuat struktur `features/` paralel.
+- **Tidak over-layer.** Hindari per-table repository, use-case/controller/presenter generik, dan abstraction satu konsumen. Ekstrak fungsi kecil jika ada owner jelas atau duplikasi nyata.
+- **Compatibility V1 hanya sementara.** Jangan menambah penggunaan `taskId`, `task_progress`, atau `active-task`. Hapus hanya setelah data historis, endpoint, export, dan migration tervalidasi.
+- **Enforcement:** jalankan `pnpm validate:architecture`, `pnpm validate:ui`, `pnpm test`, `pnpm check`, dan `pnpm build:node`. Untuk SQLite/D1 state mutation, uji parity, conflict, retry, dan transactional invariants. Mock D1 bukan substitusi test race pada D1 asli.
+
 ## UI dan design system
 
 UI default adalah **compact, flat, dan source-owned**. Sebelum membuat komponen UI baru, cari primitive yang sudah ada di `src/components/arc`. Jika use case-nya adalah primitive umum yang tersedia di UIArc, gunakan/port source UIArc ke `src/components/arc/<primitive>`; jangan membuat implementasi paralel di feature folder.

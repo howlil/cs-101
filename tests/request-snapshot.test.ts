@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { snapshotForRequest } from '../src/server/request-snapshot';
-import type { LearningSnapshot } from '../src/server/learning';
+import type { LearningSnapshot } from '../src/server/learning/contract';
 
 const snapshot = (revision: number): LearningSnapshot => ({
   activeItemId: null,

@@ -10,7 +10,7 @@ import NavigationProgress from '../components/app/NavigationProgress';
 import { ClientRouter, fade } from 'astro:transitions';
 import { curriculumGraph, curriculumSearchIndex, curriculumSearchEntries } from '../server/curriculum';
 import { snapshotForRequest } from '../server/request-snapshot';
-import type { LearningSnapshot } from '../server/learning';
+import type { LearningSnapshot } from '../server/learning/contract';
 import {
   getItemLocation,
   getTrackExplorer,

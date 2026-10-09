@@ -1,5 +1,7 @@
 # CS-101 — Engineering design
 
+> Kontrak folder dan dependency yang **aktif** ada di [`architecture.md`](architecture.md). Target tree dalam dokumen ini bersifat evolusi, bukan instruksi membuat layer yang belum diperlukan.
+
 Updated · 7 Oktober 2026 · Mengikuti [product design](design.md)
 
 CS-101 memakai **hierarchical curriculum + dependency graph + runtime learning state**. Curriculum adalah build-time/source data; progress dan evidence adalah runtime data. Production berjalan di Astro Cloudflare Workers + D1, sedangkan local development tetap dapat memakai Astro Node + SQLite.
@@ -378,7 +380,7 @@ Perubahan fingerprint membuat artifact lama stale, tetapi tidak menghapus histor
 
 ## Learning application service
 
-Saat ini business behavior tersebar pada implementasi SQLite dan D1. Target:
+Validasi session, activation, dan review eligibility kini shared di `src/domain/learning/decisions.ts`; SQLite dan D1 tetap memiliki transactional implementation berbeda. Evolusi berikutnya jika dibutuhkan:
 
 ```text
 HTTP/API
