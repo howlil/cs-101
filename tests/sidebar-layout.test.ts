@@ -28,7 +28,7 @@ test('Howlil accent wins over Arc blue preset in light and dark themes', () => {
   const css = source('src/styles/tokens.css');
   assert.match(css, /:root\[data-accent="blue"\]/);
   assert.match(css, /:root\[data-theme="dark"\]\[data-accent="blue"\]/);
-  assert.match(css, /--accent:#9BB1FF/);
+  assert.match(css, /--accent:\s*#9BB1FF/);
 });
 
 
