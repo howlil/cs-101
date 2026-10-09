@@ -1,0 +1,56 @@
+{
+  "itemId": "SQL-003",
+  "fingerprint": "sha256:7b18c39edb6674de6df1e1e875b3ea56fa18bdce02c25d487653d324881168fd",
+  "sources": [
+    {
+      "title": "CMU 15-445/645 — Database Systems",
+      "url": "https://15445.courses.cs.cmu.edu/fall2026/"
+    },
+    {
+      "title": "PostgreSQL 18 — Aggregate Functions",
+      "url": "https://www.postgresql.org/docs/18/tutorial-agg.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Window Functions Tutorial",
+      "url": "https://www.postgresql.org/docs/18/tutorial-window.html"
+    },
+    {
+      "title": "PostgreSQL 18 — Window Function Reference",
+      "url": "https://www.postgresql.org/docs/18/functions-window.html"
+    },
+    {
+      "title": "PostgreSQL 18 — SELECT",
+      "url": "https://www.postgresql.org/docs/18/sql-select.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-bea7264601",
+      "taughtAt": "GROUP BY, FILTER, window functions and LAG/LEAD",
+      "assessedAt": "Quiz + Settlement Window Drill",
+      "evidenceExpected": "10 queries with expected grain and no application-side loop"
+    },
+    {
+      "criterionId": "criterion-9051ea9e97",
+      "taughtAt": "Deterministic SUM OVER ROWS and independent GROUP BY control",
+      "assessedAt": "Quiz + Settlement Window Drill",
+      "evidenceExpected": "Per-account final running balances equal independently computed control totals"
+    },
+    {
+      "criterionId": "criterion-eb1662cae7",
+      "taughtAt": "GROUP BY collapses rows; OVER preserves input-row identity",
+      "assessedAt": "Quiz + Settlement Window Drill",
+      "evidenceExpected": "Written cardinality comparison on the same ledger dataset"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Settlement examples and analytic query patterns",
+      "assessedAt": "Settlement Window Drill",
+      "evidenceExpected": "Per-merchant totals, running balances, failed-to-success transitions, ranks, burst detection, and reconciliation"
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}
