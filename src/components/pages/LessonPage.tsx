@@ -89,7 +89,8 @@ export default function LessonPage({
 
   useEffect(() => {
     const updateFromHash = () => {
-      const hash = window.location.hash.slice(1);
+      // Explicit deep links take precedence over the learner's saved position.
+      const hash = window.location.hash.slice(1) || lastAnchor || '';
       const mapped = toc.find((heading) => heading.slug === hash);
       const next: StageId = mapped?.stage
         ?? (hash === 'practice' || hash === 'challenge' ? 'practice'
@@ -99,7 +100,7 @@ export default function LessonPage({
     updateFromHash();
     window.addEventListener('hashchange', updateFromHash);
     return () => window.removeEventListener('hashchange', updateFromHash);
-  }, [itemId, headings]);
+  }, [itemId, headings, lastAnchor]);
 
   useEffect(() => {
     document.documentElement.dataset.focus = focus ? 'true' : 'false';

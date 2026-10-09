@@ -42,3 +42,9 @@ test('review explains disabled submission and curriculum search never silently t
   assert.match(explorer, /setResultLimit\(\(limit\) => limit \+ 16\)/);
   assert.match(explorer, /results\.length\}\/\{matches\.length/);
 });
+
+test('resuming an existing lesson honors saved stage unless URL explicitly overrides it', () => {
+  const lesson = read('src/components/pages/LessonPage.tsx');
+  assert.match(lesson, /window\.location\.hash\.slice\(1\) \|\| lastAnchor \|\| ''/);
+  assert.match(lesson, /\[itemId, headings, lastAnchor\]/);
+});
