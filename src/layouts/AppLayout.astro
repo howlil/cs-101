@@ -53,8 +53,7 @@ if (showCurriculum) {
     : reviewMatch
       ? decodeURIComponent(reviewMatch[1])
       : curriculumRoute
-        ? Astro.url.searchParams.get('item') ??
-          (Astro.url.searchParams.has('track') ? null : learningState?.activeItemId)
+        ? Astro.url.searchParams.get('item')
         : learningState?.activeItemId;
   const currentItem = currentItemId ? curriculumGraph.itemsById.get(currentItemId) : undefined;
   const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
@@ -77,8 +76,7 @@ if (showCurriculum) {
   }
 
   const explorer = activeTrackId ? getTrackExplorer(curriculumGraph, activeTrackId) : undefined;
-  const firstItem = explorer?.modules.flatMap((module) => module.items)[0] ?? integrations[0];
-  const selectedItem = currentItem ?? (curriculumRoute ? firstItem : undefined);
+  const selectedItem = currentItem;
   const selectedLocation = selectedItem ? getItemLocation(curriculumGraph, selectedItem.id) : undefined;
 
   const stateFor = (id: string) =>
@@ -111,15 +109,19 @@ if (showCurriculum) {
     curriculumHref,
     activeTrackId: activeTrackId ?? '',
     selectedModuleId: selectedLocation?.module?.id,
-    tracks: tracks.map((track) => ({
-      id: track.id, title: track.title,
-      total: curriculumGraph.manifest.items.filter(
+    tracks: tracks.map((track) => {
+      const items = curriculumGraph.manifest.items.filter(
         (item) => item.kind !== 'integration' && item.trackId === track.id,
-      ).length,
-    })),
+      );
+      return {
+        id: track.id, title: track.title, total: items.length,
+        completed: items.filter((item) => stateFor(item.id) === 'passed').length,
+      };
+    }),
     modules: (explorer?.modules ?? []).map((module) => ({
       id: module.id,
       title: module.title,
+      completed: module.items.filter((item) => stateFor(item.id) === 'passed').length,
       items: module.items.map((item, index) => ({
         ...sidebarItem(item),
         position: { index: index + 1, total: module.items.length },
