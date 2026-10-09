@@ -428,10 +428,14 @@
 .lesson-staged .session-form { margin-top:20px; }
 .lesson-staged .evidence-completion { border-top:0; padding-top:6px; margin-top:16px; }
 @media(max-width:600px) {
-  .lesson-stage-toolbar { gap:9px; align-items:flex-start; }
-  .lesson-stage-tabs { flex:1; }
-  .lesson-stage-tab { flex:1; padding:6px 11px!important; }
-  .lesson-toolbar-actions { width:100%; justify-content:flex-end; }
+  /* Mobile separates the primary stage switcher from secondary reading controls. */
+  .lesson-stage-toolbar { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin-bottom:24px; }
+  .lesson-stage-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; min-width:0; }
+  .lesson-stage-tab { width:100%; min-width:0; padding:6px 8px!important; }
+  .lesson-toolbar-actions {
+    width:100%; justify-content:flex-start; gap:8px;
+    padding-top:9px; border-top:1px solid var(--line);
+  }
 }
 
 /* Phase 05: task-first Today and globally consistent sidebar hierarchy. */
@@ -440,7 +444,7 @@
 .today-focus {
   display:flex; flex-direction:column; align-items:flex-start; gap:0;
   width:100%; max-width:820px; padding:26px 30px;
-  background:var(--surface); border:0; border-radius:14px;
+  background:var(--surface); border:0; border-radius:var(--radius-panel);
 }
 .today-focus .today-title-line { width:100%; }
 .today-focus .today-title-line h2 { max-width:650px; }
@@ -462,7 +466,7 @@
   border-left:2px solid var(--warning); align-self:flex-start;
 }
 .today-focus .today-blocker span { font:500 12px/17px var(--font-mono); letter-spacing:0; }
-.today-focus > a { margin:0 0 4px; }
+.today-focus > a { margin:0 0 4px; min-height:40px; }
 .today-focus .today-why {
   width:100%; grid-column:auto; max-width:680px;
   margin:17px 0 0; padding:10px 0 0;

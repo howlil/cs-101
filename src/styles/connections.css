@@ -30,7 +30,7 @@
   border: 1px solid var(--border);
   border-radius: 999px;
   color: var(--muted);
-  font: 600 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  font: 600 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 .connection-groups {
@@ -41,7 +41,7 @@
 .connection-group h3 {
   margin: 0 0 7px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   letter-spacing: .02em;
 }
@@ -73,7 +73,7 @@
 
 .connection-items code {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .connection-items span {
