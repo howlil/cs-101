@@ -20,18 +20,35 @@ Lihat [`.agents/architecture.md`](.agents/architecture.md) sebagai kontrak **akt
 - **Compatibility V1 hanya sementara.** Jangan menambah penggunaan `taskId`, `task_progress`, atau `active-task`. Hapus hanya setelah data historis, endpoint, export, dan migration tervalidasi.
 - **Enforcement:** jalankan `pnpm validate:architecture`, `pnpm validate:ui`, `pnpm test`, `pnpm check`, dan `pnpm build:node`. Untuk SQLite/D1 state mutation, uji parity, conflict, retry, dan transactional invariants. Mock D1 bukan substitusi test race pada D1 asli.
 
+
+### UI ownership: current and planned (no moves yet)
+
+`src/components/{course,search,project}/` and `ui/{QuizClient,RevealAccordion,ThemePreference}` **still exist** and are valid during the planned migration. Do not create duplicate components in target folders early.
+
+**Future ownership** after the staged refactor:
+
+| Owner | Scope |
+| --- | --- |
+| `components/arc/` | Source-owned generic UIArc primitives + CSS Modules; intentionally one subfolder per primitive |
+| `components/app/` | AppShell, AppSidebar, NavigationProgress, global search and theme preference |
+| `components/curriculum/` | CurriculumExplorer and shared connections |
+| `components/lesson/` | Astro MDX blocks, LessonStage, QuizClient, RevealAccordion; not session persistence |
+| `components/learning/` | Activation, EvidenceForm, SessionLogger, ProjectEvidence, IntegrationEvidence, ReviewAttempt, API client |
+| `components/pages/` | Flat route workspace compositions; React page components orchestrate feature UI |
+| `components/ui/` | Truly reusable product UI such as ActionLink/EmptyAction; never a catch-all |
+
+Keep `src/pages/`, `src/layouts/`, `src/content/`, `src/domain/`, `src/server/`, `src/styles/`, generated artifacts, tests and UIArc layout intact during the UI move.
+
+**Selection rule:** put a new component with its primary consumer unless several real consumers or a stable independently tested boundary justify sharing. No automatic `features/`, `application/`, `hooks/`, `helpers/`, `ports/`, `repositories/` or per-feature `index.ts`. One-file folders are acceptable only for Astro routes, primitive+CSS/registry, or a real stable owner. Domain/server/React UI dependency restrictions in `architecture.md` remain authoritative.
+
+**No-behavior-change migrations:** one ownership slice per PR; update imports, MDX, generator templates, source references, CSS-module paths and tests atomically. Do not mix with design changes, DB migrations, dependency upgrades or API modifications. Existing `pnpm validate:architecture` remains mandatory; enhance it to forbid retired folders only **after** those folders have been migrated. Detailed move map, risk and rollback: [`.agents/refactoring-plan.md`](.agents/refactoring-plan.md).
+
+
 ## UI dan design system
 
 UI default adalah **compact, flat, dan source-owned**. Sebelum membuat komponen UI baru, cari primitive yang sudah ada di `src/components/arc`. Jika use case-nya adalah primitive umum yang tersedia di UIArc, gunakan/port source UIArc ke `src/components/arc/<primitive>`; jangan membuat implementasi paralel di feature folder.
 
-Boundary wajib:
-
-```text
-src/components/arc/      → primitive reusable, tanpa domain/product copy
-src/components/ui/       → composition reusable milik CS-101
-src/components/<feature> → composition domain/feature
-src/components/pages/    → page composition
-```
+Boundary UI wajib: `arc/` generic primitives; `pages/` route composition; `ui/` product-reusable; `app/curriculum/learning` feature owners. `lesson/` adalah target baru, sedangkan `course/search/project` tetap path aktif selama migrasi. Ikuti tabel di `UI ownership` di atas; jangan menciptakan owner ganda.
 
 Aturan implementasi:
 
