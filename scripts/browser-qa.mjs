@@ -57,7 +57,7 @@ class DevTools {
   async eval(expression) {
     const response = await this.send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
     if (response.exceptionDetails) {
-      throw new Error('Page eval: ' + response.exceptionDetails.text);
+      throw new Error('Page eval: ' + (response.exceptionDetails.exception?.description || response.exceptionDetails.text));
     }
     return response.result?.value;
   }
@@ -427,7 +427,6 @@ try {
   // saving and completing still run through the unchanged server engine.
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
-  const beforeLearning = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
   await client.eval('document.querySelector(".react-action-stack button").click()');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), 'Activated lesson shows compact evidence workbench');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
@@ -454,6 +453,8 @@ try {
   const required = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
   assert.ok(required >= 2, 'Complete lesson must require real criteria and challenge evidence');
   for (let index = 0; index < required; index++) {
+    const fieldCount = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
+    assert.ok(fieldCount > index, 'Evidence field disappeared during controlled input at index ' + index);
     await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]")[' + index + '].focus()');
     await client.send('Input.insertText', { text: 'QA verified result ' + String(index + 1) + ': query output and explanation' });
   }
