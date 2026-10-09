@@ -43,7 +43,7 @@ test('mandatory project/integration proof remains mandatory behind presentation-
 
 test('textarea handlers snapshot values synchronously before React queues state updates', () => {
   const form = read('src/components/learning/EvidenceForm.tsx');
-  assert.doesNotMatch(form, /setReflection\\(\\(current\\) => \\([\\s\\S]{0,110}event\\.currentTarget\\.value/);
-  assert.doesNotMatch(form, /setEvidence\\(\\(current\\) => \\([\\s\\S]{0,150}event\\.currentTarget\\.value/);
-  assert.match(form, /const value = event\\.currentTarget\\.value/);
+  assert.doesNotMatch(form, /setReflection\(\(current\) => \([\s\S]{0,110}event\.currentTarget\.value/);
+  assert.doesNotMatch(form, /setEvidence\(\(current\) => \([\s\S]{0,150}event\.currentTarget\.value/);
+  assert.match(form, /const value = event\.currentTarget\.value/);
 });
