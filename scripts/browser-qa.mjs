@@ -190,6 +190,17 @@ try {
   console.log('PASS Curriculum preview distinguishes authored content from manifest outlines');
   console.log('PASS curriculum overview → module selection');
 
+  // Search must not silently discard matches after 16 items. Type through
+  // Chrome input events to exercise the hydrated React explorer.
+  await client.goto('/curriculum');
+  await client.eval('document.querySelector(".curriculum-search-uiarc input").focus()');
+  await client.send('Input.insertText', { text: 'java' });
+  await client.wait(async () => await client.eval('document.querySelectorAll(".search-row").length === 16 && Boolean(document.querySelector(".search-more"))'), 'Search exposes more than first 16 matches');
+  await client.eval('document.querySelector(".search-more").click()');
+  await client.wait(async () => await client.eval('document.querySelectorAll(".search-row").length > 16'), 'Search reveals additional matches');
+  await client.screenshot('curriculum-search-expanded-1440.png');
+  console.log('PASS curriculum search count and load-more recovery');
+
   // Visual contract checks on the live browser, not just static CSS snapshots.
   await client.goto('/');
   const todayAction = await client.eval('(() => { const link = document.querySelector(".today-focus > a"); if (!link) return null; const css = getComputedStyle(link); return { background: css.backgroundColor, color: css.color, height: link.getBoundingClientRect().height }; })()');
@@ -383,6 +394,13 @@ try {
       '320px document horizontal overflow at ' + route + ': ' + JSON.stringify(m));
     assert.equal(m.mainCount, 1, 'Duplicate main at ' + route);
   }
+  await client.goto('/learn/SQL-003');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile locked evidence guidance');
+  m = await client.metrics();
+  assert.ok(m.doc <= m.vw + 1 && m.body <= m.vw + 1,
+    'Locked evidence guidance must not overflow 320px: ' + JSON.stringify(m));
+  await client.screenshot('lesson-locked-evidence-320.png');
   await client.goto('/learn/SQL-001');
   const mobileToolbar = await client.eval('(() => { const tabs=document.querySelector(".lesson-stage-tabs"); const secondary=document.querySelector(".lesson-toolbar-actions"); if (!tabs || !secondary) return null; const a=tabs.getBoundingClientRect(), b=secondary.getBoundingClientRect(); return { display:getComputedStyle(document.querySelector(".lesson-stage-toolbar")).display, first:{left:a.left,right:a.right,bottom:a.bottom}, second:{left:b.left,top:b.top} }; })()');
   assert.ok(mobileToolbar, 'Lesson mobile toolbar must be present');
