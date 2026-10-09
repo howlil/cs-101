@@ -1,6 +1,6 @@
 # Recommended `cs-101` Repository Architecture
 
-> **Current vs future:** This document must follow the active [architecture contract](../../../architecture.md) and [UI refactoring plan](../../../refactoring-plan.md). `src/components/course/*.astro` imports are **currently correct** in authored MDX and `lesson-template.mdx`; do not change them until the atomic lesson relocation PR. The server already uses `src/server/learning/{contract,sqlite,d1}.ts`.
+> **Current vs future:** This document must follow the active [architecture contract](../../../architecture.md) and [UI refactoring plan](../../../refactoring-plan.md). `src/components/lesson/*.astro` owns authored MDX blocks and quiz/reveal islands. Session/evidence/review TSX remain under `components/course` until the learning-ownership PR. The server already uses `src/server/learning/{contract,sqlite,d1}.ts`.
 
 Use Astro as the renderer and content system. Generated lessons should be MDX/content entries that compile to HTML, not hand-authored standalone HTML documents.
 
@@ -13,8 +13,8 @@ cs-101/                       # Current layout, not future structure
 ├── migrations/               # SQLite + D1 migrations
 ├── src/
 │   ├── content/lessons/       # MDX content
-│   ├── components/course/     # current MDX blocks (planned → lesson/)
-│   ├── components/ui/         # QuizClient and RevealAccordion (planned → lesson/)
+│   ├── components/lesson/     # current MDX blocks and quiz/reveal islands
+│   ├── components/course/     # temporary session/evidence/review TSX
 │   ├── components/learning/   # current evidence/activation UI
 │   ├── domain/                # curriculum graph + learning/review/generation
 │   ├── server/learning/       # contract.ts, sqlite.ts, d1.ts (already refactored)
@@ -27,8 +27,8 @@ cs-101/                       # Current layout, not future structure
 ```text
 Curriculum source
       ↓ sync
-curriculum/manifest.json
-      ↓ generate one Task ID
+curriculum/manifest.v2.json
+      ↓ generate one Item ID
 src/content/lessons/**/<TASK-ID>.mdx
       ↓ Astro
 HTML course page

@@ -137,7 +137,8 @@ curriculum/              spesifikasi materi
 generation/              sumber dan coverage lesson
 migrations/              versi schema SQLite
 src/content/lessons/     konten MDX
-src/components/course/   komponen belajar
+src/components/lesson/   konten interaktif MDX
+src/components/learning/ form dan state belajar
 src/layouts/             shell halaman
 src/domain/              schema dan aturan domain
 src/server/              service, database, HTTP boundary
