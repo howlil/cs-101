@@ -1,6 +1,6 @@
 # CS-101 — Engineering design
 
-Updated · 7 Oktober 2026 · Mengikuti [product design](design.md)
+Updated · 9 Oktober 2026 · Boundary contract + staged refactoring plan · Mengikuti [product design](design.md)
 
 CS-101 memakai **hierarchical curriculum + dependency graph + runtime learning state**. Curriculum adalah build-time/source data; progress dan evidence adalah runtime data. Production berjalan di Astro Cloudflare Workers + D1, sedangkan local development tetap dapat memakai Astro Node + SQLite.
 
@@ -701,46 +701,77 @@ Migration dilakukan bertahap:
 
 Historical Task ID tetap valid karena unit ID existing dipertahankan.
 
-## Repository target
+## Repository structure and dependency contract (active)
+
+Folder **current** dan **target** berbeda sampai migration PR berhasil. `src/pages/` dan `src/layouts/` dipertahankan karena Astro routing/SSR. Tidak ada folder root `features/` baru. Perubahan hanya menata `components/`, kemudian mengevaluasi coupling di `server/`.
+
+### Target minimal setelah UI relocation
 
 ```text
-cs-101/
-├── curriculum/
-│   ├── raw/
-│   ├── manifest.v2.json
-│   └── import-report.json
-├── generation/
-│   └── <ITEM-ID>.json
-├── scripts/
-│   ├── import-curriculum.ts
-│   ├── validate-curriculum.ts
-│   └── validate-content.ts
-├── src/
-│   ├── content/lessons/
-│   ├── domain/
-│   │   ├── curriculum/
-│   │   │   ├── schema.ts
-│   │   │   ├── graph.ts
-│   │   │   ├── selectors.ts
-│   │   │   └── fingerprint.ts
-│   │   └── learning/
-│   │       ├── rules.ts
-│   │       └── schema.ts
-│   ├── server/
-│   │   ├── learning-service.ts
-│   │   └── storage/
-│   │       ├── d1.ts
-│   │       └── sqlite.ts
-│   ├── components/
-│   │   ├── curriculum/
-│   │   └── course/
-│   ├── layouts/
-│   └── pages/
-├── migrations/
-└── tests/
+src/
+  pages/               # Astro routes / API entrypoints (unchanged)
+  layouts/             # AppLayout.astro
+  components/
+    arc/               # UIArc primitives + CSS Modules (unchanged)
+    app/               # AppShell, AppSidebar, global search, theme
+    curriculum/        # CurriculumExplorer, ConnectionsPanel
+    lesson/            # MDX components, QuizClient, RevealAccordion
+    learning/          # ActivateItem, evidence/session/review UI + HTTP client
+    pages/             # Today/Progress/Curriculum/Lesson/Project/... workspaces
+    ui/                # ActionLink, EmptyAction, truly cross-feature UI
+  content/lessons/     # Generated authored MDX (unchanged)
+  domain/
+    curriculum-v2/     # Schema, graph, selectors; V1 compatibility until retired
+    learning/          # Domain rules, view models, item action, headings
+    review/            # Review schema and policy
+    generation/        # Generation schema/context/validation
+  server/              # Runtime, snapshots, SQLite/D1, HTTP, review bank
+  styles/              # Tokens, global and route styles (unchanged)
+scripts/               # Content generation and validation tooling
+curriculum/            # Manifest source snapshots
+generation/            # Generation metadata
+review-banks/          # Generated questions
+migrations/            # SQLite/Cloudflare database migrations
+tests/                 # Domain/HTTP/parity/SSR/browser tests
 ```
 
-Struktur boleh disederhanakan selama boundaries tetap sama.
+`src/components/pages/` owns page composition but is **not** an extra architecture layer: it may import feature UI, Arc primitives and type/view models from `domain/`. `src/components/lesson/` is presentation only, while `src/components/learning/` owns evidence/session interaction. App shell may import curriculum tree. No new `index.ts` barrels or per-feature `hooks/utils/services` by default.
+
+### Dependency matrix
+
+| From | Allowed | Forbidden |
+| --- | --- | --- |
+| Astro routes/layout | `server`, `domain`, workspace/feature UI, authored MDX | Duplicate completion/availability rules; direct DB writes outside server contract |
+| UI page compositions | UI features, Arc, domain types/view models | `server/`, direct SQLite/D1, API adapter internals |
+| App/curriculum/lesson/learning/UI compositions | Arc + domain public types/selectors; documented component composition edges | Server, Astro routes, DB adapters; direct Radix |
+| Arc primitives | React, Arc CSS and primitive deps | CS-101 domain, page/feature/server imports |
+| Domain | Domain modules, pure deterministic support functions | UI, server, request runtime, database adapters |
+| Server | Domain, runtime/storage adapters, external resources | React/MDX components or presentation imports |
+| Scripts/generator | Manifest/domain, filesystem/build-time tools | Browser-only state; runtime learning mutation |
+| MDX | Lesson components only (plus authored content) | Server/data access and primitive registry internals |
+
+Typed graph selectors may be imported into server and UI; **mutable progress snapshot** is request-scoped and derived by server/route, not client source of truth. Domain `learning/rules` and `review/policy` must own business invariants shared across SQLite and D1, not two copies in each adapter.
+
+### Extraction policy, no over-layering
+
+1. Start with in-file implementation and nearest feature owner.
+2. Extract only if there is measurable duplication, ≥2 real consumers, unavoidable import cycle, or a real adapter contract (the reason must be stated in PR).
+3. Prefer pure function + type over new interface/service/repository hierarchy.
+4. Name modules for responsibility (e.g. `learning-contract.ts`), not vague `helpers.ts` or `utils.ts`.
+5. Avoid moving purely to reduce folder counts or satisfy an invented depth limit.
+6. Automated boundary checks should enforce these **after** folders have been migrated, not break CI for legitimate transitional paths.
+
+### Server clean-up scope (separate from UI moves)
+
+`server/learning.ts` currently owns SQLite service and `server/cloudflare-learning.ts` owns D1 service; the D1 module imports SQLite module's `LearningError`/`LearningSnapshot`. In a dedicated PR, move only shared error/types to `server/learning-contract.ts` and update imports; do **not** add an application/use-case/ports/repositories tree. Audit duplicated mutations function-by-function with SQLite/D1 parity + idempotency/revision tests before any domain extraction. File renames to `sqlite-learning.ts` / `d1-learning.ts` are optional and should only happen with a clear navigation benefit.
+
+### Compatibility, content generation and documentation
+
+- `domain/curriculum.ts` + `curriculum-v2/legacy.ts` + `/api/active-task` retain V1 compatibility until consumer and migration audit proves safe removal.
+- Moving `course/*.astro` also requires atomic updates to three authored MDX lessons, `demo.mdx`, `.agents/skill/course-generator/assets/lesson-template.mdx`, references, and generator/content validators. No MDX path migration without a validated build and rendered route smoke.
+- `arc/*` component folders intentionally remain separate for source-owned CSS Modules; routes `pages/learn/[id].astro` etc intentionally remain separate for Astro file-based routing.
+- Follow the detailed file mapping, staged PRs, rollback plan, and verification matrix in [`.agents/refactoring-plan.md`](refactoring-plan.md). **Do not claim this target tree exists before code migration lands.**
+
 
 ## Test strategy
 
@@ -857,7 +888,7 @@ Compatibility V1 (`active_task_id`, `task_progress`, alias `taskId`, legacy endp
 | Phase | Outcome | Definition of done |
 | --- | --- | --- |
 | P0 Curriculum V2 | Importer, Track/Module/Item, relation graph | Workbook menjadi manifest deterministic; invalid graph gagal build |
-| P1 Explorer | Icon rail + contextual curriculum explorer | Ratusan item tetap navigable tanpa flat sidebar |
+| P1 Explorer | Unified persistent sidebar + contextual curriculum tree | Ratusan item tetap navigable tanpa flat sidebar |
 | P2 Generic learning state | item_progress, active item, readiness | Unit/checkpoint/integration memakai state engine sama |
 | P3 Project workflow | lineage + requirement delta + project evidence | Cumulative checkpoint dapat dikerjakan tanpa duplicate wall-of-text |
 | P4 Cross-module graph | typed relations + Connections selector/UI | Related/deep-dive terlihat tanpa menjadi prerequisite |

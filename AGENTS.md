@@ -8,18 +8,51 @@ Instruksi ini berlaku untuk seluruh repository. Ikuti permintaan user dan instru
 - [`.agents/design.md`](.agents/design.md) memuat kontrak produk dan desain UI. [`.agents/engineering-design.md`](.agents/engineering-design.md) memuat target arsitektur. Keduanya berstatus draft; bedakan usulan dari perilaku yang sudah diterapkan.
 - Pertahankan perubahan lokal yang sudah ada. Jangan menimpa atau membuang pekerjaan yang tidak dibuat untuk tugas ini.
 
+## Architecture boundaries — aturan wajib
+
+**Acuan:** `AGENTS.md` adalah aturan perubahan; [`.agents/engineering-design.md`](.agents/engineering-design.md) adalah kontrak dependency; [`.agents/refactoring-plan.md`](.agents/refactoring-plan.md) adalah rencana migrasi yang **belum diterapkan**. Kode aktif tetap source of truth untuk path saat ini. Jangan mencampur target folder dengan klaim bahwa migrasi sudah selesai.
+
+### Ownership dan arah dependency
+
+`Astro route/layout → server/domain + page composition → feature UI → Arc primitives`.
+Server mengimpor domain dan adapter storage, **tidak** komponen React. Domain hanya berisi model/rules/selectors/validasi dan tidak mengimpor `components/`, `pages/`, `server/` atau browser/React/Astro UI. React/MDX UI tidak boleh mengimpor `src/server/` atau mengakses database langsung.
+
+| Boundary | Owner / batas |
+| --- | --- |
+| `src/pages/**`, `src/layouts/**` | Routing Astro, SSR loader, komposisi shell; API endpoints menghubungkan HTTP ke server use case. Route bukan tempat business rules. |
+| `src/components/arc/**` | Primitive UIArc, Radix wrapper, source CSS; tidak boleh ada product copy/domain. Setiap primitive boleh memiliki folder sendiri karena CSS Modules/registry. |
+| `src/components/app/**` | Global shell, sidebar, search, theme. Boleh mengomposisikan CurriculumExplorer tanpa menyalin logic curriculum. |
+| `src/components/curriculum/**` | Explorer dan hubungan item yang digunakan beberapa halaman. |
+| `src/components/lesson/**` (target) | Komponen presentasi MDX dan interactive quiz/reveal; bukan evidence persistence. |
+| `src/components/learning/**` | ActivateItem, evidence, session, review attempt dan client mutation. Menggunakan API HTTP/domain types, bukan storage. |
+| `src/components/pages/**` | Satu file komposisi per workspace. Boleh menggabungkan beberapa feature UI, tanpa domain mutations. |
+| `src/components/ui/**` | Komponen product UI yang benar-benar dipakai lintas fitur. Bukan tempat menaruh file yang tidak tahu owner-nya. |
+| `src/domain/**` | Pure schema, graph, selector, business rules, view-model; tidak bergantung pada UI maupun DB adapter. |
+| `src/server/**` | Runtime, request snapshot, HTTP, SQLite dan D1. DB-specific transaction di adapter; behavior parity tetap shared. |
+| `src/content/**`, `curriculum/`, `generation/`, `review-banks/`, `scripts/`, `migrations/` | Format/content/build-time artefacts dan tooling: tetap dipisah dari request runtime. |
+
+### Keep it small: folder dan abstraksi
+
+- **Tentukan owner berdasarkan alasan file berubah**, bukan ekstensi/jenis komponen. Prefer colocate dengan konsumen utama; pindah ke shared UI jika benar-benar dipakai lintas fitur.
+- Jangan membuat direktori baru untuk satu komponen saja, kecuali Astro file-based route, primitive dengan CSS/registry, atau boundary domain dengan tanggung jawab stabil.
+- Jangan menambah `features/`, `application/`, `ports/`, `adapters/`, `use-cases/`, `repositories/`, `services/`, `helpers/` atau `utils/` sebagai layer otomatis. Buat abstraction hanya jika menghilangkan duplikasi riil, menyederhanakan dependency, dan ada test yang membuktikannya.
+- Hindari barrel `index.ts` untuk tiap folder; gunakan direct imports. Shared abstractions hanya jika ≥2 konsumen nyata **atau** ada boundary kontrak/testing yang dibuktikan dan lebih sederhana dari tanpa ekstraksi.
+- Jangan mengubah domain behavior saat rename/move file; migration PR hanya mengubah path, imports, template/generator references, test path, dan bila perlu CSS import.
+- Tidak boleh circular dependency, termasuk import `server/cloudflare-learning` terhadap `server/learning` semata-mata untuk mengambil tipe setelah kontrak bersama dipisah.
+- V1 compatibility, endpoint alias, SQLite/D1, MDX, dan generator tetap berjalan sampai penggantinya diuji dengan parity/content/migration tests; **jangan menghapus karena folder terlihat tua**.
+
+### Status migrasi (penting)
+
+**Saat ini** `src/components/course/`, `search/`, `project/`, `ui/QuizClient.tsx` dan `ui/RevealAccordion.tsx` masih ada dan valid. **Target** adalah mengelompokkan komponen itu ke `lesson/`, `learning/`, dan `app/` setelah migrasi yang teruji. Saat menambah kode baru, gunakan target ownership; bila perlu edit komponen existing, jangan membuat duplikat target sebelum atomic move.
+
+Sebelum refactor: inventaris seluruh import dan referensi string MDX/template/validator; pindahkan satu slice per PR; jalankan `pnpm validate`, `pnpm test`, `pnpm check`, `pnpm build:node`, Chrome browser smoke, serta generator validation yang relevan. Larang perubahan schema, API, completion, review, idempotency, atau deployment dalam UI relocation PR. Jika tidak lolos, jangan merge; rollback slice.
+
+
 ## UI dan design system
 
 UI default adalah **compact, flat, dan source-owned**. Sebelum membuat komponen UI baru, cari primitive yang sudah ada di `src/components/arc`. Jika use case-nya adalah primitive umum yang tersedia di UIArc, gunakan/port source UIArc ke `src/components/arc/<primitive>`; jangan membuat implementasi paralel di feature folder.
 
-Boundary wajib:
-
-```text
-src/components/arc/      → primitive reusable, tanpa domain/product copy
-src/components/ui/       → composition reusable milik CS-101
-src/components/<feature> → composition domain/feature
-src/components/pages/    → page composition
-```
+Boundary UI wajib mengikuti tabel `Architecture boundaries` di atas: `arc/` hanya primitives, `app/curriculum/lesson/learning` untuk owner fitur, `pages/` untuk workspace composition, dan `ui/` hanya reusable product UI. Selama migrasi, path `course/search/project` lama masih sah; jangan membuat owner ganda.
 
 Aturan implementasi:
 

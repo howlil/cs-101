@@ -1,5 +1,8 @@
 # Recommended `cs-101` Repository Architecture
 
+> **Reference scope (October 2026):** The tree below is a historical example, **not** the current repository layout or an approved migration target. The authoritative rules are [`AGENTS.md`](../../../../AGENTS.md) and [`.agents/engineering-design.md`](../../../engineering-design.md); the staged file moves are in [`.agents/refactoring-plan.md`](../../../refactoring-plan.md). Until the UI relocation PR is merged, authored lessons and the generator template **must keep importing** `src/components/course/*.astro`. After migration, update all lesson/template paths together; do not invent or keep parallel `course/` and `lesson/` implementations.
+
+
 Use Astro as the renderer and content system. Generated lessons should be MDX/content entries that compile to HTML, not hand-authored standalone HTML documents.
 
 ```text
