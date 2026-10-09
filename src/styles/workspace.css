@@ -308,3 +308,5 @@
 .lesson-evidence-gate p { max-width:65ch; margin:0; color:var(--text-secondary); font-size:14px; line-height:22px; }
 .lesson-evidence-gate > a { font-size:14px; }
 .lesson-evidence-gate .item-action-status { margin:7px 0 0; }
+
+.lesson-evidence-gate { scroll-margin-top:calc(var(--app-topbar-height) + 16px); outline-offset:4px; }

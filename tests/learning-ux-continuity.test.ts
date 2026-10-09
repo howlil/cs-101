@@ -9,7 +9,7 @@ test('lesson transitions move focus after primary next CTA and preserve keyboard
   assert.match(lesson, /chooseStage\('practice', true\)/);
   assert.match(lesson, /chooseStage\('evidence', true\)/);
   assert.match(lesson, /requestAnimationFrame/);
-  assert.match(lesson, /document\.getElementById\('lesson-panel-' \+ next\)\?\.focus/);
+  assert.match(lesson, /needsEligibility \? 'lesson-evidence-gate' : 'lesson-panel-' \+ next/);
   assert.match(lesson, /onTabKeyDown/);
   assert.match(lesson, /aria-selected=\{stage === id\}/);
 });
@@ -47,4 +47,9 @@ test('resuming an existing lesson honors saved stage unless URL explicitly overr
   const lesson = read('src/components/pages/LessonPage.tsx');
   assert.match(lesson, /window\.location\.hash\.slice\(1\) \|\| lastAnchor \|\| ''/);
   assert.match(lesson, /\[itemId, headings, lastAnchor\]/);
+});
+
+test('evidence eligibility guidance appears before the authored stage content', () => {
+  const lesson = read('src/components/pages/LessonPage.tsx');
+  assert.ok(lesson.indexOf('id="lesson-evidence-gate"') < lesson.indexOf('available ? children'));
 });

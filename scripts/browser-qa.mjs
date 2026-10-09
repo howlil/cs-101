@@ -277,8 +277,9 @@ try {
   assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
-  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-evidence"'), 'Evidence panel receives focus');
+  await client.wait(async () => await client.eval('["lesson-panel-evidence","lesson-evidence-gate"].includes(document.activeElement?.id)'), 'Evidence stage receives focus');
   assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Inactive learner must not reach an empty evidence dead end');
+  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-evidence-gate', 'Inactive learner must land on the eligibility guidance first');
   const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
   if (evidenceExists) {
     assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
@@ -318,6 +319,9 @@ try {
   await client.goto('/learn/SQL-003');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
+  const gateY = await client.eval('document.querySelector(".lesson-evidence-gate").getBoundingClientRect().top');
+  const panelY = await client.eval('document.querySelector("#lesson-panel-evidence").getBoundingClientRect().top');
+  assert.ok(gateY < panelY, 'Eligibility guidance must precede evidence checklist visually');
   assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Prasyarat belum terpenuhi")'), 'Locked state must be explained in evidence stage');
   assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
   await client.screenshot('lesson-locked-evidence-901.png');

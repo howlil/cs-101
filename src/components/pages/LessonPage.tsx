@@ -123,7 +123,8 @@ export default function LessonPage({
     // viewport. Move focus to the newly visible panel, not to a dead spot.
     if (focusPanel) {
       window.requestAnimationFrame(() => {
-        document.getElementById('lesson-panel-' + next)?.focus();
+        const needsEligibility = next === 'evidence' && (!active || visibleState.status === 'passed');
+        document.getElementById(needsEligibility ? 'lesson-evidence-gate' : 'lesson-panel-' + next)?.focus();
       });
     }
   };
@@ -216,6 +217,23 @@ export default function LessonPage({
         </div>
       <aside id="lesson-context" className="lesson-staged-context" aria-label="Konteks materi" hidden={!contextOpen}>{context}</aside>
 
+      {stage === 'evidence' && (!active || visibleState.status === 'passed') && (
+        <aside id="lesson-evidence-gate" tabIndex={-1} className="lesson-evidence-gate" aria-label="Status penyimpanan bukti">
+          {visibleState.status === 'passed' ? <>
+            <strong>Materi sudah selesai.</strong>
+            <p>Bukti sebelumnya tetap tersimpan. Review dijadwalkan terpisah dari latihan ini.</p>
+            {reviewHref && <a href={reviewHref}>Lihat status review</a>}
+          </> : <>
+            <strong>{visibleState.status === 'locked'
+              ? 'Prasyarat belum terpenuhi'
+              : 'Aktifkan materi untuk menyimpan bukti'}</strong>
+            <p>{visibleState.status === 'locked'
+              ? 'Kamu boleh membaca dan berlatih sekarang. Penyimpanan sesi tersedia setelah prasyarat diselesaikan.'
+              : 'Kamu boleh membaca dan mencoba latihan tanpa mengaktifkan materi. Untuk menyimpan sesi dan bukti selesai, aktifkan materi terlebih dahulu.'}</p>
+            <ItemStatusAction itemId={itemId} kind="unit" state={visibleState} prerequisites={prerequisites} />
+          </>}
+        </aside>
+      )}
       {available ? children : <>
         <section className="lesson-stage-panel" data-lesson-stage="understand"
           id="lesson-panel-understand" role="tabpanel" aria-labelledby="lesson-tab-understand" tabIndex={0}>
@@ -245,23 +263,6 @@ export default function LessonPage({
       {stage === 'practice' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('evidence', true)}>Catat bukti</Button>
       </div>}
-      {stage === 'evidence' && (!active || visibleState.status === 'passed') && (
-        <aside className="lesson-evidence-gate" aria-label="Status penyimpanan bukti">
-          {visibleState.status === 'passed' ? <>
-            <strong>Materi sudah selesai.</strong>
-            <p>Bukti sebelumnya tetap tersimpan. Review dijadwalkan terpisah dari latihan ini.</p>
-            {reviewHref && <a href={reviewHref}>Lihat status review</a>}
-          </> : <>
-            <strong>{visibleState.status === 'locked'
-              ? 'Prasyarat belum terpenuhi'
-              : 'Aktifkan materi untuk menyimpan bukti'}</strong>
-            <p>{visibleState.status === 'locked'
-              ? 'Kamu boleh membaca dan berlatih sekarang. Penyimpanan sesi tersedia setelah prasyarat diselesaikan.'
-              : 'Kamu boleh membaca dan mencoba latihan tanpa mengaktifkan materi. Untuk menyimpan sesi dan bukti selesai, aktifkan materi terlebih dahulu.'}</p>
-            <ItemStatusAction itemId={itemId} kind="unit" state={visibleState} prerequisites={prerequisites} />
-          </>}
-        </aside>
-      )}
       {active && visibleState.status !== 'passed' && <div className="lesson-staged-evidence-form"
         role="group"
         aria-labelledby="lesson-tab-evidence">
