@@ -491,11 +491,15 @@ Answer key review tidak dikirim ke client sebelum submit. Server melakukan gradi
 
 **Continue.** Menyimpan `activeItemId`, anchor, dan `continueFrom`. Jika anchor sudah tidak ada setelah content berubah, buka awal item dan tetap tampilkan catatan terakhir.
 
-**Ganti active item.** Browsing item lain tetap boleh. Menjadikan item baru aktif harus menyimpan draft session sebelumnya terlebih dahulu. Hanya satu active item.
+**Ganti active item.** Browsing tidak pernah mengaktifkan item. Jika item sebelumnya memiliki draft lokal yang bermakna, tampilkan tiga pilihan: **Simpan sesi & ganti** (server mencatat sesi secara atomik dengan aktivasi), **Ganti tanpa simpan sesi** (draft tetap tersimpan lokal), dan **Batal**. Draft kosong, menit saja, atau form yang belum disentuh tidak boleh otomatis dikirim sebagai sesi. Hanya satu active item.
 
 **Simpan session.** Input dipertahankan saat gagal. Success hanya setelah commit storage.
 
 **Submit evidence.** Evidence dipetakan eksplisit ke criterion/requirement. URL atau checklist tidak otomatis membuktikan correctness.
+
+**CTA dan transisi.** Link ke workspace hanya menjanjikan membuka halaman; aktivasi adalah mutasi tersendiri. Aktivasi dari Curriculum preview boleh sekaligus membuka workspace setelah berhasil. Setelah project/integration `passed`, tampilkan aksi lanjut yang eksplisit. Simpan sesi progres boleh menggunakan evidence saja jika memenuhi aturan domain; validasi client tidak boleh lebih ketat daripada server.
+
+**Review feedback.** Setelah jawaban tersimpan, tampilkan jadwal review yang dikembalikan API dalam halaman yang sama sambil mempertahankan pembahasan attempt. Jangan memaksa refresh hanya untuk melihat status baru.
 
 **Curriculum stale.** Historical evidence tetap ada dengan fingerprint asal. Completion baru mengikuti curriculum aktif.
 

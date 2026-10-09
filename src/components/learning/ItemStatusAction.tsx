@@ -45,7 +45,7 @@ export default function ItemStatusAction({
     {state.isFocused
       ? <Badge tone="info">Sedang dikerjakan</Badge>
       : state.canActivate
-        ? <ActivateItem itemId={itemId} label="Perbarui & validasi" />
+        ? <ActivateItem itemId={itemId} label="Perbarui & validasi" targetHref={mode === 'preview' ? href : undefined} />
         : mode === 'preview' && href
           ? <ActionLink href={href} label="Buka & periksa" />
           : null}
@@ -58,7 +58,7 @@ export default function ItemStatusAction({
   </div>;
 
   if (state.canActivate) return <div className="item-action-status">
-    <ActivateItem itemId={itemId} label={startLabel(kind, state.status === 'started')} />
+    <ActivateItem itemId={itemId} label={startLabel(kind, state.status === 'started')} targetHref={mode === 'preview' ? href : undefined} />
   </div>;
 
   return <div className="item-action-status">

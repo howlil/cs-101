@@ -345,3 +345,8 @@ body::-webkit-scrollbar,
   ::view-transition-old(page-workspace),
   ::view-transition-new(page-workspace) { animation-duration: 0.01ms !important; }
 }
+
+/* Learning focus changes are explicit; unsaved local drafts are never silently discarded. */
+.draft-switch-actions { display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 12px; }
+.draft-switch-actions + p { max-width:60ch; font-size:12px; line-height:1.55; }
+.project-complete-next, .integration-complete-next { display:flex; justify-content:flex-start; gap:12px; margin:16px 0 5px; }

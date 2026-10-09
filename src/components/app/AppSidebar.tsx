@@ -39,7 +39,8 @@ function Navigation({ currentPath, curriculumHref = '/curriculum', compact = fal
         href={href === '/curriculum' ? curriculumHref : href}
         title={compact ? label : undefined}
         aria-label={label}
-        aria-current={current === href ? 'page' : undefined}
+        aria-current={currentPath === href ? 'page' : undefined}
+        data-section-current={current === href && currentPath !== href ? 'true' : undefined}
       ><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span className="sidebar-link-copy">{label}</span></a>;
       return compact ? <Tooltip key={href} content={label}>{link}</Tooltip> : link;
     })}

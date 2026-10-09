@@ -33,7 +33,7 @@
 :root {
   --background:#FEFEFE; --foreground:#121212;
   --surface:#F7F7F7; --surface-raised:#FEFEFE; --surface-muted:#F5F5F5;
-  --text-secondary:#626262; --text-muted:#949494;
+  --text-secondary:#626262; --text-muted:#6B6B6B;
   --border:#E7E7E7; --border-subtle:#EFEFEF; --border-strong:#BFBFBF;
   --accent:#9BB1FF; --accent-strong:#465C9A;
   --accent-subtle:#EAF8FC; --accent-foreground:#121212;
