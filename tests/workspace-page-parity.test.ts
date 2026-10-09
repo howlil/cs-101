@@ -7,8 +7,8 @@ const src = (path: string) => readFileSync(new URL('../' + path, import.meta.url
 test('sidebar remains route-aware across Today, Progress and Review', () => {
   const layout = src('src/layouts/AppLayout.astro');
   const sidebar = src('src/components/app/AppSidebar.tsx');
-  assert.match(layout, /path === '\/' \|\| path === '\/progress'/);
-  assert.match(layout, /const reviewMatch = path.match/);
+  assert.match(layout, /const showCurriculum = curriculumRoute \|\| Boolean\(contextualMatch\)/);
+  assert.doesNotMatch(layout, /reviewMatch/);
   assert.match(layout, /learningState\?\.activeItemId/);
   assert.match(sidebar, /currentPath.startsWith\('\/review\/'\)/);
 });

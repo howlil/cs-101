@@ -18,7 +18,6 @@ pre { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-
 hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 .content { max-width: 720px; }
-.lesson-grid { display: grid; grid-template-columns: minmax(0,68ch) 148px; gap: 32px; }
 .prose { min-width: 0; }
 .toc { position: sticky; top: 112px; align-self: start; font-size: 13px; }
 .toc a { display: block; color: var(--muted); text-decoration: none; padding: 6px 0; }
@@ -63,7 +62,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .today-review-heading span, .today-review-empty { color: var(--muted); font-size: 12px; }
 .today-review-empty { margin-top: 24px; }
 
-.progress-page { width: min(900px,100%); }
 .progress-review-queue, .progress-integrations { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); }
 .progress-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
 .progress-section-heading .eyebrow { margin: 0 0 3px; }
@@ -72,9 +70,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .progress-review-items, .progress-integration-items { display: grid; gap: 5px; }
 .progress-review-items a, .progress-integration-items a { min-width: 0; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 9px; align-items: baseline; padding: 8px 9px; border-radius: var(--radius-control); color: var(--text); text-decoration: none; }
 .progress-review-items a:hover, .progress-integration-items a:hover { background: var(--surface-muted); }
-.progress-review-items code, .progress-integration-items code { color: var(--muted); font-size: 10px; }
+.progress-review-items code, .progress-integration-items code { color: var(--muted); font-size: 12px; }
 .progress-review-items span, .progress-integration-items span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.progress-review-items small, .progress-integration-items small { color: var(--muted); white-space: nowrap; font-size: 10px; }
+.progress-review-items small, .progress-integration-items small { color: var(--muted); white-space: nowrap; font-size: 12px; }
 .progress-history { margin-top: 30px; }
 @media (max-width: 600px) {
   .progress-review-items a, .progress-integration-items a { grid-template-columns: auto minmax(0,1fr); }
@@ -91,7 +89,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .evidence-continuation { padding-top: var(--space-5); border-top: 1px solid var(--border); }
 
 @media (max-width: 1199px) {
-  .lesson-grid { grid-template-columns: minmax(0,68ch); }
   .toc { display: none; }
 }
 @media (max-width: 767px) {

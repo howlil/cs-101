@@ -1,7 +1,7 @@
 /* Sidebar owns navigation; this stylesheet only styles its explorer and the
  * contextual detail workspace. No second curriculum layout is mounted. */
 .curriculum-workspace { min-width:0; height:100%; overflow:auto; overscroll-behavior:contain; background:var(--canvas); }
-.curriculum-detail { width:min(880px,100%); margin-inline:auto; padding:32px 28px 64px; }
+.curriculum-detail { width:min(760px,100%); margin-inline:auto; padding:32px 28px 64px; }
 .curriculum-controls { display:grid; gap:11px; }
 .curriculum-search-uiarc label {
   position:absolute; width:1px; height:1px; margin:-1px; padding:0;
@@ -91,8 +91,7 @@
   .item-header h2 { font-size:24px; }
 }
 
-/* Curriculum index is a concise selection preview, not another lesson page. */
-.curriculum-detail { width:min(760px,100%); }
+/* Curriculum browse is a module overview; item previews remain compact. */
 .item-brief-note { color:var(--text-muted); font-size:13px; margin:14px 0 0; }
 .item-section:first-child { border-top:0; }
 .item-workbench .item-section { padding:19px 0; }
