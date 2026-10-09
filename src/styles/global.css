@@ -18,7 +18,7 @@ pre { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-
 hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 .content { max-width: 720px; }
-.prose { min-width: 0; }
+.prose { min-width:0; font-size:16px; line-height:1.65; }
 .lede { color: var(--muted); max-width: 60ch; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
@@ -235,8 +235,6 @@ hr { margin: 24px 0; }
 .review-retention h2 { font-size: 15px; }
 
 @media (max-width: 640px) {
-  .today-focus { padding: 0; }
-  .today-focus h2 { font-size: 20px; }
   .today-review-row { grid-template-columns: 18px minmax(0,1fr); }
   .today-review-cta { grid-column: 2; }
 }

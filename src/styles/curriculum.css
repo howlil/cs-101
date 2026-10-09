@@ -18,7 +18,7 @@
   color:var(--text-muted); font-size:12px; font-weight:500;
   letter-spacing:.035em;
 }
-.module-tree,.integration-list { margin-top:9px; }
+.module-tree { margin-top:9px; }
 .module-tree--uiarc > .explorer-label { margin-bottom:6px; }
 .module-tree--uiarc .module-items { display:grid; gap:2px; padding:4px 0 6px; }
 .item-row,.search-row {
@@ -54,12 +54,11 @@
 .item-main { min-width:0; width:100%; }
 .item-section { max-width:760px; padding:21px 0; border-bottom:1px solid var(--line); }
 .item-section h3 { display:flex; align-items:center; gap:7px; margin:0 0 11px; font-size:18px; font-weight:500; }
-.item-why { padding-top:23px; }
-.item-why ul,.compact-list,.criteria-list { padding-left:21px; margin:0; }
-.compact-list li,.criteria-list li { margin:6px 0; font-size:14px; line-height:23px; }
+.compact-list { padding-left:21px; margin:0; }
+.compact-list li { margin:6px 0; font-size:14px; line-height:23px; }
 .item-next-step {
-  margin-top:18px; padding:14px 16px; border:0; border-radius:11px;
-  background:var(--surface);
+  margin-top:16px; padding:14px 0; border:0; border-top:1px solid var(--border);
+  border-radius:0; background:transparent;
 }
 .item-next-step strong { display:block; font-size:14px; line-height:22px; color:var(--foreground); }
 .item-details-disclosure { max-width:760px; margin:10px 0 25px; }
@@ -77,10 +76,6 @@
 }
 .connection-list code { color:var(--text-muted); font-size:12px; }
 .connection-list span { min-width:0; font-size:13px; line-height:21px; overflow-wrap:anywhere; }
-.challenge-preview { border-top:0; }
-.compact-section-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.compact-section-heading h3 { margin:0; }
-.compact-section-heading > span { font:400 12px/16px var(--font-mono); color:var(--text-muted); }
 .curriculum-empty { padding:38px 0; }
 @media(max-width:900px) {
   .curriculum-workspace { height:auto; min-height:calc(100dvh - var(--app-topbar-height)); overflow:visible; }
@@ -115,6 +110,7 @@
 }
 .curriculum-overview-modules a:hover { color:var(--foreground); background:var(--surface-muted); }
 .curriculum-overview-number { font:400 12px/16px var(--font-mono); color:var(--text-muted); }
-.curriculum-overview-copy { display:grid; gap:4px; }
+.curriculum-overview-copy { display:grid; gap:4px; min-width:0; }
+.curriculum-overview-copy .curriculum-module-first { display:block; color:var(--text-secondary); font:400 12px/18px var(--font-body); overflow-wrap:anywhere; }
 .curriculum-overview-copy strong { font-size:15px; line-height:22px; font-weight:500; color:var(--foreground); }
 .curriculum-overview-copy small { font:400 12px/16px var(--font-mono); color:var(--text-muted); }

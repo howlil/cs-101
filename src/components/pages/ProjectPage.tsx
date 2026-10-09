@@ -118,7 +118,6 @@ export default function ProjectPage({
           <section className="project-side-section">
             <div className="project-section-heading">
               <div>
-                <p className="eyebrow">MATERI DASAR</p>
                 <h2>Materi terkait</h2>
               </div>
               <span>{contributors.length}</span>
@@ -164,7 +163,6 @@ export default function ProjectPage({
         <section className="project-section">
           <div className="project-section-heading">
             <div>
-              <p className="eyebrow"><Layers3 size={13} strokeWidth={1.8} aria-hidden="true" /> YANG BARU</p>
               <h2>Yang harus dikerjakan di project ini</h2>
             </div>
             <span>{newRequirements.length}</span>
@@ -180,8 +178,7 @@ export default function ProjectPage({
           <section className="project-section">
             <div className="project-section-heading">
               <div>
-                <p className="eyebrow"><Link2 size={13} strokeWidth={1.8} aria-hidden="true" /> DARI PROJECT SEBELUMNYA</p>
-                <h2>Yang harus tetap benar</h2>
+                  <h2>Yang harus tetap benar</h2>
               </div>
               <span>{inherited.length}</span>
             </div>

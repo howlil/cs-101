@@ -72,7 +72,7 @@ export default function ProgressPage({
       <section className="progress-primary">
         <section className="progress-overview" aria-label="Progres per jalur">
           <div className="progress-section-heading">
-            <div><p className="eyebrow">JALUR BELAJAR</p><h2>Yang sudah diselesaikan</h2></div>
+            <div><h2>Jalur belajar</h2></div>
             <span>{tracks.reduce((sum, track) => sum + track.completed, 0)} / {tracks.reduce((sum, track) => sum + track.total, 0)}</span>
           </div>
           <p className="progress-integrations-note">Materi dan project dikelompokkan dalam {tracks.length} jalur; {integrations.length} latihan gabungan dihitung terpisah.</p>
@@ -103,7 +103,6 @@ export default function ProgressPage({
             <section className="progress-review-queue">
               <div className="progress-section-heading">
                 <div>
-                  <p className="eyebrow">PERLU AKSI</p>
                   <h2><BrainCircuit size={17} strokeWidth={1.8} aria-hidden="true" /> Review</h2>
                 </div>
                 <span>{reviews.length}</span>
@@ -127,7 +126,6 @@ export default function ProgressPage({
             <section className="progress-integrations">
               <div className="progress-section-heading">
                 <div>
-                  <p className="eyebrow">LINTAS JALUR</p>
                   <h2><Boxes size={17} strokeWidth={1.8} aria-hidden="true" /> Latihan gabungan</h2>
                 </div>
                 <span>{integrations.filter((item) => item.passed).length}/{integrations.length}</span>
@@ -155,7 +153,6 @@ export default function ProgressPage({
         <section className="progress-history">
           <div className="progress-section-heading">
             <div>
-              <p className="eyebrow">SESI</p>
               <h2><History size={17} strokeWidth={1.8} aria-hidden="true" /> Terbaru</h2>
             </div>
           </div>

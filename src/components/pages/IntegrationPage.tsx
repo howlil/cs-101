@@ -65,8 +65,8 @@ export default function IntegrationPage({
         <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
         <span>Kurikulum</span>
       </a>
-      <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> LATIHAN GABUNGAN</p>
       <div className="integration-kicker">
+        <span>Latihan gabungan</span>
         <code>{id}</code>
         <span>{prerequisites.length} prasyarat</span>
       </div>
@@ -128,8 +128,7 @@ export default function IntegrationPage({
 
       <div className="integration-main">
         <section className="integration-section">
-          <p className="eyebrow"><Boxes size={13} strokeWidth={1.8} aria-hidden="true" /> YANG DIPELAJARI</p>
-          <h2>Yang perlu digabungkan</h2>
+                <h2>Yang perlu digabungkan</h2>
           <ul className="integration-list">{scope.map((entry) => <li key={entry}>{entry}</li>)}</ul>
         </section>
 
@@ -146,8 +145,7 @@ export default function IntegrationPage({
         <section className="integration-section">
           <div className="integration-section-heading">
             <div>
-              <p className="eyebrow"><CheckCircle2 size={13} strokeWidth={1.8} aria-hidden="true" /> SELESAI JIKA</p>
-              <h2>Target selesai</h2>
+                <h2>Target selesai</h2>
             </div>
             <span>{criteria.length}</span>
           </div>
@@ -158,8 +156,7 @@ export default function IntegrationPage({
           <section className="integration-section">
             <div className="integration-section-heading">
               <div>
-                <p className="eyebrow"><PackageCheck size={13} strokeWidth={1.8} aria-hidden="true" /> HASIL</p>
-                <h2>Hasil yang dibuat</h2>
+                    <h2>Hasil yang dibuat</h2>
               </div>
               <span>{requirements.length}</span>
             </div>

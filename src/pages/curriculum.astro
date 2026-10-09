@@ -53,6 +53,7 @@ const trackOverview = explorer ? {
     title: module.title,
     completed: module.items.filter((item) => viewFor(item.id)?.completion === 'passed').length,
     total: module.items.length,
+    firstItemTitle: module.items[0]?.title ?? 'Belum ada materi',
     href: '/curriculum?track=' + encodeURIComponent(explorer.track.id) +
       '&item=' + encodeURIComponent(module.items[0]?.id ?? ''),
   })),
