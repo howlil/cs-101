@@ -21,14 +21,14 @@ const nextStepFor = (view: NonNullable<typeof primary>) => {
   return item.requirements[0]?.text ?? 'Buka project dan kerjakan target pertama.';
 };
 
+// This CTA only navigates. Activation is a distinct server mutation on the
+// item detail, so never promise to begin learning from this link.
 const primaryAction = primary
-  ? today.primaryMode === 'continue' || primary.displayState === 'started'
-    ? 'Lanjut belajar'
-    : primary.displayState === 'stale'
-      ? 'Perbarui & validasi'
-      : primary.item.kind === 'unit'
-        ? 'Mulai belajar'
-        : 'Buka workspace'
+  ? today.primaryMode === 'continue' ? 'Lanjut belajar'
+    : primary.displayState === 'stale' ? 'Buka materi untuk perbarui'
+    : primary.item.kind === 'unit' ? 'Buka materi'
+    : primary.item.kind === 'checkpoint' ? 'Buka project'
+    : 'Buka latihan gabungan'
   : '';
 
 const primaryCard = primary ? (() => {
