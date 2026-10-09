@@ -71,13 +71,6 @@
 .today-blocker span,.today-blocker p{margin:0}
 .today-blocker span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .today-blocker p{font-size:12px;line-height:1.45}
-.lesson-fallback{display:grid;gap:0;margin-top:18px}
-.lesson-fallback>section{padding:18px 0;border-top:1px solid var(--line)}
-.lesson-fallback h2{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:16px}
-.lesson-fallback h3{margin:0 0 7px;font-size:13px}
-.lesson-fallback ul,.lesson-fallback ol{margin:0;padding-left:19px}
-.lesson-fallback li{margin:5px 0}
-.lesson-fallback a{display:inline-flex;align-items:center;gap:6px}
 .review-summary{display:grid;gap:4px;padding-bottom:14px}
 .review-summary strong{font-size:13px}
 .review-summary>span:last-child:not(.eyebrow){color:var(--muted);font-size:12px}
@@ -98,15 +91,13 @@
 .lesson-staged blockquote > :last-child { margin-bottom:0; }
 
 /* Shared lesson workspace: no permanent context rail. All units use 3 stages. */
-.lesson-grid.lesson-staged,
-.lesson-grid.lesson-demo {
+.lesson-grid.lesson-staged {
   display:block;
   width:min(760px,100%);
   max-width:760px;
   margin-inline:auto;
 }
-.lesson-grid.lesson-staged > .prose,
-.lesson-grid.lesson-demo > .prose { grid-area:auto; width:100%; max-width:100%; }
+.lesson-grid.lesson-staged > .prose { grid-area:auto; width:100%; max-width:100%; }
 .lesson-stage-toolbar {
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; flex-wrap:wrap; margin:22px 0 32px;
@@ -159,58 +150,57 @@
   }
 }
 
-/* Phase 05: task-first Today and globally consistent sidebar hierarchy. */
+/* Today: a focused task, not a decorative card. Content uses one reading measure. */
 .today-page { width:min(960px,100%); margin-inline:auto; }
-.today-workbench { display:block; width:100%; min-width:0; }
+.today-workbench { display:block; min-width:0; }
 .today-focus {
-  display:flex; flex-direction:column; align-items:flex-start; gap:0;
-  width:100%; max-width:820px; padding:26px 30px;
-  background:var(--surface); border:0; border-radius:var(--radius-panel);
+  width:min(820px,100%); display:grid; justify-items:start;
+  padding:8px 0 12px; margin:0;
+  border:0; border-radius:0; background:transparent;
 }
 .today-focus .today-title-line { width:100%; }
-.today-focus .today-title-line h2 { max-width:650px; }
+.today-focus .today-title-line h2 { max-width:680px; margin:4px 0 10px; font-size:28px; line-height:34px; }
 .today-focus .today-next-step {
-  width:100%; max-width:680px;
-  padding:16px 0 18px; margin:2px 0 5px;
-  border:0; background:transparent;
+  width:100%; max-width:690px; margin:14px 0 18px; padding:18px 0 0;
+  border:0; border-top:1px solid var(--border); border-radius:0; background:transparent;
 }
 .today-focus .today-next-step > span {
-  display:block; font:500 12px/17px var(--font-mono);
-  letter-spacing:.035em; color:var(--text-muted); margin-bottom:8px;
+  display:block; margin:0 0 8px; color:var(--text-muted);
+  font:500 12px/16px var(--font-mono); letter-spacing:.02em;
 }
 .today-focus .today-next-step strong {
-  display:block; font:500 16px/25px var(--font-body); color:var(--foreground);
+  display:block; color:var(--foreground); font:500 16px/24px var(--font-body);
 }
-.today-focus .today-next-step small { color:var(--text-secondary); font-size:12px; line-height:18px; }
+.today-focus .today-next-step small {
+  display:block; margin-top:6px; color:var(--text-secondary); font-size:13px; line-height:20px;
+}
 .today-focus .today-blocker {
-  width:100%; max-width:680px; margin:0 0 18px; padding:8px 0 8px 12px;
-  border-left:2px solid var(--warning); align-self:flex-start;
+  width:100%; max-width:690px; margin:0 0 18px; padding:8px 0 8px 12px;
+  border-left:2px solid var(--warning);
 }
-.today-focus .today-blocker span { font:500 12px/17px var(--font-mono); letter-spacing:0; }
-.today-focus > a { margin:0 0 4px; min-height:40px; }
+.today-focus .today-blocker span { font:500 12px/16px var(--font-mono); }
+.today-focus > a { min-height:40px; margin:0; }
 .today-focus .today-why {
-  width:100%; grid-column:auto; max-width:680px;
-  margin:17px 0 0; padding:10px 0 0;
-  background:transparent; border:0; border-top:1px solid var(--border);
+  width:100%; max-width:690px; margin:22px 0 0; padding:12px 0 0;
+  border:0; border-top:1px solid var(--border); border-radius:0; background:transparent;
 }
-.today-focus .today-why p { font-size:13px; line-height:22px; padding:4px 0 12px; }
+.today-focus .today-why p { font-size:14px; line-height:22px; padding:4px 0 12px; }
 .today-sidecar {
-  position:static; top:auto; border-left:0; padding:23px 0 0; margin-top:25px;
-  border-top:1px solid var(--line); width:100%; max-width:820px;
+  width:min(820px,100%); margin:24px 0 0; padding:20px 0 0;
+  position:static; border:0; border-top:1px solid var(--border);
 }
 .today-sidecar .today-review-row { max-width:760px; }
 @media(max-width:640px) {
-  .today-focus { padding:21px 18px; }
-  .today-focus h2 { font-size:22px; line-height:28px; }
+  .today-focus { padding:2px 0 12px; }
+  .today-focus .today-title-line h2 { font-size:24px; line-height:30px; }
 }
-
 
 /* Phase 05: Progress owns history and actions, not a second permanent rail. */
 .progress-page { width:min(960px,100%); margin-inline:auto; }
 .progress-workbench,
 .progress-primary { display:block; width:100%; min-width:0; }
-.progress-overview { margin-bottom:30px; }
-.progress-overview .progress-section-heading { margin-bottom:15px; }
+.progress-overview { margin-bottom:18px; }
+.progress-overview .progress-section-heading { margin-bottom:8px; }
 .progress-track-panel { display:grid; gap:12px; padding:8px 0 20px; }
 .progress-track-open { justify-self:start; text-decoration:none; font-size:13px; color:var(--text-secondary); }
 .progress-track-open:hover { color:var(--foreground); text-decoration:underline; }
@@ -225,7 +215,7 @@
 .progress-track-panel .progress-modules small { font:400 12px/16px var(--font-mono); }
 .progress-actions {
   display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:20px 28px; padding:25px 0; margin:22px 0 12px;
+  gap:16px 24px; padding:16px 0; margin:16px 0 0;
   border-top:1px solid var(--line); border-bottom:1px solid var(--line);
 }
 .progress-actions .progress-review-queue,
@@ -240,7 +230,7 @@
 }
 .progress-actions .progress-review-items small,
 .progress-actions .progress-integration-items small { font-size:12px; }
-.progress-history { display:block; max-width:960px; margin-top:24px; }
+.progress-history { display:block; max-width:960px; margin-top:14px; }
 .progress-history > * { max-width:100%; }
 .progress-history .history-entry { padding:15px 0; }
 @media(max-width:640px) {
@@ -304,3 +294,23 @@
   color:var(--text-secondary); font-size:13px; line-height:21px;
   margin:8px 0 17px;
 }
+
+.progress-availability-note { max-width:68ch; margin:10px 0 0; color:var(--text-secondary); font-size:12px; line-height:19px; }
+
+/* Learning continuity: bottom-of-lesson navigation must land at the next panel. */
+.lesson-stage-panel { scroll-margin-top:calc(var(--app-topbar-height) + 18px); }
+.lesson-evidence-gate {
+  display:grid; justify-items:start; gap:8px;
+  margin:18px 0 28px; padding:16px 0;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.lesson-evidence-gate strong { color:var(--foreground); font-size:16px; line-height:24px; }
+.lesson-evidence-gate p { max-width:65ch; margin:0; color:var(--text-secondary); font-size:14px; line-height:22px; }
+.lesson-evidence-gate > a { font-size:14px; }
+.lesson-evidence-gate .item-action-status { margin:7px 0 0; }
+
+.lesson-evidence-gate { scroll-margin-top:calc(var(--app-topbar-height) + 16px); outline-offset:4px; }
+
+.lesson-evidence-prerequisites { display:grid; gap:6px; width:100%; }
+.lesson-evidence-prerequisites a { width:fit-content; max-width:100%; color:var(--foreground); font-size:13px; line-height:20px; overflow-wrap:anywhere; }
+.lesson-evidence-prerequisites span { color:var(--text-secondary); font-size:13px; }

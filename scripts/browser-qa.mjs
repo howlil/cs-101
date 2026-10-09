@@ -27,7 +27,8 @@ class DevTools {
     this.ws.addEventListener('message', (event) => {
       const message = JSON.parse(event.data);
       if (message.method === 'Runtime.exceptionThrown') {
-        this.exceptions.push(message.params?.exceptionDetails?.text || 'Uncaught runtime exception');
+        const details = message.params?.exceptionDetails;
+        this.exceptions.push(details?.exception?.description || details?.text || 'Uncaught runtime exception');
       }
       const entry = this.pending.get(message.id);
       if (!entry) return;
@@ -57,7 +58,7 @@ class DevTools {
   async eval(expression) {
     const response = await this.send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
     if (response.exceptionDetails) {
-      throw new Error('Page eval: ' + response.exceptionDetails.text);
+      throw new Error('Page eval: ' + (response.exceptionDetails.exception?.description || response.exceptionDetails.text));
     }
     return response.result?.value;
   }
@@ -77,10 +78,17 @@ class DevTools {
   }
   async goto(route) {
     const url = new URL(route, base);
+    const previousPath = await this.eval('location.pathname').catch(() => '');
+    const crossingRoutes = Boolean(previousPath && previousPath !== url.pathname);
+    // CDP's Page.navigate acknowledges navigation before the *new* document
+    // replaces the old one; a pathname alone can reflect the destination
+    // while the stale app-shell still exists. Require the old marker to vanish.
+    if (crossingRoutes) await this.eval('document.documentElement.dataset.qaOldDocument = "true"');
     await this.send('Page.navigate', { url: url.href });
     await this.wait(async () => await this.eval(
       'location.pathname === ' + JSON.stringify(url.pathname) +
-      ' && document.readyState === "complete" && Boolean(document.querySelector(".app-shell"))'
+      ' && document.readyState === "complete" && Boolean(document.querySelector(".app-shell"))' +
+      (crossingRoutes ? ' && document.documentElement.dataset.qaOldDocument !== "true"' : '')
     ), 'document at ' + url.pathname, 24000);
     // React client:load islands must hydrate before exercising click behavior.
     await this.wait(async () => await this.eval(
@@ -181,7 +189,25 @@ try {
   await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
   await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
+  await client.goto('/curriculum?item=JAV-002');
+  assert.ok(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), 'Missing authored lesson must be disclosed in preview');
+  assert.equal(await client.eval("document.body.textContent.includes('tercantum di kurikulum.')"), true, 'Missing authored text must not be claimed available');
+  await client.screenshot('curriculum-outline-desktop-1440.png');
+  await client.goto('/curriculum?item=SQL-003');
+  assert.equal(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), false, 'Authored SQL-003 must not be marked outline');
+  console.log('PASS Curriculum preview distinguishes authored content from manifest outlines');
   console.log('PASS curriculum overview → module selection');
+
+  // Search must not silently discard matches after 16 items. Type through
+  // Chrome input events to exercise the hydrated React explorer.
+  await client.goto('/curriculum');
+  await client.eval('document.querySelector(".curriculum-search-uiarc input").focus()');
+  await client.send('Input.insertText', { text: 'java' });
+  await client.wait(async () => await client.eval('document.querySelectorAll(".search-row").length === 16 && Boolean(document.querySelector(".search-more"))'), 'Search exposes more than first 16 matches');
+  await client.eval('document.querySelector(".search-more").click()');
+  await client.wait(async () => await client.eval('document.querySelectorAll(".search-row").length > 16'), 'Search reveals additional matches');
+  await client.screenshot('curriculum-search-expanded-1440.png');
+  console.log('PASS curriculum search count and load-more recovery');
 
   // Visual contract checks on the live browser, not just static CSS snapshots.
   await client.goto('/');
@@ -193,6 +219,12 @@ try {
   }
   assert.equal(await client.eval('document.querySelectorAll(".topbar-workspace").length'), 0,
     'Decorative legacy workspace label must not return');
+  const todayPanel = await client.eval('(() => { const panel = document.querySelector(".today-focus"); if (!panel) return null; const css = getComputedStyle(panel); return { color:css.backgroundColor, radius:css.borderRadius, width:panel.getBoundingClientRect().width }; })()');
+  if (todayPanel) {
+    assert.equal(todayPanel.color, 'rgba(0, 0, 0, 0)', 'Today main block must be flat rather than a filled card');
+    assert.equal(todayPanel.radius, '0px', 'Today block should not have decorative card corners');
+    assert.ok(todayPanel.width <= 820, 'Today reading measure must be bounded');
+  }
   await client.screenshot('today-desktop-1440.png');
   await client.goto('/curriculum');
   console.log('PASS Today CTA hierarchy and current shell visuals');
@@ -245,10 +277,17 @@ try {
     'SQL-001 should offer three lesson stages');
   assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
     [1,1,1], 'SQL-001 must have one tabpanel per stage');
-  await client.eval('document.querySelector("#lesson-tab-practice").click()');
+  // Test the *bottom* CTA, not only the top tab. Long reading must
+  // move keyboard focus to the newly visible practice panel.
+  await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
-  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-practice"'), 'Practice panel receives focus');
+  assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
+  await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
+  await client.wait(async () => await client.eval('["lesson-panel-evidence","lesson-evidence-gate"].includes(document.activeElement?.id)'), 'Evidence stage receives focus');
+  assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Inactive learner must not reach an empty evidence dead end');
+  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-evidence-gate', 'Inactive learner must land on the eligibility guidance first');
   const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
   if (evidenceExists) {
     assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
@@ -268,14 +307,34 @@ try {
   assert.equal(await client.eval('document.querySelector(".item-id-standalone").textContent'), 'SQL-001');
   console.log('PASS learning journey: Pahami/Latihan/Bukti, evidence, focus, context preservation');
 
-  for (const id of ['SQL-002', 'JAV-001', 'JAV-002']) {
+  for (const id of ['SQL-002', 'SQL-003', 'JAV-001', 'JAV-002']) {
     await client.goto('/learn/' + id);
     assert.equal(await client.eval('document.querySelectorAll(".lesson-stage-tab").length'), 3, id + ' tabs');
     assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
       [1,1,1], id + ' tabpanels');
     assert.equal(await client.eval('Boolean(document.querySelector(".lesson-sidecar"))'), false,
       id + ' must not have the legacy permanent sidecar');
+    if (id === 'SQL-003') {
+      assert.equal(await client.eval('Boolean(document.querySelector(".lesson-stage-panel pre"))'), true, 'SQL-003 must include authored SQL examples');
+      await client.screenshot('sql003-desktop-901.png');
+    }
+    if (id === 'JAV-002') {
+      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
+    }
   }
+  // A locked authored unit can still be read and practiced, but evidence
+  // must provide prerequisite guidance rather than an empty final stage.
+  await client.goto('/learn/SQL-003');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
+  const gateY = await client.eval('document.querySelector(".lesson-evidence-gate").getBoundingClientRect().top');
+  const panelY = await client.eval('document.querySelector("#lesson-panel-evidence").getBoundingClientRect().top');
+  assert.ok(gateY < panelY, 'Eligibility guidance must precede evidence checklist visually');
+  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Selesaikan prasyarat untuk menyimpan bukti")'), 'Locked state must be explained in evidence stage');
+  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 0, 'Avoid repeating the locked badge and prerequisite block inside the evidence gate');
+  assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
+  await client.screenshot('lesson-locked-evidence-901.png');
+  console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');
   console.log('PASS other authored lessons and manifest-only fallback parity');
 
 
@@ -332,13 +391,15 @@ try {
     assert.ok(back, 'Expected back navigation on ' + route);
     assert.equal(back.radius, '9999px', 'Back navigation pill radius at ' + route);
     assert.equal(back.size, '13px', 'Back navigation size at ' + route);
+    await client.screenshot(route.startsWith('/project/') ? 'project-desktop-1440.png'
+      : route.startsWith('/integration/') ? 'integration-desktop-1440.png' : 'review-desktop-1440.png');
   }
   console.log('PASS consistent Project/Integration/Review back navigation');
 
   console.log('PASS project/integration single-column workspace');
 
   await client.resize(320, 720);
-  for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001',
+  for (const route of ['/', '/curriculum', '/progress', '/learn/SQL-001', '/learn/SQL-003',
     '/project/JAV-P01', '/integration/INT-001', '/review/SQL-001']) {
     await client.goto(route);
     m = await client.metrics();
@@ -346,6 +407,13 @@ try {
       '320px document horizontal overflow at ' + route + ': ' + JSON.stringify(m));
     assert.equal(m.mainCount, 1, 'Duplicate main at ' + route);
   }
+  await client.goto('/learn/SQL-003');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile locked evidence guidance');
+  m = await client.metrics();
+  assert.ok(m.doc <= m.vw + 1 && m.body <= m.vw + 1,
+    'Locked evidence guidance must not overflow 320px: ' + JSON.stringify(m));
+  await client.screenshot('lesson-locked-evidence-320.png');
   await client.goto('/learn/SQL-001');
   const mobileToolbar = await client.eval('(() => { const tabs=document.querySelector(".lesson-stage-tabs"); const secondary=document.querySelector(".lesson-toolbar-actions"); if (!tabs || !secondary) return null; const a=tabs.getBoundingClientRect(), b=secondary.getBoundingClientRect(); return { display:getComputedStyle(document.querySelector(".lesson-stage-toolbar")).display, first:{left:a.left,right:a.right,bottom:a.bottom}, second:{left:b.left,top:b.top} }; })()');
   assert.ok(mobileToolbar, 'Lesson mobile toolbar must be present');
@@ -361,6 +429,58 @@ try {
   await client.send('Emulation.setEmulatedMedia', { features: [] });
   assert.equal(client.exceptions.length, 0, 'Browser runtime exceptions: ' + JSON.stringify(client.exceptions));
   console.log('PASS 320px route matrix: no document overflow, no nested main, zero runtime errors');
+
+  // Exercise the real mutation path on the CI-owned disposable runtime.
+  // Stage/quiz browsing must not write progress, while explicit session
+  // saving and completing still run through the unchanged server engine.
+  await client.resize(901, 800);
+  await client.goto('/learn/SQL-001');
+  await client.eval('document.querySelector(".react-action-stack button").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), 'Activated lesson shows compact evidence workbench');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Evidence summary visible after stage');
+  assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');
+  assert.equal(await client.eval('Boolean(document.querySelector("#session-notes"))'), false, 'Session notes should be optional, not an upfront form');
+  const beforePractice = await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision)()');
+  await client.eval('document.querySelector("#lesson-tab-practice").click()');
+  const afterPractice = await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision)()');
+  assert.equal(afterPractice, beforePractice, 'Stage navigation must never mutate automatic progress');
+  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  await client.eval('document.querySelector(".evidence-summary-actions button:nth-child(2)").click()');
+  assert.ok(await client.eval('Boolean(document.querySelector("#session-notes textarea[name=continueFrom]"))'), 'Manual session notes opened on demand');
+  await client.eval('document.querySelector("#session-notes textarea[name=continueFrom]").focus()');
+  await client.send('Input.insertText', { text: 'Ulangi SQL NULL dan tulis invariant.' });
+  await client.wait(async () => await client.eval('document.querySelector(".session-draft-state")?.textContent.includes("Draft otomatis")'), 'Local draft is explicitly disclosed');
+  await client.eval('document.querySelector("#session-notes .actions button").click()');
+  await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision > ' + String(beforePractice) + ')()'), 'Explicit save commits session to server');
+  const savedState = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
+  assert.ok(savedState.progress.some(p => p.itemId === 'SQL-001' && p.status === 'active'), 'Saved partial session must not mark completion');
+  // Wait for the post-save ClientRouter refresh and then make a full clean
+  // navigation via Curriculum; otherwise the old island can still unmount
+  // while the browser test begins typing in the newly opened evidence form.
+  await client.wait(async () => await client.eval('document.body.textContent.includes("Ulangi SQL NULL dan tulis invariant.")'), 'Saved session reflected in server-rendered lesson');
+  await client.goto('/curriculum');
+  await client.goto('/learn/SQL-001#evidence');
+  assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Server session does not auto-expand evidence form');
+  await client.eval('document.querySelector(".evidence-summary-actions button:first-child").click()');
+  const required = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
+  assert.ok(required >= 2, 'Complete lesson must require real criteria and challenge evidence');
+  for (let index = 0; index < required; index++) {
+    const fieldCount = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
+    assert.ok(fieldCount > index, 'Evidence field disappeared during controlled input at index ' + index);
+    await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]")[' + index + '].focus()');
+    await client.send('Input.insertText', { text: 'QA verified result ' + String(index + 1) + ': query output and explanation' });
+    const formState = await client.eval('({ count: document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length, stage: document.querySelector(".lesson-staged")?.dataset.activeStage, ready:document.readyState, shell: Boolean(document.querySelector(".app-shell")), title:document.title, href: location.href, summary: document.querySelector(".evidence-count")?.textContent })');
+    assert.equal(formState.count, required, 'Evidence form must remain open after typing: ' + JSON.stringify(formState) + '; browser errors: ' + JSON.stringify(client.exceptions));
+  }
+  await client.wait(async () => await client.eval('document.querySelector(".evidence-count")?.textContent.trim() === "' + String(required) + '/' + String(required) + '"'), 'Coverage reflects all supplied evidence');
+  await client.screenshot('lesson-active-evidence-901.png');
+  await client.eval('document.querySelector("#completion-evidence .actions button").click()');
+  await client.wait(async () => await client.eval('(async () => { const s = await (await fetch("/api/learning")).json(); return s.progress.some(p => p.itemId === "SQL-001" && p.status === "passed"); })()'), 'Automatic completion still follows server evidence validation');
+  const completedState = await client.eval('(async () => await (await fetch("/api/learning")).json())()');
+  assert.ok(completedState.reviews.some(r => r.itemId === 'SQL-001'), 'Automatic review scheduling must still run');
+  assert.ok(completedState.revision > savedState.revision, 'Completion still increments the server-owned revision');
+  console.log('PASS real low-ceremony learner journey: browse → activate → draft → save → evidence → automatic completion/review');
   console.log('PASS screenshots saved at ' + screenshotDir);
 } finally {
   try { client?.ws.close(); } catch {}

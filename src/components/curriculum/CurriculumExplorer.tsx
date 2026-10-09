@@ -12,6 +12,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { Input } from '../arc/input/input';
+import { Button } from '../arc/button/button';
 import { Select } from '../arc/select/select';
 import { Accordion } from '../arc/accordion/accordion';
 import { matchesQuery } from '../arc/lib/matches-query';
@@ -79,13 +80,15 @@ export default function CurriculumExplorer({
   selectedModuleId?: string;
 }) {
   const [query, setQuery] = useState('');
+  const [resultLimit, setResultLimit] = useState(16);
   const normalizedQuery = query.trim().toLocaleLowerCase('id-ID');
-  const results = useMemo(
+  const matches = useMemo(
     () => normalizedQuery
-      ? searchEntries.filter((entry) => matchesQuery(entry.searchText, normalizedQuery)).slice(0, 16)
+      ? searchEntries.filter((entry) => matchesQuery(entry.searchText, normalizedQuery))
       : [],
     [normalizedQuery, searchEntries],
   );
+  const results = matches.slice(0, resultLimit);
 
   const defaultOpen = Math.max(0, modules.findIndex((module) => module.id === selectedModuleId));
   const accordionItems = modules.map((module) => ({
@@ -103,10 +106,11 @@ export default function CurriculumExplorer({
         label="Cari kurikulum"
         type="search"
         value={query}
-        onChange={(event) => setQuery(event.currentTarget.value)}
+        onChange={(event) => { setQuery(event.currentTarget.value); setResultLimit(16); }}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
             setQuery('');
+            setResultLimit(16);
             event.currentTarget.blur();
           }
         }}
@@ -118,10 +122,16 @@ export default function CurriculumExplorer({
 
     {normalizedQuery ? (
       <div className="search-results" aria-live="polite">
-        <p className="explorer-label"><Search size={12} strokeWidth={1.8} aria-hidden="true" /> HASIL</p>
+        <p className="explorer-label"><Search size={12} strokeWidth={1.8} aria-hidden="true" /> HASIL · {results.length}/{matches.length}</p>
         {results.length
           ? results.map((entry) => <ItemRow key={entry.id} item={entry} search currentPath={currentPath} />)
-          : <p className="search-empty">Tidak ada materi yang cocok.</p>}
+          : <p className="search-empty">Tidak ada materi yang cocok. Coba nama konsep atau ID lain.</p>}
+        {results.length < matches.length && (
+          <Button type="button" variant="ghost" size="sm" className="search-more"
+            onClick={() => setResultLimit((limit) => limit + 16)}>
+            Tampilkan berikutnya ({matches.length - results.length} tersisa)
+          </Button>
+        )}
       </div>
     ) : <>
       <div className="track-select-uiarc">

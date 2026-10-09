@@ -19,6 +19,7 @@ export type EvidenceGroup = {
   description?: string;
   criteria: Criterion[];
   rows?: number;
+  collapsible?: boolean;
   className?: string;
   referenceTitle?: string;
   referenceItems?: string[];
@@ -67,6 +68,8 @@ export default function EvidenceForm({
   const [minutes, setMinutes] = useState('');
   const [reflection, setReflection] = useState<SessionReflection>(emptyReflection);
   const [completionOpen, setCompletionOpen] = useState(initialCompletionOpen);
+  const [sessionNotesOpen, setSessionNotesOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [currentRevision, setCurrentRevision] = useState(revision);
   const [hydrated, setHydrated] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -85,6 +88,8 @@ export default function EvidenceForm({
     const value = Number(minutes);
     return Number.isInteger(value) && value > 0 ? value : undefined;
   };
+
+  const completedEvidenceCount = criteria.filter((criterion) => evidence[criterion.id]?.trim()).length;
 
   const session = (kind: 'progress' | 'passed'): SessionFields => ({
     itemId,
@@ -110,6 +115,8 @@ export default function EvidenceForm({
       setMinutes(draft.minutes ? String(draft.minutes) : '');
       setReflection({ ...emptyReflection(), ...(draft.reflection ?? {}) });
       setCompletionOpen(initialCompletionOpen || draft.evidence.length > 0);
+      setSessionNotesOpen(Boolean(draft.continueFrom.trim() || draft.blocker?.trim() ||
+        draft.minutes || Object.values(draft.reflection ?? {}).some((value) => value.trim())));
       setFeedback({
         title: 'Draft dipulihkan',
         message: 'Catatan lokal dipulihkan. Belum tersimpan sebagai sesi.',
@@ -145,10 +152,22 @@ export default function EvidenceForm({
       const missing = criteria.filter((criterion) => !evidence[criterion.id]?.trim());
       if (missing.length) {
         setCompletionOpen(true);
+        // Hidden optional groups must open before focusing missing evidence.
+        setExpandedGroups((current) => ({
+          ...current,
+          ...Object.fromEntries(groups.filter((group) =>
+            group.collapsible && group.criteria.some((criterion) =>
+              missing.some((entry) => entry.id === criterion.id)),
+          ).map((group) => [group.key, true])),
+        }));
         setFeedback({
           title: 'Bukti belum lengkap',
           message: `Lengkapi ${missing.length} target selesai sebelum menyelesaikan item.`,
           tone: 'warning',
+        });
+        window.requestAnimationFrame(() => {
+          const firstMissing = document.getElementsByName('evidence:' + missing[0].id)[0];
+          if (firstMissing instanceof HTMLElement) firstMissing.focus();
         });
         return;
       }
@@ -209,7 +228,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.wrongAssumption}
-        onChange={(event) => setReflection((current) => ({ ...current, wrongAssumption: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, wrongAssumption: value })); }}
       />
       <Textarea
         label="Pilihan atau trade-off yang saya ambil…"
@@ -217,7 +236,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.tradeoffChosen}
-        onChange={(event) => setReflection((current) => ({ ...current, tradeoffChosen: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, tradeoffChosen: value })); }}
       />
       <Textarea
         label="Tanpa catatan, saya sekarang bisa menjelaskan…"
@@ -225,7 +244,7 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.explainWithoutNotes}
-        onChange={(event) => setReflection((current) => ({ ...current, explainWithoutNotes: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, explainWithoutNotes: value })); }}
       />
       <Textarea
         label="Kalau ini production, saya akan monitor…"
@@ -233,17 +252,125 @@ export default function EvidenceForm({
         rows={2}
         maxLength={4000}
         value={reflection.monitorInProduction}
-        onChange={(event) => setReflection((current) => ({ ...current, monitorInProduction: event.currentTarget.value }))}
+        onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, monitorInProduction: value })); }}
       />
     </div>
   );
 
-  return <form className={['session-form', className].filter(Boolean).join(' ')} onChangeCapture={() => setDirty(true)}>
-    <section className="session-close">
+  return <form className={['session-form', className, 'session-form--quiet'].filter(Boolean).join(' ')} onChangeCapture={() => setDirty(true)}>
+    <section className="evidence-summary" aria-label="Pencatatan hasil belajar">
+      <div className="evidence-summary-heading">
+        <div>
+          <h2>Catat hasil belajar</h2>
+          <p className="muted small">Kerjakan latihan terlebih dahulu. Tambahkan bukti saat target benar-benar terpenuhi.</p>
+        </div>
+        <span className="evidence-count" aria-label={completedEvidenceCount + ' dari ' + criteria.length + ' target memiliki bukti'}>
+          {completedEvidenceCount}/{criteria.length}
+        </span>
+      </div>
+      <div className="evidence-summary-actions">
+        <Button type="button" variant="primary" disabled={Boolean(loadingKind)}
+          aria-controls="completion-evidence" aria-expanded={completionOpen}
+          onClick={() => setCompletionOpen((open) => !open)}>
+          <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+          <span>{completionOpen ? 'Tutup bukti' : 'Tambahkan bukti'}</span>
+        </Button>
+        <Button type="button" variant="secondary" disabled={Boolean(loadingKind)}
+          aria-controls="session-notes" aria-expanded={sessionNotesOpen}
+          onClick={() => setSessionNotesOpen((open) => !open)}>
+          <Save size={15} strokeWidth={1.8} aria-hidden="true" />
+          <span>{sessionNotesOpen ? 'Tutup catatan' : 'Lanjut nanti'}</span>
+        </Button>
+      </div>
+      <p className="session-draft-state" role="status">
+        {!hydrated ? 'Memeriksa draft lokal…' : dirty
+          ? 'Draft otomatis tersimpan di browser ini; belum tercatat sebagai sesi.'
+          : 'Belum ada perubahan sesi baru.'}
+      </p>
+    </section>
+
+    {completionOpen && (
+      <section id="completion-evidence" className="evidence-completion">
+        <div className="completion-rule">
+          <strong>Aturan selesai</strong>
+          <span className="evidence-coverage" role="status">{completedEvidenceCount} dari {criteria.length} target memiliki bukti</span>
+          <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
+        </div>
+
+        <p className="muted small evidence-hint">
+          Bukti bisa berupa link commit/PR, hasil test, output, benchmark, screenshot, atau penjelasan yang bisa diperiksa.
+        </p>
+        {groups.map((group) => {
+          const groupOpen = !group.collapsible ||
+            (expandedGroups[group.key] ?? group.criteria.some((criterion) => Boolean(evidence[criterion.id]?.trim())));
+          const covered = group.criteria.filter((criterion) => evidence[criterion.id]?.trim()).length;
+          return <section key={group.key} className={group.className}>
+            <div className="evidence-heading">
+              <div>
+                {group.eyebrow && <p className="eyebrow">{group.eyebrow}</p>}
+                <h2>{group.title}</h2>
+              </div>
+              <span>{covered}/{group.criteria.length}</span>
+            </div>
+            {group.description && <p className="muted small">{group.description}</p>}
+            {group.collapsible && (
+              <Button type="button" variant="ghost" size="sm"
+                aria-expanded={groupOpen} aria-controls={'evidence-group-' + group.key}
+                onClick={() => setExpandedGroups((current) => ({ ...current, [group.key]: !groupOpen }))}>
+                {groupOpen ? 'Tutup bukti' : 'Isi / periksa bukti'}
+              </Button>
+            )}
+            {groupOpen && <div id={'evidence-group-' + group.key}>
+              {group.referenceTitle && group.referenceItems?.length ? (
+                <div className="evidence-reference">
+                  <Accordion size="sm" items={[{
+                    title: group.referenceTitle,
+                    content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
+                  }]} />
+                </div>
+              ) : null}
+              <fieldset>
+                <legend className="sr-only">{group.title}</legend>
+                {group.criteria.map((criterion) => (
+                  <Textarea
+                    key={criterion.id}
+                    label={criterion.text}
+                    name={'evidence:' + criterion.id}
+                    rows={group.rows ?? 2}
+                    maxLength={8000}
+                    value={evidence[criterion.id] ?? ''}
+                    onChange={(event) => {
+                      const value = event.currentTarget.value;
+                      setEvidence((current) => ({ ...current, [criterion.id]: value }));
+                    }}
+                  />
+                ))}
+              </fieldset>
+            </div>}
+          </section>;
+        })}
+
+        <div className="actions">
+          <Button
+            type="button"
+            variant="primary"
+            loading={loadingKind === 'passed'}
+            disabled={Boolean(loadingKind)}
+            onClick={() => void submit('passed')}
+          >
+            <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
+            <span>{passLabel}</span>
+          </Button>
+        </div>
+      </section>
+    )}
+
+    {sessionNotesOpen && (
+    <section id="session-notes" className="session-close">
       <div className="evidence-heading">
         <div>
           <p className="eyebrow">SESI</p>
-          <h2>Akhiri sesi</h2>
+          <h2>Lanjutkan nanti</h2>
         </div>
       </div>
       <p className="muted small">
@@ -282,7 +409,7 @@ export default function EvidenceForm({
                 rows={2}
                 maxLength={4000}
                 value={reflection.evidenceChangedMind}
-                onChange={(event) => setReflection((current) => ({ ...current, evidenceChangedMind: event.currentTarget.value }))}
+                onChange={(event) => { const value = event.currentTarget.value; setReflection((current) => ({ ...current, evidenceChangedMind: value })); }}
               />
               <div className="session-meta-field">
                 <Input
@@ -316,80 +443,9 @@ export default function EvidenceForm({
           <Save size={15} strokeWidth={1.8} aria-hidden="true" />
           <span>{saveLabel}</span>
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={Boolean(loadingKind)}
-          onClick={() => setCompletionOpen((open) => !open)}
-          aria-expanded={completionOpen}
-        >
-          <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
-          <span>{completionOpen ? 'Tutup bukti' : 'Tambahkan bukti & selesaikan'}</span>
-        </Button>
+
       </div>
     </section>
-
-    {completionOpen && (
-      <section className="evidence-completion">
-        <div className="completion-rule">
-          <strong>Aturan selesai</strong>
-          <span>Semua target harus punya bukti yang bisa diperiksa. Durasi belajar saja tidak cukup.</span>
-        </div>
-
-        {groups.map((group) => (
-          <section key={group.key} className={group.className}>
-            <div className="evidence-heading">
-              <div>
-                {group.eyebrow && <p className="eyebrow">{group.eyebrow}</p>}
-                <h2>{group.title}</h2>
-              </div>
-              <span>{group.criteria.length}</span>
-            </div>
-            {group.description && <p className="muted small">{group.description}</p>}
-            {group.referenceTitle && group.referenceItems?.length ? (
-              <div className="evidence-reference">
-                <Accordion size="sm" items={[{
-                  title: group.referenceTitle,
-                  content: <ol>{group.referenceItems.map((item) => <li key={item}>{item}</li>)}</ol>,
-                }]} />
-              </div>
-            ) : null}
-            <p className="muted small evidence-hint">
-              Bukti bisa berupa link commit/PR, hasil test atau command, benchmark, screenshot, diagram, atau catatan yang membuktikan target.
-            </p>
-            <fieldset>
-              <legend className="sr-only">{group.title}</legend>
-              {group.criteria.map((criterion) => (
-                <Textarea
-                  key={criterion.id}
-                  label={criterion.text}
-                  name={'evidence:' + criterion.id}
-                  rows={group.rows ?? 2}
-                  maxLength={8000}
-                  value={evidence[criterion.id] ?? ''}
-                  onChange={(event) => setEvidence((current) => ({
-                    ...current,
-                    [criterion.id]: event.currentTarget.value,
-                  }))}
-                />
-              ))}
-            </fieldset>
-          </section>
-        ))}
-
-        <div className="actions">
-          <Button
-            type="button"
-            variant="primary"
-            loading={loadingKind === 'passed'}
-            disabled={Boolean(loadingKind)}
-            onClick={() => void submit('passed')}
-          >
-            <CheckCircle2 size={15} strokeWidth={1.8} aria-hidden="true" />
-            <span>{passLabel}</span>
-          </Button>
-        </div>
-      </section>
     )}
 
     {feedback && (

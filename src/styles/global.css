@@ -18,7 +18,7 @@ pre { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-
 hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 .content { max-width: 720px; }
-.prose { min-width: 0; }
+.prose { min-width:0; font-size:16px; line-height:1.65; }
 .lede { color: var(--muted); max-width: 60ch; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
@@ -235,8 +235,6 @@ hr { margin: 24px 0; }
 .review-retention h2 { font-size: 15px; }
 
 @media (max-width: 640px) {
-  .today-focus { padding: 0; }
-  .today-focus h2 { font-size: 20px; }
   .today-review-row { grid-template-columns: 18px minmax(0,1fr); }
   .today-review-cta { grid-column: 2; }
 }
@@ -282,3 +280,36 @@ body::-webkit-scrollbar,
 .app-main :is(.project-back, .integration-back, .review-back):hover {
   color: var(--foreground); background: var(--surface-muted); border-color: var(--border-strong);
 }
+
+/* Authored teaching visuals explain concepts, not clickable controls. */
+.concept-flow { max-width:100%; margin:20px 0 28px; padding:0; border:0; }
+.concept-flow pre { margin:0; padding:16px 18px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-control); overflow-x:auto; }
+.challenge-execution-note { color:var(--text-secondary); font-size:13px; line-height:20px; border-left:2px solid var(--border-strong); padding:3px 0 3px 12px; margin:12px 0; }
+
+.session-draft-state { margin:4px 0 14px; color:var(--text-secondary); font-size:12px; line-height:18px; }
+.completion-rule .evidence-coverage { color:var(--foreground); font-size:13px; font-weight:500; }
+
+/* Quiet evidence workbench: evidence is the primary job; stopping is optional.
+   Both actions use the existing server session mutation and automatic progress. */
+.session-form--quiet { border-top:1px solid var(--line); padding-top:18px; }
+.evidence-summary { max-width:820px; }
+.evidence-summary-heading { display:flex; align-items:start; justify-content:space-between; gap:16px; }
+.evidence-summary-heading h2 { margin:0 0 5px; font-size:17px; line-height:24px; }
+.evidence-summary-heading p { margin:0; max-width:62ch; }
+.evidence-count { flex:none; color:var(--text-secondary); font:500 12px/22px var(--font-mono); }
+.evidence-summary-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.session-form--quiet .session-draft-state { margin:12px 0 0; }
+.session-form--quiet .evidence-completion { margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }
+.session-form--quiet .completion-rule { padding:0; margin:0 0 18px; background:transparent; border:0; }
+.session-form--quiet .session-close { margin-top:20px; padding:18px 0 0; border-top:1px solid var(--line); }
+.session-form--quiet .session-close > .evidence-heading { margin-bottom:4px; }
+.session-form--quiet .session-close .actions { margin:10px 0; }
+@media (max-width:480px) {
+  .evidence-summary-actions { display:grid; grid-template-columns:minmax(0,1fr); }
+  .evidence-summary-actions > button { justify-content:center; width:100%; }
+}
+
+.session-form--quiet .evidence-completion > .evidence-hint { margin:0 0 16px; }
+.session-form--quiet .evidence-completion .evidence-heading { margin-bottom:8px; }
+.session-form--quiet .evidence-completion .evidence-heading > span { font-weight:500; }
+.session-form--quiet .evidence-completion > section > button { margin:2px 0 8px; }
