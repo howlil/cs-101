@@ -90,9 +90,22 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
               )}
 
             </div>
+            {selected.prerequisites.length > 0 && selected.actionState?.status !== 'locked' && (
+              <section className="item-context-prerequisites" aria-label="Prasyarat">
+                <h3><Link2 size={14} strokeWidth={1.8} aria-hidden="true" /> Prasyarat</h3>
+                <div className="connection-list">
+                  {selected.prerequisites.map((item) => (
+                    <a href={item.href} key={item.id}>
+                      <code>{item.id}</code>
+                      <span>{item.title}</span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
             <section className="item-details-disclosure" aria-label="Konteks kurikulum">
               <Accordion size="sm" defaultOpen={-1} items={[{
-                title: 'Detail tambahan · prasyarat, manfaat & sumber',
+                title: 'Kenapa penting & sumber',
                 content: <aside className="item-context" aria-label="Prasyarat dan referensi">
               {selected.marketExpectation?.length ? (
                 <section className="item-context-section">
@@ -100,20 +113,6 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
                   <ul className="compact-list">{selected.marketExpectation.map((item) => <li key={item}>{item}</li>)}</ul>
                 </section>
               ) : null}
-
-              {selected.prerequisites.length > 0 && (
-                <section className="item-context-section">
-                  <h3><Link2 size={14} strokeWidth={1.8} aria-hidden="true" /> Prasyarat</h3>
-                  <div className="connection-list">
-                    {selected.prerequisites.map((item) => (
-                      <a href={item.href} key={item.id}>
-                        <code>{item.id}</code>
-                        <span>{item.title}</span>
-                      </a>
-                    ))}
-                  </div>
-                </section>
-              )}
 
               <section className="item-context-section item-meta">
                 <div>
@@ -140,8 +139,14 @@ export default function CurriculumPage({ selected, overview }: { selected?: Sele
               <p className="breadcrumb">Kurikulum / Jalur</p>
               <h2>{overview.title}</h2>
               <p className="curriculum-overview-summary">
-                {overview.completed} dari {overview.total} materi dan project selesai. Pilih modul untuk membuka pratinjau materi pertamanya.
+                {overview.completed} dari {overview.total} materi dan project selesai.
               </p>
+              <progress
+                className="curriculum-overview-progress"
+                value={overview.completed}
+                max={Math.max(overview.total, 1)}
+                aria-label={'Progres jalur ' + overview.title}
+              />
             </header>
             <nav className="curriculum-overview-modules" aria-label="Modul di jalur">
               {overview.modules.map((module, index) => (
