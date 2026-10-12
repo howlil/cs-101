@@ -1,0 +1,193 @@
+{
+  "itemId": "SQL-001",
+  "curriculumFingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
+  "payoff": "Predict what PostgreSQL can and cannot guarantee from a query, then prove it with a reproducible psql lab rather than guessing from a single output.",
+  "learningOutcomes": [
+    "Distinguish relation, SQL table/result multiset, row, column and primary-key identity.",
+    "Explain SELECT expressions with and without FROM and how WHERE filters TRUE, FALSE and UNKNOWN.",
+    "Predict ordinary NULL comparisons, three-valued Boolean logic, null-safe predicates and the NOT IN trap.",
+    "Explain when duplicated output rows remain or disappear under DISTINCT.",
+    "Choose basic PostgreSQL types from domain meaning, including nullable data and precise money.",
+    "Specify complete ordering including tie breakers when using LIMIT.",
+    "Run a clean schema/seed/query/assertion loop exclusively from psql and preserve pre-execution predictions."
+  ],
+  "mentalModel": "Schema and row values → typed expressions → predicates produce TRUE/FALSE/UNKNOWN → WHERE keeps TRUE → projection may preserve duplicates → DISTINCT optionally deduplicates → ORDER BY defines order → LIMIT restricts result. Predict logical guarantees, not an incidental execution plan.",
+  "relationshipGraph": "schema/types/rows → expression results → TRUE|FALSE|UNKNOWN → WHERE(TRUE only) → projected rows (duplicates possible) → DISTINCT? → ORDER BY(total order when needed) → LIMIT → evidence",
+  "concepts": [
+    {
+      "id": "relational-model",
+      "title": "Relation, row and primary-key identity",
+      "mechanism": "A SQL table has typed columns and rows; ordinary SELECT uses multiset semantics so duplicate projected rows are possible. PRIMARY KEY provides unique non-null logical identity, not row-storage or result order.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "select-where",
+      "title": "SELECT expression and WHERE predicates",
+      "mechanism": "SELECT can evaluate an expression without FROM. With a table, WHERE retains rows only when the predicate evaluates TRUE; NULL/unknown and FALSE both filter out.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html",
+        "https://www.postgresql.org/docs/18/functions-comparison.html"
+      ]
+    },
+    {
+      "id": "three-valued-logic",
+      "title": "NULL comparisons and three-valued logic",
+      "mechanism": "Ordinary comparisons with NULL produce unknown. AND, OR and NOT use SQL's three-valued truth tables; FALSE AND unknown is FALSE, TRUE OR unknown is TRUE. IS NULL and IS DISTINCT FROM expose explicit semantics.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-comparison.html",
+        "https://www.postgresql.org/docs/18/functions-logical.html"
+      ]
+    },
+    {
+      "id": "not-in",
+      "title": "NOT IN under nullable lists",
+      "mechanism": "NOT IN expands conceptually to an AND of <> comparisons. Without any match, nullable list entries can make the outcome unknown, not TRUE; a definite match makes it FALSE.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-comparisons.html",
+        "https://www.postgresql.org/docs/18/functions-logical.html"
+      ]
+    },
+    {
+      "id": "duplicates",
+      "title": "Bag semantics and DISTINCT",
+      "mechanism": "Multiple input rows can project to identical result rows. DISTINCT removes identical result rows, not source data, and does not impose output ordering.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "types",
+      "title": "PostgreSQL types, casts and nullable values",
+      "mechanism": "Data types constrain allowed values and operations: bigint for numeric IDs, numeric(p,s) for exact decimal money, text for labels, boolean for flags, date for calendar dates, timestamptz for instants; literal type context/casts should be explicit in proof cases.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "ordering",
+      "title": "ORDER BY and LIMIT guarantees",
+      "mechanism": "Without ORDER BY the row order is unspecified. LIMIT does not add a guarantee. ORDER BY columns plus a unique tie-breaker define a total order; NULLS FIRST/LAST determines NULL placement.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/queries-order.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "SELECT always requires a table after FROM.",
+    "A SQL table/result is automatically a unique set or ordered by primary key.",
+    "NULL equals zero, false, or blank, so NULL = NULL should be true.",
+    "Unknown always propagates through AND or OR regardless of known operand.",
+    "WHERE accepts unknown because it is not FALSE.",
+    "NOT IN safely ignores NULL elements on the right.",
+    "DISTINCT guarantees sorting.",
+    "LIMIT 2 without a complete ORDER BY means the first two physical rows.",
+    "A source-code prediction modified after seeing results is valid evidence."
+  ],
+  "practice": [
+    "Trace a different four-row payment table: evaluate status <> 'PAID' into TRUE/FALSE/UNKNOWN and decide which IDs survive WHERE before opening the explanation.",
+    "Predict the number of duplicate projected status rows, then use DISTINCT and explain why PRIMARY KEY does not prevent duplicate status.",
+    "Run a reproducible PostgreSQL 18 psql setup from a clean dedicated database, with psql null-display settings and explicit ORDER BY.",
+    "Write 20 predictions (including one 'not guaranteed' order/selection case) before executing; keep a separate expected-result or SQL assertion for each."
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-2f0d9333e1",
+      "taughtAt": "Pahami: typed predicates, 3VL, NOT IN, duplicates, ordering and guided traces",
+      "assessedAt": "Latihan: 20 numbered SQL Semantics Minefield predictions committed before execution",
+      "evidenceExpected": "20 locked predictions with reasoning, at least 18/20 semantically correct, actual results and corrections preserved"
+    },
+    {
+      "criterionId": "criterion-141c1bd6ee",
+      "taughtAt": "Pahami: clean schema and seed with psql CLI; Latihan: reproducible execution/verification protocol",
+      "assessedAt": "Latihan: rebuild database from clean state, execute 20 queries and verification files using psql only",
+      "evidenceExpected": "SQL files and psql transcript covering schema, seed, queries, and per-case expectations/assertions; no ORM"
+    },
+    {
+      "criterionId": "criterion-9b52958986",
+      "taughtAt": "Pahami: ORDER BY / tie breakers / NULL ordering and LIMIT",
+      "assessedAt": "Latihan: ordered, tied and unordered cases with explicit expected guarantees",
+      "evidenceExpected": "All order-sensitive queries specify sufficiently unique ORDER BY; non-ordered query is assessed as non-deterministic by contract"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Pahami: exact mechanisms behind NULL, NOT IN, DISTINCT, duplicate rows, boolean logic, implicit casts and LIMIT",
+      "assessedAt": "Latihan: original SQL Semantics Minefield 20-case no-ORM challenge",
+      "evidenceExpected": "20 pre-execution predictions plus SQL assertions or expected-result files, correct misconceptions, and CLI transcript"
+    }
+  ],
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Apa hasil ordinary comparison NULL = NULL pada PostgreSQL, dan mengapa?",
+      "options": [
+        "TRUE karena kedua operand NULL",
+        "UNKNOWN (NULL), karena equality biasa tidak tahu nilai operand",
+        "ERROR karena tidak ada FROM"
+      ],
+      "answer": 1,
+      "explanation": "SELECT boleh tanpa FROM. Ordinary comparison dengan NULL tidak bisa menyatakan TRUE/FALSE sehingga hasilnya UNKNOWN.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Dalam WHERE status <> 'PAID', apa yang terjadi jika status row adalah NULL?",
+      "options": [
+        "Row lolos karena tidak sama dengan PAID",
+        "Row gagal dengan error",
+        "Kondisi UNKNOWN sehingga row tidak lolos"
+      ],
+      "answer": 2,
+      "explanation": "WHERE hanya mempertahankan TRUE. status <> 'PAID' saat status NULL bernilai UNKNOWN, sehingga row disaring.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Apa bukti yang benar untuk challenge SQL-001 dari database kosong?",
+      "options": [
+        "Screenshot query berhasil di IDE",
+        "Schema, seed, queries dan assertions dijalankan dari psql dengan transcript",
+        "Tabel sudah ada dari latihan sebelumnya"
+      ],
+      "answer": 1,
+      "explanation": "Criterion ini menuntut reproducible psql-only workflow, bukan keberhasilan IDE atau hasil tersisa dari database lama.",
+      "criterionIds": [
+        "criterion-141c1bd6ee"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "ORDER BY created_at LIMIT 2: ada banyak baris dengan created_at sama. Perbaikan mana menjamin pilihan baris stabil?",
+      "options": [
+        "Tambah ORDER BY created_at, id dengan id unik",
+        "Tambah DISTINCT saja",
+        "Biarkan karena LIMIT sendiri deterministik"
+      ],
+      "answer": 0,
+      "explanation": "Ketika created_at tie, tambahkan unique tie-breaker agar top-N mempunyai total order yang jelas.",
+      "criterionIds": [
+        "criterion-9b52958986"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "SELECT DISTINCT status ... LIMIT 1 tanpa ORDER BY punya jaminan apa?",
+      "options": [
+        "Pasti status paling awal dimasukkan",
+        "Satu status berbeda dipilih, tetapi yang mana tidak dijamin",
+        "DISTINCT sekaligus menjamin status ASC"
+      ],
+      "answer": 1,
+      "explanation": "DISTINCT menghilangkan duplicate result rows; tanpa ORDER BY, pilihan LIMIT tetap tidak dijamin urutannya.",
+      "criterionIds": [
+        "criterion-2f0d9333e1",
+        "criterion-9b52958986"
+      ]
+    }
+  ]
+}
