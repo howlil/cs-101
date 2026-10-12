@@ -54,6 +54,9 @@ export default function TodayPage({
               </div>
             )}
             <ActionLink href={primary.href} label={primary.actionLabel} variant="primary" />
+            <a className="today-curriculum-link" href={'/curriculum?item=' + encodeURIComponent(primary.id)}>
+              Lihat dalam kurikulum <ChevronRight size={14} strokeWidth={1.8} aria-hidden="true" />
+            </a>
             {primary.whyMatters && (
               <div className="today-why">
                 <Accordion size="sm" defaultOpen={-1} items={[{

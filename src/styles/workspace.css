@@ -304,3 +304,52 @@
   color:var(--text-secondary); font-size:13px; line-height:21px;
   margin:8px 0 17px;
 }
+
+/* Design-aligned learning overview: source-owned CS-101 tokens and flat rows. */
+.today-focus .today-curriculum-link {
+  display:inline-flex; align-items:center; gap:4px; align-self:flex-start;
+  min-height:34px; margin:6px 0 2px; color:var(--text-secondary);
+  font-size:12px; text-decoration:none;
+}
+.today-focus .today-curriculum-link:hover {
+  color:var(--foreground); text-decoration:underline;
+}
+.progress-track-list { display:grid; margin:16px 0 22px; }
+.progress-track-row {
+  display:grid; grid-template-columns:minmax(0,1fr) 128px;
+  align-items:center; gap:20px; min-height:68px; padding:12px 5px;
+  border-bottom:1px solid var(--line); color:var(--foreground);
+  text-decoration:none;
+}
+.progress-track-row:first-child { border-top:1px solid var(--line); }
+.progress-track-row:hover { background:var(--surface-muted); }
+.progress-track-row-heading { display:grid; gap:3px; min-width:0; }
+.progress-track-row-heading strong { font-size:14px; font-weight:500; }
+.progress-track-row-heading small {
+  color:var(--text-muted); font:400 12px/17px var(--font-mono);
+}
+.progress-track-row progress {
+  appearance:none; display:block; width:100%; height:4px;
+  overflow:hidden; border:0; border-radius:999px;
+  background:var(--border);
+}
+.progress-track-row progress::-webkit-progress-bar { background:var(--border); }
+.progress-track-row progress::-webkit-progress-value { background:var(--accent-strong); }
+.progress-track-row progress::-moz-progress-bar { background:var(--accent-strong); }
+.progress-track-details { padding:6px 0 12px; }
+.progress-track-detail { padding:17px 0; border-bottom:1px solid var(--line); }
+.progress-track-detail:last-child { border-bottom:0; }
+.progress-track-detail-heading {
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:12px; margin-bottom:10px;
+}
+.progress-track-detail-heading h3 { margin:0; font-size:14px; font-weight:500; }
+.progress-track-detail-heading a { color:var(--text-secondary); font-size:12px; }
+.progress-track-detail .progress-modules {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:4px 20px;
+}
+@media (max-width:600px) {
+  .progress-track-row { grid-template-columns:minmax(0,1fr) 84px; gap:12px; }
+  .progress-track-detail .progress-modules { grid-template-columns:1fr; }
+}

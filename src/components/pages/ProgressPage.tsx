@@ -76,24 +76,46 @@ export default function ProgressPage({
             <span>{tracks.reduce((sum, track) => sum + track.completed, 0)} / {tracks.reduce((sum, track) => sum + track.total, 0)}</span>
           </div>
           <p className="progress-integrations-note">Materi dan project dikelompokkan dalam {tracks.length} jalur; {integrations.length} latihan gabungan dihitung terpisah.</p>
+          <nav className="progress-track-list" aria-label="Jalur belajar">
+            {tracks.map((track) => (
+              <a className="progress-track-row" href={track.href} key={track.id}>
+                <span className="progress-track-row-heading">
+                  <strong>{track.title}</strong>
+                  <small>{track.completed}/{track.total} selesai{track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''}</small>
+                </span>
+                <progress
+                  value={track.completed}
+                  max={Math.max(track.total, 1)}
+                  aria-label={'Progres ' + track.title}
+                />
+              </a>
+            ))}
+          </nav>
           <Accordion
             size="sm"
-            defaultOpen={tracks.findIndex((track) => track.modules.some((module) => module.active))}
-            items={tracks.map((track) => ({
-              title: track.title + ' · ' + track.completed + '/' + track.total + (track.reviewActions ? ' · ' + track.reviewActions + ' review' : ''),
-              content: <div className="progress-track-panel">
-                <a className="progress-track-open" href={track.href}>Lihat jalur di kurikulum</a>
-                <div className="progress-modules">
-                  {track.modules.map((module) => (
-                    <a href={module.href} key={module.id} aria-label={module.title + ', ' + module.completed + ' dari ' + module.total + ' selesai'}>
-                      <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
-                      <span>{module.title}</span>
-                      <small>{module.active ? 'Aktif · ' : ''}{module.completed}/{module.total}{module.reviewActions ? ' · ' + module.reviewActions + ' review' : ''}</small>
-                    </a>
-                  ))}
-                </div>
+            defaultOpen={-1}
+            items={[{
+              title: 'Rincian modul',
+              content: <div className="progress-track-details">
+                {tracks.map((track) => (
+                  <section className="progress-track-detail" key={track.id}>
+                    <div className="progress-track-detail-heading">
+                      <h3>{track.title}</h3>
+                      <a href={track.href}>Buka jalur</a>
+                    </div>
+                    <div className="progress-modules">
+                      {track.modules.map((module) => (
+                        <a href={module.href} key={module.id} aria-label={module.title + ', ' + module.completed + ' dari ' + module.total + ' selesai'}>
+                          <BookOpen size={14} strokeWidth={1.8} aria-hidden="true" />
+                          <span>{module.title}</span>
+                          <small>{module.active ? 'Aktif · ' : ''}{module.completed}/{module.total}{module.reviewActions ? ' · ' + module.reviewActions + ' review' : ''}</small>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                ))}
               </div>,
-            }))}
+            }]}
           />
         </section>
 
