@@ -1,0 +1,199 @@
+{
+  "itemId": "SQL-001",
+  "curriculumFingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
+  "payoff": "Predict PostgreSQL query behavior correctly before running SQL, then prove it using a reproducible psql workflow.",
+  "learningOutcomes": [
+    "Explain relational schema, row identity, primary key, and duplicate result rows",
+    "Derive SQL TRUE/FALSE/UNKNOWN and reason about NULL, NOT IN, and WHERE",
+    "Choose PostgreSQL types consciously and distinguish implicit from explicit casting",
+    "Predict how DISTINCT, ORDER BY, and LIMIT affect outputs and determinism",
+    "Complete 20 hostile SQL predictions and verify them with psql and stored expected results"
+  ],
+  "mentalModel": "Schema and typed rows feed expressions; comparisons yield TRUE/FALSE/UNKNOWN; WHERE keeps TRUE only; projection may retain duplicates; DISTINCT removes duplicate results; ORDER BY with unique tie-breakers defines deterministic order for LIMIT.",
+  "relationshipGraph": "schema + typed rows → expressions → TRUE|FALSE|UNKNOWN → WHERE(TRUE only) → result rows (possible duplicates) → DISTINCT? → ORDER BY with tie-breaker? → LIMIT",
+  "concepts": [
+    {
+      "id": "relational-model",
+      "title": "Relational model, SQL rows, and primary key",
+      "mechanism": "A table's schema gives columns/types; a primary key enforces non-null unique identity rather than physical ordering.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "query-flow",
+      "title": "SELECT, FROM and WHERE",
+      "mechanism": "Expressions can be selected without FROM; a query over a table filters rows via predicates before projecting output.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "three-valued-logic",
+      "title": "TRUE, FALSE and UNKNOWN",
+      "mechanism": "Ordinary comparisons with NULL yield UNKNOWN, and AND/OR/NOT must be reasoned by truth tables.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-comparison.html",
+        "https://www.postgresql.org/docs/18/functions-logical.html"
+      ]
+    },
+    {
+      "id": "null-filtering",
+      "title": "WHERE and NULL-safe comparisons",
+      "mechanism": "WHERE retains only TRUE; IS NULL and IS DISTINCT FROM have different contracts from ordinary equality.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-comparison.html",
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "not-in",
+      "title": "NOT IN with NULL",
+      "mechanism": "NOT IN can evaluate UNKNOWN if no matching non-null element exists while right-hand options contain NULL.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/functions-comparisons.html"
+      ]
+    },
+    {
+      "id": "duplicates",
+      "title": "Duplicates and DISTINCT",
+      "mechanism": "SQL SELECT can yield duplicate result rows; DISTINCT removes duplicates but does not imply ordering.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    },
+    {
+      "id": "types",
+      "title": "PostgreSQL data types and implicit casts",
+      "mechanism": "Typed attributes matter; exact numeric money, nullable boolean, UUID/date/timestamptz and cast selection must be distinguished.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/datatype.html"
+      ]
+    },
+    {
+      "id": "ordering",
+      "title": "Deterministic ORDER BY and LIMIT",
+      "mechanism": "Without explicit total ordering, LIMIT does not define which subset is returned. Tie-breakers specify stable selection.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/18/tutorial.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "SELECT always requires FROM",
+    "NULL is zero, empty string, or FALSE",
+    "NULL = NULL returns TRUE",
+    "WHERE includes UNKNOWN",
+    "NOT IN ignores nullable right-hand elements",
+    "DISTINCT sorts",
+    "A primary key physically orders the table",
+    "LIMIT without ORDER BY chooses the same rows reliably"
+  ],
+  "practice": [
+    "Read worked row-by-row traces before answering graded questions",
+    "Create isolated PostgreSQL training database via createdb and psql CLI",
+    "Predict guided queries and reveal outcomes only after attempting",
+    "Lock 20 unseen predictions and compare with executable or expected-result evidence without changing original predictions",
+    "For LIMIT without ORDER BY, verify only the guaranteed contract, not an incidental order"
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-2f0d9333e1",
+      "taughtAt": "Understand sections 2–7 + guided lab",
+      "assessedAt": "Practice section 10 / 20 prediction cases",
+      "evidenceExpected": "At least 18/20 predictions written before execution, with reasoning and compared actual output"
+    },
+    {
+      "criterionId": "criterion-141c1bd6ee",
+      "taughtAt": "Understand section 8 and Practice section 11",
+      "assessedAt": "Clean psql setup, seed, query and assertion workflow",
+      "evidenceExpected": "Files and CLI transcript on a clean database, no ORM"
+    },
+    {
+      "criterionId": "criterion-9b52958986",
+      "taughtAt": "Understand section 7 and guided lab",
+      "assessedAt": "Practice cases 16–19 including nondeterministic LIMIT and tie-breakers",
+      "evidenceExpected": "Deterministic ordering where required, and explicit no-order contract for bare LIMIT"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Guided lab and prediction protocol in Practice section 10",
+      "assessedAt": "SQL Semantics Minefield / 20 SQL cases",
+      "evidenceExpected": "Locked predictions, executable assertions or expected-result files, correction log and psql transcript"
+    }
+  ],
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Query SELECT 7 = NULL menghasilkan apa?",
+      "options": [
+        "TRUE",
+        "FALSE",
+        "NULL / unknown"
+      ],
+      "answer": 2,
+      "explanation": "Perbandingan biasa dengan NULL menghasilkan unknown; nullness diuji dengan IS NULL.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa hasil 3 NOT IN (1, 2, NULL)?",
+      "options": [
+        "TRUE",
+        "FALSE",
+        "NULL / unknown"
+      ],
+      "answer": 2,
+      "explanation": "NOT IN menjadi rangkaian ketidaksamaan; perbandingan terakhir dengan NULL membuat hasil akhir unknown.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Mana yang paling tepat untuk mendapatkan tiga row yang sama secara deterministik?",
+      "options": [
+        "LIMIT 3",
+        "DISTINCT lalu LIMIT 3",
+        "ORDER BY id LIMIT 3"
+      ],
+      "answer": 2,
+      "explanation": "LIMIT tanpa ORDER BY yang cukup spesifik tidak menjanjikan subset atau urutan tertentu.",
+      "criterionIds": [
+        "criterion-9b52958986"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Apa arti utama PRIMARY KEY pada schema?",
+      "options": [
+        "Menyimpan row secara fisik berurutan",
+        "Memberi identifier unik dan non-null untuk row",
+        "Memaksa semua query memakai index"
+      ],
+      "answer": 1,
+      "explanation": "Primary key menyatakan uniqueness dan non-null identity; planner tetap memilih execution plan.",
+      "criterionIds": [
+        "criterion-141c1bd6ee"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Workflow mana yang paling membuktikan materi ini dikuasai?",
+      "options": [
+        "Membaca dokumentasi sampai selesai",
+        "Menjalankan schema, seed, prediksi, dan query dari psql lalu menyimpan hasil",
+        "Menggunakan ORM agar query tersembunyi"
+      ],
+      "answer": 1,
+      "explanation": "Target curriculum meminta clean schema + seed + query workflow dari psql dan prediksi yang dapat diverifikasi.",
+      "criterionIds": [
+        "criterion-141c1bd6ee",
+        "criterion-2f0d9333e1",
+        "criterion-9b52958986"
+      ]
+    }
+  ]
+}
