@@ -63,3 +63,18 @@ test('Today, Progress, Review do not duplicate the curriculum tree', () => {
   assert.match(layout, /const showCurriculum = curriculumRoute \|\| Boolean\(contextualMatch\)/);
   assert.doesNotMatch(layout, /reviewMatch/);
 });
+
+test('redesigned learning overview keeps navigation and completion server-owned', () => {
+  const today = src('src/components/pages/TodayPage.tsx');
+  const curriculum = src('src/components/pages/CurriculumPage.tsx');
+  const progress = src('src/components/pages/ProgressPage.tsx');
+
+  assert.match(today, /encodeURIComponent\(primary\.id\)/);
+  assert.match(curriculum, /className="curriculum-overview-progress"/);
+  assert.match(curriculum, /selected\.actionState\?\.status !== 'locked'/);
+  assert.match(curriculum, /className="item-context-prerequisites"/);
+  assert.match(progress, /className="progress-track-list"/);
+  assert.match(progress, /value=\{track\.completed\}/);
+  assert.match(progress, /<Accordion/);
+  assert.match(progress, /href=\{module\.href\}/);
+});
