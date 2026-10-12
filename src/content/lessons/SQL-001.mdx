@@ -385,11 +385,11 @@ Kasus 11–15: `WHERE`, NULL row, dan `NOT IN`.
 
 ```sql
 -- 11
-SELECT id FROM payments WHERE status = 'PAID' ORDER BY id;
+SELECT id FROM payments WHERE amount >= 150 ORDER BY id;
 -- 12
-SELECT id FROM payments WHERE status <> 'PAID' ORDER BY id;
+SELECT id FROM payments WHERE status <> 'FAILED' ORDER BY id;
 -- 13
-SELECT id FROM payments WHERE status IS NULL ORDER BY id;
+SELECT id FROM payments WHERE status IS NOT NULL ORDER BY id;
 -- 14
 SELECT 3 NOT IN (1, 2, NULL) AS result;
 -- 15

@@ -42,6 +42,15 @@ jobs:
           cmp generation/staging/SQL-003/derived/generation-record.json generation/SQL-003.json
           cmp generation/staging/SQL-003/derived/review-bank.json review-banks/SQL-003.json
 
+      - name: Validate and promote SQL-001 from course-generator
+        run: |
+          pnpm generation:prepare SQL-001
+          pnpm generation:validate SQL-001
+          pnpm generation:promote SQL-001
+          pnpm validate:content
+          pnpm validate:reviews
+          git diff --exit-code -- src/content/lessons/SQL-001.mdx generation/SQL-001.json review-banks/SQL-001.json
+
       - name: Test
         run: pnpm test
 
