@@ -9,7 +9,6 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Gunakan Node 24 sesuai `.node-version`. Server dev bind ke `127.0.0.1:4321`. Halaman `/demo` memperlihatkan komponen lesson; demo tidak masuk curriculum atau progres.
 
 ```sh
 pnpm test

@@ -21,3 +21,5 @@
 }
 
 .review-next-state{margin:12px 0 0;padding:11px 13px;border-left:2px solid var(--accent-strong);background:var(--surface);color:var(--foreground);font-size:13px;line-height:20px}
+
+.review-answer-count { margin:8px 0 0; color:var(--text-secondary); font-size:13px; line-height:20px; }

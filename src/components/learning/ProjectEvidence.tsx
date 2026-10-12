@@ -38,6 +38,7 @@ export default function ProjectEvidence({
       title: 'Yang harus tetap benar',
       description: 'Buktikan bahwa target dari project sebelumnya masih tetap benar.',
       criteria: inheritanceCriteria,
+      collapsible: true,
       className: 'project-evidence-section project-evidence-section--inherited',
       referenceTitle: 'Lihat target dari project sebelumnya',
       referenceItems: inheritedGuarantees.map((criterion) => criterion.text),

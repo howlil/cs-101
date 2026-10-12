@@ -6,6 +6,7 @@ import { learning } from '../server/runtime';
 import { snapshotForRequest } from '../server/request-snapshot';
 import { getProgressOverview, type ItemLearningView } from '../domain/learning/view-models';
 import { reviewStateLabel } from '../lib/learning-language';
+import { reviewBankFor } from '../server/review-bank';
 
 const service = await learning();
 const [state, recentSessions] = await Promise.all([
@@ -26,7 +27,12 @@ const stateLabel = (view: ItemLearningView) => {
   return 'Belum mulai';
 };
 
-const reviews = overview.actionableReviews.map(({ review, item }) => ({
+const eligibleReviews = overview.actionableReviews.filter(({ item }) => {
+  const bank = reviewBankFor(item.item.id);
+  return bank?.curriculumFingerprint === item.item.fingerprint;
+});
+const unavailableReviewCount = overview.actionableReviews.length - eligibleReviews.length;
+const reviews = eligibleReviews.map(({ review, item }) => ({
   id: item.item.id,
   title: item.item.title,
   state: review.state === 'retry' ? 'retry' as const : 'due' as const,
@@ -86,6 +92,7 @@ const sessions = (recentSessions as ExportSession[])
 <AppLayout title="Progres">
   <ProgressPage
     reviews={reviews}
+    unavailableReviewCount={unavailableReviewCount}
     tracks={tracks}
     integrations={integrations}
     sessions={sessions}

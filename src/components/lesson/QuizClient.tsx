@@ -36,5 +36,8 @@ function QuizQuestion({ item, index }: { item: QuizItem; index: number }) {
 }
 
 export default function QuizClient({ items }: { items: QuizItem[] }) {
-  return <div className={styles.quiz}>{items.map((item, index) => <QuizQuestion key={item.question + '-' + index} item={item} index={index} />)}</div>;
+  return <section className={styles.quiz} aria-label="Cek pemahaman">
+    <p className={styles.intro}>Jawab tanpa melihat pembahasan dulu. Kamu bisa memperbaiki jawaban dan mencoba lagi. Kuis ini latihan; progres selesai ditentukan dari bukti yang kamu simpan.</p>
+    {items.map((item, index) => <QuizQuestion key={item.question + '-' + index} item={item} index={index} />)}
+  </section>;
 }
