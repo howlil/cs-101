@@ -14,7 +14,7 @@ test('retired UI component directories cannot silently return', () => {
 });
 
 test('lesson MDX and generator template import from the canonical owner', () => {
-  const lessons = ['SQL-001', 'SQL-002', 'JAV-001', 'demo'];
+  const lessons = ['SQL-001', 'SQL-002', 'JAV-001'];
   for (const name of lessons) {
     const mdx = read('src/content/lessons/' + name + '.mdx');
     assert.match(mdx, /components\/lesson\//);

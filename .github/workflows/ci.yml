@@ -36,6 +36,12 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Validate SQL-003 authored bundle
+        run: |
+          pnpm generation:validate SQL-003
+          cmp generation/staging/SQL-003/derived/generation-record.json generation/SQL-003.json
+          cmp generation/staging/SQL-003/derived/review-bank.json review-banks/SQL-003.json
+
       - name: Test
         run: pnpm test
 

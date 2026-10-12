@@ -6,6 +6,7 @@ const { title, brief, acceptanceCriteria } = Astro.props;
 <section>
   <h2 id="challenge"><Target size={18} strokeWidth={1.8} aria-hidden="true" /> {title}</h2>
   <p>{brief}</p>
+  <p class="challenge-execution-note">Latihan manual — jalankan sendiri di lingkunganmu. Kriteria di bawah adalah pemeriksaan mandiri, bukan penilaian otomatis.</p>
   <h3><CheckCircle2 size={16} strokeWidth={1.8} aria-hidden="true" /> Kriteria selesai</h3>
   <ul>{acceptanceCriteria.map((item) => <li>{item}</li>)}</ul>
   <slot />

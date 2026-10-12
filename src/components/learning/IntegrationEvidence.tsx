@@ -35,6 +35,7 @@ export default function IntegrationEvidence({
       eyebrow: 'HASIL',
       title: 'Hasil yang harus dibuat',
       criteria: requirements,
+      collapsible: true,
       className: 'integration-evidence-section',
     }] : []),
     {

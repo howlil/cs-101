@@ -49,7 +49,8 @@ export default function ReviewAttempt({ itemId, version, revision, questions, on
   const [feedback, setFeedback] = useState<ReviewFeedback[]>([]);
   const [nextReview, setNextReview] = useState<ReviewSchedule>();
   const [error, setError] = useState('');
-  const complete = useMemo(() => answers.every((answer) => answer !== ''), [answers]);
+  const answeredCount = useMemo(() => answers.filter((answer) => answer !== '').length, [answers]);
+  const complete = answeredCount === questions.length;
 
   const submit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -158,6 +159,7 @@ export default function ReviewAttempt({ itemId, version, revision, questions, on
 
     {error && <Alert title="Review belum tersimpan" tone="danger">{error}</Alert>}
 
+    <p className="review-answer-count" role="status">{answeredCount} dari {questions.length} pertanyaan terjawab</p>
     <Button type="submit" variant="primary" disabled={!complete || submitting}>
       <Send size={15} strokeWidth={1.8} aria-hidden="true" />
       <span>{submitting ? 'Menyimpan…' : 'Kirim jawaban'}</span>
