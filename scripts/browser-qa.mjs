@@ -438,6 +438,8 @@ try {
   // saving and completing still run through the unchanged server engine.
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".react-action-stack button"))'),
+    'Lesson activation control hydrated');
   await client.eval('document.querySelector(".react-action-stack button").click()');
   await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
