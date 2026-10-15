@@ -441,9 +441,14 @@ try {
   await client.goto('/learn/SQL-001');
   await client.eval('document.querySelector(".react-action-stack button").click()');
   await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
+  // Server activation is durable before the route necessarily receives a refreshed SSR snapshot.
+  // Reload once so the evidence stage uses the confirmed active state rather than stale props.
+  await client.goto('/learn/SQL-001');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector("#lesson-tab-evidence"))'), 'Activated lesson rehydrated');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
   assert.equal(await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), false,
     'Technical evidence must not open before explicit disclosure');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form > button"))'), 'Activated evidence disclosure available');
   await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Optional technical evidence form opened');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');
