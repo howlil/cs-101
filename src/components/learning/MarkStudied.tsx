@@ -39,3 +39,4 @@ export default function MarkStudied({ itemId, revision, studied }: {
     )}
     {error && <Alert title="Progres belum tersimpan" tone="danger">{error}</Alert>}
   </section>;
+}

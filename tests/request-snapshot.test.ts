@@ -10,6 +10,7 @@ const snapshot = (revision: number): LearningSnapshot => ({
   progress: [],
   availability: [],
   reviews: [],
+  studiedItems: [],
 });
 
 test('page and layout share one snapshot per request', async () => {
