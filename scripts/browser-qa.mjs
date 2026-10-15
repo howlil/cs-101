@@ -285,9 +285,9 @@ try {
   assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
-  await client.wait(async () => await client.eval('["lesson-panel-evidence","lesson-evidence-gate"].includes(document.activeElement?.id)'), 'Evidence stage receives focus');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-study-completion"'), 'Lightweight study action receives focus');
   assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Inactive learner must not reach an empty evidence dead end');
-  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-evidence-gate', 'Inactive learner must land on the eligibility guidance first');
+  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-study-completion', 'Inactive learner lands on the self-check action first');
   const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
   if (evidenceExists) {
     assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
