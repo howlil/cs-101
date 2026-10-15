@@ -3,7 +3,7 @@ import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
 import { learningPolicyFor } from '../../domain/learning/policy';
 import {
   assessmentAttemptSchema, chooseAssessmentPlan, gradeAssessment, nextCompetencyReview,
-  type AssessmentAttempt, type ReviewSchedule,
+  type AssessmentAttempt, type ReviewSchedule, type AssessmentHistory,
 } from '../../domain/learning/assessment';
 import { assessmentQuestion, assessmentQuestionsForItem } from '../assessment-bank';
 import {
@@ -85,7 +85,7 @@ export class CloudflareLearningService {
       this.db.prepare('SELECT item_id AS itemId FROM item_study'),
       this.db.prepare(`SELECT id, request_id AS requestId, item_id AS itemId, competency_id AS competencyId,
         assessment_id AS assessmentId, assessment_version AS assessmentVersion, phase, answer_index AS answerIndex,
-        correct, recorded_at AS recordedAt FROM competency_attempts ORDER BY rowid`),
+        correct, recorded_at AS recordedAt, outcome, bank_fingerprint AS bankFingerprint FROM competency_attempts ORDER BY rowid`),
       this.db.prepare('SELECT competency_id AS competencyId, step, due_at AS dueAt FROM competency_review_schedule ORDER BY competency_id'),
     ]);
     const state = stateResult.results[0] as StateRow | undefined;
@@ -230,11 +230,14 @@ export class CloudflareLearningService {
       input: AssessmentAttempt;
       competencyId: string;
       correct: boolean;
+      outcome: ReturnType<typeof gradeAssessment>['outcome'];
+      bankFingerprint: string;
       next?: ReviewSchedule;
     } | undefined;
     if (assessmentInput) {
       const question = assessmentQuestion(assessmentInput.assessmentId);
       if (!question || question.itemId !== assessmentInput.itemId ||
+        question.curriculumFingerprint !== this.item(assessmentInput.itemId).fingerprint ||
         question.version !== assessmentInput.assessmentVersion || question.phase !== assessmentInput.phase) {
         throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.');
       }
@@ -242,8 +245,9 @@ export class CloudflareLearningService {
       if (plan.kind !== question.phase || plan.question.id !== question.id) {
         throw new LearningError(409, 'Sesi latihan atau recall berubah. Muat ulang materi.');
       }
+      const history = await this.assessmentHistory(assessmentInput.itemId);
       let graded: ReturnType<typeof gradeAssessment>;
-      try { graded = gradeAssessment(question, assessmentInput.answer); }
+      try { graded = gradeAssessment(question, assessmentInput.answer, history); }
       catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
       const previous = await this.db.prepare(`SELECT competency_id AS competencyId, step,
         due_at AS dueAt FROM competency_review_schedule WHERE competency_id=?`)
@@ -252,7 +256,10 @@ export class CloudflareLearningService {
         input: assessmentInput,
         competencyId: question.competencyId,
         correct: graded.correct,
-        next: nextCompetencyReview(previous ?? undefined, question.phase, graded.correct, this.now()),
+        outcome: graded.outcome,
+        bankFingerprint: question.curriculumFingerprint,
+        next: nextCompetencyReview(previous ?? undefined, question.phase,
+          graded.correct && (graded.outcome === 'correct_unassisted' || question.phase === 'recall'), this.now()),
       };
     }
     for (const session of sessions) assertSessionAllowed(this.item(session.itemId), session, current.activeItemId);
@@ -387,14 +394,14 @@ export class CloudflareLearningService {
     }
 
     if (assessmentWrite) {
-      const { input, competencyId, correct, next } = assessmentWrite;
+      const { input, competencyId, correct, outcome, bankFingerprint, next } = assessmentWrite;
       statements.push(this.db.prepare(`INSERT INTO competency_attempts
-        (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at)
-        SELECT ?,?,?,?,?,?,?,?,?,? WHERE EXISTS (
+        (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at,outcome,bank_fingerprint)
+        SELECT ?,?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS (
           SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
         )`).bind(randomUUID(), requestId, input.itemId, competencyId,
           input.assessmentId, input.assessmentVersion, input.phase, input.answer,
-          correct ? 1 : 0, now.toISOString(), requestId, nonce));
+          correct ? 1 : 0, now.toISOString(), outcome, bankFingerprint, requestId, nonce));
       if (next) {
         statements.push(this.db.prepare(`INSERT INTO competency_review_schedule(competency_id,step,due_at)
           SELECT ?,?,? WHERE EXISTS (
@@ -416,36 +423,50 @@ export class CloudflareLearningService {
   }
 
 
+
+  private async assessmentHistory(itemId: string): Promise<AssessmentHistory[]> {
+    const result = await this.db.prepare(`SELECT assessment_id AS assessmentId, phase, correct, outcome
+      FROM competency_attempts WHERE item_id=? ORDER BY rowid`).bind(itemId)
+      .all<Omit<AssessmentHistory, 'correct'> & { correct: number }>();
+    return result.results.map((row) => ({ ...row, correct: Boolean(row.correct) }));
+  }
+
   async assessmentPlan(itemId: string) {
-    this.item(itemId);
+    const item = this.item(itemId);
     const questions = assessmentQuestionsForItem(itemId);
-    if (!questions.length) return { kind: 'unavailable' as const, itemId };
+    if (!questions.length || questions.some((q) => q.curriculumFingerprint !== item.fingerprint)) {
+      return { kind: 'unavailable' as const, itemId };
+    }
     const competencyId = questions[0].competencyId;
-    const [practiced, schedule] = await Promise.all([
-      this.db.prepare(`SELECT 1 AS found FROM competency_attempts
-        WHERE item_id=? AND competency_id=? AND phase='practice' AND correct=1 LIMIT 1`)
-        .bind(itemId, competencyId).first<{ found: number }>(),
+    const [history, schedule] = await Promise.all([
+      this.assessmentHistory(itemId),
       this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
         FROM competency_review_schedule WHERE competency_id=?`)
         .bind(competencyId).first<ReviewSchedule>(),
     ]);
-    return chooseAssessmentPlan(itemId, questions, !!practiced, schedule ?? undefined, this.now());
+    const practiced = history.some((h) => h.correct &&
+      (h.phase === 'practice' || h.phase === 'transfer') &&
+      (h.outcome === 'correct_unassisted' || h.outcome === 'legacy_unknown'));
+    return chooseAssessmentPlan(itemId, questions, practiced, schedule ?? undefined, this.now(), history);
   }
 
   async submitAssessment(raw: unknown) {
     const input = assessmentAttemptSchema.parse(raw);
-    this.item(input.itemId);
+    const item = this.item(input.itemId);
     const question = assessmentQuestion(input.assessmentId);
-    if (!question || question.itemId !== input.itemId ||
+    if (!question || question.itemId !== input.itemId || question.curriculumFingerprint !== item.fingerprint ||
       question.version !== input.assessmentVersion || question.phase !== input.phase) {
-      throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.');
+      throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.', 'QUESTION_STALE');
     }
     let grading: ReturnType<typeof gradeAssessment>;
     try { grading = gradeAssessment(question, input.answer); }
     catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
     const snapshot = await this.mutate(input, 'assessment', [], undefined, input, undefined, input);
-    return { ...snapshot, assessment: grading };
+    const recorded = await this.db.prepare('SELECT outcome FROM competency_attempts WHERE request_id=?')
+      .bind(input.requestId).first<{ outcome: ReturnType<typeof gradeAssessment>['outcome'] }>();
+    return { ...snapshot, assessment: { ...grading, outcome: recorded?.outcome ?? grading.outcome } };
   }
+
 
   async markStudied(raw: unknown) {
     const input = studyActionSchema.parse(raw);
