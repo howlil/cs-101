@@ -25,7 +25,7 @@ export default function AssessmentPrompt({ plan, revision }: {
   const [submitting, setSubmitting] = useState(false);
   const requestRef = useRef<{ signature: string; id: string } | undefined>(undefined);
   if (plan.kind === 'unavailable') return null;
-  if (!('question' in plan)) return <section className="lesson-assessment">
+  if (!('question' in plan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
     <strong>Pemahaman dasar sudah diuji.</strong>
     <p>Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.</p>
     {plan.dueAt && <p className="muted small">Micro-recall: {new Date(plan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
@@ -59,7 +59,7 @@ export default function AssessmentPrompt({ plan, revision }: {
     }
   };
   const retry = () => { setFeedback(undefined); setAnswer(''); setError(''); };
-  return <section className="lesson-assessment" aria-label={plan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
+  return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment" aria-label={plan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
     <p className="eyebrow">{plan.kind === 'recall' ? 'RECALL · tanpa catatan' : 'PREDICT · cek pemahaman'}</p>
     <h3>{question.prompt}</h3>
     {!feedback && <>

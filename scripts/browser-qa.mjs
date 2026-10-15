@@ -281,7 +281,7 @@ try {
   // move keyboard focus to the newly visible practice panel.
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
-  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-practice"'), 'Practice panel receives focus');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-assessment"'), 'Adaptive practice prompt receives focus');
   assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');

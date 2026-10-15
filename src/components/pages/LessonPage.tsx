@@ -131,8 +131,10 @@ export default function LessonPage({
     // viewport. Move focus to the newly visible panel, not to a dead spot.
     if (focusPanel) {
       window.requestAnimationFrame(() => {
-        const needsEligibility = next === 'evidence';
-        document.getElementById(needsEligibility ? 'lesson-study-completion' : 'lesson-panel-' + next)?.focus();
+        const target = next === 'evidence' ? 'lesson-study-completion'
+          : next === 'practice' && assessmentPlan?.kind !== 'unavailable' && assessmentPlan
+            ? 'lesson-assessment' : 'lesson-panel-' + next;
+        document.getElementById(target)?.focus();
       });
     }
   };
@@ -255,6 +257,9 @@ export default function LessonPage({
           </>}
         </aside>
       )}
+      {stage === 'practice' && assessmentPlan && <AssessmentPrompt
+        key={assessmentPlan.kind}
+        plan={assessmentPlan} revision={revision} />}
       {available ? children : <>
         <section className="lesson-stage-panel" data-lesson-stage="understand"
           id="lesson-panel-understand" role="tabpanel" aria-labelledby="lesson-tab-understand" tabIndex={0}>
@@ -281,9 +286,6 @@ export default function LessonPage({
       {stage === 'understand' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('practice', true)}>Mulai latihan</Button>
       </div>}
-      {stage === 'practice' && assessmentPlan && <AssessmentPrompt
-        key={assessmentPlan.kind}
-        plan={assessmentPlan} revision={revision} />}
       {stage === 'practice' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('evidence', true)}>Selesaikan materi</Button>
       </div>}
