@@ -1,0 +1,199 @@
+{
+  "itemId": "JAV-002",
+  "curriculumFingerprint": "sha256:b7805221c341ff8966f9b10f822ebad72326f9a405e4bbf905bff53e5fedd1f6",
+  "payoff": "Rancang nilai domain Java yang tidak dapat dibangun dalam state invalid, tidak berubah setelah konstruksi, dan tetap benar sebagai key koleksi hash.",
+  "learningOutcomes": [
+    "Menolak invalid domain values di constructor atau factory",
+    "Memahami encapsulation, abstraction, interface, polymorphism, composition dan inheritance trade-off",
+    "Membuat immutable record-based value objects dan mendeteksi nested mutability",
+    "Membedakan reference identity dari value equality",
+    "Membuktikan kontrak equals/hashCode/toString",
+    "Mencocokkan HashMap/HashSet cardinality dengan independent oracle pada 10,000+ values",
+    "Menggunakan defect injection untuk menunjukkan kualitas assertion"
+  ],
+  "mentalModel": "Object = invariant pada creation boundary + kontrak makna yang konsisten. Identity berbeda dari equality; equal values harus memiliki hash sama agar koleksi hash mampu melakukan lookup dan deduplikasi secara benar.",
+  "relationshipGraph": "domain input → validate constructor → immutable value object → identity/equals → equal implies same hashCode → hash collection → cardinality oracle; client → interface → interchangeable composition",
+  "concepts": [
+    {
+      "id": "object-boundary",
+      "title": "Encapsulation and abstraction",
+      "mechanism": "Constructor/creation boundary menolak nilai invalid; public API hanya mengekspos operasi yang mempertahankan invariant. Abstraction mengurangi dependency caller pada detail implementasi.",
+      "sourceUrls": [
+        "https://dev.java/learn/classes-objects/"
+      ]
+    },
+    {
+      "id": "behavior-contract",
+      "title": "Interface, polymorphism, composition vs inheritance",
+      "mechanism": "Client bergantung pada interface; object lain diinjeksikan melalui composition sehingga implementasi dapat ditukar tanpa subclassing owner.",
+      "sourceUrls": [
+        "https://dev.java/learn/interfaces/",
+        "https://dev.java/learn/classes-objects/"
+      ]
+    },
+    {
+      "id": "value-objects",
+      "title": "Records and immutable domain values",
+      "mechanism": "Records menghasilkan accessors, equals, hashCode dan toString untuk component. Constructor memvalidasi; component reference tetap dapat menunjuk mutable object sehingga defensive copy diperlukan bila ada.",
+      "sourceUrls": [
+        "https://dev.java/learn/using-record-to-model-immutable-data/"
+      ]
+    },
+    {
+      "id": "equality",
+      "title": "Reference identity vs logical equality",
+      "mechanism": "== membandingkan reference identity sedangkan equals menyatakan kesetaraan domain; nilai sama dapat dibangun sebagai object berbeda.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html",
+        "https://dev.java/learn/using-record-to-model-immutable-data/"
+      ]
+    },
+    {
+      "id": "object-contracts",
+      "title": "equals, hashCode, toString",
+      "mechanism": "Equals adalah equivalence relation; equal objects harus memiliki hash sama. toString untuk representasi diagnostik, bukan identity/equality.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html"
+      ]
+    },
+    {
+      "id": "hash-collections",
+      "title": "HashMap and HashSet semantics",
+      "mechanism": "HashMap mengandalkan hash untuk memilih area kandidat dan equality untuk mencocokkan key; mutasi atau hash yang tak konsisten dapat membuat lookup dan deduplikasi salah.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html",
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html"
+      ]
+    },
+    {
+      "id": "deterministic-proof",
+      "title": "Independent oracle + injected defect",
+      "mechanism": "Generator ber-seed tetap menyediakan duplikasi dan triplet equality; oracle terpisah menghitung cardinality; fixture rusak membuktikan test mendeteksi kontrak yang dilanggar.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html",
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "private field otomatis berarti invariant terjaga",
+    "record otomatis deeply immutable termasuk nested mutable references",
+    "dua new object dengan nilai sama harus == true",
+    "hashCode sama berarti equals true",
+    "overriding equals tanpa hashCode tidak berbahaya",
+    "inheritance selalu cara paling tepat untuk code reuse"
+  ],
+  "practice": [
+    "Buat tabel valid/invalid Money AccountId TransactionId lalu tulis constructor guards",
+    "Prediksi hasil == equals dan hash sebelum mengeksekusi",
+    "Bangun 10,000+ generated keys dengan fixed seed dan independent oracle",
+    "Bandingkan expected unique cardinality dengan HashSet dan HashMap",
+    "Suntik deliberate hash/equals defect dalam test fixture, tunjukkan red lalu fix kembali green"
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-2c5df23dea",
+      "taughtAt": "Encapsulation, records and invariant boundaries",
+      "assessedAt": "Quiz 1 + 4; Hash Contract Ambush invalid fixture test",
+      "evidenceExpected": "100% enumerated invalid Money/AccountId/TransactionId constructions rejected"
+    },
+    {
+      "criterionId": "criterion-013fdc3dae",
+      "taughtAt": "Identity vs equality and Object contract",
+      "assessedAt": "Quiz 2 + 3; 10,000 deterministic object contract tests",
+      "evidenceExpected": "reflexive, symmetric, transitive and equal-hash assertions on all generated cases"
+    },
+    {
+      "criterionId": "criterion-30fedf22f2",
+      "taughtAt": "HashMap/HashSet key lookup and independent cardinality oracle",
+      "assessedAt": "Quiz 3 + 4; cardinality reconciliation challenge",
+      "evidenceExpected": "map/set unique-key sizes agree with independently derived expected set"
+    },
+    {
+      "criterionId": "criterion-38e6b5025a",
+      "taughtAt": "Hash contract failure mode and deliberate defect experiment",
+      "assessedAt": "Quiz 5; red/green injected defect test",
+      "evidenceExpected": "a deterministic equal-but-different-hash fixture causes targeted failure, then fix restores green"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Object boundaries through HashMap/HashSet failure modes and guided practice",
+      "assessedAt": "Hash Contract Ambush",
+      "evidenceExpected": "three immutable domain value objects, 10,000+ generated keys, valid cardinality, mutation impossibility and detected defect"
+    }
+  ],
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "AccountId menolak string kosong. Di boundary mana aturan ini paling kuat dijaga?",
+      "options": [
+        "Di setiap controller sebelum dipanggil",
+        "Di constructor/factory AccountId",
+        "Di toString"
+      ],
+      "answer": 1,
+      "explanation": "Domain invariant dijaga pemilik object sehingga semua jalur konstruksi tunduk pada aturan yang sama.",
+      "criterionIds": [
+        "criterion-2c5df23dea"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "a, b, c adalah tiga AccountId terpisah dengan value sama. Pernyataan mana wajib benar?",
+      "options": [
+        "a == b dan b == c",
+        "a.equals(b), b.equals(c), a.equals(c)",
+        "a.hashCode() harus unik untuk setiap instance"
+      ],
+      "answer": 1,
+      "explanation": "Value equality harus reflexive, symmetric, dan transitive, walau reference identity berbeda.",
+      "criterionIds": [
+        "criterion-013fdc3dae"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Dua key setara secara equals, tetapi menghasilkan hashCode berbeda. Dampak terpenting?",
+      "options": [
+        "HashMap tetap wajib menemukan nilai",
+        "HashSet/HashMap mungkin salah menduplikasi atau gagal lookup",
+        "toString otomatis berubah"
+      ],
+      "answer": 1,
+      "explanation": "Equal key wajib berbagi hash. Jika kontrak rusak, lokasi lookup dapat berbeda dan koleksi tidak lagi dapat diandalkan.",
+      "criterionIds": [
+        "criterion-013fdc3dae",
+        "criterion-30fedf22f2"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "record Holder(List<String> items) menerima list mutable tanpa copy. Apa masalahnya?",
+      "options": [
+        "Semua list otomatis final",
+        "Object record dapat berubah secara observabel lewat referensi list",
+        "record tidak memiliki equals"
+      ],
+      "answer": 1,
+      "explanation": "Record shallowly immutable; mutable component bisa diubah setelah construction, termasuk saat telah dipakai sebagai key.",
+      "criterionIds": [
+        "criterion-2c5df23dea",
+        "criterion-30fedf22f2"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Tes mana paling jelas menangkap defect equals/hashCode yang sengaja dibuat?",
+      "options": [
+        "Memeriksa warna output console",
+        "Membangun dua nilai setara dengan hash berbeda lalu menegaskan kontrak dan cardinality",
+        "Memanggil toString sepuluh kali"
+      ],
+      "answer": 1,
+      "explanation": "Test harus membuat pasangan yang equal dan membuktikan hash konsisten serta deduplikasi setara berjalan benar.",
+      "criterionIds": [
+        "criterion-38e6b5025a"
+      ]
+    }
+  ]
+}

@@ -189,7 +189,7 @@ try {
   await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
   await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
-  await client.goto('/curriculum?item=JAV-002');
+  await client.goto('/curriculum?item=JAV-003');
   assert.ok(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), 'Missing authored lesson must be disclosed in preview');
   assert.equal(await client.eval("document.body.textContent.includes('tercantum di kurikulum.')"), true, 'Missing authored text must not be claimed available');
   await client.screenshot('curriculum-outline-desktop-1440.png');
@@ -319,7 +319,8 @@ try {
       await client.screenshot('sql003-desktop-901.png');
     }
     if (id === 'JAV-002') {
-      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
+      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), false, 'Authored JAV-002 must not render the manifest-only fallback');
+      assert.equal(await client.eval("document.body.textContent.includes('Object = state yang valid + kontrak perilaku')"), true, 'JAV-002 authored mental model must render');
     }
   }
   // Foundation prerequisites are advisory. The lesson remains readable and
@@ -440,9 +441,14 @@ try {
   await client.goto('/learn/SQL-001');
   await client.eval('document.querySelector(".react-action-stack button").click()');
   await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
+  // Server activation is durable before the route necessarily receives a refreshed SSR snapshot.
+  // Reload once so the evidence stage uses the confirmed active state rather than stale props.
+  await client.goto('/learn/SQL-001');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector("#lesson-tab-evidence"))'), 'Activated lesson rehydrated');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
   assert.equal(await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), false,
     'Technical evidence must not open before explicit disclosure');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form > button"))'), 'Activated evidence disclosure available');
   await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Optional technical evidence form opened');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');

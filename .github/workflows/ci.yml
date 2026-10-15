@@ -42,6 +42,14 @@ jobs:
           cmp generation/staging/SQL-003/derived/generation-record.json generation/SQL-003.json
           cmp generation/staging/SQL-003/derived/review-bank.json review-banks/SQL-003.json
 
+      - name: Validate JAV-002 authored bundle
+        run: |
+          pnpm generation:validate JAV-002
+          cmp generation/staging/JAV-002/derived/generation-record.json generation/JAV-002.json
+          cmp generation/staging/JAV-002/derived/review-bank.json review-banks/JAV-002.json
+          pnpm generation:promote JAV-002
+          git diff --exit-code -- src/content/lessons/JAV-002.mdx generation/JAV-002.json review-banks/JAV-002.json
+
       - name: Validate and promote SQL-001 from course-generator
         run: |
           pnpm generation:prepare SQL-001
