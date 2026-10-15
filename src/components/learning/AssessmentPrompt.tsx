@@ -46,12 +46,40 @@ export default function AssessmentPrompt({ plan, revision }: {
       if (requestRef.current?.signature !== signature) {
         requestRef.current = { signature, id: crypto.randomUUID() };
       }
-      const next = await postJson<Response>('/api/assessment-attempts', {
-        ...payload, requestId: requestRef.current.id,
-      });
+      let result: Response;
+      try {
+        result = await postJson<Response>('/api/assessment-attempts', {
+          ...payload, requestId: requestRef.current.id,
+        });
+      } catch (cause) {
+        // An Astro hash navigation can retain an older SSR revision. A stale
+        // write must be rejected by the server; reconcile once without asking
+        // the learner to re-answer. Never replay if the planned task changed.
+        if (!(cause instanceof Error) || !cause.message.includes('Progres berubah di tab lain')) throw cause;
+        const [stateResponse, planResponse] = await Promise.all([
+          fetch('/api/learning', { cache: 'no-store' }),
+          fetch('/api/learning-plan?itemId=' + encodeURIComponent(plan.itemId), { cache: 'no-store' }),
+        ]);
+        if (!stateResponse.ok || !planResponse.ok) throw cause;
+        const fresh = await stateResponse.json() as { revision: number };
+        const latestPlan = await planResponse.json() as { kind: string; question?: { id: string } };
+        if (latestPlan.kind !== plan.kind || latestPlan.question?.id !== question.id) {
+          navigate(window.location.href, { history: 'replace' });
+          return;
+        }
+        // The rejected revision never committed; a new payload requires a new
+        // receipt ID. One retry only, so repeated conflicts remain visible.
+        requestRef.current = {
+          signature: JSON.stringify({ ...payload, revision: fresh.revision }),
+          id: crypto.randomUUID(),
+        };
+        result = await postJson<Response>('/api/assessment-attempts', {
+          ...payload, revision: fresh.revision, requestId: requestRef.current.id,
+        });
+      }
       requestRef.current = undefined;
-      setCurrentRevision(next.revision);
-      setFeedback(next.assessment);
+      setCurrentRevision(result.revision);
+      setFeedback(result.assessment);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Jawaban belum tersimpan.');
     } finally {
