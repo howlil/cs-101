@@ -108,7 +108,7 @@ Ini kerangka konseptual; optimizer PostgreSQL dapat menjalankan operasi fisik da
 
 Gunakan **lima baris** pada `00_setup.sql` di bawah (bukan tabel ilustrasi empat baris di awal). Prediksi dulu sebelum membaca tabel trace:
 
- Query contoh: `SELECT id FROM payments WHERE status = 'PAID' ORDER BY id;` 
+**Query contoh:** `SELECT id FROM payments WHERE status = 'PAID' ORDER BY id;`
 
 | `id` | `status` | `status = 'PAID'` | Masuk hasil? |
 | ---: | --- | --- | --- |
@@ -366,11 +366,12 @@ Coba lima pertanyaan berbasis skenario ini **setelah** membaca tahap Pahami. Qui
 
 ## 10. SQL Semantics Minefield — 20 prediksi sebelum eksekusi
 
-**Jangan jalankan kasus berikut sebelum prediksinya ditulis.** Dataset adalah lima row dari `00_setup.sql` pada tahap Pahami. Tulis 20 prediksi terpisah tanpa mencari jawaban. Untuk setiap kasus, catat: `ID | predicted result (termasuk row count dan order jika dijamin) | reasoning`. Setelah seluruh prediksi terkunci, baru eksekusi satu per satu dan simpan `actual result | correct? | correction`.
+**Jangan jalankan kasus berikut sebelum prediksinya ditulis.** Dataset adalah lima row dari `00_setup.sql` pada tahap Pahami. Tulis 20 prediksi terpisah tanpa mencari jawaban. Untuk setiap kasus, catat: `ID | predicted result (termasuk row count dan order jika dijamin) | reasoning`. Untuk setiap kelompok lima soal, kunci dulu kelima prediksi sebelum mengeksekusinya. Lalu simpan `actual result | correct? | correction` tanpa mengubah prediksi yang sudah dikunci.
 
 **Cara mengerjakannya tanpa ceremony:** buat satu file prediksi berisi 20 baris dengan format `ID | prediksi | alasan`. Kerjakan dalam empat kelompok lima kasus. Untuk setiap kelompok, tulis prediksi **sebelum** menjalankan query kelompok tersebut, lalu cek dan koreksi. Prediksi awal tidak boleh diedit. Tidak perlu timer, laporan panjang, atau formulir tambahan.
 
 **Kontrak prediksi:** untuk scalar, tulis nilai beserta `NULL` jika UNKNOWN; untuk rowset, tulis *jumlah*, *nilai yang muncul*, dan *urutan* hanya jika SQL menjaminnya. `ERROR` berbeda dari hasil `NULL`. Untuk query tanpa ordering, tulis batas jaminan yang benar, bukan menebak urutan fisik.
+
 Kasus 1–5: scalar, ordinary comparisons, dan three-valued logic.
 
 ```sql
@@ -394,11 +395,11 @@ SELECT NULL IS NOT DISTINCT FROM NULL AS result;
 -- 07
 SELECT 12 IS DISTINCT FROM NULL AS result;
 -- 08
-SELECT id FROM payments WHERE status = 'PAID' ORDER BY id;
+SELECT id FROM payments WHERE status = 'FAILED' ORDER BY id;
 -- 09
-SELECT id FROM payments WHERE status <> 'PAID' ORDER BY id;
+SELECT id FROM payments WHERE status <> 'FAILED' ORDER BY id;
 -- 10
-SELECT id FROM payments WHERE status IS DISTINCT FROM 'PAID' ORDER BY id;
+SELECT id FROM payments WHERE status IS DISTINCT FROM 'FAILED' ORDER BY id;
 ```
 
 Kasus 11–15: `NOT IN`, baris duplikat, dan `DISTINCT`.
@@ -477,16 +478,16 @@ psql -X -v ON_ERROR_STOP=1 -d cs101_sql001 -f 03_assertions.sql
 
 ```sql
 -- Contoh A: verifikasi scalar nullable dari ekspresi lain
-DO $
+DO $qa$
 BEGIN
   IF NOT ((NULL::integer = 99) IS UNKNOWN) THEN
     RAISE EXCEPTION 'Expected UNKNOWN for nullable comparison';
   END IF;
 END
-$;
+$qa$;
 
 -- Contoh B: verifikasi himpunan ID dengan ordering eksplisit
-DO $
+DO $qa$
 DECLARE observed bigint[];
 BEGIN
   SELECT array_agg(id ORDER BY id) INTO observed
@@ -495,7 +496,7 @@ BEGIN
     RAISE EXCEPTION 'Merchant 20 IDs mismatch: %', observed;
   END IF;
 END
-$;
+$qa$;
 ```
 
 Untuk kasusmu, pilih satu pemeriksaan per prediksi: **scalar** (`IS [NOT] DISTINCT FROM` bila NULL mungkin muncul), **cardinality**, atau **ordered rowset**. Jangan menambahkan `ORDER BY` diam-diam ke query yang sengaja menguji nondeterminism: pisahkan *query yang diuji* dari *cara assertion membandingkan baris*. Assertion untuk query tanpa ORDER BY tidak boleh mengunci urutan yang bukan bagian dari kontraknya.

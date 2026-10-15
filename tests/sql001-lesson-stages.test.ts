@@ -23,7 +23,7 @@ test('SQL-001 lesson and generated review bank cover all curriculum gates', () =
   const bank = JSON.parse(src('review-banks/SQL-001.json'));
   assert.equal(lesson, staged, 'Promoted lesson must match staged source');
   assert.deepEqual(bank.questions, spec.reviewQuestions, 'Review bank must match lesson spec');
-  assert.equal((lesson.match(/^-- (?:0[1-9]|1[0-9]|20)(?::|\\n)/gm) ?? []).length, 20);
+  assert.equal((lesson.match(/^-- (?:0[1-9]|1[0-9]|20)(?:.*)$/gm) ?? []).length, 20);
   assert.match(lesson, /RAISE EXCEPTION/);
   assert.match(lesson, /no ORM|tanpa ORM/i);
   assert.equal(new Set(spec.coverage.map((entry: { criterionId: string }) => entry.criterionId)).size, 4);
