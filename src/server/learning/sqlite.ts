@@ -4,7 +4,7 @@ import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
 import { learningPolicyFor } from '../../domain/learning/policy';
 import {
   assessmentAttemptSchema, chooseAssessmentPlan, gradeAssessment, nextCompetencyReview,
-  type ReviewSchedule,
+  type ReviewSchedule, type AssessmentHistory,
 } from '../../domain/learning/assessment';
 import { assessmentQuestion, assessmentQuestionsForItem } from '../assessment-bank';
 import {
@@ -119,7 +119,8 @@ export class LearningService {
       }),
       competencyAttempts: this.db.prepare(`SELECT id, request_id AS requestId, item_id AS itemId,
         competency_id AS competencyId, assessment_id AS assessmentId, assessment_version AS assessmentVersion,
-        phase, answer_index AS answerIndex, correct, recorded_at AS recordedAt FROM competency_attempts ORDER BY rowid`).all(),
+        phase, answer_index AS answerIndex, correct, recorded_at AS recordedAt,
+        outcome, bank_fingerprint AS bankFingerprint FROM competency_attempts ORDER BY rowid`).all(),
       competencyReviewSchedules: this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
         FROM competency_review_schedule ORDER BY competency_id`).all(),
       reviewAttempts: attempts.map((attempt) => ({
@@ -240,47 +241,65 @@ export class LearningService {
   }
 
 
+
+  private assessmentHistory(itemId: string): AssessmentHistory[] {
+    const rows = this.db.prepare(`SELECT assessment_id AS assessmentId, phase, correct, outcome
+      FROM competency_attempts WHERE item_id=? ORDER BY rowid`).all(itemId) as Array<
+      Omit<AssessmentHistory, 'correct'> & { correct: number }
+    >;
+    return rows.map((row) => ({ ...row, correct: Boolean(row.correct) }));
+  }
+
   assessmentPlan(itemId: string) {
-    this.item(itemId);
+    const item = this.item(itemId);
     const questions = assessmentQuestionsForItem(itemId);
-    if (!questions.length) return { kind: 'unavailable' as const, itemId };
-    const competencyId = questions[0].competencyId;
-    const practiced = this.db.prepare(`SELECT 1 FROM competency_attempts
-      WHERE item_id=? AND competency_id=? AND phase='practice' AND correct=1 LIMIT 1`)
-      .get(itemId, competencyId);
+    if (!questions.length || questions.some((q) => q.curriculumFingerprint !== item.fingerprint)) {
+      return { kind: 'unavailable' as const, itemId };
+    }
+    const history = this.assessmentHistory(itemId);
+    const practiced = history.some((h) => h.correct &&
+      (h.phase === 'practice' || h.phase === 'transfer') &&
+      (h.outcome === 'correct_unassisted' || h.outcome === 'legacy_unknown'));
     const schedule = this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
       FROM competency_review_schedule WHERE competency_id=?`)
-      .get(competencyId) as ReviewSchedule | undefined;
-    return chooseAssessmentPlan(itemId, questions, !!practiced, schedule, this.now());
+      .get(questions[0].competencyId) as ReviewSchedule | undefined;
+    return chooseAssessmentPlan(itemId, questions, practiced, schedule, this.now(), history);
   }
 
   submitAssessment(raw: unknown) {
     const input = assessmentAttemptSchema.parse(raw);
     const item = this.item(input.itemId);
     const question = assessmentQuestion(input.assessmentId);
-    if (!question || question.itemId !== item.id ||
+    if (!question || question.itemId !== item.id || question.curriculumFingerprint !== item.fingerprint ||
         question.phase !== input.phase || question.version !== input.assessmentVersion) {
-      throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.');
+      throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.', 'QUESTION_STALE');
     }
+    const previous = this.db.prepare('SELECT outcome FROM competency_attempts WHERE request_id=?')
+      .get(input.requestId) as { outcome: ReturnType<typeof gradeAssessment>['outcome'] } | undefined;
+    const history = this.assessmentHistory(item.id);
     let grading: ReturnType<typeof gradeAssessment>;
-    try { grading = gradeAssessment(question, input.answer); }
-    catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
-
+    try {
+      grading = gradeAssessment(question, input.answer, previous
+        ? history.filter((entry) => entry.assessmentId !== question.id) : history);
+      if (previous) grading = { ...grading, outcome: previous.outcome };
+    } catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
     const snapshot = this.mutate(input, 'assessment', () => {
       const plan = this.assessmentPlan(item.id);
       if (plan.kind !== question.phase || plan.question.id !== question.id) {
-        throw new LearningError(409, 'Sesi latihan atau recall berubah. Muat ulang materi.');
+        throw new LearningError(409, 'Sesi latihan atau recall berubah. Muat ulang materi.', 'QUESTION_STALE');
       }
       const now = this.now();
-      const previous = this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
+      const schedule = this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
         FROM competency_review_schedule WHERE competency_id=?`)
         .get(question.competencyId) as ReviewSchedule | undefined;
       this.db.prepare(`INSERT INTO competency_attempts
-        (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at)
-        VALUES(?,?,?,?,?,?,?,?,?,?)`)
+        (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at,outcome,bank_fingerprint)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`)
         .run(randomUUID(), input.requestId, item.id, question.competencyId, question.id,
-          question.version, question.phase, input.answer, grading.correct ? 1 : 0, now.toISOString());
-      const next = nextCompetencyReview(previous, question.phase, grading.correct, now);
+          question.version, question.phase, input.answer, grading.correct ? 1 : 0, now.toISOString(),
+          grading.outcome, question.curriculumFingerprint);
+      const next = nextCompetencyReview(schedule, question.phase,
+        grading.correct && (grading.outcome === 'correct_unassisted' || question.phase === 'recall'), now);
       if (next) {
         this.db.prepare(`INSERT INTO competency_review_schedule(competency_id,step,due_at)
           VALUES(?,?,?) ON CONFLICT(competency_id)
@@ -290,6 +309,7 @@ export class LearningService {
     });
     return { ...snapshot, assessment: grading };
   }
+
 
   markStudied(raw: unknown) {
     const input = studyActionSchema.parse(raw);
