@@ -5,6 +5,7 @@ import { initialSchema } from '../../migrations/001-initial';
 import { learningItemsMigration } from '../../migrations/002-learning-items';
 import { reviewMigration } from '../../migrations/003-review';
 import { studyProgressMigration } from '../../migrations/004-study-progress';
+import { adaptiveAssessmentMigration } from '../../migrations/005-adaptive-assessment';
 
 export function openDatabase(path: string) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
@@ -12,7 +13,7 @@ export function openDatabase(path: string) {
   db.exec('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 3000;');
 
   let version = (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version;
-  if (version > 4) {
+  if (version > 5) {
     db.close();
     throw new Error('Database lebih baru dari versi aplikasi.');
   }
@@ -62,6 +63,19 @@ export function openDatabase(path: string) {
       db.exec(studyProgressMigration);
       db.exec('COMMIT');
       version = 4;
+    } catch (error) {
+      db.exec('ROLLBACK');
+      db.close();
+      throw error;
+    }
+  }
+
+  if (version === 4) {
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      db.exec(adaptiveAssessmentMigration);
+      db.exec('COMMIT');
+      version = 5;
     } catch (error) {
       db.exec('ROLLBACK');
       db.close();
