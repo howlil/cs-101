@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import { CloudflareLearningService, type D1Database } from '../src/server/learning/d1';
 import assert from 'node:assert/strict';
-import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
+import { curriculumGraph } from '../src/server/curriculum';
 import {
   chooseAssessmentPlan, gradeAssessment, nextCompetencyReview, publicQuestion,
 } from '../src/domain/learning/assessment';
@@ -10,21 +10,8 @@ import { assessmentQuestion, assessmentQuestionsForItem } from '../src/server/as
 import { LearningService, LearningError } from '../src/server/learning/sqlite';
 import { openDatabase } from '../src/server/storage';
 
-const itemBase = {
-  id: 'SQL-001', kind: 'unit' as const, trackId: 'sql', moduleId: 'sql-core',
-  order: 1, title: 'SQL NULL', scope: ['NULL'],
-  criteria: [{ id: 'c1', text: 'Predict NULL' }],
-  challenge: { title: 'Predict', raw: 'Predict', steps: ['Try'] },
-  prerequisites: [], marketExpectation: [], source: { title: 'Reference' },
-  crossModuleReferenceRaw: [],
-};
-const item = { ...itemBase, fingerprint: assessmentQuestion('sql-null-predict-01')!.curriculumFingerprint };
-const graph = buildCurriculumGraph({
-  version: 2,
-  tracks: [{ id: 'sql', title: 'SQL', order: 1 }],
-  modules: [{ id: 'sql-core', trackId: 'sql', title: 'SQL Core', order: 1 }],
-  items: [item], relations: [],
-});
+const graph = curriculumGraph;
+const item = graph.itemsById.get('SQL-001')!;
 
 test('public assessment never sends answer key and misconception map', () => {
   const q = assessmentQuestion('sql-null-predict-01')!;
