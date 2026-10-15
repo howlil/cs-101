@@ -9,7 +9,7 @@ test('lesson transitions move focus after primary next CTA and preserve keyboard
   assert.match(lesson, /chooseStage\('practice', true\)/);
   assert.match(lesson, /chooseStage\('evidence', true\)/);
   assert.match(lesson, /requestAnimationFrame/);
-  assert.match(lesson, /needsEligibility \? 'lesson-study-completion' : 'lesson-panel-' \+ next/);
+  assert.match(lesson, /document.getElementById\(target\)\?\.focus\(\)/);
   assert.match(lesson, /onTabKeyDown/);
   assert.match(lesson, /aria-selected=\{stage === id\}/);
 });

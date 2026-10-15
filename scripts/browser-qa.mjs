@@ -281,7 +281,7 @@ try {
   // move keyboard focus to the newly visible practice panel.
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('document.querySelector("#lesson-tab-practice").getAttribute("aria-selected") === "true"'), 'Practice stage');
-  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-panel-practice"'), 'Practice panel receives focus');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-assessment"'), 'Adaptive practice prompt receives focus');
   assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
@@ -439,16 +439,17 @@ try {
   // saving and completing still run through the unchanged server engine.
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".react-action-stack button"))'),
+    'Lesson activation control hydrated');
   await client.eval('document.querySelector(".react-action-stack button").click()');
   await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
-  // Server activation is durable before the route necessarily receives a refreshed SSR snapshot.
-  // Reload once so the evidence stage uses the confirmed active state rather than stale props.
-  await client.goto('/learn/SQL-001');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector("#lesson-tab-evidence"))'), 'Activated lesson rehydrated');
-  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  // Activation triggers a ClientRouter replacement. Await fresh server-rendered
+  // active state rather than clicking the transient pre-activation island.
+  await client.goto('/learn/SQL-001#evidence');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form > button"))'),
+    'Activated lesson mounts optional evidence disclosure');
   assert.equal(await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), false,
     'Technical evidence must not open before explicit disclosure');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form > button"))'), 'Activated evidence disclosure available');
   await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Optional technical evidence form opened');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');
@@ -495,6 +496,32 @@ try {
   assert.ok(completedState.reviews.some(r => r.itemId === 'SQL-001'), 'Automatic review scheduling must still run');
   assert.ok(completedState.revision > savedState.revision, 'Completion still increments the server-owned revision');
   console.log('PASS real low-ceremony learner journey: browse → activate → draft → save → evidence → automatic completion/review');
+  // New adaptive SQL-001 vertical slice: real UI, server grading, no pre-submit answer key.
+  await client.goto('/learn/SQL-001#practice');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-assessment input[value=\\\"1\\\"]"))'),
+    'Adaptive assessment hydrated');
+  const publicPlan = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
+  assert.equal(publicPlan.kind, 'practice');
+  assert.equal(Object.hasOwn(publicPlan.question, 'answer'), false, 'Assessment must not expose answer key');
+  await client.eval('document.querySelector(".lesson-assessment input[value=\\\"1\\\"]").click()');
+  await client.wait(async () => await client.eval('!document.querySelector(".lesson-assessment button").disabled'),
+    'Adaptive answer selected');
+  await client.eval('document.querySelector(".lesson-assessment button").click()');
+  try {
+    await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment [role=status]")?.textContent.includes("Prediksi tepat")'),
+      'Server-graded assessment feedback');
+  } catch (cause) {
+    const diagnostic = await client.eval(`(async () => ({
+      content: document.querySelector(".lesson-assessment")?.textContent,
+      revision: (await (await fetch("/api/learning")).json()).revision,
+      plan: await (await fetch("/api/learning-plan?itemId=SQL-001")).json(),
+    }))()`);
+    throw new Error('Assessment did not show feedback: ' + JSON.stringify(diagnostic) + '; ' + String(cause));
+  }
+  const afterAssessment = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
+  assert.equal(afterAssessment.kind, 'waiting', 'Correct prediction must schedule delayed recall');
+  console.log('PASS SQL-001 prediction → server feedback → delayed micro-recall without evidence form');
+
   console.log('PASS screenshots saved at ' + screenshotDir);
 } finally {
   try { client?.ws.close(); } catch {}

@@ -23,6 +23,7 @@ const Content = rendered?.Content;
 const stale = !!lesson && lesson.data.curriculumFingerprint !== item.fingerprint;
 const state = await snapshotForRequest(Astro.locals);
 const progress = state.progress.find((entry) => entry.itemId === item.id);
+const assessmentPlan = await (await (await import('../../server/runtime')).learning()).assessmentPlan(item.id);
 const view = getItemLearningView(curriculumGraph, state, item.id);
 const actionState = getItemActionState(view);
 const location = getItemLocation(curriculumGraph, item.id);
@@ -60,6 +61,7 @@ const nextSmallStep =
     stale={stale}
     active={state.activeItemId === item.id}
     studied={state.studiedItems.includes(item.id)}
+    assessmentPlan={assessmentPlan}
     actionState={actionState}
     prerequisites={prerequisites}
     breadcrumb={{ track: location.track?.title ?? '', module: location.module?.title ?? '', position: modulePosition, total: moduleItems.length }}

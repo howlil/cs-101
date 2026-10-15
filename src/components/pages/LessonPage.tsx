@@ -11,6 +11,8 @@ import { Button } from '../arc/button/button';
 import { Accordion } from '../arc/accordion/accordion';
 import SessionLogger from '../learning/SessionLogger';
 import MarkStudied from '../learning/MarkStudied';
+import AssessmentPrompt from '../learning/AssessmentPrompt';
+import type { AssessmentPlan } from '../../domain/learning/assessment';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
 type StageId = 'understand' | 'practice' | 'evidence';
@@ -32,6 +34,7 @@ export default function LessonPage({
   stale,
   active,
   studied,
+  assessmentPlan,
   actionState,
   prerequisites = [],
   breadcrumb,
@@ -61,6 +64,7 @@ export default function LessonPage({
   stale: boolean;
   active: boolean;
   studied: boolean;
+  assessmentPlan?: AssessmentPlan;
   actionState?: ItemActionState;
   prerequisites?: Array<{ id: string; title: string; href: string }>;
   breadcrumb?: { track: string; module: string; position: number; total: number };
@@ -127,8 +131,10 @@ export default function LessonPage({
     // viewport. Move focus to the newly visible panel, not to a dead spot.
     if (focusPanel) {
       window.requestAnimationFrame(() => {
-        const needsEligibility = next === 'evidence';
-        document.getElementById(needsEligibility ? 'lesson-study-completion' : 'lesson-panel-' + next)?.focus();
+        const target = next === 'evidence' ? 'lesson-study-completion'
+          : next === 'practice' && assessmentPlan?.kind !== 'unavailable' && assessmentPlan
+            ? 'lesson-assessment' : 'lesson-panel-' + next;
+        document.getElementById(target)?.focus();
       });
     }
   };
@@ -251,6 +257,9 @@ export default function LessonPage({
           </>}
         </aside>
       )}
+      {stage === 'practice' && assessmentPlan && <AssessmentPrompt
+        key={assessmentPlan.kind}
+        plan={assessmentPlan} revision={revision} />}
       {available ? children : <>
         <section className="lesson-stage-panel" data-lesson-stage="understand"
           id="lesson-panel-understand" role="tabpanel" aria-labelledby="lesson-tab-understand" tabIndex={0}>
