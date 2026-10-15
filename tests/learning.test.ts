@@ -171,7 +171,7 @@ test('migration V2 backfill active item, progress, dan session item id', () => {
     assert.equal(storedSession.itemId, unit.id);
     assert.equal(
       (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version,
-      3,
+      4,
     );
   } finally {
     db.close();
@@ -259,17 +259,15 @@ test('kelulusan membutuhkan evidence semua criteria dan challenge', () => {
   }
 });
 
-test('hard prerequisite memblokir aktivasi sampai prerequisite passed', () => {
+test('unit prerequisites advisory sementara formal pass tetap tersedia', () => {
   const { db, service } = fixture();
   try {
     assert.equal(
       service.snapshot().availability.find((entry) => entry.itemId === locked.id)?.status,
-      'locked',
+      'ready',
     );
-    assert.throws(
-      () => service.setActiveItem({ ...envelope(1), itemId: locked.id }),
-      (error) => error instanceof LearningError && error.status === 422,
-    );
+    // Foundation lessons can be explored without completing the earlier task.
+    // Projects still require passed checkpoints / studied foundation units.
 
     const evidence = requiredEvidenceForItem(unit).map((criterion) => ({
       criterionId: criterion.id,
@@ -389,7 +387,7 @@ test('restart mempertahankan sesi dan active item dari SQLite disk', () => {
   }
 });
 
-test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () => {
+test('stale fingerprint remains stale while unit browsing stays advisory', () => {
   const db = openDatabase(':memory:');
   try {
     db.prepare('INSERT INTO item_progress(item_id,status,passed_fingerprint,last_anchor,continue_from) VALUES(?,?,?,?,?)')
@@ -399,7 +397,7 @@ test('passed fingerprint lama menjadi stale dan tidak membuka prerequisite', () 
     assert.equal(snapshot.progress.find((entry) => entry.itemId === unit.id)?.status, 'stale');
     assert.equal(
       snapshot.availability.find((entry) => entry.itemId === locked.id)?.status,
-      'locked',
+      'ready',
     );
   } finally {
     db.close();

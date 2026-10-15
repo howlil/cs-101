@@ -285,9 +285,9 @@ try {
   assert.ok(await client.eval('document.body.textContent.includes("Kuis ini latihan")'), 'Formative quiz must be clearly distinguished from saved completion');
   await client.eval('document.querySelector(".lesson-stage-next button").click()');
   await client.wait(async () => await client.eval('getComputedStyle(document.querySelector("#lesson-panel-evidence")).display !== "none"'), 'Evidence stage visible');
-  await client.wait(async () => await client.eval('["lesson-panel-evidence","lesson-evidence-gate"].includes(document.activeElement?.id)'), 'Evidence stage receives focus');
+  await client.wait(async () => await client.eval('document.activeElement?.id === "lesson-study-completion"'), 'Lightweight study action receives focus');
   assert.ok(await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Inactive learner must not reach an empty evidence dead end');
-  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-evidence-gate', 'Inactive learner must land on the eligibility guidance first');
+  assert.equal(await client.eval('document.activeElement?.id'), 'lesson-study-completion', 'Inactive learner lands on the self-check action first');
   const evidenceExists = await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form"))');
   if (evidenceExists) {
     assert.notEqual(await client.eval('getComputedStyle(document.querySelector(".lesson-staged-evidence-form")).display'), 'none',
@@ -322,19 +322,22 @@ try {
       assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
     }
   }
-  // A locked authored unit can still be read and practiced, but evidence
-  // must provide prerequisite guidance rather than an empty final stage.
+  // Foundation prerequisites are advisory. The lesson remains readable and
+  // self-checkable without activating a task or completing an earlier lesson.
   await client.goto('/learn/SQL-003');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-study-completion"))'), 'Advisory unit completion');
   const gateY = await client.eval('document.querySelector(".lesson-evidence-gate").getBoundingClientRect().top');
   const panelY = await client.eval('document.querySelector("#lesson-panel-evidence").getBoundingClientRect().top');
-  assert.ok(gateY < panelY, 'Eligibility guidance must precede evidence checklist visually');
-  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Selesaikan prasyarat untuk menyimpan bukti")'), 'Locked state must be explained in evidence stage');
-  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 0, 'Avoid repeating the locked badge and prerequisite block inside the evidence gate');
-  assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
-  await client.screenshot('lesson-locked-evidence-901.png');
-  console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');
+  assert.ok(gateY < panelY, 'Evidence guidance must precede the detailed checklist visually');
+  assert.ok(await client.eval('document.querySelector(".lesson-study-completion")?.textContent.includes("Tandai tanpa laporan")'),
+    'Self-reported foundation study must not require a manual evidence form');
+  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Aktifkan materi untuk menyimpan bukti")'),
+    'Optional technical evidence still offers an explicit activation path');
+  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 1,
+    'Optional activation must be available without forcing a prerequisite gate');
+  await client.screenshot('lesson-advisory-evidence-901.png');
+  console.log('PASS Pahami → Latihan → Dipelajari flow and optional technical evidence');
   console.log('PASS other authored lessons and manifest-only fallback parity');
 
 
@@ -409,10 +412,10 @@ try {
   }
   await client.goto('/learn/SQL-003');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile locked evidence guidance');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile optional evidence guidance');
   m = await client.metrics();
   assert.ok(m.doc <= m.vw + 1 && m.body <= m.vw + 1,
-    'Locked evidence guidance must not overflow 320px: ' + JSON.stringify(m));
+    'Optional evidence guidance must not overflow 320px: ' + JSON.stringify(m));
   await client.screenshot('lesson-locked-evidence-320.png');
   await client.goto('/learn/SQL-001');
   const mobileToolbar = await client.eval('(() => { const tabs=document.querySelector(".lesson-stage-tabs"); const secondary=document.querySelector(".lesson-toolbar-actions"); if (!tabs || !secondary) return null; const a=tabs.getBoundingClientRect(), b=secondary.getBoundingClientRect(); return { display:getComputedStyle(document.querySelector(".lesson-stage-toolbar")).display, first:{left:a.left,right:a.right,bottom:a.bottom}, second:{left:b.left,top:b.top} }; })()');
@@ -436,9 +439,12 @@ try {
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
   await client.eval('document.querySelector(".react-action-stack button").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), 'Activated lesson shows compact evidence workbench');
+  await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Evidence summary visible after stage');
+  assert.equal(await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), false,
+    'Technical evidence must not open before explicit disclosure');
+  await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Optional technical evidence form opened');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');
   assert.equal(await client.eval('Boolean(document.querySelector("#session-notes"))'), false, 'Session notes should be optional, not an upfront form');
   const beforePractice = await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision)()');
@@ -462,6 +468,8 @@ try {
   await client.goto('/curriculum');
   await client.goto('/learn/SQL-001#evidence');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Server session does not auto-expand evidence form');
+  await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Reopened optional technical evidence form');
   await client.eval('document.querySelector(".evidence-summary-actions button:first-child").click()');
   const required = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
   assert.ok(required >= 2, 'Complete lesson must require real criteria and challenge evidence');

@@ -74,7 +74,7 @@ export default function ProgressPage({
       <section className="progress-primary">
         <section className="progress-overview" aria-label="Progres per jalur">
           <div className="progress-section-heading">
-            <div><p className="eyebrow">JALUR BELAJAR</p><h2>Yang sudah diselesaikan</h2></div>
+            <div><p className="eyebrow">JALUR BELAJAR</p><h2>Yang dipelajari dan diselesaikan</h2></div>
             <span>{tracks.reduce((sum, track) => sum + track.completed, 0)} / {tracks.reduce((sum, track) => sum + track.total, 0)}</span>
           </div>
           <p className="progress-integrations-note">Materi dan project dikelompokkan dalam {tracks.length} jalur; {integrations.length} latihan gabungan dihitung terpisah.</p>

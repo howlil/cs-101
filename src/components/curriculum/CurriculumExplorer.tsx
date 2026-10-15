@@ -18,7 +18,7 @@ import { Accordion } from '../arc/accordion/accordion';
 import { matchesQuery } from '../arc/lib/matches-query';
 
 type ItemKind = 'unit' | 'checkpoint' | 'integration';
-type DisplayState = 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
+type DisplayState = 'passed' | 'studied' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
 
 type TrackOption = { id: string; title: string; total: number; completed: number };
 export type ExplorerItem = {
@@ -36,7 +36,7 @@ type SearchEntry = ExplorerItem & { searchText: string };
 
 function ItemIcon({ item }: { item: ExplorerItem }) {
   const props = { size: 14, strokeWidth: 1.8, 'aria-hidden': true as const };
-  if (item.state === 'passed') return <Check {...props} />;
+  if (item.state === 'passed' || item.state === 'studied') return <Check {...props} />;
   if (item.state === 'active') return <CircleDot {...props} />;
   if (item.state === 'started') return <Clock3 {...props} />;
   if (item.state === 'stale') return <TriangleAlert {...props} />;

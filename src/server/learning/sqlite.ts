@@ -1,6 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
 import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
+import { learningPolicyFor } from '../../domain/learning/policy';
 import {
   deriveAvailability,
   withCurrentCompletion,
@@ -8,6 +9,7 @@ import {
 } from '../../domain/learning/rules';
 import {
   activeItemSchema,
+  studyActionSchema,
   sessionSchema,
   reviewAttemptSchema,
   type SessionFields,
@@ -60,13 +62,16 @@ export class LearningService {
     ).all() as ItemProgressState[];
     const currentRows = withCurrentCompletion(this.graph, rows);
     const progress = currentRows.map((item) => ({ ...item, taskId: item.itemId }));
+    const studiedItems = (this.db.prepare('SELECT item_id AS itemId FROM item_study')
+      .all() as { itemId: string }[]).map((row) => row.itemId);
     const now = this.now();
     return {
+      studiedItems,
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress,
-      availability: deriveAvailability(this.graph, currentRows),
+      availability: deriveAvailability(this.graph, currentRows, studiedItems),
       reviews: this.storedReviewRows().map((row) => toReviewView(row, now)),
     };
   }
@@ -94,7 +99,7 @@ export class LearningService {
     }>;
 
     return {
-      version: 3,
+      version: 4,
       ...this.snapshot(),
       sessions: sessions.map(({ payload, ...row }) => {
         const parsed = JSON.parse(payload) as Record<string, unknown>;
@@ -222,6 +227,16 @@ export class LearningService {
     if (input.kind === 'passed' && !wasCurrentPass) {
       this.scheduleInitialReview(item.id);
     }
+  }
+
+  markStudied(raw: unknown) {
+    const input = studyActionSchema.parse(raw);
+    const item = this.item(input.itemId);
+    if (learningPolicyFor(item).completion !== 'self_check') throw new LearningError(422, 'Tandai dipelajari hanya untuk materi.');
+    return this.mutate(input, 'mark-studied', () => {
+      this.db.prepare('INSERT INTO item_study(item_id, studied_at) VALUES(?, ?) ON CONFLICT(item_id) DO NOTHING')
+        .run(item.id, this.now().toISOString());
+    });
   }
 
   saveSession(raw: unknown) {

@@ -363,3 +363,9 @@
   .progress-track-row { grid-template-columns:minmax(0,1fr) 84px; gap:12px; }
   .progress-track-detail .progress-modules { grid-template-columns:1fr; }
 }
+
+/* The primary completion action is intentionally not a mandatory evidence form. */
+.lesson-study-completion { padding: 1.25rem 0; border-top: 1px solid var(--border, currentColor); }
+.lesson-study-completion h2 { margin-bottom: .4rem; }
+.lesson-study-completion p { margin-bottom: .85rem; }
+.lesson-study-completion:focus { outline: none; }

@@ -15,7 +15,7 @@ type SelectedItem = {
   hasLesson?: boolean;
   breadcrumb: string;
   href: string;
-  state?: 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
+  state?: 'passed' | 'studied' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
   actionState?: ItemActionState;
   missingPrerequisites: string[];
   marketExpectation?: string[];

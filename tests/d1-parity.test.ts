@@ -226,3 +226,30 @@ test('SQLite dan D1 service menjaga contract state yang sama', async () => {
     d1Db.close();
   }
 });
+
+test('mark studied maintains SQLite/D1 parity without passing competency', async () => {
+  const localDb = openDatabase(':memory:');
+  const d1Db = openDatabase(':memory:');
+  d1Db.exec("ALTER TABLE request_receipts ADD COLUMN nonce TEXT NOT NULL DEFAULT ''");
+  const local = new LearningService(localDb, graph);
+  const cloud = new CloudflareLearningService(sqliteD1(d1Db), graph);
+  try {
+    const input = {
+      requestId: '00000000-0000-4000-8000-000000000198',
+      revision: 0, itemId: first.id, action: 'mark_studied',
+    };
+    const before = local.snapshot();
+    assert.equal(before.availability.find((item) => item.itemId === second.id)?.status, 'ready');
+    const one = local.markStudied(input);
+    const other = await cloud.markStudied(input);
+    assert.deepEqual(other, one);
+    assert.deepEqual(local.markStudied(input), one);
+    assert.deepEqual(await cloud.markStudied(input), other);
+    assert.equal(local.export().sessions.length, 0);
+    assert.equal(one.progress.length, 0);
+    assert.equal(one.studiedItems[0], first.id);
+  } finally {
+    localDb.close();
+    d1Db.close();
+  }
+});

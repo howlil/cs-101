@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
+import { learningPolicyFor } from '../../domain/learning/policy';
 import {
   deriveAvailability,
   withCurrentCompletion,
@@ -7,6 +8,7 @@ import {
 } from '../../domain/learning/rules';
 import {
   activeItemSchema,
+  studyActionSchema,
   reviewAttemptSchema,
   sessionSchema,
   type SessionFields,
@@ -70,29 +72,32 @@ export class CloudflareLearningService {
   ) {}
 
   async snapshot(): Promise<LearningSnapshot> {
-    const [stateResult, progressResult, reviewResult] = await this.db.batch([
+    const [stateResult, progressResult, reviewResult, studyResult] = await this.db.batch([
       this.db.prepare('SELECT active_item_id AS activeItemId, revision FROM learner_state WHERE id=1'),
       this.db.prepare('SELECT item_id AS itemId, status, passed_fingerprint AS passedFingerprint, last_anchor AS lastAnchor, continue_from AS continueFrom FROM item_progress'),
       this.db.prepare(`SELECT item_id AS itemId, policy_version AS policyVersion, step,
         due_at AS dueAt, state AS storedState FROM review_schedule`),
+      this.db.prepare('SELECT item_id AS itemId FROM item_study'),
     ]);
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
     const rows = progressResult.results as ItemProgressState[];
     const currentRows = withCurrentCompletion(this.graph, rows);
+    const studiedItems = (studyResult.results as { itemId: string }[]).map((row) => row.itemId);
     const now = this.now();
     return {
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress: currentRows.map((item) => ({ ...item, taskId: item.itemId })),
-      availability: deriveAvailability(this.graph, currentRows),
+      availability: deriveAvailability(this.graph, currentRows, studiedItems),
       reviews: (reviewResult.results as StoredReviewRow[]).map((row) => toReviewView(row, now)),
+      studiedItems,
     };
   }
 
   async export() {
-    const [stateResult, progressResult, reviewResult, sessionsResult, attemptsResult] = await this.db.batch([
+    const [stateResult, progressResult, reviewResult, sessionsResult, attemptsResult, studyResult] = await this.db.batch([
       this.db.prepare('SELECT active_item_id AS activeItemId, revision FROM learner_state WHERE id=1'),
       this.db.prepare('SELECT item_id AS itemId, status, passed_fingerprint AS passedFingerprint, last_anchor AS lastAnchor, continue_from AS continueFrom FROM item_progress'),
       this.db.prepare(`SELECT item_id AS itemId, policy_version AS policyVersion, step,
@@ -101,6 +106,7 @@ export class CloudflareLearningService {
       this.db.prepare(`SELECT id, item_id AS itemId, question_set_version AS questionSetVersion,
         answers, grading_mode AS gradingMode, score, assisted, result,
         recorded_at AS recordedAt FROM review_attempts ORDER BY rowid`),
+      this.db.prepare('SELECT item_id AS itemId FROM item_study'),
     ]);
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
@@ -108,12 +114,13 @@ export class CloudflareLearningService {
     const currentRows = withCurrentCompletion(this.graph, rows);
     const now = this.now();
     return {
-      version: 3,
+      version: 4,
+      studiedItems: (studyResult.results as { itemId: string }[]).map((row) => row.itemId),
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress: currentRows.map((item) => ({ ...item, taskId: item.itemId })),
-      availability: deriveAvailability(this.graph, currentRows),
+      availability: deriveAvailability(this.graph, currentRows, (studyResult.results as { itemId: string }[]).map((row) => row.itemId)),
       reviews: (reviewResult.results as StoredReviewRow[]).map((row) => toReviewView(row, now)),
       sessions: (sessionsResult.results as { id: string; itemId: string | null; recordedAt: string; payload: string }[])
         .map(({ payload, ...row }) => {
@@ -192,6 +199,7 @@ export class CloudflareLearningService {
     sessions: SessionFields[],
     activeItemId?: string,
     idempotencyInput: unknown = raw,
+    studiedItemId?: string,
   ) {
     const hash = createHash('sha256').update(JSON.stringify({ operation, input: idempotencyInput })).digest('hex');
     const old = await this.db.prepare(
@@ -243,12 +251,16 @@ export class CloudflareLearningService {
     }
 
     const nextReviews = [...reviewRows.values()].map((row) => toReviewView(row, now));
+    const nextStudiedItems = studiedItemId
+      ? [...new Set([...current.studiedItems, studiedItemId])]
+      : current.studiedItems;
     const response: LearningSnapshot = {
       activeItemId: activeItemId ?? current.activeItemId,
       activeTaskId: activeItemId ?? current.activeItemId,
       revision: current.revision + 1,
       progress: nextProgress,
-      availability: deriveAvailability(this.graph, nextProgress),
+      availability: deriveAvailability(this.graph, nextProgress, nextStudiedItems),
+      studiedItems: nextStudiedItems,
       reviews: nextReviews,
     };
 
@@ -325,6 +337,14 @@ export class CloudflareLearningService {
       }
     }
 
+    if (studiedItemId) {
+      statements.push(this.db.prepare(`INSERT INTO item_study(item_id, studied_at)
+        SELECT ?, ? WHERE EXISTS (
+          SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+        ) ON CONFLICT(item_id) DO NOTHING`)
+        .bind(studiedItemId, now.toISOString(), requestId, nonce));
+    }
+
     await this.db.batch(statements);
     const receipt = await this.db.prepare(
       'SELECT payload_hash, response, nonce FROM request_receipts WHERE request_id=?',
@@ -332,6 +352,13 @@ export class CloudflareLearningService {
     if (!receipt) throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
     if (receipt.payload_hash !== hash) throw new LearningError(409, 'Request ID sudah dipakai untuk data berbeda.');
     return JSON.parse(receipt.response) as LearningSnapshot;
+  }
+
+  async markStudied(raw: unknown) {
+    const input = studyActionSchema.parse(raw);
+    const item = this.item(input.itemId);
+    if (learningPolicyFor(item).completion !== 'self_check') throw new LearningError(422, 'Tandai dipelajari hanya untuk materi.');
+    return this.mutate(input, 'mark-studied', [], undefined, input, item.id);
   }
 
   async saveSession(raw: unknown) {

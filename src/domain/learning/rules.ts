@@ -1,5 +1,6 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
 import type { Criterion, CurriculumItem } from '../curriculum-v2/schema';
+import { learningPolicyFor } from './policy';
 
 export type StoredCompletionStatus = 'active' | 'passed';
 export type CompletionStatus = StoredCompletionStatus | 'stale';
@@ -51,14 +52,18 @@ export function blockingPrerequisites(item: CurriculumItem): string[] {
 export function deriveAvailability(
   graph: CurriculumGraph,
   progress: ItemProgressState[],
+  studiedItems: readonly string[] = [],
 ): AvailabilityState[] {
   const current = withCurrentCompletion(graph, progress);
   const passed = new Set(
     current.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId),
   );
 
+  const studied = new Set(studiedItems);
   return graph.manifest.items.map((item) => {
-    const missingPrerequisites = blockingPrerequisites(item).filter((id) => !passed.has(id));
+    const missingPrerequisites = learningPolicyFor(item).prerequisite === 'advisory' ? [] : blockingPrerequisites(item).filter((id) =>
+      !passed.has(id) && !(graph.itemsById.get(id)?.kind === 'unit' && studied.has(id))
+    );
     return {
       itemId: item.id,
       status: missingPrerequisites.length ? 'locked' : 'ready',
@@ -71,6 +76,7 @@ export function missingPrerequisites(
   graph: CurriculumGraph,
   itemId: string,
   progress: ItemProgressState[],
+  studiedItems: readonly string[] = [],
 ) {
   const item = graph.itemsById.get(itemId);
   if (!item) throw new Error('Item tidak ada di curriculum.');
@@ -78,5 +84,8 @@ export function missingPrerequisites(
   const passed = new Set(
     current.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId),
   );
-  return blockingPrerequisites(item).filter((id) => !passed.has(id));
+  const studied = new Set(studiedItems);
+  return learningPolicyFor(item).prerequisite === 'advisory' ? [] : blockingPrerequisites(item).filter((id) =>
+    !passed.has(id) && !(graph.itemsById.get(id)?.kind === 'unit' && studied.has(id))
+  );
 }

@@ -9,7 +9,7 @@ test('lesson transitions move focus after primary next CTA and preserve keyboard
   assert.match(lesson, /chooseStage\('practice', true\)/);
   assert.match(lesson, /chooseStage\('evidence', true\)/);
   assert.match(lesson, /requestAnimationFrame/);
-  assert.match(lesson, /needsEligibility \? 'lesson-evidence-gate' : 'lesson-panel-' \+ next/);
+  assert.match(lesson, /needsEligibility \? 'lesson-study-completion' : 'lesson-panel-' \+ next/);
   assert.match(lesson, /onTabKeyDown/);
   assert.match(lesson, /aria-selected=\{stage === id\}/);
 });
@@ -21,6 +21,7 @@ test('evidence tab never becomes an empty destination for ineligible learners', 
   assert.match(lesson, /Aktifkan materi untuk menyimpan bukti/);
   assert.match(lesson, /<ItemStatusAction itemId=\{itemId\} kind="unit"/);
   assert.match(lesson, /Materi sudah selesai/);
+  assert.match(lesson, /<MarkStudied/);
 });
 
 test('quizzes are formative, evidence drafts are distinguished from committed sessions', () => {

@@ -50,12 +50,12 @@ const trackOverview = explorer ? {
   id: explorer.track.id,
   title: explorer.track.title,
   completed: explorer.modules.reduce((total, module) =>
-    total + module.items.filter((item) => viewFor(item.id)?.completion === 'passed').length, 0),
+    total + module.items.filter((item) => ['passed', 'studied'].includes(viewFor(item.id)?.completion ?? '')).length, 0),
   total: explorer.modules.reduce((total, module) => total + module.items.length, 0),
   modules: explorer.modules.map((module) => ({
     id: module.id,
     title: module.title,
-    completed: module.items.filter((item) => viewFor(item.id)?.completion === 'passed').length,
+    completed: module.items.filter((item) => ['passed', 'studied'].includes(viewFor(item.id)?.completion ?? '')).length,
     total: module.items.length,
     firstItemTitle: module.items[0]?.title ?? 'Belum ada materi',
     href: '/curriculum?track=' + encodeURIComponent(explorer.track.id) +
