@@ -174,3 +174,28 @@ test('Cloudflare D1 and SQLite assessment mutations agree across retry and delay
     assert.deepEqual(await cloud.snapshot(), local.snapshot());
   } finally { sqliteDb.close(); d1Db.close(); }
 });
+
+test('incorrect prediction can be retried without activation; stale revision is rejected', () => {
+  const db = openDatabase(':memory:');
+  const service = new LearningService(db, graph);
+  const first = {
+    requestId: '00000000-0000-4000-8000-000000000911',
+    revision: 0, itemId: item.id, phase: 'practice' as const,
+    assessmentId: 'sql-null-predict-01', assessmentVersion: 'v1', answer: 0,
+  };
+  try {
+    const attempt = service.submitAssessment(first);
+    assert.equal(attempt.assessment.correct, false);
+    assert.equal(attempt.revision, 1);
+    assert.equal(service.assessmentPlan(item.id).kind, 'practice');
+    assert.throws(() => service.submitAssessment({
+      ...first, requestId: '00000000-0000-4000-8000-000000000912', answer: 1,
+    }), (e: unknown) => e instanceof LearningError && e.status === 409);
+    const retry = service.submitAssessment({
+      ...first, requestId: '00000000-0000-4000-8000-000000000913', revision: 1, answer: 1,
+    });
+    assert.equal(retry.assessment.correct, true);
+    assert.equal(service.assessmentPlan(item.id).kind, 'waiting');
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM competency_attempts').get() as {count:number}).count, 2);
+  } finally { db.close(); }
+});
