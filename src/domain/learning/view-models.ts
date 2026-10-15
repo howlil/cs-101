@@ -124,8 +124,7 @@ function orderedItems(graph: CurriculumGraph) {
   return ordered;
 }
 
-export function getTodayView(graph: CurriculumGraph, state: LearningViewState,
-  demonstratedItems: ReadonlySet<string> = new Set()) {
+export function getTodayView(graph: CurriculumGraph, state: LearningViewState) {
   const active = state.activeItemId
     ? getItemLearningView(graph, state, state.activeItemId)
     : undefined;
@@ -136,7 +135,7 @@ export function getTodayView(graph: CurriculumGraph, state: LearningViewState,
     .find((view) =>
       view.availability === 'ready' &&
       view.completion !== 'passed' && view.completion !== 'studied' &&
-      !demonstratedItems.has(view.item.id) && view.displayState !== 'active'
+      view.displayState !== 'active'
     );
 
   const reviews = state.reviews
