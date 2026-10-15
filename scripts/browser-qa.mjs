@@ -442,7 +442,11 @@ try {
     'Lesson activation control hydrated');
   await client.eval('document.querySelector(".react-action-stack button").click()');
   await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
-  await client.eval('document.querySelector("#lesson-tab-evidence").click()');
+  // Activation triggers a ClientRouter replacement. Await fresh server-rendered
+  // active state rather than clicking the transient pre-activation island.
+  await client.goto('/learn/SQL-001#evidence');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-staged-evidence-form > button"))'),
+    'Activated lesson mounts optional evidence disclosure');
   assert.equal(await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), false,
     'Technical evidence must not open before explicit disclosure');
   await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
