@@ -2,6 +2,11 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
 import { learningPolicyFor } from '../../domain/learning/policy';
 import {
+  assessmentAttemptSchema, chooseAssessmentPlan, gradeAssessment, nextCompetencyReview,
+  type AssessmentAttempt, type ReviewSchedule,
+} from '../../domain/learning/assessment';
+import { assessmentQuestion, assessmentQuestionsForItem } from '../assessment-bank';
+import {
   deriveAvailability,
   withCurrentCompletion,
   type ItemProgressState,
@@ -200,6 +205,7 @@ export class CloudflareLearningService {
     activeItemId?: string,
     idempotencyInput: unknown = raw,
     studiedItemId?: string,
+    assessmentInput?: AssessmentAttempt,
   ) {
     const hash = createHash('sha256').update(JSON.stringify({ operation, input: idempotencyInput })).digest('hex');
     const old = await this.db.prepare(
@@ -213,6 +219,35 @@ export class CloudflareLearningService {
     const current = await this.snapshot();
     if (current.revision !== raw.revision) {
       throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
+    }
+    let assessmentWrite: {
+      input: AssessmentAttempt;
+      competencyId: string;
+      correct: boolean;
+      next?: ReviewSchedule;
+    } | undefined;
+    if (assessmentInput) {
+      const question = assessmentQuestion(assessmentInput.assessmentId);
+      if (!question || question.itemId !== assessmentInput.itemId ||
+        question.version !== assessmentInput.assessmentVersion || question.phase !== assessmentInput.phase) {
+        throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.');
+      }
+      const plan = await this.assessmentPlan(assessmentInput.itemId);
+      if (plan.kind !== question.phase || plan.question.id !== question.id) {
+        throw new LearningError(409, 'Sesi latihan atau recall berubah. Muat ulang materi.');
+      }
+      let graded: ReturnType<typeof gradeAssessment>;
+      try { graded = gradeAssessment(question, assessmentInput.answer); }
+      catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
+      const previous = await this.db.prepare(`SELECT competency_id AS competencyId, step,
+        due_at AS dueAt FROM competency_review_schedule WHERE competency_id=?`)
+        .bind(question.competencyId).first<ReviewSchedule>();
+      assessmentWrite = {
+        input: assessmentInput,
+        competencyId: question.competencyId,
+        correct: graded.correct,
+        next: nextCompetencyReview(previous ?? undefined, question.phase, graded.correct, this.now()),
+      };
     }
     for (const session of sessions) assertSessionAllowed(this.item(session.itemId), session, current.activeItemId);
 
@@ -345,6 +380,26 @@ export class CloudflareLearningService {
         .bind(studiedItemId, now.toISOString(), requestId, nonce));
     }
 
+    if (assessmentWrite) {
+      const { input, competencyId, correct, next } = assessmentWrite;
+      statements.push(this.db.prepare(`INSERT INTO competency_attempts
+        (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at)
+        SELECT ?,?,?,?,?,?,?,?,?,? WHERE EXISTS (
+          SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+        )`).bind(randomUUID(), requestId, input.itemId, competencyId,
+          input.assessmentId, input.assessmentVersion, input.phase, input.answer,
+          correct ? 1 : 0, now.toISOString(), requestId, nonce));
+      if (next) {
+        statements.push(this.db.prepare(`INSERT INTO competency_review_schedule(competency_id,step,due_at)
+          SELECT ?,?,? WHERE EXISTS (
+            SELECT 1 FROM request_receipts WHERE request_id=? AND nonce=?
+          )
+          ON CONFLICT(competency_id) DO UPDATE
+            SET step=excluded.step,due_at=excluded.due_at`)
+          .bind(competencyId, next.step, next.dueAt, requestId, nonce));
+      }
+    }
+
     await this.db.batch(statements);
     const receipt = await this.db.prepare(
       'SELECT payload_hash, response, nonce FROM request_receipts WHERE request_id=?',
@@ -352,6 +407,38 @@ export class CloudflareLearningService {
     if (!receipt) throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
     if (receipt.payload_hash !== hash) throw new LearningError(409, 'Request ID sudah dipakai untuk data berbeda.');
     return JSON.parse(receipt.response) as LearningSnapshot;
+  }
+
+
+  async assessmentPlan(itemId: string) {
+    this.item(itemId);
+    const questions = assessmentQuestionsForItem(itemId);
+    if (!questions.length) return { kind: 'unavailable' as const, itemId };
+    const competencyId = questions[0].competencyId;
+    const [practiced, schedule] = await Promise.all([
+      this.db.prepare(`SELECT 1 AS found FROM competency_attempts
+        WHERE item_id=? AND competency_id=? AND phase='practice' AND correct=1 LIMIT 1`)
+        .bind(itemId, competencyId).first<{ found: number }>(),
+      this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
+        FROM competency_review_schedule WHERE competency_id=?`)
+        .bind(competencyId).first<ReviewSchedule>(),
+    ]);
+    return chooseAssessmentPlan(itemId, questions, !!practiced, schedule ?? undefined, this.now());
+  }
+
+  async submitAssessment(raw: unknown) {
+    const input = assessmentAttemptSchema.parse(raw);
+    this.item(input.itemId);
+    const question = assessmentQuestion(input.assessmentId);
+    if (!question || question.itemId !== input.itemId ||
+      question.version !== input.assessmentVersion || question.phase !== input.phase) {
+      throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.');
+    }
+    let grading: ReturnType<typeof gradeAssessment>;
+    try { grading = gradeAssessment(question, input.answer); }
+    catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
+    const snapshot = await this.mutate(input, 'assessment', [], undefined, input, undefined, input);
+    return { ...snapshot, assessment: grading };
   }
 
   async markStudied(raw: unknown) {
