@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import { CloudflareLearningService, type D1Database } from '../src/server/learning/d1';
 import assert from 'node:assert/strict';
-import { curriculumItemFingerprint } from '../src/domain/curriculum-v2/schema';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import {
   chooseAssessmentPlan, gradeAssessment, nextCompetencyReview, publicQuestion,
@@ -19,7 +18,7 @@ const itemBase = {
   prerequisites: [], marketExpectation: [], source: { title: 'Reference' },
   crossModuleReferenceRaw: [],
 };
-const item = { ...itemBase, fingerprint: curriculumItemFingerprint(itemBase) };
+const item = { ...itemBase, fingerprint: assessmentQuestion('sql-null-predict-01')!.curriculumFingerprint };
 const graph = buildCurriculumGraph({
   version: 2,
   tracks: [{ id: 'sql', title: 'SQL', order: 1 }],
@@ -175,7 +174,7 @@ test('Cloudflare D1 and SQLite assessment mutations agree across retry and delay
   } finally { sqliteDb.close(); d1Db.close(); }
 });
 
-test('incorrect prediction can be retried without activation; stale revision is rejected', () => {
+test('incorrect prediction routes to fresh transfer without activation; stale revision is rejected', () => {
   const db = openDatabase(':memory:');
   const service = new LearningService(db, graph);
   const first = {
@@ -187,15 +186,44 @@ test('incorrect prediction can be retried without activation; stale revision is 
     const attempt = service.submitAssessment(first);
     assert.equal(attempt.assessment.correct, false);
     assert.equal(attempt.revision, 1);
-    assert.equal(service.assessmentPlan(item.id).kind, 'practice');
+    assert.equal(service.assessmentPlan(item.id).kind, 'transfer');
     assert.throws(() => service.submitAssessment({
       ...first, requestId: '00000000-0000-4000-8000-000000000912', answer: 1,
     }), (e: unknown) => e instanceof LearningError && e.status === 409);
     const retry = service.submitAssessment({
-      ...first, requestId: '00000000-0000-4000-8000-000000000913', revision: 1, answer: 1,
+      ...first, requestId: '00000000-0000-4000-8000-000000000913', revision: 1,
+      phase: 'transfer', assessmentId: 'sql-null-transfer-01', answer: 1,
     });
-    assert.equal(retry.assessment.correct, true);
+    assert.equal(retry.assessment.outcome, 'correct_unassisted');
     assert.equal(service.assessmentPlan(item.id).kind, 'waiting');
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM competency_attempts').get() as {count:number}).count, 2);
+  } finally { db.close(); }
+});
+
+test('feedback on the same question is not independent evidence', () => {
+  const q = assessmentQuestion('sql-null-predict-01')!;
+  const previous = [{ assessmentId: q.id, phase: 'practice' as const, correct: false,
+    outcome: 'incorrect' as const }];
+  assert.equal(gradeAssessment(q, 1, previous).outcome, 'correct_after_feedback');
+  const afterFailure = chooseAssessmentPlan(q.itemId, assessmentQuestionsForItem(q.itemId),
+    false, undefined, new Date(), previous);
+  assert.equal(afterFailure.kind, 'transfer');
+});
+
+test('v6 export carries independent assessment attempts and schedule in SQLite', () => {
+  const db = openDatabase(':memory:');
+  try {
+    const service = new LearningService(db, graph);
+    service.submitAssessment({
+      requestId: '00000000-0000-4000-8000-000000000915', revision: 0,
+      itemId: 'SQL-001', phase: 'practice', assessmentId: 'sql-null-predict-01',
+      assessmentVersion: 'v1', answer: 1,
+    });
+    const data = service.export();
+    assert.equal(data.version, 5);
+    assert.equal(data.competencyAttempts.length, 1);
+    assert.equal(data.competencyReviewSchedules.length, 1);
+    assert.equal((data.competencyAttempts[0] as { outcome: string }).outcome, 'correct_unassisted');
+    assert.equal((db.prepare('PRAGMA user_version').get() as {user_version:number}).user_version, 6);
   } finally { db.close(); }
 });

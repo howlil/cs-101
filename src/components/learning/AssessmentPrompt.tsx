@@ -26,8 +26,10 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
   const requestRef = useRef<{ signature: string; id: string } | undefined>(undefined);
   if (plan.kind === 'unavailable') return null;
   if (!('question' in plan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
-    <strong>Pemahaman dasar sudah diuji.</strong>
-    <p>Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.</p>
+    <strong>{plan.kind === 'needs_support' ? 'Perlu penguatan konsep' : 'Pemahaman dasar sudah diuji.'}</strong>
+    <p>{plan.kind === 'needs_support'
+      ? 'Latihan variasi belum cukup. Periksa penjelasan dan coba implementasi SQL secara mandiri; tidak ada kewajiban mengulang form.'
+      : 'Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.'}</p>
     {plan.dueAt && <p className="muted small">Micro-recall: {new Date(plan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
   </section>;
 
@@ -86,7 +88,6 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
       setSubmitting(false);
     }
   };
-  const retry = () => { setFeedback(undefined); setAnswer(''); setError(''); };
   return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment" aria-label={plan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
     <p className="eyebrow">{plan.kind === 'recall' ? 'RECALL · tanpa catatan' : 'PREDICT · cek pemahaman'}</p>
     <h3>{question.prompt}</h3>
@@ -106,9 +107,8 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
         <p>{feedback.explanation}</p>
       </Alert>
       <Button type="button" variant="secondary" onClick={() => {
-        if (feedback.correct) navigate(window.location.href, { history: 'replace' });
-        else retry();
-      }}>{feedback.correct ? 'Lihat langkah berikutnya' : 'Coba lagi'}</Button>
+        navigate(window.location.href, { history: 'replace' });
+      }}>{feedback.correct ? 'Lihat langkah berikutnya' : 'Coba soal berbeda'}</Button>
     </div>}
     {error && <Alert title="Belum tersimpan" tone="danger">{error}</Alert>}
     <p className="muted small">Jawaban tersimpan otomatis; tidak diperlukan form bukti atau aktivasi materi.</p>
