@@ -506,8 +506,17 @@ try {
   await client.wait(async () => await client.eval('!document.querySelector(".lesson-assessment button").disabled'),
     'Adaptive answer selected');
   await client.eval('document.querySelector(".lesson-assessment button").click()');
-  await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment [role=status]")?.textContent.includes("Prediksi tepat")'),
-    'Server-graded assessment feedback');
+  try {
+    await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment [role=status]")?.textContent.includes("Prediksi tepat")'),
+      'Server-graded assessment feedback');
+  } catch (cause) {
+    const diagnostic = await client.eval(`(async () => ({
+      content: document.querySelector(".lesson-assessment")?.textContent,
+      revision: (await (await fetch("/api/learning")).json()).revision,
+      plan: await (await fetch("/api/learning-plan?itemId=SQL-001")).json(),
+    }))()`);
+    throw new Error('Assessment did not show feedback: ' + JSON.stringify(diagnostic) + '; ' + String(cause));
+  }
   const afterAssessment = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
   assert.equal(afterAssessment.kind, 'waiting', 'Correct prediction must schedule delayed recall');
   console.log('PASS SQL-001 prediction → server feedback → delayed micro-recall without evidence form');
