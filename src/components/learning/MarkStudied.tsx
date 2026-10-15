@@ -29,7 +29,7 @@ export default function MarkStudied({ itemId, revision, studied }: {
       setLoading(false);
     }
   };
-  return <section className="lesson-study-completion" aria-label="Progres belajar">
+  return <section id="lesson-study-completion" tabIndex={-1} className="lesson-study-completion" aria-label="Progres belajar">
     <h2>Sudah mempelajari konsep ini?</h2>
     <p className="muted small">Tandai tanpa laporan atau textarea. Ini progres belajar, bukan sertifikasi kompetensi. Bukti teknis tetap opsional.</p>
     {studied ? <p><CheckCircle2 size={16} aria-hidden="true" /> Materi sudah dipelajari.</p> : (

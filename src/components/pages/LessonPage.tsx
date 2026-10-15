@@ -127,8 +127,8 @@ export default function LessonPage({
     // viewport. Move focus to the newly visible panel, not to a dead spot.
     if (focusPanel) {
       window.requestAnimationFrame(() => {
-        const needsEligibility = next === 'evidence' && (!active || visibleState.status === 'passed');
-        document.getElementById(needsEligibility ? 'lesson-evidence-gate' : 'lesson-panel-' + next)?.focus();
+        const needsEligibility = next === 'evidence';
+        document.getElementById(needsEligibility ? 'lesson-study-completion' : 'lesson-panel-' + next)?.focus();
       });
     }
   };

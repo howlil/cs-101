@@ -171,7 +171,7 @@ test('migration V2 backfill active item, progress, dan session item id', () => {
     assert.equal(storedSession.itemId, unit.id);
     assert.equal(
       (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version,
-      3,
+      4,
     );
   } finally {
     db.close();
