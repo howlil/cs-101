@@ -56,8 +56,10 @@ export function nextCompetencyReview(
   };
 }
 export type AssessmentPlan =
-  | { kind: 'unavailable' | 'waiting'; itemId: string; dueAt?: string }
-  | { kind: 'practice' | 'recall'; itemId: string; question: PublicAssessment; dueAt?: string };
+  | { kind: 'unavailable'; itemId: string }
+  | { kind: 'waiting'; itemId: string; dueAt?: string }
+  | { kind: 'practice'; itemId: string; question: PublicAssessment }
+  | { kind: 'recall'; itemId: string; question: PublicAssessment; dueAt?: string };
 
 export function chooseAssessmentPlan(
   itemId: string,
