@@ -1,6 +1,5 @@
 "use client";
-import { useRef, useState } from 'react';
-import { navigate } from 'astro:transitions/client';
+import { useEffect, useRef, useState } from 'react';
 import type { AssessmentPlan } from '../../domain/learning/assessment';
 import { Button } from '../arc/button/button';
 import { RadioGroup } from '../arc/radio-group/radio-group';
@@ -19,29 +18,42 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
   plan: AssessmentPlan; revision: number; onCommitted?: (revision: number) => void;
 }) {
   const [answer, setAnswer] = useState('');
+  const [currentPlan, setCurrentPlan] = useState(plan);
+  useEffect(() => { setCurrentPlan(plan); }, [plan]);
 
   const [feedback, setFeedback] = useState<Feedback>();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const requestRef = useRef<{ signature: string; id: string } | undefined>(undefined);
-  if (plan.kind === 'unavailable') return null;
-  if (!('question' in plan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
-    <strong>{plan.kind === 'needs_support' ? 'Perlu penguatan konsep' : 'Pemahaman dasar sudah diuji.'}</strong>
+  const advance = async () => {
+    setSubmitting(true); setError('');
+    try {
+      const response = await fetch('/api/learning-plan?itemId=' + encodeURIComponent(currentPlan.itemId), { cache: 'no-store' });
+      if (!response.ok) throw new Error('Langkah berikutnya belum tersedia.');
+      setCurrentPlan(await response.json() as AssessmentPlan);
+      setFeedback(undefined); setAnswer(''); requestRef.current = undefined;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Belum bisa memuat latihan berikutnya.');
+    } finally { setSubmitting(false); }
+  };
+  if (currentPlan.kind === 'unavailable') return null;
+  if (!('question' in currentPlan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
+    <strong>{currentPlan.kind === 'needs_support' ? 'Perlu penguatan konsep' : 'Pemahaman dasar sudah diuji.'}</strong>
     <p>{plan.kind === 'needs_support'
       ? 'Latihan variasi belum cukup. Periksa penjelasan dan coba implementasi SQL secara mandiri; tidak ada kewajiban mengulang form.'
       : 'Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.'}</p>
-    {plan.kind === 'waiting' && plan.dueAt && <p className="muted small">Micro-recall: {new Date(plan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
+    {currentPlan.kind === 'waiting' && currentPlan.dueAt && <p className="muted small">Micro-recall: {new Date(currentPlan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
   </section>;
 
-  const { question } = plan;
+  const { question } = currentPlan;
   const submit = async () => {
     if (!answer || submitting || feedback?.correct) return;
     setSubmitting(true);
     setError('');
     try {
       const payload = {
-        itemId: plan.itemId, assessmentId: question.id,
-        assessmentVersion: question.version, phase: plan.kind,
+        itemId: currentPlan.itemId, assessmentId: question.id,
+        assessmentVersion: question.version, phase: currentPlan.kind,
         answer: Number(answer), revision,
       };
       const signature = JSON.stringify(payload);
@@ -60,13 +72,14 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
         if (!(cause instanceof MutationError) || cause.code !== 'REVISION_CONFLICT') throw cause;
         const [stateResponse, planResponse] = await Promise.all([
           fetch('/api/learning', { cache: 'no-store' }),
-          fetch('/api/learning-plan?itemId=' + encodeURIComponent(plan.itemId), { cache: 'no-store' }),
+          fetch('/api/learning-plan?itemId=' + encodeURIComponent(currentPlan.itemId), { cache: 'no-store' }),
         ]);
         if (!stateResponse.ok || !planResponse.ok) throw cause;
         const fresh = await stateResponse.json() as { revision: number };
         const latestPlan = await planResponse.json() as { kind: string; question?: { id: string } };
-        if (latestPlan.kind !== plan.kind || latestPlan.question?.id !== question.id) {
-          navigate(window.location.href, { history: 'replace' });
+        if (latestPlan.kind !== currentPlan.kind || latestPlan.question?.id !== question.id) {
+          setCurrentPlan(latestPlan as AssessmentPlan);
+          setFeedback(undefined); setAnswer('');
           return;
         }
         // The rejected revision never committed; a new payload requires a new
@@ -88,8 +101,8 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
       setSubmitting(false);
     }
   };
-  return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment" aria-label={plan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
-    <p className="eyebrow">{plan.kind === 'recall' ? 'RECALL · tanpa catatan' : 'PREDICT · cek pemahaman'}</p>
+  return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment" aria-label={currentPlan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
+    <p className="eyebrow">{currentPlan.kind === 'recall' ? 'RECALL · tanpa catatan' : currentPlan.kind === 'transfer' ? 'TRANSFER · soal variasi' : 'PREDICT · cek pemahaman'}</p>
     <h3>{question.prompt}</h3>
     {!feedback && <>
       <RadioGroup label="Pilih hasil prediksi" name={'assessment-' + question.id}
@@ -106,9 +119,8 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
         {feedback.misconception && <p>{feedback.misconception}</p>}
         <p>{feedback.explanation}</p>
       </Alert>
-      <Button type="button" variant="secondary" onClick={() => {
-        navigate(window.location.href, { history: 'replace' });
-      }}>{feedback.correct ? 'Lihat langkah berikutnya' : 'Coba soal berbeda'}</Button>
+      <Button type="button" variant="secondary" disabled={submitting} onClick={() => void advance()}>
+        {feedback.correct ? 'Lihat langkah berikutnya' : 'Coba soal berbeda'}</Button>
     </div>}
     {error && <Alert title="Belum tersimpan" tone="danger">{error}</Alert>}
     <p className="muted small">Jawaban tersimpan otomatis; tidak diperlukan form bukti atau aktivasi materi.</p>
