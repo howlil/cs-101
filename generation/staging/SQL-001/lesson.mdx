@@ -104,6 +104,22 @@ Cara menalar **hasil**, bukan urutan internal eksekusi fisik:
 
 Ini kerangka konseptual; optimizer PostgreSQL dapat menjalankan operasi fisik dalam urutan berbeda selama semantiknya terjaga.
 
+### Trace satu query dari baris sumber ke hasil
+
+Gunakan **lima baris** pada `00_setup.sql` di bawah (bukan tabel ilustrasi empat baris di awal). Prediksi dulu sebelum membaca tabel trace:
+
+**Query contoh:** `SELECT id FROM payments WHERE status = 'PAID' ORDER BY id;`
+
+| `id` | `status` | `status = 'PAID'` | Masuk hasil? |
+| ---: | --- | --- | --- |
+| 1 | PAID | TRUE | Ya |
+| 2 | FAILED | FALSE | Tidak |
+| 3 | NULL | UNKNOWN | Tidak |
+| 4 | PAID | TRUE | Ya |
+| 5 | PENDING | FALSE | Tidak |
+
+Output berurutan adalah `1, 4`. Kalau kamu mengira `id = 3` ikut karena UNKNOWN bukan FALSE, modelnya keliru: **WHERE hanya mengambil TRUE**. Untuk memprediksi query lain, pisahkan pertanyaan *nilai kondisi per row* dan *urutan hasil*.
+
 ## 3. NULL dan three-valued logic (3VL)
 
 `NULL` berarti **tidak ada nilai yang diketahui** pada posisi tersebut, bukan `0`, bukan string kosong, bukan `FALSE`. SQL memiliki tiga nilai logika: **TRUE, FALSE, UNKNOWN** (direpresentasikan sebagai `NULL` pada hasil ekspresi boolean).
@@ -150,6 +166,7 @@ SELECT 9 IS DISTINCT FROM NULL;            -- TRUE
 `AND` hanya TRUE bila **kedua** operand TRUE. Begitu satu sisi FALSE, hasilnya pasti FALSE terlepas dari sisi lainnya. Ini evaluasi nilai logika; jangan mengasumsikan PostgreSQL selalu mengeksekusi operand kiri lebih dahulu.
 </Reveal>
 
+**Pembedaan yang sering menipu:** kontrak `NULL` adalah bagian dari *data*, sedangkan tampilan `[NULL]` hanyalah konfigurasi `psql`. Mengubah `\pset null` tidak mengubah hasil query, tipe kolom, atau cara `WHERE` bekerja.
 ## 4. WHERE mempertahankan TRUE, bukan semua yang tidak FALSE
 
 Misalkan `status` pada payment `id=3` adalah `NULL`.
@@ -337,80 +354,83 @@ Referensi tambahan untuk penjelasan 3VL, tipe, implicit cast, dan ordering: [Log
 
 ## 9. Cek pemahaman — bukan skor kelulusan
 
-Coba lima pertanyaan ini **setelah** membaca tahap Pahami. Quiz ini membantu menemukan miskonsepsi; skor kelulusan berasal dari 20 kasus terpisah yang diprediksi sebelum dijalankan.
+Coba lima pertanyaan berbasis skenario ini **setelah** membaca tahap Pahami. Quiz ini membantu menemukan miskonsepsi; skor kelulusan berasal dari 20 kasus terpisah yang diprediksi sebelum dijalankan.
 
 <Quiz items={[
-  { question: 'Mengapa SELECT 7 = NULL tidak menghasilkan FALSE?', options: ['SELECT butuh FROM', 'NULL membuat equality biasa menjadi UNKNOWN', 'PostgreSQL tidak punya operator ='], answer: 1, explanation: 'SELECT bisa mengevaluasi ekspresi tanpa FROM; ordinary comparison dengan NULL menghasilkan UNKNOWN.' },
-  { question: 'Apa arti WHERE jika predikat bernilai UNKNOWN?', options: ['Row dipertahankan', 'Row tidak lolos', 'Query error'], answer: 1, explanation: 'WHERE hanya mempertahankan TRUE. FALSE dan UNKNOWN tidak lolos.' },
-  { question: 'Mengapa NOT IN berbahaya ketika daftar mengandung NULL?', options: ['Selalu menghasilkan TRUE', 'Tanpa match lain, hasil bisa UNKNOWN', 'NULL otomatis diabaikan'], answer: 1, explanation: 'NOT IN adalah gabungan perbandingan ketidaksamaan; satu UNKNOWN dapat membuat hasil akhir UNKNOWN bila tidak ada FALSE.' },
-  { question: 'Apa yang dilakukan DISTINCT?', options: ['Mengurutkan tabel fisik', 'Menghapus duplikat pada result rows', 'Membuat PRIMARY KEY'], answer: 1, explanation: 'DISTINCT menghapus duplicate result rows tetapi tidak menjamin ordering.' },
-  { question: 'Apa syarat LIMIT 2 memilih dua row secara deterministik?', options: ['ORDER BY created_at saja meski banyak tie', 'ORDER BY dengan tie-breaker unik', 'Tanpa ORDER BY karena primary key sudah ada'], answer: 1, explanation: 'ORDER BY dengan key yang membedakan semua row memastikan pilihan dan urutan stabil.' }
+  { question: 'Dari seed lima pembayaran, WHERE status <> \'PAID\' ORDER BY id menghasilkan ID berapa?', options: ['2, 3, 5', '2, 5', '1, 4'], answer: 1, explanation: 'Status NULL memberi UNKNOWN, sehingga baris 3 tidak lolos WHERE. Hanya FAILED dan PENDING yang TRUE.' },
+  { question: 'Apa hasil 8 NOT IN (1, 2, NULL)?', options: ['TRUE', 'FALSE', 'NULL / UNKNOWN'], answer: 2, explanation: 'Tanpa match numerik, perbandingan terhadap NULL tetap UNKNOWN dan NOT IN tidak menjadi TRUE.' },
+  { question: 'SELECT DISTINCT status FROM payments menghasilkan berapa baris, jika urutan diabaikan?', options: ['3', '4', '5'], answer: 1, explanation: 'Dua PAID menjadi satu; FAILED, PENDING, dan NULL masing-masing satu. DISTINCT tidak menjamin urutan.' },
+  { question: 'Dua payment memiliki created_at identik. Cara memilih LIMIT 2 secara deterministik?', options: ['ORDER BY created_at, id LIMIT 2', 'ORDER BY created_at LIMIT 2', 'LIMIT 2 saja'], answer: 0, explanation: 'Tie pada timestamp membutuhkan tie-breaker unik (id) supaya urutan total dijamin.' },
+  { question: 'Yang membuktikan hasil latihan, bukan cuma eksekusi SQL sukses, adalah?', options: ['Screenshot query yang selesai', 'Prediksi awal lalu assertion yang gagal pada mismatch, dijalankan dari psql -v ON_ERROR_STOP=1', 'Membaca semua soal sebelum membuat schema'], answer: 1, explanation: 'Pisahkan prediksi dari actual, jalankan seed dan assertion dari psql; RAISE EXCEPTION membuat mismatch menghasilkan exit nonzero.' }
 ]} />
 
 ## 10. SQL Semantics Minefield — 20 prediksi sebelum eksekusi
 
-**Jangan jalankan kasus berikut sebelum prediksinya ditulis.** Dataset adalah lima row dari `00_setup.sql` pada tahap Pahami. Tulis 20 prediksi terpisah tanpa mencari jawaban. Untuk setiap kasus, catat: `ID | predicted result (termasuk row count dan order jika dijamin) | reasoning`. Setelah seluruh prediksi terkunci, baru eksekusi satu per satu dan simpan `actual result | correct? | correction`.
+**Jangan jalankan kasus berikut sebelum prediksinya ditulis.** Dataset adalah lima row dari `00_setup.sql` pada tahap Pahami. Tulis 20 prediksi terpisah tanpa mencari jawaban. Untuk setiap kasus, catat: `ID | predicted result (termasuk row count dan order jika dijamin) | reasoning`. Untuk setiap kelompok lima soal, kunci dulu kelima prediksi sebelum mengeksekusinya. Lalu simpan `actual result | correct? | correction` tanpa mengubah prediksi yang sudah dikunci.
 
-Kasus 1–5: ekspresi, ordinary comparisons, dan `AND`.
+**Cara mengerjakannya tanpa ceremony:** buat satu file prediksi berisi 20 baris dengan format `ID | prediksi | alasan`. Kerjakan dalam empat kelompok lima kasus. Untuk setiap kelompok, tulis prediksi **sebelum** menjalankan query kelompok tersebut, lalu cek dan koreksi. Prediksi awal tidak boleh diedit. Tidak perlu timer, laporan panjang, atau formulir tambahan.
+
+**Kontrak prediksi:** untuk scalar, tulis nilai beserta `NULL` jika UNKNOWN; untuk rowset, tulis *jumlah*, *nilai yang muncul*, dan *urutan* hanya jika SQL menjaminnya. `ERROR` berbeda dari hasil `NULL`. Untuk query tanpa ordering, tulis batas jaminan yang benar, bukan menebak urutan fisik.
+
+Kasus 1–5: scalar, ordinary comparisons, dan three-valued logic.
 
 ```sql
--- 01
+-- 01: SELECT tanpa FROM
 SELECT 42 AS result;
--- 02
+-- 02: equality dengan NULL
 SELECT 12 = NULL AS result;
--- 03
-SELECT NULL <> NULL AS result;
--- 04
-SELECT TRUE AND (3 > NULL) AS result;
--- 05
+-- 03: AND dengan UNKNOWN
 SELECT FALSE AND (3 > NULL) AS result;
+-- 04: OR dengan UNKNOWN
+SELECT TRUE OR (3 > NULL) AS result;
+-- 05: NOT dengan UNKNOWN
+SELECT NOT (3 > NULL) AS result;
 ```
 
-Kasus 6–10: `OR`, `NOT`, dan null-safe predicates.
+Kasus 6–10: null-safe equality dan pemilihan row. Gunakan lima row dari `00_setup.sql`.
 
 ```sql
 -- 06
-SELECT TRUE OR (3 > NULL) AS result;
+SELECT NULL IS NOT DISTINCT FROM NULL AS result;
 -- 07
-SELECT FALSE OR (3 > NULL) AS result;
--- 08
-SELECT NOT (3 > NULL) AS result;
--- 09
-SELECT NULL IS NULL AS result;
--- 10
 SELECT 12 IS DISTINCT FROM NULL AS result;
+-- 08
+SELECT id FROM payments WHERE status = 'FAILED' ORDER BY id;
+-- 09
+SELECT id FROM payments WHERE status <> 'FAILED' ORDER BY id;
+-- 10
+SELECT id FROM payments WHERE status IS DISTINCT FROM 'FAILED' ORDER BY id;
 ```
 
-Kasus 11–15: `WHERE`, NULL row, dan `NOT IN`.
+Kasus 11–15: `NOT IN`, baris duplikat, dan `DISTINCT`.
 
 ```sql
 -- 11
-SELECT id FROM payments WHERE amount >= 150 ORDER BY id;
--- 12
-SELECT id FROM payments WHERE status <> 'FAILED' ORDER BY id;
--- 13
-SELECT id FROM payments WHERE status IS NOT NULL ORDER BY id;
--- 14
 SELECT 3 NOT IN (1, 2, NULL) AS result;
--- 15
+-- 12
 SELECT 2 NOT IN (1, 2, NULL) AS result;
+-- 13
+SELECT status FROM payments WHERE status = 'PAID' ORDER BY id;
+-- 14
+SELECT DISTINCT status FROM payments ORDER BY status NULLS LAST;
+-- 15
+SELECT DISTINCT merchant_id FROM payments ORDER BY merchant_id;
 ```
 
-Kasus 16–20: duplicates, `DISTINCT`, ordering, `LIMIT`, dan operator type inference.
+Kasus 16–20: numeric, sorting, `LIMIT`, dan literal type inference.
 
 ```sql
--- 16
-SELECT DISTINCT status FROM payments ORDER BY status NULLS LAST;
--- 17
-SELECT status FROM payments WHERE status = 'PAID' ORDER BY id;
--- 18
+-- 16: dua kolom dengan urutan yang eksplisit
+SELECT id, amount FROM payments WHERE amount >= 150 ORDER BY amount DESC, id;
+-- 17: aritmetika desimal exact
+SELECT 0.1::numeric + 0.2::numeric AS result;
+-- 18: tanpa ORDER BY
 SELECT id FROM payments LIMIT 2;
--- 19
+-- 19: created_at bisa sama; id menjadi tie-breaker
 SELECT id FROM payments ORDER BY created_at, id LIMIT 2;
--- 20
+-- 20: unknown literal dan operator resolution
 SELECT '10' + 2 AS result;
 ```
-
 **Khusus kasus 18:** jawaban yang benar bukan menebak dua ID. Jelaskan apa yang **dijamin** oleh query dan apa yang **tidak dijamin**; assertion juga harus memeriksa kontrak itu, bukan mengunci urutan kebetulan.
 
 <Challenge
@@ -452,6 +472,34 @@ psql -X -v ON_ERROR_STOP=1 -d cs101_sql001 -f 01_queries.sql
 psql -X -v ON_ERROR_STOP=1 -d cs101_sql001 -f 03_assertions.sql
 ```
 
+### Template assertion yang benar-benar gagal saat prediksi salah
+
+`psql` bukan runner test otomatis hanya karena query berhasil dieksekusi. Untuk membuat suatu pemeriksaan benar-benar *fail*, gunakan `DO` dengan `RAISE EXCEPTION`, kemudian jalankan `psql -v ON_ERROR_STOP=1`. Dua contoh berikut **bukan jawaban untuk 20 kasus**:
+
+```sql
+-- Contoh A: verifikasi scalar nullable dari ekspresi lain
+DO $qa$
+BEGIN
+  IF NOT ((NULL::integer = 99) IS UNKNOWN) THEN
+    RAISE EXCEPTION 'Expected UNKNOWN for nullable comparison';
+  END IF;
+END
+$qa$;
+
+-- Contoh B: verifikasi himpunan ID dengan ordering eksplisit
+DO $qa$
+DECLARE observed bigint[];
+BEGIN
+  SELECT array_agg(id ORDER BY id) INTO observed
+  FROM payments WHERE merchant_id = 20;
+  IF observed IS DISTINCT FROM ARRAY[3, 4]::bigint[] THEN
+    RAISE EXCEPTION 'Merchant 20 IDs mismatch: %', observed;
+  END IF;
+END
+$qa$;
+```
+
+Untuk kasusmu, pilih satu pemeriksaan per prediksi: **scalar** (`IS [NOT] DISTINCT FROM` bila NULL mungkin muncul), **cardinality**, atau **ordered rowset**. Jangan menambahkan `ORDER BY` diam-diam ke query yang sengaja menguji nondeterminism: pisahkan *query yang diuji* dari *cara assertion membandingkan baris*. Assertion untuk query tanpa ORDER BY tidak boleh mengunci urutan yang bukan bagian dari kontraknya.
 Jika klaim `18/20` belum terbukti, **jangan** tandai unit lulus. Review reasoning yang salah, siapkan kasus baru dengan semantik serupa tetapi input berbeda, lalu uji ulang tanpa melihat hasil terlebih dahulu.
 
 </LessonStage>

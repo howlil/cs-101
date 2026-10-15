@@ -3,13 +3,13 @@
   "curriculumFingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
   "payoff": "Predict PostgreSQL query behavior correctly before running SQL, then prove it using a reproducible psql workflow.",
   "learningOutcomes": [
-    "Explain relational schema, row identity, primary key, and duplicate result rows",
-    "Derive SQL TRUE/FALSE/UNKNOWN and reason about NULL, NOT IN, and WHERE",
-    "Choose PostgreSQL types consciously and distinguish implicit from explicit casting",
-    "Predict how DISTINCT, ORDER BY, and LIMIT affect outputs and determinism",
-    "Complete 20 hostile SQL predictions and verify them with psql and stored expected results"
+    "Menjelaskan schema, primary key, duplicate rows, dan perbedaan relation vs SQL result set",
+    "Menurunkan TRUE/FALSE/UNKNOWN dan memprediksi efek NULL/NOT IN pada WHERE",
+    "Memilih numeric dan time data types dengan sadar serta membedakan literal inference vs cast",
+    "Menentukan cardinality, DISTINCT, dan urutan yang benar untuk ORDER BY/LIMIT",
+    "Membuat 20 prediksi sebelum eksekusi, kemudian membuktikannya dengan psql dan SQL assertions"
   ],
-  "mentalModel": "Schema and typed rows feed expressions; comparisons yield TRUE/FALSE/UNKNOWN; WHERE keeps TRUE only; projection may retain duplicates; DISTINCT removes duplicate results; ORDER BY with unique tie-breakers defines deterministic order for LIMIT.",
+  "mentalModel": "Typed input rows → comparisons (TRUE/FALSE/UNKNOWN) → WHERE keeps TRUE only → projected rows may duplicate → DISTINCT optionally removes duplicates → total ORDER BY makes LIMIT deterministic; assertions verify the guaranteed contract, not incidental execution output.",
   "relationshipGraph": "schema + typed rows → expressions → TRUE|FALSE|UNKNOWN → WHERE(TRUE only) → result rows (possible duplicates) → DISTINCT? → ORDER BY with tie-breaker? → LIMIT",
   "concepts": [
     {
@@ -87,108 +87,111 @@
     "NOT IN ignores nullable right-hand elements",
     "DISTINCT sorts",
     "A primary key physically orders the table",
-    "LIMIT without ORDER BY chooses the same rows reliably"
+    "LIMIT without ORDER BY chooses the same rows reliably",
+    "A successful psql exit proves a prediction correct without an assertion",
+    "The display string [NULL] is stored data rather than a psql output setting",
+    "An assertion may force an accidental LIMIT order that SQL never guaranteed"
   ],
   "practice": [
-    "Read worked row-by-row traces before answering graded questions",
-    "Create isolated PostgreSQL training database via createdb and psql CLI",
-    "Predict guided queries and reveal outcomes only after attempting",
-    "Lock 20 unseen predictions and compare with executable or expected-result evidence without changing original predictions",
-    "For LIMIT without ORDER BY, verify only the guaranteed contract, not an incidental order"
+    "Trace per-row predicate truth value on five payment fixtures before running SQL",
+    "Lock each group of five SQL predictions before executing that group; retain original prediction text",
+    "Cover NULL, NOT IN, null-safe comparisons, duplicates, DISTINCT, numeric types, tie-breaking and unordered LIMIT across 20 cases",
+    "Use psql -v ON_ERROR_STOP=1 and DO/RAISE EXCEPTION or expected-result files to verify each predicted contract",
+    "Repair misconceptions with a fresh analogous case without weakening the 18/20 original threshold"
   ],
   "coverage": [
     {
       "criterionId": "criterion-2f0d9333e1",
-      "taughtAt": "Understand sections 2–7 + guided lab",
-      "assessedAt": "Practice section 10 / 20 prediction cases",
-      "evidenceExpected": "At least 18/20 predictions written before execution, with reasoning and compared actual output"
+      "taughtAt": "Understand: row-by-row WHERE trace, 3VL, NOT IN, duplicate results and data types",
+      "assessedAt": "Practice: 4 batches × 5 independent prediction cases (01–20)",
+      "evidenceExpected": "20 locked pre-execution predictions; ≥18 correct with row counts, NULL semantics, and contract-aware ordering"
     },
     {
       "criterionId": "criterion-141c1bd6ee",
-      "taughtAt": "Understand section 8 and Practice section 11",
-      "assessedAt": "Clean psql setup, seed, query and assertion workflow",
-      "evidenceExpected": "Files and CLI transcript on a clean database, no ORM"
+      "taughtAt": "Understand: isolated psql setup and seed; Practice: fail-hard DO assertion templates",
+      "assessedAt": "Clean psql setup, query execution, and 20 expected-result files or SQL assertions",
+      "evidenceExpected": "psql transcript with ON_ERROR_STOP=1 and assertions detecting real mismatches, no ORM"
     },
     {
       "criterionId": "criterion-9b52958986",
-      "taughtAt": "Understand section 7 and guided lab",
-      "assessedAt": "Practice cases 16–19 including nondeterministic LIMIT and tie-breakers",
-      "evidenceExpected": "Deterministic ordering where required, and explicit no-order contract for bare LIMIT"
+      "taughtAt": "Understand: total ORDER BY and tie-breakers; Practice: sorting and LIMIT contract",
+      "assessedAt": "Practice cases 16, 18, 19 plus contract-aware assertions",
+      "evidenceExpected": "Explicit tie-breakers for ordered outputs and a non-ordered LIMIT assertion that does not assume an ID sequence"
     },
     {
       "criterionId": "challenge",
-      "taughtAt": "Guided lab and prediction protocol in Practice section 10",
-      "assessedAt": "SQL Semantics Minefield / 20 SQL cases",
-      "evidenceExpected": "Locked predictions, executable assertions or expected-result files, correction log and psql transcript"
+      "taughtAt": "Guided psql lab, four 5-case batches, and fail-hard assertion templates",
+      "assessedAt": "SQL Semantics Minefield (20 prediction / verify cases)",
+      "evidenceExpected": "Pre-execution prediction log, per-case assertion or expected-result evidence, correction notes, and psql CLI transcript"
     }
   ],
   "reviewQuestions": [
     {
       "id": "q1",
-      "prompt": "Query SELECT 7 = NULL menghasilkan apa?",
+      "prompt": "Pada seed 5 pembayaran, SELECT id FROM payments WHERE status <> 'PAID' ORDER BY id; menghasilkan apa?",
       "options": [
-        "TRUE",
-        "FALSE",
-        "NULL / unknown"
+        "2, 3, 5",
+        "2, 5",
+        "1, 4"
       ],
-      "answer": 2,
-      "explanation": "Perbandingan biasa dengan NULL menghasilkan unknown; nullness diuji dengan IS NULL.",
+      "answer": 1,
+      "explanation": "FALSE pada PAID, TRUE pada FAILED dan PENDING, UNKNOWN pada NULL; WHERE hanya menerima TRUE.",
       "criterionIds": [
         "criterion-2f0d9333e1"
       ]
     },
     {
       "id": "q2",
-      "prompt": "Apa hasil 3 NOT IN (1, 2, NULL)?",
+      "prompt": "Apa hasil SELECT 8 NOT IN (1, 2, NULL)?",
       "options": [
         "TRUE",
         "FALSE",
-        "NULL / unknown"
+        "NULL / UNKNOWN"
       ],
       "answer": 2,
-      "explanation": "NOT IN menjadi rangkaian ketidaksamaan; perbandingan terakhir dengan NULL membuat hasil akhir unknown.",
+      "explanation": "Tidak ada kecocokan numerik; perbandingan terhadap NULL tetap UNKNOWN dan konjungsi NOT IN menghasilkan UNKNOWN.",
       "criterionIds": [
         "criterion-2f0d9333e1"
       ]
     },
     {
       "id": "q3",
-      "prompt": "Mana yang paling tepat untuk mendapatkan tiga row yang sama secara deterministik?",
+      "prompt": "Dari seed lima pembayaran (PAID dua kali, FAILED, NULL, PENDING), berapa row SELECT DISTINCT status FROM payments?",
       "options": [
-        "LIMIT 3",
-        "DISTINCT lalu LIMIT 3",
-        "ORDER BY id LIMIT 3"
+        "3",
+        "4",
+        "5"
       ],
-      "answer": 2,
-      "explanation": "LIMIT tanpa ORDER BY yang cukup spesifik tidak menjanjikan subset atau urutan tertentu.",
+      "answer": 1,
+      "explanation": "DISTINCT mereduksi dua PAID menjadi satu; NULL adalah satu nilai duplicate group tersendiri, bukan otomatis dihapus.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dua payment memiliki created_at sama. Mana yang memberi subset LIMIT 2 secara deterministik?",
+      "options": [
+        "ORDER BY created_at, id LIMIT 2",
+        "ORDER BY created_at LIMIT 2",
+        "LIMIT 2 tanpa ORDER BY"
+      ],
+      "answer": 0,
+      "explanation": "Tie-breaker id yang unik membuat total order; timestamp saja tidak menjamin tie-order.",
       "criterionIds": [
         "criterion-9b52958986"
       ]
     },
     {
-      "id": "q4",
-      "prompt": "Apa arti utama PRIMARY KEY pada schema?",
-      "options": [
-        "Menyimpan row secara fisik berurutan",
-        "Memberi identifier unik dan non-null untuk row",
-        "Memaksa semua query memakai index"
-      ],
-      "answer": 1,
-      "explanation": "Primary key menyatakan uniqueness dan non-null identity; planner tetap memilih execution plan.",
-      "criterionIds": [
-        "criterion-141c1bd6ee"
-      ]
-    },
-    {
       "id": "q5",
-      "prompt": "Workflow mana yang paling membuktikan materi ini dikuasai?",
+      "prompt": "Cara mana memberi bukti yang dapat direproduksi untuk prediksi SQL?",
       "options": [
-        "Membaca dokumentasi sampai selesai",
-        "Menjalankan schema, seed, prediksi, dan query dari psql lalu menyimpan hasil",
-        "Menggunakan ORM agar query tersembunyi"
+        "Screenshot output psql tanpa pengecekan",
+        "Prediksi sebelum eksekusi + psql -v ON_ERROR_STOP=1 + assertion yang RAISE EXCEPTION jika mismatch",
+        "Jalankan query di ORM tanpa menyimpan prediksi"
       ],
       "answer": 1,
-      "explanation": "Target curriculum meminta clean schema + seed + query workflow dari psql dan prediksi yang dapat diverifikasi.",
+      "explanation": "Sukses menjalankan SQL bukan bukti hasil sesuai ekspektasi. Fail-hard assertions memverifikasi output; prediksi disimpan sebelum melihat hasil.",
       "criterionIds": [
         "criterion-141c1bd6ee",
         "criterion-2f0d9333e1",
