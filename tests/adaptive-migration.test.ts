@@ -30,7 +30,8 @@ test('v5→v6 migration preserves legacy attempts and permits new transfer attem
     assert.equal((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 6);
     const old = db.prepare('SELECT outcome, bank_fingerprint AS bankFingerprint FROM competency_attempts WHERE id=?')
       .get('old-1') as { outcome: string; bankFingerprint: string | null };
-    assert.deepEqual(old, { outcome: 'legacy_unknown', bankFingerprint: null });
+    assert.equal(old.outcome, 'legacy_unknown');
+    assert.equal(old.bankFingerprint, null);
     db.prepare(`INSERT INTO competency_attempts
       (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at,outcome,bank_fingerprint)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('new-1', 'new-request', 'SQL-001', 'sql-001-null-logic',
