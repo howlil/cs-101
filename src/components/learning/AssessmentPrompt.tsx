@@ -39,7 +39,7 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
   if (currentPlan.kind === 'unavailable') return null;
   if (!('question' in currentPlan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
     <strong>{currentPlan.kind === 'needs_support' ? 'Perlu penguatan konsep' : 'Pemahaman dasar sudah diuji.'}</strong>
-    <p>{plan.kind === 'needs_support'
+    <p>{currentPlan.kind === 'needs_support'
       ? 'Latihan variasi belum cukup. Periksa penjelasan dan coba implementasi SQL secara mandiri; tidak ada kewajiban mengulang form.'
       : 'Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.'}</p>
     {currentPlan.kind === 'waiting' && currentPlan.dueAt && <p className="muted small">Micro-recall: {new Date(currentPlan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
@@ -76,9 +76,9 @@ export default function AssessmentPrompt({ plan, revision, onCommitted }: {
         ]);
         if (!stateResponse.ok || !planResponse.ok) throw cause;
         const fresh = await stateResponse.json() as { revision: number };
-        const latestPlan = await planResponse.json() as { kind: string; question?: { id: string } };
-        if (latestPlan.kind !== currentPlan.kind || latestPlan.question?.id !== question.id) {
-          setCurrentPlan(latestPlan as AssessmentPlan);
+        const latestPlan = await planResponse.json() as AssessmentPlan;
+        if (latestPlan.kind !== currentPlan.kind || !('question' in latestPlan) || latestPlan.question.id !== question.id) {
+          setCurrentPlan(latestPlan);
           setFeedback(undefined); setAnswer('');
           return;
         }
