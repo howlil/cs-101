@@ -24,20 +24,21 @@ export default function AssessmentPrompt({ plan, revision }: {
   const [submitting, setSubmitting] = useState(false);
   const requestRef = useRef<{ signature: string; id: string } | undefined>(undefined);
   if (plan.kind === 'unavailable') return null;
-  if (plan.kind === 'waiting') return <section className="lesson-assessment">
+  if (!('question' in plan)) return <section className="lesson-assessment">
     <strong>Pemahaman dasar sudah diuji.</strong>
     <p>Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.</p>
     {plan.dueAt && <p className="muted small">Micro-recall: {new Date(plan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
   </section>;
 
+  const { question } = plan;
   const submit = async () => {
     if (!answer || submitting || feedback?.correct) return;
     setSubmitting(true);
     setError('');
     try {
       const payload = {
-        itemId: plan.itemId, assessmentId: plan.question.id,
-        assessmentVersion: plan.question.version, phase: plan.kind,
+        itemId: plan.itemId, assessmentId: question.id,
+        assessmentVersion: question.version, phase: plan.kind,
         answer: Number(answer), revision,
       };
       const signature = JSON.stringify(payload);
@@ -58,10 +59,10 @@ export default function AssessmentPrompt({ plan, revision }: {
   const retry = () => { setFeedback(undefined); setAnswer(''); setError(''); };
   return <section className="lesson-assessment" aria-label={plan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
     <p className="eyebrow">{plan.kind === 'recall' ? 'RECALL · tanpa catatan' : 'PREDICT · cek pemahaman'}</p>
-    <h3>{plan.question.prompt}</h3>
+    <h3>{question.prompt}</h3>
     {!feedback && <>
-      <RadioGroup label="Pilih hasil prediksi" name={'assessment-' + plan.question.id}
-        options={plan.question.options.map((label, index) => ({ label, value: String(index) }))}
+      <RadioGroup label="Pilih hasil prediksi" name={'assessment-' + question.id}
+        options={question.options.map((label, index) => ({ label, value: String(index) }))}
         value={answer} onValueChange={setAnswer} />
       <Button type="button" variant="primary" disabled={!answer || submitting}
         loading={submitting} onClick={() => void submit()}>
