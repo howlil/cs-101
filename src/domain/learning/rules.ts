@@ -1,5 +1,6 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
 import type { Criterion, CurriculumItem } from '../curriculum-v2/schema';
+import { learningPolicyFor } from './policy';
 
 export type StoredCompletionStatus = 'active' | 'passed';
 export type CompletionStatus = StoredCompletionStatus | 'stale';
@@ -60,7 +61,7 @@ export function deriveAvailability(
 
   const studied = new Set(studiedItems);
   return graph.manifest.items.map((item) => {
-    const missingPrerequisites = item.kind === 'unit' ? [] : blockingPrerequisites(item).filter((id) =>
+    const missingPrerequisites = learningPolicyFor(item).prerequisite === 'advisory' ? [] : blockingPrerequisites(item).filter((id) =>
       !passed.has(id) && !(graph.itemsById.get(id)?.kind === 'unit' && studied.has(id))
     );
     return {
@@ -84,7 +85,7 @@ export function missingPrerequisites(
     current.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId),
   );
   const studied = new Set(studiedItems);
-  return item.kind === 'unit' ? [] : blockingPrerequisites(item).filter((id) =>
+  return learningPolicyFor(item).prerequisite === 'advisory' ? [] : blockingPrerequisites(item).filter((id) =>
     !passed.has(id) && !(graph.itemsById.get(id)?.kind === 'unit' && studied.has(id))
   );
 }

@@ -234,8 +234,8 @@ export default function LessonPage({
               ? 'Selesaikan prasyarat untuk menyimpan bukti'
               : 'Aktifkan materi untuk menyimpan bukti'}</strong>
             <p>{visibleState.status === 'locked'
-              ? 'Kamu tetap bisa membaca dan mencoba latihan. Sesi baru dapat disimpan setelah prasyarat selesai.'
-              : 'Kamu boleh membaca dan mencoba latihan tanpa mengaktifkan materi. Untuk menyimpan sesi dan bukti selesai, aktifkan materi terlebih dahulu.'}</p>
+              ? 'Kamu tetap bisa membaca, mencoba, dan menandai materi dipelajari. Bukti teknis tambahan dapat disimpan setelah prasyarat selesai.'
+              : 'Tandai dipelajari tanpa aktivasi. Untuk mengirim bukti teknis tambahan, aktifkan materi terlebih dahulu.'}</p>
             {visibleState.status === 'locked' ? (
               <div className="lesson-evidence-prerequisites">
                 {visibleState.missingPrerequisites.map((id) => {

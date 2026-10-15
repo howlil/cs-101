@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
+import { learningPolicyFor } from '../../domain/learning/policy';
 import {
   deriveAvailability,
   withCurrentCompletion,
@@ -356,7 +357,7 @@ export class CloudflareLearningService {
   async markStudied(raw: unknown) {
     const input = studyActionSchema.parse(raw);
     const item = this.item(input.itemId);
-    if (item.kind !== 'unit') throw new LearningError(422, 'Tandai dipelajari hanya untuk materi.');
+    if (learningPolicyFor(item).completion !== 'self_check') throw new LearningError(422, 'Tandai dipelajari hanya untuk materi.');
     return this.mutate(input, 'mark-studied', [], undefined, input, item.id);
   }
 
