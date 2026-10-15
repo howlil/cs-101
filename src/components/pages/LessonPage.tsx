@@ -10,6 +10,7 @@ import { Alert } from '../arc/alert/alert';
 import { Button } from '../arc/button/button';
 import { Accordion } from '../arc/accordion/accordion';
 import SessionLogger from '../learning/SessionLogger';
+import MarkStudied from '../learning/MarkStudied';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
 type StageId = 'understand' | 'practice' | 'evidence';
@@ -30,6 +31,7 @@ export default function LessonPage({
   available,
   stale,
   active,
+  studied,
   actionState,
   prerequisites = [],
   breadcrumb,
@@ -58,6 +60,7 @@ export default function LessonPage({
   available: boolean;
   stale: boolean;
   active: boolean;
+  studied: boolean;
   actionState?: ItemActionState;
   prerequisites?: Array<{ id: string; title: string; href: string }>;
   breadcrumb?: { track: string; module: string; position: number; total: number };
@@ -86,6 +89,7 @@ export default function LessonPage({
   const [stage, setStage] = useState<StageId>('understand');
   const [contextOpen, setContextOpen] = useState(false);
   const [focus, setFocus] = useState(false);
+  const [proofOpen, setProofOpen] = useState(false);
 
   useEffect(() => {
     const updateFromHash = () => {
@@ -217,6 +221,8 @@ export default function LessonPage({
         </div>
       <aside id="lesson-context" className="lesson-staged-context" aria-label="Konteks materi" hidden={!contextOpen}>{context}</aside>
 
+      {stage === 'evidence' && <MarkStudied itemId={itemId} revision={revision}
+        studied={studied || visibleState.status === 'passed'} />}
       {stage === 'evidence' && (!active || visibleState.status === 'passed') && (
         <aside id="lesson-evidence-gate" tabIndex={-1} className="lesson-evidence-gate" aria-label="Status penyimpanan bukti">
           {visibleState.status === 'passed' ? <>
@@ -272,19 +278,22 @@ export default function LessonPage({
         <Button type="button" variant="primary" onClick={() => chooseStage('practice', true)}>Mulai latihan</Button>
       </div>}
       {stage === 'practice' && <div className="lesson-stage-next">
-        <Button type="button" variant="primary" onClick={() => chooseStage('evidence', true)}>Catat bukti</Button>
+        <Button type="button" variant="primary" onClick={() => chooseStage('evidence', true)}>Selesaikan materi</Button>
       </div>}
-      {active && visibleState.status !== 'passed' && <div className="lesson-staged-evidence-form"
+      {stage === 'evidence' && active && visibleState.status !== 'passed' && <div className="lesson-staged-evidence-form"
         role="group"
         aria-labelledby="lesson-tab-evidence">
-        <SessionLogger
+        <Button type="button" size="sm" variant="secondary" aria-expanded={proofOpen} onClick={() => setProofOpen((value) => !value)}>
+          {proofOpen ? 'Tutup bukti teknis' : 'Bukti teknis lanjutan (opsional)'}
+        </Button>
+        {proofOpen && <SessionLogger
           itemId={itemId}
           fingerprint={fingerprint}
           criteria={criteria}
           revision={revision}
           continueFrom={continueFrom}
           lastAnchor={lastAnchor}
-        />
+        />}
       </div>}
       {(previous || next) && <nav className="lesson-sequence" aria-label="Navigasi materi">
         {previous ? <a href={previous.href} rel="prev">

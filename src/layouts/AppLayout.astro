@@ -110,13 +110,13 @@ if (showCurriculum) {
       );
       return {
         id: track.id, title: track.title, total: items.length,
-        completed: items.filter((item) => stateFor(item.id) === 'passed').length,
+        completed: items.filter((item) => ((stateFor(item.id) === 'passed' || stateFor(item.id) === 'studied') || stateFor(item.id) === 'studied')).length,
       };
     }),
     modules: (explorer?.modules ?? []).map((module) => ({
       id: module.id,
       title: module.title,
-      completed: module.items.filter((item) => stateFor(item.id) === 'passed').length,
+      completed: module.items.filter((item) => (stateFor(item.id) === 'passed' || stateFor(item.id) === 'studied')).length,
       items: module.items.map((item, index) => ({
         ...sidebarItem(item),
         position: { index: index + 1, total: module.items.length },

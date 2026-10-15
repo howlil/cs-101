@@ -98,7 +98,7 @@ export class LearningService {
     }>;
 
     return {
-      version: 3,
+      version: 4,
       ...this.snapshot(),
       sessions: sessions.map(({ payload, ...row }) => {
         const parsed = JSON.parse(payload) as Record<string, unknown>;

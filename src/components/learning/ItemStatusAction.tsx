@@ -30,6 +30,7 @@ export default function ItemStatusAction({
   if (state.status === 'studied') return <div className="item-action-status">
     <Badge tone="success" icon={<CheckCircle2 size={14} />}>Dipelajari</Badge>
     {mode === 'preview' && href && <ActionLink href={href} label="Buka materi" />}
+    {mode === 'detail' && state.canActivate && <ActivateItem itemId={itemId} label="Bukti teknis (opsional)" />}
   </div>;
 
   if (state.status === 'locked') return <div className="item-action-status item-action-locked">
