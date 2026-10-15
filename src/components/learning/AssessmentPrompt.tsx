@@ -5,7 +5,7 @@ import type { AssessmentPlan } from '../../domain/learning/assessment';
 import { Button } from '../arc/button/button';
 import { RadioGroup } from '../arc/radio-group/radio-group';
 import { Alert } from '../arc/alert/alert';
-import { postJson } from './client';
+import { postJson, MutationError } from './client';
 
 type Feedback = {
   correct: boolean;
@@ -15,11 +15,11 @@ type Feedback = {
 };
 type Response = { revision: number; assessment: Feedback };
 
-export default function AssessmentPrompt({ plan, revision }: {
-  plan: AssessmentPlan; revision: number;
+export default function AssessmentPrompt({ plan, revision, onCommitted }: {
+  plan: AssessmentPlan; revision: number; onCommitted?: (revision: number) => void;
 }) {
   const [answer, setAnswer] = useState('');
-  const [currentRevision, setCurrentRevision] = useState(revision);
+
   const [feedback, setFeedback] = useState<Feedback>();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -40,7 +40,7 @@ export default function AssessmentPrompt({ plan, revision }: {
       const payload = {
         itemId: plan.itemId, assessmentId: question.id,
         assessmentVersion: question.version, phase: plan.kind,
-        answer: Number(answer), revision: currentRevision,
+        answer: Number(answer), revision,
       };
       const signature = JSON.stringify(payload);
       if (requestRef.current?.signature !== signature) {
@@ -55,7 +55,7 @@ export default function AssessmentPrompt({ plan, revision }: {
         // An Astro hash navigation can retain an older SSR revision. A stale
         // write must be rejected by the server; reconcile once without asking
         // the learner to re-answer. Never replay if the planned task changed.
-        if (!(cause instanceof Error) || !cause.message.includes('Progres berubah di tab lain')) throw cause;
+        if (!(cause instanceof MutationError) || cause.code !== 'REVISION_CONFLICT') throw cause;
         const [stateResponse, planResponse] = await Promise.all([
           fetch('/api/learning', { cache: 'no-store' }),
           fetch('/api/learning-plan?itemId=' + encodeURIComponent(plan.itemId), { cache: 'no-store' }),
@@ -78,7 +78,7 @@ export default function AssessmentPrompt({ plan, revision }: {
         });
       }
       requestRef.current = undefined;
-      setCurrentRevision(result.revision);
+      onCommitted?.(result.revision);
       setFeedback(result.assessment);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Jawaban belum tersimpan.');

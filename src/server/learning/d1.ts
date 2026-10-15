@@ -83,6 +83,10 @@ export class CloudflareLearningService {
       this.db.prepare(`SELECT item_id AS itemId, policy_version AS policyVersion, step,
         due_at AS dueAt, state AS storedState FROM review_schedule`),
       this.db.prepare('SELECT item_id AS itemId FROM item_study'),
+      this.db.prepare(`SELECT id, request_id AS requestId, item_id AS itemId, competency_id AS competencyId,
+        assessment_id AS assessmentId, assessment_version AS assessmentVersion, phase, answer_index AS answerIndex,
+        correct, recorded_at AS recordedAt FROM competency_attempts ORDER BY rowid`),
+      this.db.prepare('SELECT competency_id AS competencyId, step, due_at AS dueAt FROM competency_review_schedule ORDER BY competency_id'),
     ]);
     const state = stateResult.results[0] as StateRow | undefined;
     if (!state) throw new Error('Database progres belum dimigrasikan.');
@@ -102,7 +106,7 @@ export class CloudflareLearningService {
   }
 
   async export() {
-    const [stateResult, progressResult, reviewResult, sessionsResult, attemptsResult, studyResult] = await this.db.batch([
+    const [stateResult, progressResult, reviewResult, sessionsResult, attemptsResult, studyResult, competencyResult, competencyScheduleResult] = await this.db.batch([
       this.db.prepare('SELECT active_item_id AS activeItemId, revision FROM learner_state WHERE id=1'),
       this.db.prepare('SELECT item_id AS itemId, status, passed_fingerprint AS passedFingerprint, last_anchor AS lastAnchor, continue_from AS continueFrom FROM item_progress'),
       this.db.prepare(`SELECT item_id AS itemId, policy_version AS policyVersion, step,
@@ -119,7 +123,7 @@ export class CloudflareLearningService {
     const currentRows = withCurrentCompletion(this.graph, rows);
     const now = this.now();
     return {
-      version: 4,
+      version: 5,
       studiedItems: (studyResult.results as { itemId: string }[]).map((row) => row.itemId),
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
@@ -139,6 +143,8 @@ export class CloudflareLearningService {
             continueFrom: typeof parsed.continueFrom === 'string' ? parsed.continueFrom : '',
           };
         }),
+      competencyAttempts: competencyResult.results,
+      competencyReviewSchedules: competencyScheduleResult.results,
       reviewAttempts: (attemptsResult.results as Array<{
         id: string;
         itemId: string;
@@ -218,7 +224,7 @@ export class CloudflareLearningService {
 
     const current = await this.snapshot();
     if (current.revision !== raw.revision) {
-      throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
+      throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.', 'REVISION_CONFLICT');
     }
     let assessmentWrite: {
       input: AssessmentAttempt;

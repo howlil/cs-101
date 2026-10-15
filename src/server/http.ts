@@ -30,7 +30,7 @@ export async function mutation(request: Request, action: (input: unknown) => Pro
     catch { return json({ error: 'JSON tidak valid.' }, 422); }
     return json(await action(body));
   } catch (error) {
-    if (error instanceof LearningError) return json({ error: error.message }, error.status);
+    if (error instanceof LearningError) return json({ error: error.message, code: error.code }, error.status);
     if (error instanceof ZodError) return json({ error: 'Data tidak valid.', fields: error.issues.map((issue) => issue.path.join('.')) }, 422);
     console.error('Learning storage request failed:', error instanceof Error ? error.name : 'UnknownError');
     return json({ error: 'Penyimpanan belum tersedia. Coba lagi.' }, 503);

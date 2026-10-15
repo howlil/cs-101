@@ -5,7 +5,7 @@ import { requiredEvidenceForItem, type AvailabilityState, type ItemProgressState
 
 // One pure business decision boundary shared by SQLite and Cloudflare D1.
 export class LearningError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  constructor(public status: number, message: string, public code = 'LEARNING_ERROR') { super(message); }
 }
 
 export function assertSessionAllowed(item: CurriculumItem, input: SessionFields, activeItemId: string | null): void {

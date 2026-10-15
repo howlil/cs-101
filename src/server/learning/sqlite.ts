@@ -104,7 +104,7 @@ export class LearningService {
     }>;
 
     return {
-      version: 4,
+      version: 5,
       ...this.snapshot(),
       sessions: sessions.map(({ payload, ...row }) => {
         const parsed = JSON.parse(payload) as Record<string, unknown>;
@@ -117,6 +117,11 @@ export class LearningService {
           continueFrom: typeof parsed.continueFrom === 'string' ? parsed.continueFrom : '',
         };
       }),
+      competencyAttempts: this.db.prepare(`SELECT id, request_id AS requestId, item_id AS itemId,
+        competency_id AS competencyId, assessment_id AS assessmentId, assessment_version AS assessmentVersion,
+        phase, answer_index AS answerIndex, correct, recorded_at AS recordedAt FROM competency_attempts ORDER BY rowid`).all(),
+      competencyReviewSchedules: this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
+        FROM competency_review_schedule ORDER BY competency_id`).all(),
       reviewAttempts: attempts.map((attempt) => ({
         ...attempt,
         answers: JSON.parse(attempt.answers) as number[],
@@ -163,7 +168,7 @@ export class LearningService {
         return JSON.parse(old.response) as LearningSnapshot;
       }
       if (this.snapshot().revision !== input.revision) {
-        throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.');
+        throw new LearningError(409, 'Progres berubah di tab lain. Muat ulang sebelum menyimpan.', 'REVISION_CONFLICT');
       }
       work();
       this.db.prepare('UPDATE learner_state SET revision=revision+1 WHERE id=1').run();

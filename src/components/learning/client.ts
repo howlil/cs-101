@@ -35,6 +35,24 @@ export function removeDraft(itemId: string) {
   } catch {}
 }
 
+export class MutationError extends Error {
+  constructor(message: string, public status: number, public code: string) { super(message); }
+}
+export async function postWithRevisionRetry<T extends { revision: number }>(
+  path: string,
+  payload: Record<string, unknown> & { revision: number; requestId: string },
+  canRetry?: (revision: number) => Promise<boolean>,
+): Promise<T> {
+  try { return await postJson<T>(path, payload); }
+  catch (cause) {
+    if (!(cause instanceof MutationError) || cause.code !== 'REVISION_CONFLICT') throw cause;
+    const response = await fetch('/api/learning', { cache: 'no-store' });
+    if (!response.ok) throw cause;
+    const latest = await response.json() as { revision: number };
+    if (canRetry && !(await canRetry(latest.revision))) throw cause;
+    return postJson<T>(path, { ...payload, revision: latest.revision, requestId: crypto.randomUUID() });
+  }
+}
 export async function postJson<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(path, {
     method: 'POST',
@@ -42,6 +60,6 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Perubahan belum tersimpan. Coba lagi.');
+  if (!response.ok) throw new MutationError(data.error || 'Perubahan belum tersimpan. Coba lagi.', response.status, data.code ?? 'REQUEST_FAILED');
   return data as T;
 }
