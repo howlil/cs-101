@@ -491,6 +491,23 @@ try {
   assert.ok(completedState.reviews.some(r => r.itemId === 'SQL-001'), 'Automatic review scheduling must still run');
   assert.ok(completedState.revision > savedState.revision, 'Completion still increments the server-owned revision');
   console.log('PASS real low-ceremony learner journey: browse → activate → draft → save → evidence → automatic completion/review');
+  // New adaptive SQL-001 vertical slice: real UI, server grading, no pre-submit answer key.
+  await client.goto('/learn/SQL-001#practice');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-assessment input[value=\\\"1\\\"]"))'),
+    'Adaptive assessment hydrated');
+  const publicPlan = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
+  assert.equal(publicPlan.kind, 'practice');
+  assert.equal(Object.hasOwn(publicPlan.question, 'answer'), false, 'Assessment must not expose answer key');
+  await client.eval('document.querySelector(".lesson-assessment input[value=\\\"1\\\"]").click()');
+  await client.wait(async () => await client.eval('!document.querySelector(".lesson-assessment button").disabled'),
+    'Adaptive answer selected');
+  await client.eval('document.querySelector(".lesson-assessment button").click()');
+  await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment [role=status]")?.textContent.includes("Prediksi tepat")'),
+    'Server-graded assessment feedback');
+  const afterAssessment = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
+  assert.equal(afterAssessment.kind, 'waiting', 'Correct prediction must schedule delayed recall');
+  console.log('PASS SQL-001 prediction → server feedback → delayed micro-recall without evidence form');
+
   console.log('PASS screenshots saved at ' + screenshotDir);
 } finally {
   try { client?.ws.close(); } catch {}
