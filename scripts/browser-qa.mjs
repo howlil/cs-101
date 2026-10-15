@@ -412,10 +412,10 @@ try {
   }
   await client.goto('/learn/SQL-003');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile locked evidence guidance');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Mobile optional evidence guidance');
   m = await client.metrics();
   assert.ok(m.doc <= m.vw + 1 && m.body <= m.vw + 1,
-    'Locked evidence guidance must not overflow 320px: ' + JSON.stringify(m));
+    'Optional evidence guidance must not overflow 320px: ' + JSON.stringify(m));
   await client.screenshot('lesson-locked-evidence-320.png');
   await client.goto('/learn/SQL-001');
   const mobileToolbar = await client.eval('(() => { const tabs=document.querySelector(".lesson-stage-tabs"); const secondary=document.querySelector(".lesson-toolbar-actions"); if (!tabs || !secondary) return null; const a=tabs.getBoundingClientRect(), b=secondary.getBoundingClientRect(); return { display:getComputedStyle(document.querySelector(".lesson-stage-toolbar")).display, first:{left:a.left,right:a.right,bottom:a.bottom}, second:{left:b.left,top:b.top} }; })()');
@@ -439,9 +439,12 @@ try {
   await client.resize(901, 800);
   await client.goto('/learn/SQL-001');
   await client.eval('document.querySelector(".react-action-stack button").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), 'Activated lesson shows compact evidence workbench');
+  await client.wait(async () => await client.eval('(async () => (await (await fetch("/api/learning")).json()).activeItemId === "SQL-001")()'), 'Lesson activated in server state');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Evidence summary visible after stage');
+  assert.equal(await client.eval('Boolean(document.querySelector(".session-form--quiet"))'), false,
+    'Technical evidence must not open before explicit disclosure');
+  await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Optional technical evidence form opened');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Evidence details should start collapsed');
   assert.equal(await client.eval('Boolean(document.querySelector("#session-notes"))'), false, 'Session notes should be optional, not an upfront form');
   const beforePractice = await client.eval('(async () => (await (await fetch("/api/learning")).json()).revision)()');
@@ -465,6 +468,8 @@ try {
   await client.goto('/curriculum');
   await client.goto('/learn/SQL-001#evidence');
   assert.equal(await client.eval('Boolean(document.querySelector("#completion-evidence"))'), false, 'Server session does not auto-expand evidence form');
+  await client.eval('document.querySelector(".lesson-staged-evidence-form > button").click()');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".evidence-summary-actions"))'), 'Reopened optional technical evidence form');
   await client.eval('document.querySelector(".evidence-summary-actions button:first-child").click()');
   const required = await client.eval('document.querySelectorAll("#completion-evidence textarea[name^=evidence]").length');
   assert.ok(required >= 2, 'Complete lesson must require real criteria and challenge evidence');
