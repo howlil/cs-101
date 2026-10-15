@@ -9,6 +9,7 @@ import { getItemLocation } from '../domain/curriculum-v2/selectors';
 import { reviewBankFor } from '../server/review-bank';
 import { assessedItemIds } from '../server/assessment-bank';
 import { selectMicroRecallQueue } from '../domain/review/budget';
+import { nextLearningAction } from '../domain/learning/next-action';
 
 const state = await snapshotForRequest(Astro.locals);
 const assessed = await learning();
@@ -17,6 +18,7 @@ const demonstratedItems = new Set(plans.filter((plan) => plan.kind === 'waiting'
 const today = getTodayView(curriculumGraph, state, demonstratedItems);
 const primary = today.primary;
 const primaryPlan = plans.find((plan) => plan.itemId === primary?.item.id);
+const nextAction = nextLearningAction(primaryPlan);
 // Review state remains authoritative; only current question banks generate actions.
 const availableReviews = today.actionableReviews.filter(({ item }) => {
   const bank = reviewBankFor(item.item.id);
@@ -70,21 +72,12 @@ const primaryCard = primary ? (() => {
     title: primary.item.title,
     description: primary.continueFrom || 'Item siap dikerjakan.',
     breadcrumb,
-    nextStep: primaryPlan?.kind === 'practice' || primaryPlan?.kind === 'transfer'
-      ? primaryPlan.question.prompt
-      : primaryPlan?.kind === 'needs_support'
-        ? 'Pahami kembali SQL NULL, lalu uji query dengan variasi berbeda.'
-        : nextStepFor(primary),
+    nextStep: nextAction?.instruction ?? nextStepFor(primary),
     whyNext,
     whyMatters,
     blocker,
-    href: primaryPlan?.kind === 'practice' || primaryPlan?.kind === 'transfer' || primaryPlan?.kind === 'needs_support'
-      ? '/learn/' + primary.item.id + '#practice' : primary.href,
-    actionLabel: primaryPlan?.kind === 'practice' ? 'Coba prediksi'
-      : primaryPlan?.kind === 'transfer' ? 'Coba soal variasi'
-      : primaryPlan?.kind === 'needs_support' ? 'Perkuat pemahaman'
-      : primaryPlan?.kind === 'waiting' ? 'Lanjut implementasi'
-      : primaryAction,
+    href: nextAction?.focusPractice ? '/learn/' + primary.item.id + '#practice' : primary.href,
+    actionLabel: nextAction?.label ?? primaryAction,
   };
 })() : undefined;
 
