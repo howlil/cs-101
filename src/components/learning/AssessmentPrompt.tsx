@@ -22,7 +22,7 @@ export default function AssessmentPrompt({ plan, revision }: {
   const [feedback, setFeedback] = useState<Feedback>();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const requestRef = useRef<{ signature: string; id: string }>();
+  const requestRef = useRef<{ signature: string; id: string } | undefined>(undefined);
   if (plan.kind === 'unavailable') return null;
   if (plan.kind === 'waiting') return <section className="lesson-assessment">
     <strong>Pemahaman dasar sudah diuji.</strong>

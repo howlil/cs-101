@@ -11,6 +11,8 @@ import { Button } from '../arc/button/button';
 import { Accordion } from '../arc/accordion/accordion';
 import SessionLogger from '../learning/SessionLogger';
 import MarkStudied from '../learning/MarkStudied';
+import AssessmentPrompt from '../learning/AssessmentPrompt';
+import type { AssessmentPlan } from '../../domain/learning/assessment';
 import ConnectionsPanel, { type ConnectionGroupData } from '../curriculum/ConnectionsPanel';
 
 type StageId = 'understand' | 'practice' | 'evidence';
@@ -32,6 +34,7 @@ export default function LessonPage({
   stale,
   active,
   studied,
+  assessmentPlan,
   actionState,
   prerequisites = [],
   breadcrumb,
@@ -61,6 +64,7 @@ export default function LessonPage({
   stale: boolean;
   active: boolean;
   studied: boolean;
+  assessmentPlan?: AssessmentPlan;
   actionState?: ItemActionState;
   prerequisites?: Array<{ id: string; title: string; href: string }>;
   breadcrumb?: { track: string; module: string; position: number; total: number };
@@ -277,6 +281,9 @@ export default function LessonPage({
       {stage === 'understand' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('practice', true)}>Mulai latihan</Button>
       </div>}
+      {stage === 'practice' && assessmentPlan && <AssessmentPrompt
+        key={assessmentPlan.kind}
+        plan={assessmentPlan} revision={revision} />}
       {stage === 'practice' && <div className="lesson-stage-next">
         <Button type="button" variant="primary" onClick={() => chooseStage('evidence', true)}>Selesaikan materi</Button>
       </div>}

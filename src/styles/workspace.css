@@ -369,3 +369,9 @@
 .lesson-study-completion h2 { margin-bottom: .4rem; }
 .lesson-study-completion p { margin-bottom: .85rem; }
 .lesson-study-completion:focus { outline: none; }
+
+/* Adaptive assessment is an in-flow practice element, not an additional mandatory form. */
+.lesson-assessment { margin-block: 1.2rem; padding: 1rem 0; border-top: 1px solid var(--border, rgba(127,127,127,.2)); }
+.lesson-assessment h3 { margin-block: .4rem 1rem; max-width: 68ch; }
+.lesson-assessment > p:last-child { margin-top: .65rem; }
+.lesson-assessment [role="status"] { display: grid; gap: .75rem; margin-block: 1rem; }
