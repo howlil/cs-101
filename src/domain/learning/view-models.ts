@@ -9,10 +9,12 @@ export type LearningViewState = {
   progress: Array<ItemProgressState & { taskId?: string }>;
   availability: AvailabilityState[];
   reviews: ReviewScheduleView[];
+  studiedItems?: string[];
 };
 
 export type ItemDisplayState =
   | 'passed'
+  | 'studied'
   | 'stale'
   | 'active'
   | 'started'
@@ -24,7 +26,7 @@ export type ItemLearningView = {
   item: CurriculumItem;
   href: string;
   displayState: ItemDisplayState;
-  completion: 'not_started' | 'started' | 'active' | 'passed' | 'stale';
+  completion: 'not_started' | 'started' | 'active' | 'studied' | 'passed' | 'stale';
   availability: 'locked' | 'ready' | 'unknown';
   review: ReviewScheduleView['state'] | 'none';
   reviewDueAt: string | null;
@@ -54,13 +56,16 @@ export function getItemLearningView(
   const availability = maps.availability.get(itemId);
   const review = maps.reviews.get(itemId);
   const isFocused = state.activeItemId === itemId;
+  const studied = state.studiedItems?.includes(itemId) ?? false;
 
   const completion: ItemLearningView['completion'] =
     progress?.status === 'passed'
       ? 'passed'
       : progress?.status === 'stale'
         ? 'stale'
-        : isFocused
+        : studied
+          ? 'studied'
+          : isFocused
           ? 'active'
           : progress?.status === 'active'
             ? 'started'
@@ -71,7 +76,9 @@ export function getItemLearningView(
       ? 'passed'
       : completion === 'stale'
         ? 'stale'
-        : isFocused
+        : completion === 'studied'
+          ? 'studied'
+          : isFocused
           ? 'active'
           : completion === 'started'
             ? 'started'
@@ -127,7 +134,7 @@ export function getTodayView(graph: CurriculumGraph, state: LearningViewState) {
     .map((item) => getItemLearningView(graph, state, item.id))
     .find((view) =>
       view.availability === 'ready' &&
-      view.completion !== 'passed' &&
+      view.completion !== 'passed' && view.completion !== 'studied' &&
       view.displayState !== 'active'
     );
 
@@ -181,7 +188,7 @@ export function getProgressOverview(graph: CurriculumGraph, state: LearningViewS
         .map((module) => {
           const itemIds = graph.moduleItems.get(module.id) ?? [];
           const views = itemIds.map((id) => getItemLearningView(graph, state, id));
-          const completed = views.filter((view) => view.completion === 'passed').length;
+          const completed = views.filter((view) => view.completion === 'passed' || view.completion === 'studied').length;
           const reviewActions = views.filter((view) =>
             view.review === 'due' || view.review === 'retry'
           ).length;
@@ -230,7 +237,7 @@ export function getProgressOverview(graph: CurriculumGraph, state: LearningViewS
     tracks,
     integrations,
     actionableReviews,
-    completed: state.progress.filter((entry) => entry.status === 'passed').length,
+    completed: new Set([...(state.studiedItems ?? []), ...state.progress.filter((entry) => entry.status === 'passed').map((entry) => entry.itemId)]).size,
     total: graph.manifest.items.length,
   };
 }

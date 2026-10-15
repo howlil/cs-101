@@ -1,7 +1,7 @@
 import type { ItemLearningView } from './view-models';
 
 export type ItemActionState = {
-  status: 'passed' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
+  status: 'passed' | 'studied' | 'stale' | 'active' | 'started' | 'locked' | 'ready' | 'unknown';
   isFocused: boolean;
   canActivate: boolean;
   missingPrerequisites: string[];
@@ -15,6 +15,7 @@ export type ItemActionState = {
 export function getItemActionState(view: ItemLearningView): ItemActionState {
   const status: ItemActionState['status'] =
     view.completion === 'passed' ? 'passed'
+    : view.completion === 'studied' ? 'studied'
     : view.completion === 'stale' ? 'stale'
     : view.isFocused ? 'active'
     : view.availability === 'locked' ? 'locked'

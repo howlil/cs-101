@@ -27,6 +27,11 @@ export default function ItemStatusAction({
     {mode === 'preview' && href && <ActionLink href={href} label={kind === 'unit' ? 'Buka materi' : 'Buka workspace'} />}
   </div>;
 
+  if (state.status === 'studied') return <div className="item-action-status">
+    <Badge tone="success" icon={<CheckCircle2 size={14} />}>Dipelajari</Badge>
+    {mode === 'preview' && href && <ActionLink href={href} label="Buka materi" />}
+  </div>;
+
   if (state.status === 'locked') return <div className="item-action-status item-action-locked">
     <Badge tone="neutral" icon={<LockKeyhole size={14} />}>Terkunci · prasyarat belum terpenuhi</Badge>
     {state.missingPrerequisites.length > 0 && <div className="item-action-prerequisites">
