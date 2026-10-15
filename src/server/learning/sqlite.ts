@@ -8,6 +8,7 @@ import {
 } from '../../domain/learning/rules';
 import {
   activeItemSchema,
+  studyActionSchema,
   sessionSchema,
   reviewAttemptSchema,
   type SessionFields,
@@ -60,13 +61,16 @@ export class LearningService {
     ).all() as ItemProgressState[];
     const currentRows = withCurrentCompletion(this.graph, rows);
     const progress = currentRows.map((item) => ({ ...item, taskId: item.itemId }));
+    const studiedItems = (this.db.prepare('SELECT item_id AS itemId FROM item_study')
+      .all() as { itemId: string }[]).map((row) => row.itemId);
     const now = this.now();
     return {
+      studiedItems,
       activeItemId: state.activeItemId,
       activeTaskId: state.activeItemId,
       revision: state.revision,
       progress,
-      availability: deriveAvailability(this.graph, currentRows),
+      availability: deriveAvailability(this.graph, currentRows, studiedItems),
       reviews: this.storedReviewRows().map((row) => toReviewView(row, now)),
     };
   }
@@ -222,6 +226,16 @@ export class LearningService {
     if (input.kind === 'passed' && !wasCurrentPass) {
       this.scheduleInitialReview(item.id);
     }
+  }
+
+  markStudied(raw: unknown) {
+    const input = studyActionSchema.parse(raw);
+    const item = this.item(input.itemId);
+    if (item.kind !== 'unit') throw new LearningError(422, 'Tandai dipelajari hanya untuk materi.');
+    return this.mutate(input, 'mark-studied', () => {
+      this.db.prepare('INSERT INTO item_study(item_id, studied_at) VALUES(?, ?) ON CONFLICT(item_id) DO NOTHING')
+        .run(item.id, this.now().toISOString());
+    });
   }
 
   saveSession(raw: unknown) {
