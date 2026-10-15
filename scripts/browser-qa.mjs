@@ -322,19 +322,22 @@ try {
       assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), true, 'Manifest-only lesson must be distinguishable');
     }
   }
-  // A locked authored unit can still be read and practiced, but evidence
-  // must provide prerequisite guidance rather than an empty final stage.
+  // Foundation prerequisites are advisory. The lesson remains readable and
+  // self-checkable without activating a task or completing an earlier lesson.
   await client.goto('/learn/SQL-003');
   await client.eval('document.querySelector("#lesson-tab-evidence").click()');
-  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-evidence-gate"))'), 'Locked unit evidence guidance');
+  await client.wait(async () => await client.eval('Boolean(document.querySelector(".lesson-study-completion"))'), 'Advisory unit completion');
   const gateY = await client.eval('document.querySelector(".lesson-evidence-gate").getBoundingClientRect().top');
   const panelY = await client.eval('document.querySelector("#lesson-panel-evidence").getBoundingClientRect().top');
-  assert.ok(gateY < panelY, 'Eligibility guidance must precede evidence checklist visually');
-  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Selesaikan prasyarat untuk menyimpan bukti")'), 'Locked state must be explained in evidence stage');
-  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 0, 'Avoid repeating the locked badge and prerequisite block inside the evidence gate');
-  assert.ok(await client.eval(`Boolean(document.querySelector('.lesson-evidence-gate a[href*="SQL-002"]'))`), 'Locked evidence state must link to its prerequisite');
-  await client.screenshot('lesson-locked-evidence-901.png');
-  console.log('PASS Pahami → Latihan → Bukti focus and locked evidence recovery');
+  assert.ok(gateY < panelY, 'Evidence guidance must precede the detailed checklist visually');
+  assert.ok(await client.eval('document.querySelector(".lesson-study-completion")?.textContent.includes("Tandai tanpa laporan")'),
+    'Self-reported foundation study must not require a manual evidence form');
+  assert.ok(await client.eval('document.querySelector(".lesson-evidence-gate")?.textContent.includes("Aktifkan materi untuk menyimpan bukti")'),
+    'Optional technical evidence still offers an explicit activation path');
+  assert.equal(await client.eval('document.querySelectorAll(".lesson-evidence-gate .item-action-status").length'), 1,
+    'Optional activation must be available without forcing a prerequisite gate');
+  await client.screenshot('lesson-advisory-evidence-901.png');
+  console.log('PASS Pahami → Latihan → Dipelajari flow and optional technical evidence');
   console.log('PASS other authored lessons and manifest-only fallback parity');
 
 
