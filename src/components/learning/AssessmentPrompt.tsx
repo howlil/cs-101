@@ -19,6 +19,7 @@ export default function AssessmentPrompt({ plan, revision }: {
   plan: AssessmentPlan; revision: number;
 }) {
   const [answer, setAnswer] = useState('');
+  const [currentRevision, setCurrentRevision] = useState(revision);
   const [feedback, setFeedback] = useState<Feedback>();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -39,7 +40,7 @@ export default function AssessmentPrompt({ plan, revision }: {
       const payload = {
         itemId: plan.itemId, assessmentId: question.id,
         assessmentVersion: question.version, phase: plan.kind,
-        answer: Number(answer), revision,
+        answer: Number(answer), revision: currentRevision,
       };
       const signature = JSON.stringify(payload);
       if (requestRef.current?.signature !== signature) {
@@ -49,6 +50,7 @@ export default function AssessmentPrompt({ plan, revision }: {
         ...payload, requestId: requestRef.current.id,
       });
       requestRef.current = undefined;
+      setCurrentRevision(next.revision);
       setFeedback(next.assessment);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Jawaban belum tersimpan.');
