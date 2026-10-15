@@ -3,6 +3,11 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { CurriculumGraph } from '../../domain/curriculum-v2/graph';
 import { learningPolicyFor } from '../../domain/learning/policy';
 import {
+  assessmentAttemptSchema, chooseAssessmentPlan, gradeAssessment, nextCompetencyReview,
+  type ReviewSchedule,
+} from '../../domain/learning/assessment';
+import { assessmentQuestion, assessmentQuestionsForItem } from '../assessment-bank';
+import {
   deriveAvailability,
   withCurrentCompletion,
   type ItemProgressState,
@@ -227,6 +232,58 @@ export class LearningService {
     if (input.kind === 'passed' && !wasCurrentPass) {
       this.scheduleInitialReview(item.id);
     }
+  }
+
+
+  assessmentPlan(itemId: string) {
+    this.item(itemId);
+    const questions = assessmentQuestionsForItem(itemId);
+    if (!questions.length) return { kind: 'unavailable' as const, itemId };
+    const competencyId = questions[0].competencyId;
+    const practiced = this.db.prepare(`SELECT 1 FROM competency_attempts
+      WHERE item_id=? AND competency_id=? AND phase='practice' AND correct=1 LIMIT 1`)
+      .get(itemId, competencyId);
+    const schedule = this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
+      FROM competency_review_schedule WHERE competency_id=?`)
+      .get(competencyId) as ReviewSchedule | undefined;
+    return chooseAssessmentPlan(itemId, questions, !!practiced, schedule, this.now());
+  }
+
+  submitAssessment(raw: unknown) {
+    const input = assessmentAttemptSchema.parse(raw);
+    const item = this.item(input.itemId);
+    const question = assessmentQuestion(input.assessmentId);
+    if (!question || question.itemId !== item.id ||
+        question.phase !== input.phase || question.version !== input.assessmentVersion) {
+      throw new LearningError(409, 'Soal tidak cocok atau sudah diperbarui.');
+    }
+    let grading: ReturnType<typeof gradeAssessment>;
+    try { grading = gradeAssessment(question, input.answer); }
+    catch { throw new LearningError(422, 'Jawaban tidak valid.'); }
+
+    const snapshot = this.mutate(input, 'assessment', () => {
+      const plan = this.assessmentPlan(item.id);
+      if (plan.kind !== question.phase || plan.question.id !== question.id) {
+        throw new LearningError(409, 'Sesi latihan atau recall berubah. Muat ulang materi.');
+      }
+      const now = this.now();
+      const previous = this.db.prepare(`SELECT competency_id AS competencyId, step, due_at AS dueAt
+        FROM competency_review_schedule WHERE competency_id=?`)
+        .get(question.competencyId) as ReviewSchedule | undefined;
+      this.db.prepare(`INSERT INTO competency_attempts
+        (id,request_id,item_id,competency_id,assessment_id,assessment_version,phase,answer_index,correct,recorded_at)
+        VALUES(?,?,?,?,?,?,?,?,?,?)`)
+        .run(randomUUID(), input.requestId, item.id, question.competencyId, question.id,
+          question.version, question.phase, input.answer, grading.correct ? 1 : 0, now.toISOString());
+      const next = nextCompetencyReview(previous, question.phase, grading.correct, now);
+      if (next) {
+        this.db.prepare(`INSERT INTO competency_review_schedule(competency_id,step,due_at)
+          VALUES(?,?,?) ON CONFLICT(competency_id)
+          DO UPDATE SET step=excluded.step,due_at=excluded.due_at`)
+          .run(question.competencyId, next.step, next.dueAt);
+      }
+    });
+    return { ...snapshot, assessment: grading };
   }
 
   markStudied(raw: unknown) {
