@@ -8,6 +8,7 @@ import { getTodayView } from '../domain/learning/view-models';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 import { reviewBankFor } from '../server/review-bank';
 import { assessedItemIds } from '../server/assessment-bank';
+import { selectMicroRecallQueue } from '../domain/review/budget';
 
 const state = await snapshotForRequest(Astro.locals);
 const today = getTodayView(curriculumGraph, state);
@@ -18,9 +19,11 @@ const availableReviews = today.actionableReviews.filter(({ item }) => {
   return bank?.curriculumFingerprint === item.item.fingerprint;
 });
 const nextReview = availableReviews[0];
-const assessed = await (await learning());
-const dueMicroRecall = (await Promise.all(assessedItemIds().map((id) => assessed.assessmentPlan(id))))
-  .find((plan) => plan.kind === 'recall');
+const assessed = await learning();
+const microReviewQueue = selectMicroRecallQueue(
+  await Promise.all(assessedItemIds().map((id) => assessed.assessmentPlan(id))),
+);
+const dueMicroRecall = microReviewQueue[0];
 const lastSession = primary ? (await (await learning()).recentSessions(1, primary.item.id))[0] : undefined;
 
 const nextStepFor = (view: NonNullable<typeof primary>) => {
