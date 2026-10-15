@@ -44,6 +44,12 @@ export const sessionSchema = z.preprocess(
   canonicalSessionFields.extend(envelope),
 );
 
+export const studyActionSchema = z.object({
+  ...envelope,
+  itemId: itemIdSchema,
+  action: z.literal('mark_studied'),
+});
+
 export const activeItemSchema = z.preprocess(
   withLegacyItemId,
   z.object({

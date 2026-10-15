@@ -10,4 +10,5 @@ export type LearningSnapshot = {
   progress: LearningProgress[];
   availability: AvailabilityState[];
   reviews: ReviewScheduleView[];
+  studiedItems: string[];
 };
