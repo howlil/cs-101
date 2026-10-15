@@ -1,8 +1,9 @@
 import type { AssessmentQuestion } from '../domain/learning/assessment';
 
+const fingerprint = 'sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67';
 const QUESTIONS: readonly AssessmentQuestion[] = [
   {
-    id: 'sql-null-predict-01', version: 'v1', itemId: 'SQL-001',
+    id: 'sql-null-predict-01', version: 'v1', itemId: 'SQL-001', curriculumFingerprint: fingerprint,
     competencyId: 'sql-001-null-logic', phase: 'practice',
     prompt: 'Apa hasil SELECT 1 WHERE NULL = NULL?',
     options: ['Satu baris berisi 1', 'Tidak ada baris', 'Query error'],
@@ -14,7 +15,25 @@ const QUESTIONS: readonly AssessmentQuestion[] = [
     },
   },
   {
-    id: 'sql-null-recall-01', version: 'v1', itemId: 'SQL-001',
+    id: 'sql-null-transfer-01', version: 'v1', itemId: 'SQL-001', curriculumFingerprint: fingerprint,
+    competencyId: 'sql-001-null-logic', phase: 'transfer',
+    prompt: 'Query mana yang dengan tepat menemukan baris dengan email NULL?',
+    options: ["WHERE email = NULL", "WHERE email IS NULL", "WHERE email <> NULL"],
+    answer: 1,
+    explanation: 'IS NULL menguji ketiadaan nilai. Operator = dan <> dengan NULL menghasilkan UNKNOWN.',
+    misconceptions: { 0: '= NULL tidak menghasilkan TRUE.', 2: '<> NULL juga menghasilkan UNKNOWN.' },
+  },
+  {
+    id: 'sql-null-transfer-02', version: 'v1', itemId: 'SQL-001', curriculumFingerprint: fingerprint,
+    competencyId: 'sql-001-null-logic', phase: 'transfer',
+    prompt: "Untuk x=NULL, apakah WHERE x = 1 OR x IS NULL mempertahankan baris?",
+    options: ['Ya', 'Tidak', 'Query error'],
+    answer: 0,
+    explanation: 'UNKNOWN OR TRUE menghasilkan TRUE, sehingga WHERE mempertahankan baris.',
+    misconceptions: { 1: 'IS NULL menghasilkan TRUE; UNKNOWN OR TRUE juga TRUE.', 2: 'Predikat tersebut valid.' },
+  },
+  {
+    id: 'sql-null-recall-01', version: 'v1', itemId: 'SQL-001', curriculumFingerprint: fingerprint,
     competencyId: 'sql-001-null-logic', phase: 'recall',
     prompt: "Apa yang terjadi pada baris status NULL saat WHERE status <> 'PAID'?",
     options: ['Baris tetap ditampilkan', 'Baris tidak ditampilkan', 'Query gagal dieksekusi'],
@@ -26,7 +45,6 @@ const QUESTIONS: readonly AssessmentQuestion[] = [
     },
   },
 ];
-
 export function assessmentQuestion(id: string) { return QUESTIONS.find((q) => q.id === id); }
 export function assessmentQuestionsForItem(itemId: string) { return QUESTIONS.filter((q) => q.itemId === itemId); }
 export function assessedItemIds() { return [...new Set(QUESTIONS.map((q) => q.itemId))]; }
