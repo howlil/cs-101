@@ -11,18 +11,19 @@ import { assessedItemIds } from '../server/assessment-bank';
 import { selectMicroRecallQueue } from '../domain/review/budget';
 
 const state = await snapshotForRequest(Astro.locals);
-const today = getTodayView(curriculumGraph, state);
+const assessed = await learning();
+const plans = await Promise.all(assessedItemIds().map((id) => assessed.assessmentPlan(id)));
+const demonstratedItems = new Set(plans.filter((plan) => plan.kind === 'waiting').map((plan) => plan.itemId));
+const today = getTodayView(curriculumGraph, state, demonstratedItems);
 const primary = today.primary;
+const primaryPlan = plans.find((plan) => plan.itemId === primary?.item.id);
 // Review state remains authoritative; only current question banks generate actions.
 const availableReviews = today.actionableReviews.filter(({ item }) => {
   const bank = reviewBankFor(item.item.id);
   return bank?.curriculumFingerprint === item.item.fingerprint;
 });
 const nextReview = availableReviews[0];
-const assessed = await learning();
-const microReviewQueue = selectMicroRecallQueue(
-  await Promise.all(assessedItemIds().map((id) => assessed.assessmentPlan(id))),
-);
+const microReviewQueue = selectMicroRecallQueue(plans);
 const dueMicroRecall = microReviewQueue[0];
 const lastSession = primary ? (await (await learning()).recentSessions(1, primary.item.id))[0] : undefined;
 
@@ -69,12 +70,21 @@ const primaryCard = primary ? (() => {
     title: primary.item.title,
     description: primary.continueFrom || 'Item siap dikerjakan.',
     breadcrumb,
-    nextStep: nextStepFor(primary),
+    nextStep: primaryPlan?.kind === 'practice' || primaryPlan?.kind === 'transfer'
+      ? primaryPlan.question.prompt
+      : primaryPlan?.kind === 'needs_support'
+        ? 'Pahami kembali SQL NULL, lalu uji query dengan variasi berbeda.'
+        : nextStepFor(primary),
     whyNext,
     whyMatters,
     blocker,
-    href: primary.href,
-    actionLabel: primaryAction,
+    href: primaryPlan?.kind === 'practice' || primaryPlan?.kind === 'transfer' || primaryPlan?.kind === 'needs_support'
+      ? '/learn/' + primary.item.id + '#practice' : primary.href,
+    actionLabel: primaryPlan?.kind === 'practice' ? 'Coba prediksi'
+      : primaryPlan?.kind === 'transfer' ? 'Coba soal variasi'
+      : primaryPlan?.kind === 'needs_support' ? 'Perkuat pemahaman'
+      : primaryPlan?.kind === 'waiting' ? 'Lanjut implementasi'
+      : primaryAction,
   };
 })() : undefined;
 
