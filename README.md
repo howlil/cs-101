@@ -3,7 +3,7 @@
 CS-101 is a **single-page content library** for engineering lessons, practice questions, and project ideas.
 
 - One page: `/`
-- Sidebar: domain selector, module accordion, curriculum topics, search.
+- Sidebar: domain selector, module accordion, and curriculum topics.
 - Content: authored MDX lessons with interactive self-check quizzes, or an explicit curriculum outline when content is not yet authored.
 - Projects: project checkpoints and integration challenges from the curriculum manifest.
 - No learner account, progress, study sessions, evidence submission, spaced repetition, database reads or writes.

@@ -6,7 +6,7 @@ import '../styles/curriculum.css';
 import { ClientRouter, fade } from 'astro:transitions';
 import { AppHeaderActions } from '../components/app/AppShell';
 import AppSidebar, { type SidebarData } from '../components/app/AppSidebar';
-import { curriculumGraph, curriculumSearchIndex } from '../server/curriculum';
+import { curriculumGraph } from '../server/curriculum';
 import { getTrackExplorer, getItemLocation } from '../domain/curriculum-v2/selectors';
 import { libraryHref, selectLibraryItem } from '../domain/content-library';
 
@@ -39,12 +39,7 @@ const sidebarData: SidebarData = {
     items: module.items.map(row),
   })),
   integrations: graph.manifest.items.filter((item) => item.kind === 'integration').map(row),
-  searchEntries: curriculumSearchIndex.map((entry) => ({
-    ...row(graph.itemsById.get(entry.itemId)!),
-    searchText: entry.searchText,
-  })),
 };
-const searchEntries = curriculumSearchIndex.map((entry) => ({ ...entry, href: libraryHref(entry.itemId) }));
 ---
 <!doctype html>
 <html lang="id" data-accent="blue" data-density="compact" data-sidebar="expanded" transition:animate="none">
@@ -75,7 +70,7 @@ const searchEntries = curriculumSearchIndex.map((entry) => ({ ...entry, href: li
       <a class="brand" href="/" aria-label="CS-101 · Materi">
         <span class="brand-mark" aria-hidden="true">CS</span><span>CS-101</span>
       </a>
-      <AppHeaderActions client:load searchEntries={searchEntries} />
+      <AppHeaderActions client:load />
     </header>
     <div class="app-shell">
       <AppSidebar client:load data={sidebarData} />

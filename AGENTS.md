@@ -5,7 +5,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 ## Product invariant
 
 - `/` is the only content page; `?item=ID` selects the material and `?track=ID` selects the domain.
-- Sidebar reuses the domain selector, module accordion and search. Never add Today, progress, study sessions, reviews, evidence forms, or mandatory reflection UI.
+- Sidebar reuses the domain selector and module accordion. No search field, global search button or command palette. Never add Today, progress, study sessions, reviews, evidence forms, or mandatory reflection UI.
 - Authored content is MDX at `src/content/lessons`. Quiz feedback is local/ephemeral and never persisted.
 - Unauthored items must say they are outlines and **must not fabricate explanations or generated questions**.
 - Checkpoints and integration challenges come from the canonical manifest.
@@ -25,4 +25,4 @@ pnpm ci
 node scripts/validate-css.mjs
 ```
 
-Maintain content fidelity, mobile sidebar navigation, keyboard search, direct-link selection, and read-only rendering. Retired `/learn/:id`, `/project/:id`, `/integration/:id`, `/review/:id`, `/curriculum`, `/progress` URLs redirect to `/`. Do not resurrect old routes or persistence.
+Maintain content fidelity, mobile sidebar navigation, direct-link selection, and read-only rendering. Retired `/learn/:id`, `/project/:id`, `/integration/:id`, `/review/:id`, `/curriculum`, `/progress` URLs redirect to `/`. Do not resurrect old routes or persistence.

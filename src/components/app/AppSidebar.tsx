@@ -4,7 +4,7 @@ import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button } from '../arc/button/button';
 import { Dialog, DialogContent, DialogTrigger } from '../arc/dialog/dialog';
 import { Tooltip } from '../arc/tooltip/tooltip';
-import CurriculumExplorer, { type ExplorerItem, type ModuleOption, type SearchEntry, type TrackOption } from '../curriculum/CurriculumExplorer';
+import CurriculumExplorer, { type ExplorerItem, type ModuleOption, type TrackOption } from '../curriculum/CurriculumExplorer';
 
 export type SidebarData = {
   total: number;
@@ -13,7 +13,6 @@ export type SidebarData = {
   tracks: TrackOption[];
   modules: ModuleOption[];
   integrations: ExplorerItem[];
-  searchEntries: SearchEntry[];
 };
 const COLLAPSE_KEY = 'cs101:sidebar-collapsed';
 function SidebarContent({ data }: { data: SidebarData }) {
@@ -21,7 +20,7 @@ function SidebarContent({ data }: { data: SidebarData }) {
     <div className="sidebar-curriculum">
       <div className="sidebar-section-heading"><span>DAFTAR KURIKULUM</span><span>{data.total} item</span></div>
       <CurriculumExplorer activeTrackId={data.activeTrackId} selectedModuleId={data.selectedModuleId}
-        tracks={data.tracks} modules={data.modules} integrations={data.integrations} searchEntries={data.searchEntries} />
+        tracks={data.tracks} modules={data.modules} integrations={data.integrations} />
     </div>
   </div>;
 }

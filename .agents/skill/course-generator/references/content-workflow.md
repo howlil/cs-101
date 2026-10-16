@@ -18,7 +18,7 @@ No learning account or persistence exists. The browser can show immediate, local
 
 ## Navigation
 
-The single root page uses `?track=<DOMAIN-ID>` and `?item=<ITEM-ID>`. The sidebar owns the domain select, module accordion, and search. Old /learn, /project, /review, /progress and /curriculum links redirect to root.
+The single root page uses `?track=<DOMAIN-ID>` and `?item=<ITEM-ID>`. The sidebar owns the domain select and module accordion. Old /learn, /project, /review, /progress and /curriculum links redirect to root.
 
 ## Verification
 

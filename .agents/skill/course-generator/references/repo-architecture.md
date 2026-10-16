@@ -13,7 +13,7 @@ src/pages/index.astro
         ↓
 src/components/library/ContentLibrary.astro
         ↓
-src/layouts/AppLayout.astro + AppSidebar (domain select, module accordion, search)
+src/layouts/AppLayout.astro + AppSidebar (domain select, module accordion)
 ```
 
 UI boundaries:

@@ -3,11 +3,6 @@
 .curriculum-workspace { min-width:0; height:100%; overflow:auto; overscroll-behavior:contain; background:var(--canvas); }
 .curriculum-detail { width:min(760px,100%); margin-inline:auto; padding:32px 28px 64px; }
 .curriculum-controls { display:grid; gap:11px; }
-.curriculum-search-uiarc label {
-  position:absolute; width:1px; height:1px; margin:-1px; padding:0;
-  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;
-}
-.curriculum-search-uiarc input { min-height:36px; background:var(--background); }
 .track-select-uiarc { padding-bottom:10px; border-bottom:1px solid var(--line); }
 .track-select-uiarc label {
   color:var(--text-muted); font-size:12px; font-weight:500; letter-spacing:.025em;
@@ -21,24 +16,22 @@
 .module-tree { margin-top:9px; }
 .module-tree--uiarc > .explorer-label { margin-bottom:6px; }
 .module-tree--uiarc .module-items { display:grid; gap:2px; padding:4px 0 6px; }
-.item-row,.search-row {
+.item-row {
   min-width:0; display:grid; grid-template-columns:17px minmax(0,1fr); gap:8px;
   align-items:start; padding:9px 8px; border-radius:9px;
   color:var(--text-secondary); text-decoration:none;
 }
-.item-row:hover,.search-row:hover { color:var(--foreground); background:var(--surface-muted); }
+.item-row:hover { color:var(--foreground); background:var(--surface-muted); }
 .item-row[aria-current="page"] { color:var(--foreground); background:var(--accent-subtle); }
 .item-marker { padding-top:2px; text-align:center; color:currentColor; line-height:1.3; }
-.item-copy,.search-row > span:last-child { min-width:0; display:grid; gap:3px; }
-.item-id,.search-row strong {
+.item-copy { min-width:0; display:grid; gap:3px; }
+.item-id {
   color:currentColor; font:400 12px/16px var(--font-mono); letter-spacing:0;
 }
-.item-title,.search-row small {
+.item-title {
   color:currentColor; font-size:13px; line-height:19px;
   white-space:normal; overflow-wrap:anywhere;
 }
-.search-results { min-height:80px; }
-.search-empty { color:var(--text-muted); font-size:13px; }
 .item-header { padding-bottom:19px; border-bottom:1px solid var(--line); }
 .breadcrumb { margin:0 0 8px; color:var(--text-muted); font-size:12px; }
 .item-id-standalone { display:inline-block; margin-bottom:8px; color:var(--text-muted); font-size:12px; }
