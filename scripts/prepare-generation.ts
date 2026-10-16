@@ -12,7 +12,7 @@ const graph = buildCurriculumGraph(manifestSource);
 const item = graph.itemsById.get(itemId);
 if (!item) throw new Error('Item tidak ditemukan: ' + itemId);
 if (item.kind !== 'unit') {
-  throw new Error('Course generator hanya untuk unit. Project/integration memakai workspace runtime.');
+  throw new Error('Course generator hanya untuk unit. Project/integration ditampilkan langsung dari Curriculum Manifest V2.');
 }
 
 const directory = resolve('generation', 'staging', itemId);
@@ -76,13 +76,13 @@ if (!existsSync(specTemplatePath)) {
         criterionId: criterion.id,
         taughtAt: '<section>',
         assessedAt: '<quiz/practice/challenge>',
-        evidenceExpected: '<observable evidence>',
+        evidenceExpected: '<observable local result>',
       })),
       {
         criterionId: 'challenge',
         taughtAt: '<challenge preparation>',
         assessedAt: '<challenge>',
-        evidenceExpected: '<challenge evidence>',
+        evidenceExpected: '<challenge acceptance check>',
       },
     ],
     reviewQuestions: Array.from({ length: 5 }, (_, index) => ({

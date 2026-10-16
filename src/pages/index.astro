@@ -1,104 +1,42 @@
 ---
+import { getCollection, render } from 'astro:content';
 import AppLayout from '../layouts/AppLayout.astro';
-import TodayPage from '../components/pages/TodayPage';
+import ContentLibrary from '../components/library/ContentLibrary.astro';
 import { curriculumGraph } from '../server/curriculum';
-import { learning } from '../server/runtime';
-import { snapshotForRequest } from '../server/request-snapshot';
-import { getTodayView } from '../domain/learning/view-models';
+import { projectIdeaFor, selectLibraryItem } from '../domain/content-library';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
-import { reviewBankFor } from '../server/review-bank';
-import { assessedItemIds } from '../server/assessment-bank';
-import { selectMicroRecallQueue } from '../domain/review/budget';
-import { nextLearningAction } from '../domain/learning/next-action';
+import '../styles/library.css';
 
-const state = await snapshotForRequest(Astro.locals);
-const assessed = await learning();
-const plans = await Promise.all(assessedItemIds().map((id) => assessed.assessmentPlan(id)));
-const today = getTodayView(curriculumGraph, state);
-const primary = today.primary;
-const primaryPlan = plans.find((plan) => plan.itemId === primary?.item.id);
-const nextAction = nextLearningAction(primaryPlan);
-// Review state remains authoritative; only current question banks generate actions.
-const availableReviews = today.actionableReviews.filter(({ item }) => {
-  const bank = reviewBankFor(item.item.id);
-  return bank?.curriculumFingerprint === item.item.fingerprint;
-});
-const nextReview = availableReviews[0];
-const microReviewQueue = selectMicroRecallQueue(plans);
-const dueMicroRecall = microReviewQueue[0];
-const lastSession = primary ? (await (await learning()).recentSessions(1, primary.item.id))[0] : undefined;
-
-const nextStepFor = (view: NonNullable<typeof primary>) => {
-  if (view.continueFrom) return view.continueFrom;
-  const item = view.item;
-  if (item.kind === 'unit' || item.kind === 'integration') {
-    return item.challenge.steps[0] ?? item.scope[0] ?? 'Buka materi dan kerjakan satu bagian kecil.';
-  }
-  return item.requirements[0]?.text ?? 'Buka project dan kerjakan target pertama.';
-};
-
-// This CTA only navigates. Activation is a distinct server mutation on the
-// item detail, so never promise to begin learning from this link.
-const primaryAction = primary
-  ? today.primaryMode === 'continue' ? 'Lanjut belajar'
-    : primary.displayState === 'stale' ? 'Buka materi untuk perbarui'
-    : primary.item.kind === 'unit' ? 'Buka materi'
-    : primary.item.kind === 'checkpoint' ? 'Buka project'
-    : 'Buka latihan gabungan'
-  : '';
-
-const primaryCard = primary ? (() => {
-  const location = getItemLocation(curriculumGraph, primary.item.id);
-  const blocker = typeof lastSession?.blocker === 'string' && lastSession.blocker.trim()
-    ? lastSession.blocker.trim()
-    : undefined;
-  const breadcrumb = [location.track?.title ?? 'Lintas jalur', location.module?.title]
-    .filter(Boolean)
-    .join(' / ');
-  const whyNext = today.primaryMode === 'continue'
-    ? 'Melanjutkan sesi aktif.'
-    : primary.item.prerequisites.length
-      ? 'Prasyarat sudah terpenuhi.'
-      : 'Item berikutnya yang siap di jalur ini.';
-  const whyMatters = primary.item.kind === 'unit'
-    ? primary.item.marketExpectation[0]
-    : primary.item.kind === 'checkpoint'
-      ? primary.item.problemStatement
-      : primary.item.brief;
-
-  return {
-    id: primary.item.id,
-    title: primary.item.title,
-    description: primary.continueFrom || 'Item siap dikerjakan.',
-    breadcrumb,
-    nextStep: nextAction?.instruction ?? nextStepFor(primary),
-    whyNext,
-    whyMatters,
-    blocker,
-    href: nextAction?.focusPractice ? '/learn/' + primary.item.id + '#practice' : primary.href,
-    actionLabel: nextAction?.label ?? primaryAction,
-  };
-})() : undefined;
-
-const microRecallCard = dueMicroRecall?.kind === 'recall' ? {
-  id: dueMicroRecall.itemId,
-  title: curriculumGraph.itemsById.get(dueMicroRecall.itemId)?.title ?? dueMicroRecall.itemId,
-  description: 'Satu prediksi singkat untuk menjaga pemahaman.',
-  href: '/learn/' + dueMicroRecall.itemId + '#practice',
-  actionLabel: 'Coba micro-recall',
-} : undefined;
-
-const reviewCard = nextReview ? {
-  id: nextReview.item.item.id,
-  title: nextReview.item.item.title,
-  description: nextReview.review.state === 'retry'
-    ? 'Recall sebelumnya belum cukup. Coba lagi tanpa catatan.'
-    : 'Review sudah jatuh tempo.',
-  href: '/review/' + nextReview.item.item.id,
-  actionLabel: nextReview.review.state === 'retry' ? 'Ulangi review' : 'Mulai review',
-} : undefined;
+const selection = selectLibraryItem(
+  curriculumGraph,
+  Astro.url.searchParams.get('track'),
+  Astro.url.searchParams.get('item'),
+);
+const item = selection.item;
+const location = item ? getItemLocation(curriculumGraph, item.id) : undefined;
+const lessons = item?.kind === 'unit' ? await getCollection('lessons') : [];
+const lesson = item?.kind === 'unit'
+  ? lessons.find((entry) => !entry.data.demo && entry.data.taskId === item.id)
+  : undefined;
+const rendered = lesson ? await render(lesson) : null;
+const Content = rendered?.Content;
+const prerequisites = item?.prerequisites.map((id) => {
+  const previous = curriculumGraph.itemsById.get(id);
+  return { id, title: previous?.title ?? id };
+}) ?? [];
 ---
-<AppLayout title="Hari ini">
-  <TodayPage primary={primaryCard} review={microRecallCard ?? reviewCard}
-    reviewCount={availableReviews.length + (microRecallCard ? 1 : 0)} />
+<AppLayout title={item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101.">
+  {item ? (
+    <ContentLibrary
+      item={item}
+      trackTitle={location?.track?.title}
+      moduleTitle={location?.module?.title}
+      authored={Boolean(Content)}
+      stale={Boolean(lesson && lesson.data.curriculumFingerprint !== item.fingerprint)}
+      project={projectIdeaFor(curriculumGraph, item)}
+      prerequisites={prerequisites}
+    >
+      {Content && <Content />}
+    </ContentLibrary>
+  ) : <p>Kurikulum belum tersedia.</p>}
 </AppLayout>

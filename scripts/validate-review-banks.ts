@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
-import { requiredEvidenceForItem } from '../src/domain/learning/rules';
+import { contentCriteriaForItem } from '../src/domain/generation/criteria';
 import { reviewBankSchema } from '../src/domain/review/schema';
 
 const graph = buildCurriculumGraph(manifestSource);
@@ -25,7 +25,7 @@ if (existsSync(root)) {
       throw new Error('Review bank stale: ' + bank.itemId);
     }
 
-    const allowedCriteria = new Set(requiredEvidenceForItem(item).map((criterion) => criterion.id));
+    const allowedCriteria = new Set(contentCriteriaForItem(item).map((criterion) => criterion.id));
     const questionIds = new Set<string>();
     for (const question of bank.questions) {
       if (questionIds.has(question.id)) throw new Error('Review question ID duplikat: ' + bank.itemId + '/' + question.id);

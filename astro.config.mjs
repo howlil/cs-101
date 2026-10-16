@@ -7,8 +7,7 @@ const privateOrigin = process.env.CS101_ORIGIN ? new URL(process.env.CS101_ORIGI
 
 export default defineConfig({
   output: 'server',
-  // SSR HTML embeds private learner state and is deliberately no-store.
-  // Prefetching it would cause redundant Worker/D1 reads without cache reuse.
+  // Content pages are read-only, with no learner state or database access.
   prefetch: false,
   session: false,
   adapter: cloudflare({ imageService: 'passthrough' }),
@@ -20,5 +19,4 @@ export default defineConfig({
       ...(privateOrigin ? [{ hostname: privateOrigin.hostname, protocol: privateOrigin.protocol.slice(0, -1), port: privateOrigin.port }] : []),
     ],
   },
-  vite: { ssr: { external: ['node:sqlite'] } },
 });

@@ -1,19 +1,13 @@
 ---
-/**
- * Authored MDX stage boundary, used by every authored lesson.
- * Stage content remains server-rendered in document order and Astro owns MDX rendering.
- * React only chooses which stage is visible; no DOM reparenting or duplication.
- */
 interface Props { stage: 'understand' | 'practice' | 'evidence' }
 const { stage } = Astro.props;
+const section = {
+  understand: { id: 'materi', title: 'Materi' },
+  practice: { id: 'latihan', title: 'Latihan soal' },
+  evidence: { id: 'praktik', title: 'Praktik dan verifikasi mandiri' },
+}[stage];
 ---
-<section
-  class="lesson-stage-panel"
-  data-lesson-stage={stage}
-  id={'lesson-panel-' + stage}
-  role="tabpanel"
-  aria-labelledby={'lesson-tab-' + stage}
-  tabindex="0"
->
+<section class="library-content-section prose" id={section.id} data-lesson-stage={stage} aria-label={section.title}>
+  <h2>{section.title}</h2>
   <slot />
 </section>

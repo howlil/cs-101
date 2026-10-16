@@ -1,5 +1,5 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
-import { requiredEvidenceForItem } from '../learning/rules';
+import { contentCriteriaForItem } from './criteria';
 import {
   generationRecordSchema,
   lessonSpecSchema,
@@ -44,7 +44,7 @@ export function validateGenerationPlan(
     }
   }
 
-  const expectedCriteria = requiredEvidenceForItem(item);
+  const expectedCriteria = contentCriteriaForItem(item);
   const coverageIds = new Set(lessonSpec.coverage.map((entry) => entry.criterionId));
   for (const criterion of expectedCriteria) {
     if (!coverageIds.has(criterion.id)) {

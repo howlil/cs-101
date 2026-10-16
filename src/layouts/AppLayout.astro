@@ -2,213 +2,83 @@
 import '../styles/global.css';
 import '../styles/app-shell.css';
 import '../styles/app-sidebar.css';
-import '../styles/workspace.css';
 import '../styles/curriculum.css';
+import { ClientRouter, fade } from 'astro:transitions';
 import { AppHeaderActions } from '../components/app/AppShell';
 import AppSidebar, { type SidebarData } from '../components/app/AppSidebar';
-import { ClientRouter, fade } from 'astro:transitions';
-import { curriculumGraph, curriculumSearchIndex, curriculumSearchEntries } from '../server/curriculum';
-import { snapshotForRequest } from '../server/request-snapshot';
-import type { LearningSnapshot } from '../server/learning/contract';
-import {
-  getItemLocation,
-  getTrackExplorer,
-  itemHref,
-} from '../domain/curriculum-v2/selectors';
-import { getItemLearningView } from '../domain/learning/view-models';
-import { getItemActionState } from '../domain/learning/item-action';
+import { curriculumGraph } from '../server/curriculum';
+import { getTrackExplorer, getItemLocation } from '../domain/curriculum-v2/selectors';
+import { libraryHref, selectLibraryItem } from '../domain/content-library';
 
-interface Props {
-  title: string;
-  description?: string;
-  flush?: boolean;
-}
-
-const {
-  title,
-  description = 'Materi, latihan, dan bukti belajar CS-101.',
-  flush = false,
-} = Astro.props;
-
-const path = Astro.url.pathname;
-const searchIndex = curriculumSearchIndex;
-const searchEntries = curriculumSearchEntries;
-
-const curriculumRoute = path === '/curriculum';
-const contextualMatch = path.match(/^\/(learn|project|integration)\/([^/]+)$/);
-const showCurriculum = curriculumRoute || Boolean(contextualMatch);
-let sidebarData: SidebarData | undefined;
-
-if (showCurriculum) {
-  // One request-scoped snapshot drives the page and global navigation.
-  // A highlighted item never activates learner progress by itself.
-  let learningState: LearningSnapshot | undefined;
-  try { learningState = await snapshotForRequest(Astro.locals); } catch { learningState = undefined; }
-
-  const currentItemId = contextualMatch
-    ? decodeURIComponent(contextualMatch[2])
-    : curriculumRoute
-      ? Astro.url.searchParams.get('item')
-      : learningState?.activeItemId;
-  const currentItem = currentItemId ? curriculumGraph.itemsById.get(currentItemId) : undefined;
-  const tracks = [...curriculumGraph.manifest.tracks].sort((a, b) => a.order - b.order);
-  const integrations = curriculumGraph.manifest.items
-    .filter((item) => item.kind === 'integration')
-    .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
-  const location = currentItem ? getItemLocation(curriculumGraph, currentItem.id) : undefined;
-  const requestedTrack = Astro.url.searchParams.get('track');
-  let activeTrackId = currentItem && currentItem.kind !== 'integration'
-    ? currentItem.trackId
-    : tracks.some((track) => track.id === requestedTrack)
-      ? requestedTrack!
-      : location?.track?.id ?? tracks[0]?.id;
-
-  if (currentItem?.kind === 'integration' && !curriculumRoute) {
-    const anchor = currentItem.prerequisites
-      .map((id) => curriculumGraph.itemsById.get(id))
-      .find((item) => item && item.kind !== 'integration');
-    activeTrackId = anchor && anchor.kind !== 'integration' ? anchor.trackId : tracks[0]?.id;
-  }
-
-  const explorer = activeTrackId ? getTrackExplorer(curriculumGraph, activeTrackId) : undefined;
-  const selectedItem = currentItem;
-  const selectedLocation = selectedItem ? getItemLocation(curriculumGraph, selectedItem.id) : undefined;
-
-  const stateFor = (id: string) =>
-    learningState
-      ? getItemActionState(getItemLearningView(curriculumGraph, learningState, id)).status
-      : 'unknown';
-
-  const previewHref = (item: typeof curriculumGraph.manifest.items[number]) =>
-    item.kind === 'integration'
-      ? '/curriculum?item=' + encodeURIComponent(item.id)
-      : '/curriculum?track=' + encodeURIComponent(item.trackId) + '&item=' + encodeURIComponent(item.id);
-
-  const curriculumHref = currentItem
-    ? previewHref(currentItem)
-    : activeTrackId
-      ? '/curriculum?track=' + encodeURIComponent(activeTrackId)
-      : '/curriculum';
-
-  const sidebarItem = (item: typeof curriculumGraph.manifest.items[number]) => ({
-    id: item.id,
-    title: item.title,
-    href: curriculumRoute ? previewHref(item) : itemHref(curriculumGraph, item.id),
-    kind: item.kind,
-    state: stateFor(item.id),
-    active: item.id === selectedItem?.id,
-  });
-
-  sidebarData = {
-    total: curriculumGraph.manifest.items.length,
-    curriculumHref,
-    activeTrackId: activeTrackId ?? '',
-    selectedModuleId: selectedLocation?.module?.id,
-    tracks: tracks.map((track) => {
-      const items = curriculumGraph.manifest.items.filter(
-        (item) => item.kind !== 'integration' && item.trackId === track.id,
-      );
-      return {
-        id: track.id, title: track.title, total: items.length,
-        completed: items.filter((item) => ((stateFor(item.id) === 'passed' || stateFor(item.id) === 'studied') || stateFor(item.id) === 'studied')).length,
-      };
-    }),
-    modules: (explorer?.modules ?? []).map((module) => ({
-      id: module.id,
-      title: module.title,
-      completed: module.items.filter((item) => (stateFor(item.id) === 'passed' || stateFor(item.id) === 'studied')).length,
-      items: module.items.map((item, index) => ({
-        ...sidebarItem(item),
-        position: { index: index + 1, total: module.items.length },
-      })),
-    })),
-    integrations: integrations.map(sidebarItem),
-    searchEntries: searchIndex.map((entry) => ({
-      ...sidebarItem(curriculumGraph.itemsById.get(entry.itemId)!),
-      searchText: entry.searchText,
-    })),
-  };
-}
-
-Astro.response.headers.set('Cache-Control', 'no-store');
+interface Props { title: string; description?: string }
+const { title, description = 'Materi, latihan soal, dan ide project CS-101.' } = Astro.props;
+const graph = curriculumGraph;
+const selection = selectLibraryItem(graph, Astro.url.searchParams.get('track'), Astro.url.searchParams.get('item'));
+const current = selection.item;
+const explorer = selection.trackId ? getTrackExplorer(graph, selection.trackId) : undefined;
+const location = current ? getItemLocation(graph, current.id) : undefined;
+const row = (item: typeof graph.manifest.items[number]) => ({
+  id: item.id,
+  title: item.title,
+  href: libraryHref(item.id),
+  kind: item.kind,
+  active: current?.id === item.id,
+});
+const sidebarData: SidebarData = {
+  total: graph.manifest.items.length,
+  activeTrackId: selection.trackId,
+  selectedModuleId: location?.module?.id,
+  tracks: [...graph.manifest.tracks].sort((a, b) => a.order - b.order).map((track) => ({
+    id: track.id,
+    title: track.title,
+    total: graph.manifest.items.filter((item) => item.kind !== 'integration' && item.trackId === track.id).length,
+  })),
+  modules: (explorer?.modules ?? []).map((module) => ({
+    id: module.id,
+    title: module.title,
+    items: module.items.map(row),
+  })),
+  integrations: graph.manifest.items.filter((item) => item.kind === 'integration').map(row),
+};
 ---
 <!doctype html>
-<html lang="id" data-accent="blue" data-density="compact" data-sidebar="expanded" transition:animate="none">
+<html lang="id" data-accent="neutral" data-density="compact" data-sidebar="expanded" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap" />
     <title>{title} · CS-101</title>
     <ClientRouter fallback="swap" />
     <script is:inline>
-      // Apply the collapsed preference before the first paint and carry it across Astro swaps.
       try {
-        document.documentElement.dataset.sidebar =
-          localStorage.getItem('cs101:sidebar-collapsed') === 'true' ? 'collapsed' : 'expanded';
-      } catch { document.documentElement.dataset.sidebar = 'expanded'; }
-      document.addEventListener('astro:before-swap', (event) => {
-        event.newDocument.documentElement.dataset.sidebar =
-          document.documentElement.dataset.sidebar || 'expanded';
-      });
-    </script>
-    <script>
-      // Keep old content visible while SSR/D1 prepares the next view. Show a
-      // small progress cue only when the fetch is perceptibly slow.
-      let loadingTimer: number | undefined;
-      const stopLoading = () => {
-        window.clearTimeout(loadingTimer);
-        loadingTimer = undefined;
-        delete document.documentElement.dataset.routeLoading;
-      };
-
-      document.addEventListener('astro:before-preparation', () => {
-        stopLoading();
-        loadingTimer = window.setTimeout(() => {
-          document.documentElement.dataset.routeLoading = 'true';
-        }, 160);
-      });
-      document.addEventListener('astro:after-preparation', stopLoading);
-      document.addEventListener('astro:after-swap', stopLoading);
-      document.addEventListener('astro:page-load', stopLoading);
-      window.addEventListener('pagehide', stopLoading);
-
-    </script>
-    <script is:inline>
-      // The new SSR document defaults to light. Copy the current preference
-      // before the DOM swap to avoid a theme flash during client navigation.
-      try {
+        document.documentElement.dataset.sidebar = localStorage.getItem('cs101:sidebar-collapsed') === 'true' ? 'collapsed' : 'expanded';
         const preference = localStorage.getItem('cs101:theme') || 'system';
         document.documentElement.dataset.themePreference = preference;
         document.documentElement.dataset.theme = preference === 'system'
-          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-          : preference;
+          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : preference;
       } catch {}
       document.addEventListener('astro:before-swap', (event) => {
-        event.newDocument.documentElement.dataset.themePreference =
-          document.documentElement.dataset.themePreference || 'system';
-        event.newDocument.documentElement.dataset.theme =
-          document.documentElement.dataset.theme || 'light';
+        event.newDocument.documentElement.dataset.sidebar = document.documentElement.dataset.sidebar || 'expanded';
+        event.newDocument.documentElement.dataset.themePreference = document.documentElement.dataset.themePreference || 'system';
+        event.newDocument.documentElement.dataset.theme = document.documentElement.dataset.theme || 'light';
       });
     </script>
   </head>
   <body transition:animate="none">
-    <a class="skip-link" href="#main">Langsung ke isi</a>
-    <header class="topbar" transition:persist="app-header">
-      <a class="brand" href="/" aria-label="CS-101 · Hari ini">
-        <span class="brand-mark" aria-hidden="true">CS</span>
-        <span>CS-101</span>
+    <a class="skip-link" href="#main">Langsung ke konten</a>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="CS-101 · Materi">
+        <span class="brand-mark" aria-hidden="true">CS</span><span>CS-101</span>
       </a>
-      <AppHeaderActions client:load searchEntries={searchEntries} />
+      <div class="topbar-location"><strong>Library</strong><span class="separator" aria-hidden="true">/</span><span class="current-track">{location?.track?.title ?? "Content Library"}</span></div>
+      <AppHeaderActions client:load />
     </header>
     <div class="app-shell">
-      <AppSidebar client:load currentPath={path} data={sidebarData} />
-      <main
-        id="main"
-        tabindex="-1"
-        class:list={['app-main', flush && 'app-main--flush']}
-        transition:name="page-workspace"
-        transition:animate={fade({ duration: '0.14s' })}
-      >
+      <AppSidebar client:load data={sidebarData} />
+      <main id="main" tabindex="-1" class="app-main" transition:name="page-workspace" transition:animate={fade({duration:'0.26s'})}>
         <slot />
       </main>
     </div>

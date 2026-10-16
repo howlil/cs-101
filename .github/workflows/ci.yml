@@ -18,115 +18,47 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10.28.2
           run_install: false
-
-      - name: Setup Node 24
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
-
       - name: Install
         run: pnpm install --frozen-lockfile
-
-      - name: Validate SQL-003 authored bundle
-        run: |
-          pnpm generation:validate SQL-003
-          cmp generation/staging/SQL-003/derived/generation-record.json generation/SQL-003.json
-          cmp generation/staging/SQL-003/derived/review-bank.json review-banks/SQL-003.json
-
-      - name: Validate JAV-003 authored bundle
-        run: |
-          pnpm generation:validate JAV-003
-          cmp generation/staging/JAV-003/derived/generation-record.json generation/JAV-003.json
-          cmp generation/staging/JAV-003/derived/review-bank.json review-banks/JAV-003.json
-          pnpm generation:promote JAV-003
-          git diff --exit-code -- src/content/lessons/JAV-003.mdx generation/JAV-003.json review-banks/JAV-003.json
-
-      - name: Validate JAV-002 authored bundle
-        run: |
-          pnpm generation:validate JAV-002
-          cmp generation/staging/JAV-002/derived/generation-record.json generation/JAV-002.json
-          cmp generation/staging/JAV-002/derived/review-bank.json review-banks/JAV-002.json
-          pnpm generation:promote JAV-002
-          git diff --exit-code -- src/content/lessons/JAV-002.mdx generation/JAV-002.json review-banks/JAV-002.json
-
-      - name: Validate and promote SQL-001 from course-generator
-        run: |
-          pnpm generation:prepare SQL-001
-          pnpm generation:validate SQL-001
-          pnpm generation:promote SQL-001
-          pnpm validate:content
-          pnpm validate:reviews
-          git diff --exit-code -- src/content/lessons/SQL-001.mdx generation/SQL-001.json review-banks/SQL-001.json
-
-      - name: Test
+      - name: Validate authored lessons and question banks
+        run: pnpm validate
+      - name: Unit tests
         run: pnpm test
-
-      - name: Astro check
+      - name: Astro type check
         run: pnpm check
-
       - name: CSS parse
         run: node scripts/validate-css.mjs
-
       - name: Safe Node build
         run: pnpm build:node
-
-      - name: Smoke Node runtime
+      - name: Single-page smoke test
         shell: bash
         run: |
           set -euo pipefail
           pnpm start > /tmp/cs101-smoke.log 2>&1 &
           pid=$!
           trap 'kill "$pid" 2>/dev/null || true' EXIT
-
           ready=0
           for _ in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:4321/ >/dev/null; then
-              ready=1
-              break
-            fi
+            if curl --fail --silent http://127.0.0.1:4321/ >/dev/null; then ready=1; break; fi
             sleep 0.5
           done
-
-          if [ "$ready" -ne 1 ]; then
-            cat /tmp/cs101-smoke.log
-            exit 1
-          fi
-
-          curl --fail --silent http://127.0.0.1:4321/ >/dev/null
-          curl --fail --silent http://127.0.0.1:4321/curriculum >/dev/null
-          curl --fail --silent http://127.0.0.1:4321/progress >/dev/null
-          curl --fail --silent http://127.0.0.1:4321/learn/SQL-001 > /tmp/cs101-sql001.html
-          grep -q 'data-lesson-stage="understand"' /tmp/cs101-sql001.html
-          grep -q 'data-lesson-stage="practice"' /tmp/cs101-sql001.html
-          grep -q 'data-lesson-stage="evidence"' /tmp/cs101-sql001.html
-          for id in JAV-001 SQL-002 JAV-002 JAV-003; do
-            curl --fail --silent --show-error "http://127.0.0.1:4321/learn/$id" > "/tmp/cs101-$id.html"
-            grep -q 'data-lesson-stage="understand"' "/tmp/cs101-$id.html"
-            grep -q 'data-lesson-stage="practice"' "/tmp/cs101-$id.html"
-            grep -q 'data-lesson-stage="evidence"' "/tmp/cs101-$id.html"
-          done
-
-          for page in project/JAV-P01 integration/INT-001 review/SQL-001; do
-            curl --fail --silent --show-error "http://127.0.0.1:4321/$page" >/dev/null
-          done
-          node scripts/browser-qa.mjs
-
-
-
-      - name: Upload responsive screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cs101-responsive-qa
-          path: /tmp/cs101-qa/*.png
-          if-no-files-found: ignore
-          retention-days: 14
+          if [ "$ready" -ne 1 ]; then cat /tmp/cs101-smoke.log; exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/cs101-lesson.html
+          grep -q 'data-lesson-stage="understand"' /tmp/cs101-lesson.html
+          grep -q 'data-lesson-stage="practice"' /tmp/cs101-lesson.html
+          grep -q 'id="ide-project"' /tmp/cs101-lesson.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-P01' > /tmp/cs101-project.html
+          grep -q 'Problem statement' /tmp/cs101-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/cs101-domain.html
+          grep -q 'NET-001' /tmp/cs101-domain.html
+          curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/api/learning | grep -q 404
+          curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/learn/SQL-001 | grep -q 302

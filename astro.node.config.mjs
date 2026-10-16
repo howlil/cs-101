@@ -7,7 +7,7 @@ const privateOrigin = process.env.CS101_ORIGIN ? new URL(process.env.CS101_ORIGI
 
 export default defineConfig({
   output: 'server',
-  prefetch: false, // Matches Cloudflare's private, no-store HTML navigation.
+  prefetch: false, // Navigation always reuses the single content page.
   session: false,
   adapter: node({ mode: 'standalone' }),
   integrations: [mdx(), react()],
@@ -19,5 +19,4 @@ export default defineConfig({
       ...(privateOrigin ? [{ hostname: privateOrigin.hostname, protocol: privateOrigin.protocol.slice(0, -1), port: privateOrigin.port }] : []),
     ],
   },
-  vite: { ssr: { external: ['node:sqlite'] } },
 });

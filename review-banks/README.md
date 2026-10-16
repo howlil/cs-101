@@ -1,36 +1,10 @@
-# Review banks
+# Practice question banks (legacy directory name)
 
-Review bank adalah artifact assessment terstruktur yang dipakai server untuk grading recall.
+Each `<ITEM-ID>.json` is a **static collection of five formative questions**, authored from `lesson-spec.json` and verified by `pnpm validate:reviews`. The directory is named `review-banks` for generator compatibility, **not** for scheduling reviews.
 
-Satu curriculum item memakai satu file `<ITEM-ID>.json`:
+Questions must:
+- map back to the curriculum item and its fingerprint;
+- have valid answer indices, useful explanations, and explicit criterion coverage;
+- test mechanisms, prediction, debugging, or design trade-offs instead of memorization.
 
-```json
-{
-  "itemId": "JAV-001",
-  "version": "sha256-or-generator-version",
-  "curriculumFingerprint": "sha256:<fingerprint item>",
-  "questions": [
-    {
-      "id": "q1",
-      "prompt": "Pertanyaan recall",
-      "options": ["A", "B", "C", "D"],
-      "answer": 0,
-      "explanation": "Alasan jawaban.",
-      "criterionIds": ["criterion-..."]
-    }
-  ]
-}
-```
-
-Aturan:
-
-- tepat 5 pertanyaan;
-- answer index harus valid;
-- pertanyaan harus memetakan recall ke criterion/challenge, bukan trivia;
-- `curriculumFingerprint` harus sama dengan item aktif;
-- grading dilakukan server-side;
-- answer key dan explanation tidak dikirim ke browser sebelum submit;
-- bank final diturunkan dari `lesson-spec.json` oleh `generation:validate`, bukan diedit manual;
-- setiap curriculum criterion harus tercakup minimal satu review question.
-
-P6 menghasilkan review bank sebagai derived artifact dari lesson spec yang sama dengan lesson, sehingga assessment tidak drift dari coverage lesson.
+The website does not persist answers. Self-check quiz feedback runs entirely in the browser. There is no server grading, recall history, spaced repetition, or account system. This content can be reused in future authored MDX; it is not an authoritative learner assessment.

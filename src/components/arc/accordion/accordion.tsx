@@ -9,7 +9,7 @@ import type { TargetAndTransition, Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./accordion.module.css";
 
-export interface AccordionItem { title: string; content: ReactNode; }
+export interface AccordionItem { title: string; content: ReactNode; meta?: string | number; }
 export interface AccordionProps {
   items: AccordionItem[];
   defaultOpen?: number;
@@ -43,7 +43,7 @@ export function Accordion({ items, defaultOpen = 0, size = "md" }: AccordionProp
     {items.map((item, index) => { const open = openValue === String(index); return <AccordionPrimitive.Item className={styles.item} value={String(index)} key={`${item.title}-${index}`}>
       <AccordionPrimitive.Header className={styles.header}>
         <AccordionPrimitive.Trigger className={styles.trigger}>
-          <span>{item.title}</span><motion.span className={styles.icon} initial={false} animate={{ rotate: open ? 180 : 0 }} transition={reduced ? { duration: 0 } : motionTokens.spring.snappy}><ChevronDown width={17} height={17} aria-hidden="true" /></motion.span>
+          <span className={styles.triggerLabel}>{item.title}</span>{item.meta !== undefined && <span className={styles.triggerMeta}>{item.meta}</span>}<motion.span className={styles.icon} initial={false} animate={{ rotate: open ? 180 : 0 }} transition={reduced ? { duration: 0 } : motionTokens.spring.snappy}><ChevronDown width={17} height={17} aria-hidden="true" /></motion.span>
         </AccordionPrimitive.Trigger>
       </AccordionPrimitive.Header>
       {/* Radix keeps semantics and ids; motion owns the height so a toggle mid-flight retargets instead of restarting. */}

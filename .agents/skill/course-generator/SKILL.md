@@ -1,198 +1,84 @@
 ---
 name: course-generator
-description: Generate one CS-101 unit on demand from Curriculum Manifest V2, research authoritative sources, and persist a validated Astro/MDX lesson plus review bank. Use for one unit such as SQL-001 or JAV-013. Project checkpoints and integrations use their dedicated runtime workspaces.
+description: Generate one CS-101 unit as an authored learning material with explanatory MDX, local practice quiz, and project bridge. Uses authoritative sources and coverage validation. The website is a read-only content library, not a learning-progress system.
 ---
 
-# Course Generator
+# CS-101 Content Generator
 
-Generate **one unit at a time**. Treat curriculum as source code and generated content as a compiled artifact.
+Generate **one unit at a time**. Curriculum Manifest V2 is the specification. MDX, question banks, and provenance are versioned compiled content.
 
-## Execution model
+## Product contract
+
+CS-101 has **one content page**, `/`, whose sidebar selects domains and items. It displays authored materials, practice questions, and project ideas. There are no learner states, session logs, review due dates, databases, answer submissions to a server, or completion gates.
+
+- Unit (`JAV-003`) → generate MDX lesson plus five-question bank.
+- Checkpoint (`JAV-P01`) → source-backed project idea from manifest; **not** an MDX lesson.
+- Integration (`INT-001`) → source-backed cross-domain exercise from manifest.
+
+## Workflow
 
 ```text
 Item ID
-  ↓
-pnpm generation:prepare <ITEM-ID>
-  ↓
-context.json
-  ↓
-source research
-  ↓
-source-pack.json
-  ↓
-lesson-spec.json
-  ↓
-lesson.mdx
-  ↓
-pnpm generation:validate <ITEM-ID>
-  ↓
-derived generation record + review bank
-  ↓
-pnpm generation:promote <ITEM-ID>
+  → pnpm generation:prepare <ID>
+  → bounded graph context
+  → researched source-pack.json
+  → lesson-spec.json (model, explanation, examples, practice, questions, challenge coverage)
+  → lesson.mdx using assets/lesson-template.mdx
+  → pnpm generation:validate <ID>
+  → derived metadata and question bank
+  → pnpm generation:promote <ID>
+  → pnpm ci
 ```
 
-Never write final lesson/review artifacts before the staged bundle passes validation.
+Do not publish a generated file before validation.
 
-## Input
+### Context
 
-Resolve to one Curriculum V2 Item ID.
+Read `generation/staging/<ID>/context.json` from `generation:prepare`. This bounded packet includes prerequisite concepts, neighboring units, nearest checkpoint/project lineage, relation signals, criteria, and curriculum source. Never load the entire manifest for one lesson.
 
-- Unit, e.g. `SQL-001`: supported.
-- Checkpoint, e.g. `SQL-P01`: do not generate as a lesson; use the project workspace.
-- Integration, e.g. `INT-001`: do not generate as a lesson; use the integration workspace.
+### Research
 
-For ambiguous title lookup, resolve against Manifest V2 before generating.
+Inspect the curated source first, then 1–5 authoritative sources specific to the declared scope. Prefer primary documentation and standards. Record direct URLs in `source-pack.json`. Unsupported claims must be resolved or omitted before validating.
 
-## 1. Prepare graph context
+### Lesson specification
 
-Run:
+Create `lesson-spec.json` before prose, including:
+- immediate learning payoff, predictive mental model, and dependency/causal graph;
+- mechanisms, invariants, worked examples, and misconceptions;
+- guided implementation and independent practice;
+- every curriculum criterion plus the original challenge in the coverage matrix;
+- exactly five question-bank prompts aligned to criteria, with explanations.
 
-```sh
-pnpm generation:prepare SQL-001
-```
+`evidenceExpected` in metadata means **a locally observable result**, not a submission or persisted learner record.
 
-Read `generation/staging/SQL-001/context.json`.
+### Write MDX
 
-The resolver selects only deterministic relevant context:
+Use `assets/lesson-template.mdx` with three **visible in-page sections**:
+1. Materi — mental model, explanations, traces, and sources.
+2. Latihan soal — formative quiz, guided practice and challenge.
+3. Praktik — self-verification checklist only; no evidence form, progress state, or upload.
 
-- current item;
-- direct prerequisites;
-- nearby module items;
-- nearest checkpoint;
-- checkpoint lineage;
-- bounded related/deep-dive/foundation/contributes-to relations;
-- curated curriculum source.
+A separate **Ide project** section is composed by the content page using the nearest relevant checkpoint from the manifest.
 
-Do not replace this packet with the full manifest.
+Required components: `LessonStage`, `MentalModel`, `ConceptGraph`, `Quiz`, `Challenge`, `ExitCriteria`, `SourceList`. Use reusable content components; never add page navigation, global sidebar, or trackers into lesson MDX.
 
-## 2. Research sources
-
-Read the curated curriculum source first, then primary/official sources for the exact scope.
-
-Write `source-pack.json` using the schema in `src/domain/generation/schema.ts`.
-
-Rules:
-
-- 1–5 strong sources.
-- Tier 0 = curriculum-provided source.
-- Prefer Tier 1 official/primary sources.
-- Every concept claim in the lesson spec must point to a URL in this pack.
-- Keep `unsupportedClaims` non-empty until unresolved factual gaps are actually resolved.
-- Do not broaden curriculum scope to justify extra research.
-
-## 3. Build lesson spec
-
-Create `lesson-spec.json` before prose.
-
-It must contain:
-
-- payoff;
-- concrete learning outcomes;
-- one predictive mental model;
-- relationship/cause-effect graph;
-- concepts in dependency order;
-- mechanism explanation per concept;
-- misconception traps;
-- guided practice;
-- full criterion/challenge coverage matrix;
-- exactly five review questions.
-
-Each curriculum criterion must be tested by at least one review question. Challenge coverage is required in the lesson/evidence matrix but does not need to become trivia in the review bank.
-
-## 4. Write lesson
-
-Write `generation/staging/<ITEM-ID>/lesson.mdx` using `assets/lesson-template.mdx`.
-
-Preserve:
-
-- original scope;
-- original challenge intent;
-- original Definition of Done;
-- direct prerequisite identity.
-
-Optimize teaching order, not requirements.
-
-Required course components:
-
-- MentalModel
-- ConceptGraph
-- Quiz
-- Challenge
-- ExitCriteria
-- SourceList
-
-## 5. Validate
-
-Run:
+### Validate and publish
 
 ```sh
 pnpm generation:validate SQL-001
-```
-
-Validation blocks:
-
-- stale fingerprint;
-- missing criterion/challenge coverage;
-- review questions not covering curriculum criteria;
-- unsupported claims;
-- source URLs outside source pack;
-- invalid frontmatter;
-- missing prerequisite references;
-- source pack URLs absent from lesson;
-- missing required course components.
-
-The validator derives:
-
-- `generation-record.json`
-- `review-bank.json`
-- `validation-report.json`
-
-Do not hand-edit derived files.
-
-## 6. Promote
-
-Run:
-
-```sh
 pnpm generation:promote SQL-001
+pnpm ci
 ```
 
-Promotion verifies validation hashes and writes:
+Validation blocks stale fingerprints, unsupported claims, missing source coverage, missing criterion/challenge assessment coverage, malformed MDX/frontmatter, broken prerequisite identities, and invalid question banks. Promotion checks artifact hashes.
 
-- `src/content/lessons/<ITEM-ID>.mdx`
-- `generation/<ITEM-ID>.json`
-- `review-banks/<ITEM-ID>.json`
+Outputs retain compatibility paths:
+- `src/content/lessons/<ID>.mdx` — material, quiz, manual challenge;
+- `generation/<ID>.json` — provenance, source mapping, coverage;
+- `review-banks/<ID>.json` — **reusable practice-question content only**; this legacy directory name does not imply a review scheduler.
 
-Then run:
-
-```sh
-pnpm validate:content
-pnpm validate:reviews
-```
-
-Generating content never marks the learner item passed.
-
-## Writing rules
-
-- Payoff first.
-- One strong mental model.
-- Explain dependency, mechanism, invariant, state transition, and failure mode when they affect reasoning.
-- Prefer prediction before execution.
-- Code/examples must be minimal and tied to a criterion.
-- Pareto applies to teaching order, never to deleting requirements.
-- No invented metrics, APIs, behavior, citations, or requirements.
-
-## Non-goals
-
-Do not bulk-generate by default. Do not use checkpoint/integration as ordinary MDX lessons. Do not turn contextual relations into prerequisites. Do not use blogs as primary evidence when official sources exist. Do not provide full project solutions when implementation practice is the learning goal.
+Do not bulk-generate automatically, broaden scope to fill space, write full project solutions, fabricate citations, or add learner-state code.
 
 ## Completion report
 
-Report:
-
-- Item ID + generated lesson path;
-- authoritative sources used;
-- criterion/challenge coverage status;
-- review bank status;
-- unresolved source/curriculum conflicts;
-- next learner action.
+Report published item ID, source URLs, content sections, criterion coverage, question quality/coverage, project bridge, validation results, and remaining content gaps.
