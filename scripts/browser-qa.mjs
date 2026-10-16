@@ -189,12 +189,14 @@ try {
   await client.eval('document.querySelector(".curriculum-overview-modules a").click()');
   await client.wait(async () => await client.eval('location.pathname === "/curriculum" && new URLSearchParams(location.search).has("item")'), 'module opens selected preview');
   await client.wait(async () => await client.eval('Boolean(document.querySelector(".item-id-standalone"))'), 'selected curriculum item');
-  await client.goto('/curriculum?item=JAV-003');
+  await client.goto('/curriculum?item=JAV-004');
   assert.ok(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), 'Missing authored lesson must be disclosed in preview');
   assert.equal(await client.eval("document.body.textContent.includes('tercantum di kurikulum.')"), true, 'Missing authored text must not be claimed available');
   await client.screenshot('curriculum-outline-desktop-1440.png');
   await client.goto('/curriculum?item=SQL-003');
   assert.equal(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), false, 'Authored SQL-003 must not be marked outline');
+  await client.goto('/curriculum?item=JAV-003');
+  assert.equal(await client.eval('Boolean(document.querySelector(".item-outline-status"))'), false, 'Authored JAV-003 should not be marked as outline');
   console.log('PASS Curriculum preview distinguishes authored content from manifest outlines');
   console.log('PASS curriculum overview → module selection');
 
@@ -307,7 +309,7 @@ try {
   assert.equal(await client.eval('document.querySelector(".item-id-standalone").textContent'), 'SQL-001');
   console.log('PASS learning journey: Pahami/Latihan/Bukti, evidence, focus, context preservation');
 
-  for (const id of ['SQL-002', 'SQL-003', 'JAV-001', 'JAV-002']) {
+  for (const id of ['SQL-002', 'SQL-003', 'JAV-001', 'JAV-002', 'JAV-003']) {
     await client.goto('/learn/' + id);
     assert.equal(await client.eval('document.querySelectorAll(".lesson-stage-tab").length'), 3, id + ' tabs');
     assert.deepEqual(await client.eval('["understand","practice","evidence"].map(s => document.querySelectorAll("#lesson-panel-"+s).length)'),
@@ -321,6 +323,10 @@ try {
     if (id === 'JAV-002') {
       assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), false, 'Authored JAV-002 must not render the manifest-only fallback');
       assert.equal(await client.eval("document.body.textContent.includes('Object = state yang valid + kontrak perilaku')"), true, 'JAV-002 authored mental model must render');
+    }
+    if (id === 'JAV-003') {
+      assert.equal(await client.eval("document.body.textContent.includes('Kerangka kurikulum — materi belum ditulis')"), false, 'Authored JAV-003 must not render the manifest-only fallback');
+      assert.equal(await client.eval("document.body.textContent.includes('Collection = indeks untuk pola operasi')"), true, 'JAV-003 authored mental model must render');
     }
   }
   // Foundation prerequisites are advisory. The lesson remains readable and

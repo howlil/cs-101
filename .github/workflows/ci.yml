@@ -42,8 +42,13 @@ jobs:
           cmp generation/staging/SQL-003/derived/generation-record.json generation/SQL-003.json
           cmp generation/staging/SQL-003/derived/review-bank.json review-banks/SQL-003.json
 
-      - name: Validate JAV-003 staged content
-        run: pnpm generation:validate JAV-003
+      - name: Validate JAV-003 authored bundle
+        run: |
+          pnpm generation:validate JAV-003
+          cmp generation/staging/JAV-003/derived/generation-record.json generation/JAV-003.json
+          cmp generation/staging/JAV-003/derived/review-bank.json review-banks/JAV-003.json
+          pnpm generation:promote JAV-003
+          git diff --exit-code -- src/content/lessons/JAV-003.mdx generation/JAV-003.json review-banks/JAV-003.json
 
       - name: Validate JAV-002 authored bundle
         run: |
@@ -103,7 +108,7 @@ jobs:
           grep -q 'data-lesson-stage="understand"' /tmp/cs101-sql001.html
           grep -q 'data-lesson-stage="practice"' /tmp/cs101-sql001.html
           grep -q 'data-lesson-stage="evidence"' /tmp/cs101-sql001.html
-          for id in JAV-001 SQL-002 JAV-002; do
+          for id in JAV-001 SQL-002 JAV-002 JAV-003; do
             curl --fail --silent --show-error "http://127.0.0.1:4321/learn/$id" > "/tmp/cs101-$id.html"
             grep -q 'data-lesson-stage="understand"' "/tmp/cs101-$id.html"
             grep -q 'data-lesson-stage="practice"' "/tmp/cs101-$id.html"

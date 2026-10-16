@@ -1,0 +1,79 @@
+{
+  "itemId": "JAV-003",
+  "version": "lesson-spec-v1:sha256:3b2c332eb78b309e0000506a733e2182bf441f7499e17738c0903a8c4d4e7781",
+  "curriculumFingerprint": "sha256:3b2c332eb78b309e0000506a733e2182bf441f7499e17738c0903a8c4d4e7781",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Sebagian besar operasi adalah get(i) pada 200.000 item, tetapi ada sesekali insert di awal. Pilihan dan prediksi yang benar?",
+      "options": [
+        "ArrayList: get indeks O(1), insert awal O(n)",
+        "LinkedList: get indeks O(1), insert awal O(1) dalam semua kondisi",
+        "HashSet: get indeks O(1)"
+      ],
+      "answer": 0,
+      "explanation": "ArrayList mendukung akses indeks konstan; insert awal menggeser elemen. LinkedList mengakses indeks dengan traversal.",
+      "criterionIds": [
+        "criterion-959850da65"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "ID transaksi duplikat harus dibuang, tetapi laporan wajib mengikuti urutan ID pertama kali datang. Struktur utama yang tepat?",
+      "options": [
+        "HashSet karena menjamin insertion order",
+        "LinkedHashSet karena unik sekaligus mempertahankan encounter/insertion order",
+        "PriorityQueue karena selalu FIFO"
+      ],
+      "answer": 1,
+      "explanation": "LinkedHashSet menerapkan Set dan menjaga insertion order; HashSet tidak menjamin urutan.",
+      "criterionIds": [
+        "criterion-959850da65"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Setelah mengagregasi saldo a akun, ingin Top-K untuk k jauh lebih kecil dari a tanpa full-sort. Pendekatan yang sesuai?",
+      "options": [
+        "Sort a akun penuh: O(a log a)",
+        "Scan semua akun dengan min-heap terbatas k: O(a log k), lalu urutkan hanya hasil k",
+        "Masukkan akun ke HashMap lalu iterasi pasti terurut"
+      ],
+      "answer": 1,
+      "explanation": "Heap menyimpan k kandidat terbaik; kandidat lebih buruk di head dan dapat diganti saat skor lebih baik muncul.",
+      "criterionIds": [
+        "criterion-df02e09611",
+        "criterion-bec801ef85"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Top-K memakai |saldo| descending, tie akun ID ascending. Agar hasil stabil ketika input diacak, apa yang wajib?",
+      "options": [
+        "Gunakan iterator PriorityQueue sebagai hasil akhir",
+        "Comparator total yang sama pada heap dan full-sort oracle, dengan tie-break ID eksplisit",
+        "Andalkan HashMap iteration order"
+      ],
+      "answer": 1,
+      "explanation": "Heap hanya menjamin elemen head menurut comparator, bukan urutan iterasinya. Output k elemen tetap harus diurutkan dan seri harus ditentukan.",
+      "criterionIds": [
+        "criterion-df02e09611",
+        "criterion-bec801ef85"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Review mengharuskan zero -Xlint:rawtypes/-Xlint:unchecked. Mana pilihan yang menjaga safety type?",
+      "options": [
+        "List list = new ArrayList(); lalu casting saat baca",
+        "List<AccountId> ids = new ArrayList<>(); dan parameter producer List<? extends AccountId> bila perlu",
+        "(List<AccountId>) rawList dengan unchecked cast"
+      ],
+      "answer": 1,
+      "explanation": "Parameterized type dan bound mengekspresikan kontrak compile-time. Raw type serta unchecked cast menghilangkan bukti static typing.",
+      "criterionIds": [
+        "criterion-8ca0bc2b72"
+      ]
+    }
+  ]
+}
