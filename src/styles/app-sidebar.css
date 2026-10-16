@@ -105,3 +105,9 @@ html[data-sidebar="collapsed"] .app-sidebar .sidebar-nav-link { justify-content:
   html[data-focus="true"] .sidebar-mobile-trigger { display:none!important; }
   html[data-focus="true"] .topbar .brand { margin-left:0; }
 }
+
+/* The single-page catalogue keeps one scrollable curriculum tree on desktop. */
+.app-sidebar .sidebar-frame { flex:1; min-height:0; overflow:hidden; }
+.app-sidebar .sidebar-frame > .sidebar-scroll { height:100%; }
+.app-sidebar .sidebar-curriculum { margin-top:6px; }
+.sidebar-mobile-dialog .sidebar-curriculum { margin-top:8px; }

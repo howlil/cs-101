@@ -25,14 +25,4 @@ export const reviewBankSchema = z.object({
   questions: z.array(reviewQuestionSchema).length(5),
 });
 
-export const reviewAttemptSchema = z.object({
-  requestId: z.uuid(),
-  revision: z.number().int().nonnegative(),
-  itemId: itemIdSchema,
-  questionSetVersion: z.string().min(1),
-  answers: z.array(z.number().int().nonnegative()).length(5),
-  assisted: z.boolean().default(false),
-});
-
 export type ReviewBank = z.infer<typeof reviewBankSchema>;
-export type ReviewAttemptInput = z.infer<typeof reviewAttemptSchema>;
