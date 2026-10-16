@@ -1,0 +1,289 @@
+---
+taskId: "JAV-003"
+title: "Collections + Generics"
+description: "Pilih Java collections dari access/update constraints; indeks transaksi satu pass dan hitung Top-K tanpa full-sort."
+demo: false
+curriculumFingerprint: "sha256:3b2c332eb78b309e0000506a733e2182bf441f7499e17738c0903a8c4d4e7781"
+---
+
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import Reveal from '../../components/lesson/Reveal.astro';
+
+<LessonStage stage="understand">
+
+> Dari transaksi berulang, buat laporan urutan pertama, saldo per akun, dan **Top-K akun** tanpa menyortir seluruh akun. Struktur data menentukan apakah hasil benar dan bagaimana biaya meningkat ketika data membesar.
+
+## Outcome
+
+- Pilih `List`, `Set`, `Map`, `Queue`, atau `Deque` dari operasi yang dominan, bukan kebiasaan.
+- Prediksi Big-O serta asumsi biaya untuk setidaknya **9 dari 10 skenario backend**.
+- Pahami generics, tipe berbatas, `Comparator`, perilaku hash dan urutan iterasi.
+- Bangun Top-K menggunakan **heap ukuran maksimal K**, validasi terhadap full-sort oracle pada **100 dataset ber-seed**, dan hilangkan raw/unchecked warnings.
+
+<MentalModel title="Collection = indeks untuk pola operasi">
+Tanyakan empat hal sebelum memilih: **Apa identitas yang unik? Urutan mana yang dijanjikan? Operasi mana yang dominan? Berapa besar data dibanding K?**
+
+`Set` menjawab keunikan; `Map` menjawab lookup/aggregation berdasarkan key; `List` menjawab urutan dan indeks; `Queue` atau `Deque` menjawab pekerjaan di ujung/head. Untuk Top-K, pertahankan hanya K kandidat dalam heap: jangan urutkan keseluruhan hanya untuk mengambil sebagian kecil.
+</MentalModel>
+
+<ConceptGraph>
+<pre>{`transaction stream (n events)
+       |
+       +--> HashSet<TransactionId> --> skip duplicate ID
+       |             |
+       |             +--> LinkedHashSet<TransactionId> (first-seen report)
+       |             +--> HashMap<AccountId, BigInteger> (net balance)
+       |
+       +--> after ingestion: a distinct account balances
+                    |
+                    +--> bounded PriorityQueue (at most k)
+                    |       |
+                    |       +--> sort final k only --> Top-K report
+                    |
+                    +--> independent FULL SORT (test oracle only)
+                           |
+                           +--> compare exact results on 100 datasets`}</pre>
+</ConceptGraph>
+
+## Prasyarat
+
+[JAV-002 — OOP + object contracts](/learn/JAV-002) wajib dipahami: `TransactionId` dan `AccountId` adalah value objects yang immutable dan patuh `equals/hashCode`. Inilah dasar deduplikasi dan `HashMap` key yang benar.
+
+## 1. Kontrak koleksi dan pilihan implementasi
+
+| Kebutuhan | Pilihan | Operasi dominan dan biaya |
+| --- | --- | --- |
+| Akses index, tambah di ujung | `ArrayList<E>` | get(index) O(1); append amortized O(1); insert awal O(n) |
+| Unik tanpa urutan | `HashSet<E>` | add/contains expected O(1), **bukan** ordered |
+| Unik **dengan first-seen order** | `LinkedHashSet<E>` | keunikan hash + insertion-order iteration; extra memory |
+| Lookup/update saldo per ID | `HashMap<K,V>` | get/put expected O(1) dengan hash tersebar baik |
+| FIFO sederhana dari kedua ujung | `ArrayDeque<E>` | add/remove pada ujung amortized O(1) |
+| Ambil kandidat ranking terburuk/terbaik | `PriorityQueue<E>` | offer/poll O(log m), peek O(1), iterator **tak terurut** |
+
+Biaya `HashMap` atau `HashSet` itu **expected**, tidak otomatis worst-case O(1); collision, resize, dan key buruk mengubah kerja aktual. `LinkedHashSet` menjaga *insertion order* dan menambah elemen yang sudah ada tidak memindahkan posisi first-seen. `Queue` tidak berarti selalu FIFO: priority queue memilih head menurut comparator, sedangkan `Deque` mendukung dua ujung. Jangan memakai `LinkedList` hanya karena terasa mudah untuk insert; mencari indeks di linked list tetap memerlukan traversal.
+
+## 2. Generics = kontrak yang diperiksa compiler
+
+~~~java
+Set<TransactionId> seen = new HashSet<>();
+Map<AccountId, java.math.BigInteger> balance = new HashMap<>();
+List<AccountId> ordered = new ArrayList<>();
+~~~
+
+Generic type parameter menghindarkan cast manual dari `Object`. Dalam API yang hanya *membaca* subtype, wildcard semisal `List<? extends Number>` dapat menerima `List<Integer>`; ia tidak berarti aman menambahkan sembarang `Number`. Untuk algoritma yang membutuhkan operasi tertentu, type parameter berbatas seperti `<T extends Comparable<? super T>>` menyatakan kemampuan tipe, bukan casting runtime.
+
+<Reveal title="Kenapa List<Integer> bukan List<Number>?">
+Jika `List<Integer>` boleh diperlakukan sebagai `List<Number>`, kode lain dapat menambahkan `Double` ke dalamnya. Java generics bersifat invariant untuk mencegah pelanggaran itu. Upper-bounded wildcard dipakai pada interface pembaca ketika benar-benar diperlukan.
+</Reveal>
+
+## 3. Urutan first-seen berbeda dari sorting
+
+Input ID `[tx-2, tx-1, tx-2, tx-3, tx-1]` menghasilkan `[tx-2, tx-1, tx-3]`. `HashSet` cukup untuk keunikan, tetapi **tidak** menjamin iterasi sesuai arrival order. `LinkedHashSet<TransactionId>` menjaga keduanya.
+
+~~~java
+Set<String> firstSeen = new LinkedHashSet<>();
+for (String id : List.of("tx-2", "tx-1", "tx-2", "tx-3", "tx-1")) {
+    firstSeen.add(id);
+}
+System.out.println(firstSeen); // [tx-2, tx-1, tx-3]
+~~~
+
+Untuk satu-pass ingestion, gunakan `seen.add(id)` sebagai keputusan pertama sebelum memperbarui saldo. Satu transaksi duplikat tidak boleh memengaruhi agregasi kedua kalinya. Ingat: jumlah account tidak sama dengan jumlah transaksi unik.
+
+## 4. Comparator adalah spesifikasi hasil, bukan dekorasi
+
+Kontrak report:
+
+1. `absolute(balance)` lebih besar didahulukan.
+2. Saat absolut saldo sama, `AccountId` lexicographic ascending.
+3. AccountId unik menghasilkan total order yang deterministik.
+
+Jika memakai `BigInteger` untuk saldo dalam minor units, lakukan `abs()` langsung; jangan `Math.abs(long)` sembarangan karena `Long.MIN_VALUE` tak memiliki nilai positif yang muat dalam `long`. Dalam heap bounded-K, head harus kandidat **terburuk**: absolute saldo paling kecil, dan saat seri ID lexicographic paling besar. Kandidat lebih baik menggantikan head. Untuk output, *sort hanya K finalist* menggunakan urutan laporan descending tadi.
+
+<ConceptGraph>
+<pre>{`heap size <= k
+incoming account balance
+     |
+     +--> size < k? --> offer
+     |
+     +--> strictly better than heap.peek()? --> poll + offer
+     |
+     +--> otherwise skip
+end: sort only k finalists
+
+Top-K objective: O(a log k + k log k)
+Full sort oracle: O(a log a)
+(a = distinct accounts; k = min(requestedK, a))`}</pre>
+</ConceptGraph>
+
+`PriorityQueue.iterator()` **bukan** sorted traversal; `peek()` hanya menjamin head. Gunakan comparator yang sama semantiknya di heap dan oracle, tetapi terbalik sesuai posisi kandidat terburuk pada heap. Uji juga `k = 0`, `k > a`, negatif/positif dengan absolut sama, duplikasi transaksi, dan tie account ID.
+
+## 5. Dua fase, tetapi hanya satu pass atas transaksi
+
+**Ingest:** scan `n` event tepat sekali, deduplicate by `TransactionId`, append first-seen ID dan update `Map<AccountId, BigInteger>`. Dengan hash yang terdistribusi baik, expected time **O(n)**; space **O(u + a)** untuk `u` unique IDs dan `a` accounts.
+
+**Report:** scan `a` saldo akun (bukan scan ulang transaksi), pertahankan heap ukuran `k`, lalu sort `k` hasil saja. Time **O(a log k + k log k)** untuk `k >= 2`, dengan kasus `k <= 1` ditangani terpisah; auxiliary heap **O(k)**. Total expected **O(n + a log k + k log k)**, storage **O(u + a + k)**. Full-sort hanya dijalankan pada *oracle test*, tidak pada implementasi produksi.
+
+## Sepuluh prediksi struktur
+
+Sebelum menulis kode, jawab **struktur + Big-O**: (1) index read pada event array; (2) repeated insert awal pada ArrayList; (3) dedup unordered ID; (4) dedup ordered ID; (5) lookup saldo per account; (6) FIFO queue; (7) double-ended queue; (8) bounded Top-K; (9) cek membership terhadap HashSet; (10) mengurutkan semua akun untuk full report. Target minimal 9 jawaban benar.
+
+<Reveal title="Periksa 10 prediksi">
+1. ArrayList get O(1).
+2. ArrayList insert awal O(n).
+3. HashSet add expected O(1).
+4. LinkedHashSet add expected O(1), iteration ordered.
+5. HashMap get/put expected O(1).
+6. ArrayDeque offerLast/pollFirst amortized O(1).
+7. ArrayDeque kedua ujung amortized O(1).
+8. PriorityQueue bounded k, tiap offer/poll O(log k).
+9. HashSet contains expected O(1).
+10. Full sort seluruh a akun O(a log a); ini **oracle**, bukan implementasi Top-K.
+</Reveal>
+
+<SourceList sources={[
+ {title:'Dev.java — Collections Framework',url:'https://dev.java/learn/api/collections-framework/'},
+ {title:'Dev.java — Generics',url:'https://dev.java/learn/generics/'},
+ {title:'Java SE 25 — HashMap',url:'https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html'},
+ {title:'Java SE 25 — LinkedHashSet',url:'https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/LinkedHashSet.html'},
+ {title:'Java SE 25 — PriorityQueue',url:'https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PriorityQueue.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Prediksi dahulu, uji kemudian
+
+<Quiz items={[
+  {
+    "question": "Sebagian besar operasi adalah get(i) pada 200.000 item, tetapi ada sesekali insert di awal. Pilihan dan prediksi yang benar?",
+    "options": [
+      "ArrayList: get indeks O(1), insert awal O(n)",
+      "LinkedList: get indeks O(1), insert awal O(1) dalam semua kondisi",
+      "HashSet: get indeks O(1)"
+    ],
+    "answer": 0,
+    "explanation": "ArrayList mendukung akses indeks konstan; insert awal menggeser elemen. LinkedList mengakses indeks dengan traversal."
+  },
+  {
+    "question": "ID transaksi duplikat harus dibuang, tetapi laporan wajib mengikuti urutan ID pertama kali datang. Struktur utama yang tepat?",
+    "options": [
+      "HashSet karena menjamin insertion order",
+      "LinkedHashSet karena unik sekaligus mempertahankan encounter/insertion order",
+      "PriorityQueue karena selalu FIFO"
+    ],
+    "answer": 1,
+    "explanation": "LinkedHashSet menerapkan Set dan menjaga insertion order; HashSet tidak menjamin urutan."
+  },
+  {
+    "question": "Setelah mengagregasi saldo a akun, ingin Top-K untuk k jauh lebih kecil dari a tanpa full-sort. Pendekatan yang sesuai?",
+    "options": [
+      "Sort a akun penuh: O(a log a)",
+      "Scan semua akun dengan min-heap terbatas k: O(a log k), lalu urutkan hanya hasil k",
+      "Masukkan akun ke HashMap lalu iterasi pasti terurut"
+    ],
+    "answer": 1,
+    "explanation": "Heap menyimpan k kandidat terbaik; kandidat lebih buruk di head dan dapat diganti saat skor lebih baik muncul."
+  },
+  {
+    "question": "Top-K memakai |saldo| descending, tie akun ID ascending. Agar hasil stabil ketika input diacak, apa yang wajib?",
+    "options": [
+      "Gunakan iterator PriorityQueue sebagai hasil akhir",
+      "Comparator total yang sama pada heap dan full-sort oracle, dengan tie-break ID eksplisit",
+      "Andalkan HashMap iteration order"
+    ],
+    "answer": 1,
+    "explanation": "Heap hanya menjamin elemen head menurut comparator, bukan urutan iterasinya. Output k elemen tetap harus diurutkan dan seri harus ditentukan."
+  },
+  {
+    "question": "Review mengharuskan zero -Xlint:rawtypes/-Xlint:unchecked. Mana pilihan yang menjaga safety type?",
+    "options": [
+      "List list = new ArrayList(); lalu casting saat baca",
+      "List<AccountId> ids = new ArrayList<>(); dan parameter producer List<? extends AccountId> bila perlu",
+      "(List<AccountId>) rawList dengan unchecked cast"
+    ],
+    "answer": 1,
+    "explanation": "Parameterized type dan bound mengekspresikan kontrak compile-time. Raw type serta unchecked cast menghilangkan bukti static typing."
+  }
+]} />
+
+## Guided practice: One-pass Settlement Index
+
+**Tahap A — kontrak data.** Reuse `AccountId` dan `TransactionId` dari JAV-002. Definisikan `Transaction(id, account, deltaMinorUnits)` dan agregasi `BigInteger` yang exact. Pastikan duplicate ID tidak menambah saldo kedua kalinya. Siapkan input dengan negative, zero, duplicate ID dan tie saldo.
+
+**Tahap B — satu scan input.** Bangun `Set<TransactionId>` untuk mendeteksi seen, `LinkedHashSet<TransactionId>` untuk laporan first-seen, dan `Map<AccountId, BigInteger>` untuk saldo. Jelaskan apakah dua set ID benar-benar perlu, atau satu `LinkedHashSet` cukup untuk kedua fungsi; pilih implementasi terkecil yang tetap memenuhi laporan.
+
+~~~java
+// Kerangka algoritma: isi tipe domain dan assertion sendiri.
+Set<TransactionId> firstSeen = new LinkedHashSet<>();
+Map<AccountId, java.math.BigInteger> balances = new HashMap<>();
+// for (Transaction tx : stream) {
+//   if (firstSeen.add(tx.id())) {
+//     // TODO: merge exact delta into balances
+//   }
+// }
+~~~
+
+**Tahap C — Top-K & oracle.** Buat Comparator deterministik: terbesar menurut nilai absolut saldo, kemudian ID terkecil lexicographic. Implementasikan heap maksimal K item dengan *worst candidate* di head. Buat oracle terpisah dengan full-sort seluruh account balances (hanya pada test). Jalankan minimal **100 dataset seeded**, termasuk `k=0`, `k>a`, tie absolut, transaksi duplikat, dan data kosong. Bandingkan **urutan dan nilai**, bukan hanya Set hasil.
+
+**Tahap D — complexity dan lint.** Catat `n`, `u`, `a`, `k`, time/space untuk setiap struktur. Jalankan berikut pada source latihan, termasuk dependencies yang diperlukan dalam satu invocation:
+
+~~~sh
+javac -Xlint:rawtypes -Xlint:unchecked -Werror *.java
+~~~
+
+Hasil harus tanpa raw-type maupun unchecked warning. Jangan menutup warning memakai `@SuppressWarnings` sebagai cara lulus latihan.
+
+<Reveal title="Tiga jebakan saat test gagal">
+- Dua saldo seri menghasilkan urutan berbeda: tambahkan tie-break AccountId pada Comparator, bukan mengandalkan HashMap.
+- Output dari `PriorityQueue` tampak acak: jangan iterasi heap sebagai sorted result; sort hanya k finalist.
+- Hasil Top-K benar pada dataset kecil tetapi berbeda pada `k > a`: tangani bound `min(k,a)` serta `k=0` eksplisit.
+</Reveal>
+
+<Challenge
+  title="One-pass Settlement Index"
+  brief="Konsumsi stream transaksi satu kali. Deduplicate TransactionId, pertahankan urutan first-seen untuk report pertama, agregasikan saldo per AccountId, lalu tampilkan Top-K account berdasarkan absolute balance untuk report kedua. Larangan: jangan sort semua saldo akun di implementasi Top-K. Tulis analisis kompleksitas tiap struktur dan verifikasi dengan oracle independen pada 100 dataset acak deterministik."
+  acceptanceCriteria={[
+    'Semua duplicate transaction ID tidak menghasilkan double counting.',
+    'Laporan first-seen mempertahankan arrival order dari unique transaction IDs.',
+    'Top-K menghasilkan urutan dan score identik dengan full-sort oracle untuk 100 deterministic randomized datasets.',
+    'Implementasi Top-K memakai bounded heap maksimum K, tanpa sorting keseluruhan account dataset.',
+    'Minimal 9 dari 10 backend collection scenarios dijawab beserta Big-O yang benar.',
+    'Kompilasi zero raw-type dan unchecked-generic warnings menggunakan -Xlint:rawtypes -Xlint:unchecked -Werror.',
+    'Collection choice, expected time dan space complexity terdokumentasi untuk setiap kebutuhan.'
+  ]}
+/>
+
+## Bridge ke proyek
+
+Artefak indeks transaksi ini menjadi komponen untuk [JAV-P01 — Adversarial Ledger Kernel](/project/JAV-P01): object contracts dari [JAV-002](/learn/JAV-002) + structure selection dari unit ini. Jangan menambahkan Spring atau database ke micro challenge.
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+<ExitCriteria items={[
+  'Choose an appropriate collection and state expected Big-O correctly for at least 9 of 10 backend scenarios',
+  'Top-K result matches a full-sort oracle across 100 deterministic randomized datasets',
+  'Top-K implementation does not sort the entire dataset',
+  'Exercise code compiles with zero raw-type or unchecked-generic warnings'
+]} />
+
+## Bukti minimum
+
+- Tabel sepuluh skenario berisi pilihan struktur, operasi dominan dan estimasi Big-O; nilai **≥9/10**.
+- Hasil test 100 dataset ber-seed (seed, input size, k, top-K comparison) dengan invariant dedup serta first-seen order.
+- Implementasi heap size ≤ k dan sumber test oracle full-sort terpisah; cek kode produksi **tanpa full-sort**.
+- Output `javac -Xlint:rawtypes -Xlint:unchecked -Werror` dengan exit code 0.
+- Satu commit source/test dan ringkasan complexity `n,u,a,k` sudah cukup: tidak perlu formulir refleksi tambahan.
+
+Materi berikut: [JAV-004 — Lambdas + Streams + Optional](/learn/JAV-004). Jangan lanjut sebelum evidence di atas benar-benar lulus.
+
+</LessonStage>
