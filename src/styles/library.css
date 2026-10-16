@@ -59,3 +59,34 @@
   }
   .library-jump a { transition: none; }
 }
+
+/* Reading page layout from the accepted preview. */
+.library-content { width:min(770px,100%); padding:31px 40px 65px; }
+.library-heading { padding-bottom:0; border-bottom:0; }
+.library-location { margin:0 0 20px; font:400 11px/18px var(--font-body); color:var(--text-muted); }
+.library-id { margin:0 0 9px; font:500 10px/17px var(--font-body); }
+.library-heading h1 { font-size:clamp(24px,2.8vw,30px); font-weight:750; letter-spacing:-.055em; margin:0 0 11px; }
+.library-description { max-width:62ch; font-size:13px; line-height:1.8; margin:0 0 24px; }
+.library-jump { margin:0; gap:4px; border-bottom:1px solid var(--line); }
+.library-jump a {
+  border:0; border-bottom:2px solid transparent; border-radius:0;
+  padding:12px 15px; margin-bottom:-1px; background:transparent;
+  color:var(--text-muted); font-size:12px; font-weight:600;
+}
+.library-jump a:first-child,
+.library-content:has(#materi:target) .library-jump a[href="#materi"],
+.library-content:has(#latihan:target) .library-jump a[href="#latihan"],
+.library-content:has(#ide-project:target) .library-jump a[href="#ide-project"] {
+  border-bottom-color:var(--foreground); color:var(--foreground);
+}
+.library-content:has(#latihan:target) .library-jump a:first-child,
+.library-content:has(#ide-project:target) .library-jump a:first-child {
+  border-bottom-color:transparent; color:var(--text-muted);
+}
+.library-content-section { padding:26px 0; }
+.library-content-section h2:first-child { font-size:19px; font-weight:720; margin-bottom:14px; }
+.library-content-section h3 { font-size:13px; font-weight:700; margin:18px 0 9px; }
+.library-authored .prose { font-size:14px; line-height:1.7; }
+.library-content-section :is(.mental-model,.concept-flow) { border-left-color:var(--foreground); }
+@media (max-width:900px) { .library-content { padding:25px 24px 55px; } }
+@media (max-width:600px) { .library-content { padding:22px 17px 42px; } .library-heading h1 { font-size:25px; } }

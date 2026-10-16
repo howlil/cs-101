@@ -18,7 +18,7 @@ export type ModuleOption = { id: string; title: string; items: ExplorerItem[] };
 function ItemRow({ item }: { item: ExplorerItem }) {
   const Icon = item.kind === 'checkpoint' ? FolderKanban : item.kind === 'integration' ? Boxes : BookOpen;
   return <a className="item-row" href={item.href} aria-current={item.active ? 'page' : undefined}>
-    <span className="item-marker" aria-hidden="true"><Icon size={14} strokeWidth={1.8} /></span>
+    <span className="item-marker" aria-hidden="true"><Icon size={13} strokeWidth={1.8} /></span>
     <span className="item-copy">
       <span className="item-id">{item.id}</span>
       <span className="item-title">{item.title}</span>
@@ -33,6 +33,7 @@ export default function CurriculumExplorer({ tracks, activeTrackId, modules, int
   integrations: ExplorerItem[];
   selectedModuleId?: string;
 }) {
+  const count = modules.reduce((total, module) => total + module.items.length, 0);
   const defaultOpen = Math.max(0, modules.findIndex((module) => module.id === selectedModuleId));
 
   return <div className="curriculum-controls">
@@ -46,10 +47,13 @@ export default function CurriculumExplorer({ tracks, activeTrackId, modules, int
     </div>
 
     <div className="module-tree module-tree--uiarc">
-      <p className="explorer-label"><FolderKanban size={12} aria-hidden="true" /> MODUL</p>
+      <div className="curriculum-tree-heading">
+        <span>KURIKULUM</span><span>{count} ITEMS</span>
+      </div>
       <Accordion key={activeTrackId + ':' + (selectedModuleId ?? '')} size="sm" defaultOpen={defaultOpen}
         items={modules.map((module) => ({
-          title: module.title + ' · ' + module.items.length,
+          title: module.title,
+          meta: module.items.length,
           content: <nav aria-label={module.title} className="module-items">
             {module.items.map((item) => <ItemRow key={item.id} item={item} />)}
           </nav>,

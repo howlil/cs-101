@@ -69,10 +69,11 @@ const sidebarData: SidebarData = {
   </head>
   <body transition:animate="none">
     <a class="skip-link" href="#main">Langsung ke konten</a>
-    <header class="topbar" transition:persist="app-header">
+    <header class="topbar">
       <a class="brand" href="/" aria-label="CS-101 · Materi">
         <span class="brand-mark" aria-hidden="true">CS</span><span>CS-101</span>
       </a>
+      <div class="topbar-location"><strong>Library</strong><span class="separator" aria-hidden="true">/</span><span class="current-track">{location?.track?.title ?? "Content Library"}</span></div>
       <AppHeaderActions client:load />
     </header>
     <div class="app-shell">

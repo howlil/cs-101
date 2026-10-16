@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button } from '../arc/button/button';
 import { Dialog, DialogContent, DialogTrigger } from '../arc/dialog/dialog';
@@ -14,32 +15,50 @@ export type SidebarData = {
   modules: ModuleOption[];
   integrations: ExplorerItem[];
 };
+
 const COLLAPSE_KEY = 'cs101:sidebar-collapsed';
+
 function SidebarContent({ data }: { data: SidebarData }) {
   return <div className="sidebar-scroll">
-    <div className="sidebar-curriculum">
-      <div className="sidebar-section-heading"><span>DAFTAR KURIKULUM</span><span>{data.total} item</span></div>
-      <CurriculumExplorer activeTrackId={data.activeTrackId} selectedModuleId={data.selectedModuleId}
-        tracks={data.tracks} modules={data.modules} integrations={data.integrations} />
-    </div>
+    <CurriculumExplorer
+      activeTrackId={data.activeTrackId}
+      selectedModuleId={data.selectedModuleId}
+      tracks={data.tracks}
+      modules={data.modules}
+      integrations={data.integrations}
+    />
+  </div>;
+}
+
+function SidebarFooter() {
+  return <div className="sidebar-footer" aria-label="Content library">
+    <span className="sidebar-footer-square" aria-hidden="true" />
+    <span>Content Library</span>
+    <span className="sidebar-footer-version">v2</span>
   </div>;
 }
 
 export default function AppSidebar({ data }: { data: SidebarData }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [data.activeTrackId]);
+
+  // A selected domain or topic should never leave the mobile drawer covering the article.
+  useEffect(() => { setMobileOpen(false); }, [data.activeTrackId, data.selectedModuleId]);
+
   const toggleDesktop = () => {
     const next = document.documentElement.dataset.sidebar === 'collapsed' ? 'expanded' : 'collapsed';
     document.documentElement.dataset.sidebar = next;
     try { localStorage.setItem(COLLAPSE_KEY, next === 'collapsed' ? 'true' : 'false'); } catch {}
   };
+
   return <>
     <aside className="app-sidebar" aria-label="Daftar kurikulum">
       <div className="sidebar-identity">
-        <a className="sidebar-brand" href="/" aria-label="CS-101 · Materi">
+        <a className="sidebar-brand" href="/" aria-label="CS-101 · Content Library">
           <span className="sidebar-brand-mark" aria-hidden="true">CS</span>
-          <span className="sidebar-brand-label">CS-101</span>
+          <span className="sidebar-brand-copy">
+            <span className="sidebar-brand-label">CS-101</span>
+            <span className="sidebar-brand-subtitle">Engineering Library</span>
+          </span>
         </a>
         <Tooltip content="Ciutkan atau buka sidebar">
           <Button type="button" variant="ghost" size="sm" className="sidebar-collapse" onClick={toggleDesktop} aria-label="Ciutkan sidebar">
@@ -52,7 +71,8 @@ export default function AppSidebar({ data }: { data: SidebarData }) {
           </Button>
         </Tooltip>
       </div>
-      <div ref={scrollRef} className="sidebar-frame"><SidebarContent data={data} /></div>
+      <div className="sidebar-frame"><SidebarContent data={data} /></div>
+      <SidebarFooter />
     </aside>
     <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
       <DialogTrigger asChild>
@@ -60,7 +80,7 @@ export default function AppSidebar({ data }: { data: SidebarData }) {
           <Menu size={18} strokeWidth={1.8} />
         </Button>
       </DialogTrigger>
-      <DialogContent title="Kurikulum CS-101" description="Pilih domain dan topik" className="sidebar-mobile-dialog">
+      <DialogContent title="Kurikulum CS-101" description="Pilih domain dan materi" className="sidebar-mobile-dialog">
         <SidebarContent data={data} />
       </DialogContent>
     </Dialog>

@@ -16,3 +16,8 @@
 .lg .panelInner { max-width: 62ch; padding: 0 var(--space-12) var(--space-6) 0; }
 @media (max-width: 520px) { .lg .trigger { min-height: 68px; font-size: var(--text-base); } .lg .panel { font-size: var(--text-sm); } .lg .panelInner { padding-right: var(--space-6); } }
 @media (prefers-reduced-motion: reduce) { .trigger, .icon { transition: none; } }
+
+/* Sidebar-specific selectors are applied via the curriculum tree container. */
+:global(.module-tree--uiarc) .sm .trigger { min-height:39px; padding:6px; gap:8px; font-size:12px; font-weight:670; }
+:global(.module-tree--uiarc) .sm .panelInner { padding:0; }
+:global(.module-tree--uiarc) .accordion { border-top:0; }
