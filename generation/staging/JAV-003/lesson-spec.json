@@ -1,0 +1,184 @@
+{
+  "itemId": "JAV-003",
+  "curriculumFingerprint": "sha256:3b2c332eb78b309e0000506a733e2182bf441f7499e17738c0903a8c4d4e7781",
+  "payoff": "Pilih struktur data Java dari operasi yang dominan, proses transaksi tanpa duplikasi, jaga urutan first-seen, dan hitung Top-K dengan heap tanpa full-sort.",
+  "learningOutcomes": [
+    "Membedakan kontrak List, Set, Map, Queue dan Deque serta konsekuensi urutan, duplikasi dan indexed access",
+    "Membandingkan ArrayList/LinkedList, HashSet/LinkedHashSet, HashMap dan ArrayDeque dari operasi dan trade-off",
+    "Menjelaskan expected O(1) hash operations, worst-case caveats, O(log k) heap updates dan memory overhead",
+    "Memakai generic parameter dan mengenali bounded parameter atau wildcard ketika signature memerlukannya",
+    "Mendesain Comparator total, deterministic tie-break dan PriorityQueue min-heap berukuran k",
+    "Menurunkan complexity one-pass ingestion + per-account Top-K dan membandingkan oracle full sort",
+    "Menjalankan 100 seeded randomized datasets, 9/10 scenario choices, dan javac lint tanpa raw/unchecked warnings"
+  ],
+  "mentalModel": "Collection adalah indeks terhadap pola operasi, bukan wadah universal: pilih representasi dari identity, ordering, lookup dan update; lalu pisahkan streaming aggregation O(n) dari ranking k kandidat O(a log k).",
+  "relationshipGraph": "input transactions -> HashSet<TransactionId> deduplicate -> LinkedHashSet<TransactionId> first-seen report + HashMap<AccountId,BigInteger> aggregate -> PriorityQueue<AccountBalance> bounded-k ranking -> sort only k finalists; full-sort oracle is independent test path",
+  "concepts": [
+    {
+      "id": "collection-interfaces",
+      "title": "List, Set, Map, Queue, Deque",
+      "mechanism": "List menjaga indexed sequence termasuk duplikat; Set menjaga uniqueness berdasarkan equals/hashCode; Map memasangkan key-value; Queue mendefinisikan head policy bukan selalu FIFO; Deque bisa bekerja dari kedua ujung.",
+      "sourceUrls": [
+        "https://dev.java/learn/api/collections-framework/"
+      ]
+    },
+    {
+      "id": "implementations-and-cost",
+      "title": "Choose implementations by operations",
+      "mechanism": "ArrayList memberi O(1) indexed access dan O(n) shifting untuk insert awal; HashMap/HashSet expected constant-time basic operations bergantung distribusi hash; LinkedHashSet menjaga insertion order dengan overhead tambahan.",
+      "sourceUrls": [
+        "https://dev.java/learn/api/collections-framework/",
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html",
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/LinkedHashSet.html"
+      ]
+    },
+    {
+      "id": "generics",
+      "title": "Generics, bounds, raw warnings",
+      "mechanism": "Parameterized types memaksa konsistensi types pada compile time; upper bounds mengekspresikan kebutuhan capability; raw types dan unchecked casts menghilangkan safety yang bisa dibuktikan compiler.",
+      "sourceUrls": [
+        "https://dev.java/learn/generics/"
+      ]
+    },
+    {
+      "id": "comparator-and-heap",
+      "title": "Comparator plus bounded Top-K heap",
+      "mechanism": "Min-heap ukuran k mempertahankan kandidat terburuk pada head; setiap offer/poll O(log k), peek O(1). Definisikan tie-break total; urutkan hanya k item akhir, bukan seluruh akun.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PriorityQueue.html"
+      ]
+    },
+    {
+      "id": "stream-oracle",
+      "title": "Deterministic test oracle and complexity",
+      "mechanism": "Dedup dan aggregate selama satu pass transaksi; iterate distinct accounts untuk rank. Bandingkan output dengan full sort independen pada 100 dataset ber-seed termasuk tie, k=0/k>a dan duplikasi.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html",
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/LinkedHashSet.html",
+        "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PriorityQueue.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "HashSet dan HashMap memiliki iteration order yang stabil dan sesuai arrival order",
+    "LinkedList membuat indexed read O(1)",
+    "PriorityQueue iterator otomatis menampilkan semua elemen secara sorted",
+    "Comparator hanya membutuhkan score tanpa explicit tie-break",
+    "Top-K via full sorting memenuhi larangan sort seluruh dataset",
+    "List<Object> dapat menerima List<String> karena generic variance otomatis",
+    "Big-O expected O(1) lookup sama dengan worst-case guarantee"
+  ],
+  "practice": [
+    "Untuk 10 skenario backend, pilih struktur dan tulis prediksi cost sebelum melihat answer key; target 9/10 benar",
+    "Buat satu trace duplicate Tx ID, first-seen order dan per-account balances, kemudian uji dengan test deterministik",
+    "Rancang total Comparator berdasarkan absolute balance descending dan AccountId ascending dengan BigInteger.abs()",
+    "Implementasikan bounded min-heap Top-K dan independent full-sort oracle, bandingkan 100 seeded datasets",
+    "Kompilasi source dengan javac -Xlint:rawtypes -Xlint:unchecked -Werror dan hilangkan warning, bukan suppress"
+  ],
+  "coverage": [
+    {
+      "criterionId": "criterion-959850da65",
+      "taughtAt": "Collection contracts, implementation selection, ten-scenario drill",
+      "assessedAt": "Quiz 1 and 2 + score ≥9/10 scenarios",
+      "evidenceExpected": "10 scenario table of structure, access/update constraints and Big-O with at least 9 correct"
+    },
+    {
+      "criterionId": "criterion-df02e09611",
+      "taughtAt": "Comparator total order, heap ranking and full-sort oracle",
+      "assessedAt": "Quiz 3 and 4 + 100 seeded randomized comparisons",
+      "evidenceExpected": "Exactly equal top-K ordered account IDs/scores across 100 deterministic datasets including ties"
+    },
+    {
+      "criterionId": "criterion-bec801ef85",
+      "taughtAt": "Bounded heap complexity and no-full-sort constraint",
+      "assessedAt": "Quiz 3 and 4 + source/test inspection",
+      "evidenceExpected": "Top-K code uses bounded heap of size at most k, with no global sort of all account balances"
+    },
+    {
+      "criterionId": "criterion-8ca0bc2b72",
+      "taughtAt": "Parameterized generic signatures, bounds, compile warnings",
+      "assessedAt": "Quiz 5 + javac lint gate",
+      "evidenceExpected": "Compiler exits zero with -Xlint:rawtypes -Xlint:unchecked -Werror"
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "End-to-end index trace, complexity budget, source examples",
+      "assessedAt": "One-pass Settlement Index challenge",
+      "evidenceExpected": "Unique transaction IDs, first-seen report, correct net balances, deterministic Top-K, complexity write-up and 100 seeded comparisons"
+    }
+  ],
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Sebagian besar operasi adalah get(i) pada 200.000 item, tetapi ada sesekali insert di awal. Pilihan dan prediksi yang benar?",
+      "options": [
+        "ArrayList: get indeks O(1), insert awal O(n)",
+        "LinkedList: get indeks O(1), insert awal O(1) dalam semua kondisi",
+        "HashSet: get indeks O(1)"
+      ],
+      "answer": 0,
+      "explanation": "ArrayList mendukung akses indeks konstan; insert awal menggeser elemen. LinkedList mengakses indeks dengan traversal.",
+      "criterionIds": [
+        "criterion-959850da65"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "ID transaksi duplikat harus dibuang, tetapi laporan wajib mengikuti urutan ID pertama kali datang. Struktur utama yang tepat?",
+      "options": [
+        "HashSet karena menjamin insertion order",
+        "LinkedHashSet karena unik sekaligus mempertahankan encounter/insertion order",
+        "PriorityQueue karena selalu FIFO"
+      ],
+      "answer": 1,
+      "explanation": "LinkedHashSet menerapkan Set dan menjaga insertion order; HashSet tidak menjamin urutan.",
+      "criterionIds": [
+        "criterion-959850da65"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Setelah mengagregasi saldo a akun, ingin Top-K untuk k jauh lebih kecil dari a tanpa full-sort. Pendekatan yang sesuai?",
+      "options": [
+        "Sort a akun penuh: O(a log a)",
+        "Scan semua akun dengan min-heap terbatas k: O(a log k), lalu urutkan hanya hasil k",
+        "Masukkan akun ke HashMap lalu iterasi pasti terurut"
+      ],
+      "answer": 1,
+      "explanation": "Heap menyimpan k kandidat terbaik; kandidat lebih buruk di head dan dapat diganti saat skor lebih baik muncul.",
+      "criterionIds": [
+        "criterion-df02e09611",
+        "criterion-bec801ef85"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Top-K memakai |saldo| descending, tie akun ID ascending. Agar hasil stabil ketika input diacak, apa yang wajib?",
+      "options": [
+        "Gunakan iterator PriorityQueue sebagai hasil akhir",
+        "Comparator total yang sama pada heap dan full-sort oracle, dengan tie-break ID eksplisit",
+        "Andalkan HashMap iteration order"
+      ],
+      "answer": 1,
+      "explanation": "Heap hanya menjamin elemen head menurut comparator, bukan urutan iterasinya. Output k elemen tetap harus diurutkan dan seri harus ditentukan.",
+      "criterionIds": [
+        "criterion-df02e09611",
+        "criterion-bec801ef85"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Review mengharuskan zero -Xlint:rawtypes/-Xlint:unchecked. Mana pilihan yang menjaga safety type?",
+      "options": [
+        "List list = new ArrayList(); lalu casting saat baca",
+        "List<AccountId> ids = new ArrayList<>(); dan parameter producer List<? extends AccountId> bila perlu",
+        "(List<AccountId>) rawList dengan unchecked cast"
+      ],
+      "answer": 1,
+      "explanation": "Parameterized type dan bound mengekspresikan kontrak compile-time. Raw type serta unchecked cast menghilangkan bukti static typing.",
+      "criterionIds": [
+        "criterion-8ca0bc2b72"
+      ]
+    }
+  ]
+}

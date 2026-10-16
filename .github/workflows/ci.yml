@@ -42,6 +42,9 @@ jobs:
           cmp generation/staging/SQL-003/derived/generation-record.json generation/SQL-003.json
           cmp generation/staging/SQL-003/derived/review-bank.json review-banks/SQL-003.json
 
+      - name: Validate JAV-003 staged content
+        run: pnpm generation:validate JAV-003
+
       - name: Validate JAV-002 authored bundle
         run: |
           pnpm generation:validate JAV-002
