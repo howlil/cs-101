@@ -26,3 +26,36 @@
 .library-footer a { color:var(--foreground); }
 @media(max-width:900px) { .library-content { padding:18px 18px 52px; } }
 @media(max-width:600px) { .library-content { padding:16px 14px 44px; } .library-heading h1 { font-size:24px; } }
+
+/* Quiet content entry: stable sidebar, staggered article hierarchy. Durations follow
+   UIArc's considered/standard tempo without interrupting reading or tabbing. */
+@keyframes library-content-enter {
+  from { opacity: 0; transform: translateY(var(--distance-content-enter)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.library-heading,
+.library-authored > :first-child,
+.library-content > .library-content-section,
+.library-content > .library-footer {
+  animation: library-content-enter var(--duration-content-enter) var(--ease-enter) both;
+}
+.library-content > .library-content-section:nth-of-type(2),
+.library-authored > :nth-child(2) { animation-delay: var(--duration-content-stagger); }
+.library-content > .library-content-section:nth-of-type(3),
+.library-authored > :nth-child(3) { animation-delay: calc(2 * var(--duration-content-stagger)); }
+.library-jump a {
+  transition: color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .library-heading,
+  .library-authored > :first-child,
+  .library-content > .library-content-section,
+  .library-content > .library-footer,
+  .library-authored > :nth-child(2),
+  .library-authored > :nth-child(3) {
+    animation: none;
+  }
+  .library-jump a { transition: none; }
+}

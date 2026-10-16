@@ -131,3 +131,9 @@ html[data-sidebar="collapsed"] .app-sidebar .sidebar-nav-link { justify-content:
 .app-sidebar .module-tree--uiarc .module-items { padding:3px 0 5px 6px; }
 .app-sidebar .item-row[aria-current="page"] { background:var(--accent-subtle); }
 .sidebar-mobile-dialog .sidebar-scroll { padding:10px; }
+
+/* Preserve the UIArc Accordion spring and use the shared Jakarta Sans type
+   for compact topic identifiers instead of a competing monospace font. */
+.app-sidebar .item-id,
+.sidebar-mobile-dialog .item-id,
+.sidebar-section-heading span { font-family: var(--font-body); }
