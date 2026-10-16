@@ -5,70 +5,70 @@
   "questions": [
     {
       "id": "q1",
-      "prompt": "Query SELECT 7 = NULL menghasilkan apa?",
+      "prompt": "Pada seed 5 pembayaran, SELECT id FROM payments WHERE status <> 'PAID' ORDER BY id; menghasilkan apa?",
       "options": [
-        "TRUE",
-        "FALSE",
-        "NULL / unknown"
+        "2, 3, 5",
+        "2, 5",
+        "1, 4"
       ],
-      "answer": 2,
-      "explanation": "Perbandingan biasa dengan NULL menghasilkan unknown; nullness diuji dengan IS NULL.",
+      "answer": 1,
+      "explanation": "FALSE pada PAID, TRUE pada FAILED dan PENDING, UNKNOWN pada NULL; WHERE hanya menerima TRUE.",
       "criterionIds": [
         "criterion-2f0d9333e1"
       ]
     },
     {
       "id": "q2",
-      "prompt": "Apa hasil 3 NOT IN (1, 2, NULL)?",
+      "prompt": "Apa hasil SELECT 8 NOT IN (1, 2, NULL)?",
       "options": [
         "TRUE",
         "FALSE",
-        "NULL / unknown"
+        "NULL / UNKNOWN"
       ],
       "answer": 2,
-      "explanation": "NOT IN menjadi rangkaian ketidaksamaan; perbandingan terakhir dengan NULL membuat hasil akhir unknown.",
+      "explanation": "Tidak ada kecocokan numerik; perbandingan terhadap NULL tetap UNKNOWN dan konjungsi NOT IN menghasilkan UNKNOWN.",
       "criterionIds": [
         "criterion-2f0d9333e1"
       ]
     },
     {
       "id": "q3",
-      "prompt": "Mana yang paling tepat untuk mendapatkan tiga row yang sama secara deterministik?",
+      "prompt": "Dari seed lima pembayaran (PAID dua kali, FAILED, NULL, PENDING), berapa row SELECT DISTINCT status FROM payments?",
       "options": [
-        "LIMIT 3",
-        "DISTINCT lalu LIMIT 3",
-        "ORDER BY id LIMIT 3"
+        "3",
+        "4",
+        "5"
       ],
-      "answer": 2,
-      "explanation": "LIMIT tanpa ORDER BY yang cukup spesifik tidak menjanjikan subset atau urutan tertentu.",
+      "answer": 1,
+      "explanation": "DISTINCT mereduksi dua PAID menjadi satu; NULL adalah satu nilai duplicate group tersendiri, bukan otomatis dihapus.",
+      "criterionIds": [
+        "criterion-2f0d9333e1"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dua payment memiliki created_at sama. Mana yang memberi subset LIMIT 2 secara deterministik?",
+      "options": [
+        "ORDER BY created_at, id LIMIT 2",
+        "ORDER BY created_at LIMIT 2",
+        "LIMIT 2 tanpa ORDER BY"
+      ],
+      "answer": 0,
+      "explanation": "Tie-breaker id yang unik membuat total order; timestamp saja tidak menjamin tie-order.",
       "criterionIds": [
         "criterion-9b52958986"
       ]
     },
     {
-      "id": "q4",
-      "prompt": "Apa arti utama PRIMARY KEY pada schema?",
-      "options": [
-        "Menyimpan row secara fisik berurutan",
-        "Memberi identifier unik dan non-null untuk row",
-        "Memaksa semua query memakai index"
-      ],
-      "answer": 1,
-      "explanation": "Primary key menyatakan uniqueness dan non-null identity; planner tetap memilih execution plan.",
-      "criterionIds": [
-        "criterion-141c1bd6ee"
-      ]
-    },
-    {
       "id": "q5",
-      "prompt": "Workflow mana yang paling membuktikan materi ini dikuasai?",
+      "prompt": "Cara mana memberi bukti yang dapat direproduksi untuk prediksi SQL?",
       "options": [
-        "Membaca dokumentasi sampai selesai",
-        "Menjalankan schema, seed, prediksi, dan query dari psql lalu menyimpan hasil",
-        "Menggunakan ORM agar query tersembunyi"
+        "Screenshot output psql tanpa pengecekan",
+        "Prediksi sebelum eksekusi + psql -v ON_ERROR_STOP=1 + assertion yang RAISE EXCEPTION jika mismatch",
+        "Jalankan query di ORM tanpa menyimpan prediksi"
       ],
       "answer": 1,
-      "explanation": "Target curriculum meminta clean schema + seed + query workflow dari psql dan prediksi yang dapat diverifikasi.",
+      "explanation": "Sukses menjalankan SQL bukan bukti hasil sesuai ekspektasi. Fail-hard assertions memverifikasi output; prediksi disimpan sebelum melihat hasil.",
       "criterionIds": [
         "criterion-141c1bd6ee",
         "criterion-2f0d9333e1",

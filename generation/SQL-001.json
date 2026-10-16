@@ -26,27 +26,27 @@
   "coverage": [
     {
       "criterionId": "criterion-2f0d9333e1",
-      "taughtAt": "Understand sections 2–7 + guided lab",
-      "assessedAt": "Practice section 10 / 20 prediction cases",
-      "evidenceExpected": "At least 18/20 predictions written before execution, with reasoning and compared actual output"
+      "taughtAt": "Understand: row-by-row WHERE trace, 3VL, NOT IN, duplicate results and data types",
+      "assessedAt": "Practice: 4 batches × 5 independent prediction cases (01–20)",
+      "evidenceExpected": "20 locked pre-execution predictions; ≥18 correct with row counts, NULL semantics, and contract-aware ordering"
     },
     {
       "criterionId": "criterion-141c1bd6ee",
-      "taughtAt": "Understand section 8 and Practice section 11",
-      "assessedAt": "Clean psql setup, seed, query and assertion workflow",
-      "evidenceExpected": "Files and CLI transcript on a clean database, no ORM"
+      "taughtAt": "Understand: isolated psql setup and seed; Practice: fail-hard DO assertion templates",
+      "assessedAt": "Clean psql setup, query execution, and 20 expected-result files or SQL assertions",
+      "evidenceExpected": "psql transcript with ON_ERROR_STOP=1 and assertions detecting real mismatches, no ORM"
     },
     {
       "criterionId": "criterion-9b52958986",
-      "taughtAt": "Understand section 7 and guided lab",
-      "assessedAt": "Practice cases 16–19 including nondeterministic LIMIT and tie-breakers",
-      "evidenceExpected": "Deterministic ordering where required, and explicit no-order contract for bare LIMIT"
+      "taughtAt": "Understand: total ORDER BY and tie-breakers; Practice: sorting and LIMIT contract",
+      "assessedAt": "Practice cases 16, 18, 19 plus contract-aware assertions",
+      "evidenceExpected": "Explicit tie-breakers for ordered outputs and a non-ordered LIMIT assertion that does not assume an ID sequence"
     },
     {
       "criterionId": "challenge",
-      "taughtAt": "Guided lab and prediction protocol in Practice section 10",
-      "assessedAt": "SQL Semantics Minefield / 20 SQL cases",
-      "evidenceExpected": "Locked predictions, executable assertions or expected-result files, correction log and psql transcript"
+      "taughtAt": "Guided psql lab, four 5-case batches, and fail-hard assertion templates",
+      "assessedAt": "SQL Semantics Minefield (20 prediction / verify cases)",
+      "evidenceExpected": "Pre-execution prediction log, per-case assertion or expected-result evidence, correction notes, and psql CLI transcript"
     }
   ],
   "validator": {

@@ -16,6 +16,20 @@ test('SQL-001 uses authored stage boundaries with original quiz and challenge', 
   assert.match(lesson, /<SourceList sources=/);
 });
 
+test('SQL-001 lesson and generated review bank cover all curriculum gates', () => {
+  const lesson = src('src/content/lessons/SQL-001.mdx');
+  const staged = src('generation/staging/SQL-001/lesson.mdx');
+  const spec = JSON.parse(src('generation/staging/SQL-001/lesson-spec.json'));
+  const bank = JSON.parse(src('review-banks/SQL-001.json'));
+  assert.equal(lesson, staged, 'Promoted lesson must match staged source');
+  assert.deepEqual(bank.questions, spec.reviewQuestions, 'Review bank must match lesson spec');
+  assert.equal((lesson.match(/^-- (?:0[1-9]|1[0-9]|20)(?:.*)$/gm) ?? []).length, 20);
+  assert.match(lesson, /RAISE EXCEPTION/);
+  assert.match(lesson, /no ORM|tanpa ORM/i);
+  assert.equal(new Set(spec.coverage.map((entry: { criterionId: string }) => entry.criterionId)).size, 4);
+  assert.equal(spec.reviewQuestions.length, 5);
+});
+
 test('staged navigation never replaces server evidence persistence', () => {
   const page = src('src/components/pages/LessonPage.tsx');
   const form = src('src/components/learning/EvidenceForm.tsx');
