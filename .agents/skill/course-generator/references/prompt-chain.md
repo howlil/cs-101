@@ -133,7 +133,7 @@ Use mixes of:
 - design choice;
 - output/state-transition reasoning.
 
-Review answer keys remain server-side at runtime. The generated review bank is derived from `lesson-spec.json`; do not maintain a second independent assessment definition.
+Quiz answer keys are used for immediate, local feedback. The generated question bank is derived from `lesson-spec.json`; there is no server-side learner grading, due-review engine, or account state.
 
 ## 6. Validator
 
@@ -165,4 +165,4 @@ Run:
 pnpm generation:promote SQL-001
 ```
 
-Promotion refuses a bundle changed since validation and writes the final lesson, generation record, and review bank. Generation never changes learner completion state.
+Promotion refuses a bundle changed since validation and writes the final lesson, generation record, and review bank. Generation has no learner completion state to change.

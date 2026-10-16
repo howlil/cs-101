@@ -6,6 +6,7 @@ demo: false
 curriculumFingerprint: "{{CURRICULUM_FINGERPRINT}}"
 ---
 
+import LessonStage from '../../components/lesson/LessonStage.astro';
 import MentalModel from '../../components/lesson/MentalModel.astro';
 import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
 import Quiz from '../../components/lesson/Quiz.astro';
@@ -14,7 +15,7 @@ import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
 import Reveal from '../../components/lesson/Reveal.astro';
 
-# {{TITLE}}
+<LessonStage stage="understand">
 
 > {{ONE_SENTENCE_PAYOFF}}
 
@@ -34,21 +35,23 @@ import Reveal from '../../components/lesson/Reveal.astro';
 
 {{PREREQUISITE_LINKS}}
 
-## Core
+## Konsep inti dan mekanisme
 
 {{CORE_CONCEPTS_IN_DEPENDENCY_ORDER}}
 
-## Cara kerjanya
-
 {{MECHANISM_OR_EXECUTION_TRACE}}
 
-## Contoh yang penting
+## Contoh dan prediksi
 
 {{WORKED_EXAMPLE}}
 
-## Wrong models yang harus dibuang
+## Miskonsepsi yang harus dihindari
 
 {{MISCONCEPTION_TRAPS}}
+
+</LessonStage>
+
+<LessonStage stage="practice">
 
 ## Guided practice
 
@@ -62,12 +65,16 @@ import Reveal from '../../components/lesson/Reveal.astro';
   acceptanceCriteria={{{CHALLENGE_ACCEPTANCE}}}
 />
 
-{{PROJECT_BRIDGE_IF_APPLICABLE}}
+</LessonStage>
+
+<LessonStage stage="evidence">
 
 <ExitCriteria items={{{EXIT_CRITERIA}}} />
 
-## Bukti yang harus lo simpan
+## Periksa hasil secara mandiri
 
 {{EVIDENCE_EXPECTED}}
 
 <SourceList sources={{{SOURCE_DATA}}} />
+
+</LessonStage>

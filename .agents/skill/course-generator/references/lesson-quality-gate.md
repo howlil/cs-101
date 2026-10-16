@@ -57,7 +57,7 @@ Prefer:
 - New concepts are introduced in dependency order.
 - No duplicated explanation across prose/table/diagram.
 - Related-but-noncritical material is deferred.
-- Page supports progressive disclosure for answers/deep dives.
+- Page supports progressive disclosure for answers/deep dives without requiring a learner account or progress tracking.
 
 ## 7. Technical artifact quality — required
 
