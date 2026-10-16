@@ -110,3 +110,24 @@ html[data-sidebar="collapsed"] .app-sidebar .sidebar-nav-link { justify-content:
 .app-sidebar .sidebar-frame > .sidebar-scroll { height:100%; }
 .app-sidebar .sidebar-curriculum { margin-top:6px; }
 .sidebar-mobile-dialog .sidebar-curriculum { margin-top:8px; }
+
+/* Compact CS-101 navigation, using the existing UIArc Select + Accordion. */
+@media (min-width:901px) {
+  .app-shell { grid-template-columns: 224px minmax(0,1fr); }
+  .app-sidebar { width: 224px; }
+  .topbar { width:calc(100% - 224px); margin-left:224px; }
+}
+.sidebar-identity { min-height:48px; padding-inline:11px; }
+.sidebar-brand-mark { width:26px; height:26px; border-radius:7px; }
+.sidebar-brand-label { font-size:13px; }
+.sidebar-scroll { padding:6px 9px 16px; }
+.sidebar-section-heading { margin-bottom:9px; padding-inline:7px; }
+.app-sidebar .curriculum-controls { gap:9px; }
+.app-sidebar .module-tree { margin-top:2px; }
+.app-sidebar .module-tree .explorer-label { padding-left:5px; }
+.app-sidebar .item-row { padding:6px 7px; gap:6px; grid-template-columns:14px minmax(0,1fr); border-radius:6px; }
+.app-sidebar .item-title { font-size:12px; line-height:16px; }
+.app-sidebar .item-id { font-size:10px; line-height:14px; }
+.app-sidebar .module-tree--uiarc .module-items { padding:3px 0 5px 6px; }
+.app-sidebar .item-row[aria-current="page"] { background:var(--accent-subtle); }
+.sidebar-mobile-dialog .sidebar-scroll { padding:10px; }

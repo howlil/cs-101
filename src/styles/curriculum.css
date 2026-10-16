@@ -129,3 +129,15 @@
   font-size:14px; font-weight:500;
 }
 .item-context-prerequisites .connection-list a { min-height:38px; }
+
+/* Compact monochrome catalogue overrides; UIArc owns the interactive controls. */
+.curriculum-controls { gap:9px; }
+.track-select-uiarc button { min-height:34px; }
+.track-select-uiarc label { font-size:11px; }
+.module-tree { margin-top:3px; }
+.module-tree--uiarc > .explorer-label { margin-bottom:4px; }
+.module-tree--uiarc .module-items { gap:1px; padding:3px 0 5px; }
+.item-row[aria-current="page"] { background:var(--accent-subtle); }
+.item-copy { gap:1px; }
+.item-id { font-size:10px; line-height:14px; }
+.item-title { font-size:12px; line-height:17px; }

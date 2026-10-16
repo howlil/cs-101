@@ -1,4 +1,3 @@
-.quiz { display: grid; gap: var(--space-4); margin: var(--space-5) 0; }
-.question { display: grid; gap: var(--space-3); }
-
-.intro { margin:0 0 var(--space-2); color:var(--text-secondary); font-size:13px; line-height:21px; }
+.quiz { display:grid; gap:10px; margin:14px 0; }
+.question { display:grid; gap:9px; }
+.intro { margin:0 0 6px; color:var(--text-secondary); font-size:12px; line-height:19px; }

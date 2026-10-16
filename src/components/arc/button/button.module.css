@@ -10,8 +10,8 @@
 .labelContent { display: inline-flex; flex: none; align-items: center; }
 .labelPhase { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); white-space: nowrap; }
 .labelPhase svg { flex: none; }
-.primary { color: var(--background); background: linear-gradient(180deg,var(--foreground),color-mix(in oklab,var(--foreground) 87%,var(--background))); border-color: transparent; }
-.secondary { color: var(--foreground); background: linear-gradient(180deg,var(--surface-raised),var(--surface-muted)); border-color: transparent; }
+.primary { color: var(--background); background: var(--foreground); border-color: transparent; }
+.secondary { color: var(--foreground); background: var(--surface-raised); border-color: transparent; }
 .ghost { color: var(--text-secondary); background: transparent; border-color: transparent; }
 .danger { color: var(--danger); background: var(--surface); border-color: var(--border); }
 @media (hover: hover) and (pointer: fine) {
