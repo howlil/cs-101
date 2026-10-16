@@ -1,11 +1,10 @@
 "use client";
-import { useRef, useState } from 'react';
-import { navigate } from 'astro:transitions/client';
+import { useEffect, useRef, useState } from 'react';
 import type { AssessmentPlan } from '../../domain/learning/assessment';
 import { Button } from '../arc/button/button';
 import { RadioGroup } from '../arc/radio-group/radio-group';
 import { Alert } from '../arc/alert/alert';
-import { postJson } from './client';
+import { postJson, MutationError } from './client';
 
 type Feedback = {
   correct: boolean;
@@ -15,32 +14,47 @@ type Feedback = {
 };
 type Response = { revision: number; assessment: Feedback };
 
-export default function AssessmentPrompt({ plan, revision }: {
-  plan: AssessmentPlan; revision: number;
+export default function AssessmentPrompt({ plan, revision, onCommitted }: {
+  plan: AssessmentPlan; revision: number; onCommitted?: (revision: number) => void;
 }) {
   const [answer, setAnswer] = useState('');
-  const [currentRevision, setCurrentRevision] = useState(revision);
+  const [currentPlan, setCurrentPlan] = useState(plan);
+  useEffect(() => { setCurrentPlan(plan); }, [plan]);
+
   const [feedback, setFeedback] = useState<Feedback>();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const requestRef = useRef<{ signature: string; id: string } | undefined>(undefined);
-  if (plan.kind === 'unavailable') return null;
-  if (!('question' in plan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
-    <strong>Pemahaman dasar sudah diuji.</strong>
-    <p>Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.</p>
-    {plan.dueAt && <p className="muted small">Micro-recall: {new Date(plan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
+  const advance = async () => {
+    setSubmitting(true); setError('');
+    try {
+      const response = await fetch('/api/learning-plan?itemId=' + encodeURIComponent(currentPlan.itemId), { cache: 'no-store' });
+      if (!response.ok) throw new Error('Langkah berikutnya belum tersedia.');
+      setCurrentPlan(await response.json() as AssessmentPlan);
+      setFeedback(undefined); setAnswer(''); requestRef.current = undefined;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Belum bisa memuat latihan berikutnya.');
+    } finally { setSubmitting(false); }
+  };
+  if (currentPlan.kind === 'unavailable') return null;
+  if (!('question' in currentPlan)) return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment">
+    <strong>{currentPlan.kind === 'needs_support' ? 'Perlu penguatan konsep' : 'Pemahaman dasar sudah diuji.'}</strong>
+    <p>{currentPlan.kind === 'needs_support'
+      ? 'Latihan variasi belum cukup. Periksa penjelasan dan coba implementasi SQL secara mandiri; tidak ada kewajiban mengulang form.'
+      : 'Review berikutnya dijadwalkan terpisah. Kamu bisa lanjut menerapkan konsep tanpa mengisi laporan.'}</p>
+    {currentPlan.kind === 'waiting' && currentPlan.dueAt && <p className="muted small">Micro-recall: {new Date(currentPlan.dueAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>}
   </section>;
 
-  const { question } = plan;
+  const { question } = currentPlan;
   const submit = async () => {
     if (!answer || submitting || feedback?.correct) return;
     setSubmitting(true);
     setError('');
     try {
       const payload = {
-        itemId: plan.itemId, assessmentId: question.id,
-        assessmentVersion: question.version, phase: plan.kind,
-        answer: Number(answer), revision: currentRevision,
+        itemId: currentPlan.itemId, assessmentId: question.id,
+        assessmentVersion: question.version, phase: currentPlan.kind,
+        answer: Number(answer), revision,
       };
       const signature = JSON.stringify(payload);
       if (requestRef.current?.signature !== signature) {
@@ -55,16 +69,17 @@ export default function AssessmentPrompt({ plan, revision }: {
         // An Astro hash navigation can retain an older SSR revision. A stale
         // write must be rejected by the server; reconcile once without asking
         // the learner to re-answer. Never replay if the planned task changed.
-        if (!(cause instanceof Error) || !cause.message.includes('Progres berubah di tab lain')) throw cause;
+        if (!(cause instanceof MutationError) || cause.code !== 'REVISION_CONFLICT') throw cause;
         const [stateResponse, planResponse] = await Promise.all([
           fetch('/api/learning', { cache: 'no-store' }),
-          fetch('/api/learning-plan?itemId=' + encodeURIComponent(plan.itemId), { cache: 'no-store' }),
+          fetch('/api/learning-plan?itemId=' + encodeURIComponent(currentPlan.itemId), { cache: 'no-store' }),
         ]);
         if (!stateResponse.ok || !planResponse.ok) throw cause;
         const fresh = await stateResponse.json() as { revision: number };
-        const latestPlan = await planResponse.json() as { kind: string; question?: { id: string } };
-        if (latestPlan.kind !== plan.kind || latestPlan.question?.id !== question.id) {
-          navigate(window.location.href, { history: 'replace' });
+        const latestPlan = await planResponse.json() as AssessmentPlan;
+        if (latestPlan.kind !== currentPlan.kind || !('question' in latestPlan) || latestPlan.question.id !== question.id) {
+          setCurrentPlan(latestPlan);
+          setFeedback(undefined); setAnswer('');
           return;
         }
         // The rejected revision never committed; a new payload requires a new
@@ -78,7 +93,7 @@ export default function AssessmentPrompt({ plan, revision }: {
         });
       }
       requestRef.current = undefined;
-      setCurrentRevision(result.revision);
+      onCommitted?.(result.revision);
       setFeedback(result.assessment);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Jawaban belum tersimpan.');
@@ -86,9 +101,8 @@ export default function AssessmentPrompt({ plan, revision }: {
       setSubmitting(false);
     }
   };
-  const retry = () => { setFeedback(undefined); setAnswer(''); setError(''); };
-  return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment" aria-label={plan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
-    <p className="eyebrow">{plan.kind === 'recall' ? 'RECALL · tanpa catatan' : 'PREDICT · cek pemahaman'}</p>
+  return <section id="lesson-assessment" tabIndex={-1} className="lesson-assessment" aria-label={currentPlan.kind === 'recall' ? 'Micro-recall' : 'Cek pemahaman'} >
+    <p className="eyebrow">{currentPlan.kind === 'recall' ? 'RECALL · tanpa catatan' : currentPlan.kind === 'transfer' ? 'TRANSFER · soal variasi' : 'PREDICT · cek pemahaman'}</p>
     <h3>{question.prompt}</h3>
     {!feedback && <>
       <RadioGroup label="Pilih hasil prediksi" name={'assessment-' + question.id}
@@ -105,10 +119,8 @@ export default function AssessmentPrompt({ plan, revision }: {
         {feedback.misconception && <p>{feedback.misconception}</p>}
         <p>{feedback.explanation}</p>
       </Alert>
-      <Button type="button" variant="secondary" onClick={() => {
-        if (feedback.correct) navigate(window.location.href, { history: 'replace' });
-        else retry();
-      }}>{feedback.correct ? 'Lihat langkah berikutnya' : 'Coba lagi'}</Button>
+      <Button type="button" variant="secondary" disabled={submitting} onClick={() => void advance()}>
+        {feedback.correct ? 'Lihat langkah berikutnya' : 'Coba soal berbeda'}</Button>
     </div>}
     {error && <Alert title="Belum tersimpan" tone="danger">{error}</Alert>}
     <p className="muted small">Jawaban tersimpan otomatis; tidak diperlukan form bukti atau aktivasi materi.</p>

@@ -20,4 +20,6 @@ test('review budget caps visible queue without mutating overdue history', () => 
   assert.equal(selected[0].itemId, 'SQL-008');
   assert.deepEqual(candidates, copy);
   assert.deepEqual(selectMicroRecallQueue(candidates, 0), []);
+  assert.equal(selectMicroRecallQueue(candidates, 3, 90).length, 1);
+  assert.equal(selectMicroRecallQueue(candidates, 3, 60).length, 0);
 });

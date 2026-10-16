@@ -14,9 +14,9 @@
 Migration `0004_study_progress.sql` is additive. Update SQLite via `openDatabase` and apply D1 migration before running the new Cloudflare Worker code; snapshot queries require `item_study`.
 The repository's existing `build:cloudflare` script invokes `migrate:cloudflare` against the remote DB when `WORKERS_CI=1`. This existing deployment behavior is **not** a safe general migration strategy; review it before running a production build.
 
-## Phase 2 (not implemented)
+## Later phases (not implemented)
 
-Per-competency authored quiz policy, server-side quiz grading, artifact-to-criterion proof, credential-level mastery, stable criterion IDs, and review-without-pass require separate schemas and QA.
+Artifact-to-criterion proof, credential-level mastery, full multi-item competency analytics, authenticated multiuser progress, and adaptive FSRS scheduling remain separate projects.
 
 ## Adaptive assessment v2 — SQL-001 vertical slice
 
@@ -46,3 +46,18 @@ The D1 parity shim based on Node SQLite is not proof of real Cloudflare multi-wr
 ### Not in this slice
 
 Adaptive AI tutor, trusted arbitrary code execution, auto-grading 20 SQL traps, competency-wide analytics, FSRS fitting, and multi-user personalization are **not implemented**. The current database is designed for one learner; multi-user support needs a separate identity and isolation design.
+
+## Adaptive learning v2.1 — deterministic next-action and transferable evidence
+
+Source of truth: `competency_attempts` and `competency_review_schedule`; `item_study` and formal `passed` remain **independent**. Assessment attempts must never silently unlock technical checkpoints.
+
+- `src/domain/learning/next-action.ts` maps assessment plans to the next learning action. Today skips units whose independent assessment is awaiting delayed recall, but does not mark them studied or passed.
+- SQL-001: wrong initial prediction → independent transfer question about IS NULL → second distinct transfer case if needed. Correct after viewing feedback on the same question is **not** unassisted understanding. Once all authored fresh prompts have been tried, show a supportive explanation and allow normal study, never trap the learner behind a forced re-test.
+- `migrations/0006_assessment_evidence.sql` and `006-assessment-evidence.ts` rebuild the attempt table with a transfer phase and preserve old rows with `outcome='legacy_unknown'`. Historical answers are not retroactively assigned an assistance state.
+- The question bank is bound to SQL-001's exact curriculum fingerprint. Mismatches disable the bank until reviewed; submissions with mismatched fingerprints are rejected.
+- SQLite and D1 `export()` now include competency attempts and schedules, under an export payload version **5**. Export format versions do not need to equal DB schema versions (DB v6).
+- React lesson owns a shared revision. HTTP conflicts carry stable error codes; stale revisions can be reconciled once while preserving idempotency receipts for uncertain network outcomes.
+- Micro-review queue is bounded by 3 questions and an estimated 300 seconds. Time estimates are heuristic, not measured. Legacy 5-question review remains separately scheduled.
+- `GET /api/learning-plan` remains server-owned and sends no answer keys; client-side MDX quizzes are formative only.
+- **Security release gate:** the current application uses a single learner row (`learner_state.id=1`) and has no app-level identity check. For public deployment of private progress, enforce authenticated access at the edge (Cloudflare Access) or implement learner-aware authorization for progress APIs. Origin checks are not authentication. This PR does **not** assume or change the intended public/private deployment mode.
+- **Rollout gate:** migrate production D1 through 0006 before deploying Worker code that reads the new columns. Verify backup, schema version, rollback and authorization. CI's D1 shim is insufficient to prove real multi-writer race behavior.

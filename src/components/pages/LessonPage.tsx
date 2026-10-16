@@ -91,6 +91,8 @@ export default function LessonPage({
   // All curriculum units expose the same stages. Authored MDX defines its own
   // boundaries; missing lessons use structured manifest content, not fake MDX.
   const [stage, setStage] = useState<StageId>('understand');
+  const [currentRevision, setCurrentRevision] = useState(revision);
+  useEffect(() => { setCurrentRevision(revision); }, [revision]);
   const [contextOpen, setContextOpen] = useState(false);
   const [focus, setFocus] = useState(false);
   const [proofOpen, setProofOpen] = useState(false);
@@ -227,8 +229,8 @@ export default function LessonPage({
         </div>
       <aside id="lesson-context" className="lesson-staged-context" aria-label="Konteks materi" hidden={!contextOpen}>{context}</aside>
 
-      {stage === 'evidence' && <MarkStudied itemId={itemId} revision={revision}
-        studied={studied || visibleState.status === 'passed'} />}
+      {stage === 'evidence' && <MarkStudied itemId={itemId} revision={currentRevision}
+        onCommitted={setCurrentRevision} studied={studied || visibleState.status === 'passed'} />}
       {stage === 'evidence' && (!active || visibleState.status === 'passed') && (
         <aside id="lesson-evidence-gate" tabIndex={-1} className="lesson-evidence-gate" aria-label="Status penyimpanan bukti">
           {visibleState.status === 'passed' ? <>
@@ -259,7 +261,7 @@ export default function LessonPage({
       )}
       {stage === 'practice' && assessmentPlan && <AssessmentPrompt
         key={assessmentPlan.kind}
-        plan={assessmentPlan} revision={revision} />}
+        plan={assessmentPlan} revision={currentRevision} onCommitted={setCurrentRevision} />}
       {available ? children : <>
         <section className="lesson-stage-panel" data-lesson-stage="understand"
           id="lesson-panel-understand" role="tabpanel" aria-labelledby="lesson-tab-understand" tabIndex={0}>
@@ -299,7 +301,7 @@ export default function LessonPage({
           itemId={itemId}
           fingerprint={fingerprint}
           criteria={criteria}
-          revision={revision}
+          revision={currentRevision}
           continueFrom={continueFrom}
           lastAnchor={lastAnchor}
         />}

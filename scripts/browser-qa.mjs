@@ -503,9 +503,23 @@ try {
   const publicPlan = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
   assert.equal(publicPlan.kind, 'practice');
   assert.equal(Object.hasOwn(publicPlan.question, 'answer'), false, 'Assessment must not expose answer key');
+  // Wrong diagnosis must lead to a genuinely different transfer question,
+  // not an immediate retry of a disclosed answer.
+  await client.eval('document.querySelector(".lesson-assessment input[value=\\\"0\\\"]").click()');
+  await client.wait(async () => await client.eval('!document.querySelector(".lesson-assessment button").disabled'),
+    'Wrong diagnosis selected');
+  await client.eval('document.querySelector(".lesson-assessment button").click()');
+  await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment [role=status]")?.textContent.includes("Perbaiki mental model")'),
+    'Targeted misconception feedback');
+  await client.eval('document.querySelector(".lesson-assessment [role=status] button").click()');
+  await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment h3")?.textContent.includes("email NULL")'),
+    'Fresh transfer question replaces explained diagnosis');
+  const transfer = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
+  assert.equal(transfer.kind, 'transfer');
+  assert.notEqual(transfer.question.id, publicPlan.question.id);
   await client.eval('document.querySelector(".lesson-assessment input[value=\\\"1\\\"]").click()');
   await client.wait(async () => await client.eval('!document.querySelector(".lesson-assessment button").disabled'),
-    'Adaptive answer selected');
+    'Independent transfer answer selected');
   await client.eval('document.querySelector(".lesson-assessment button").click()');
   try {
     await client.wait(async () => await client.eval('document.querySelector(".lesson-assessment [role=status]")?.textContent.includes("Prediksi tepat")'),
@@ -520,7 +534,7 @@ try {
   }
   const afterAssessment = await client.eval('(async () => await (await fetch("/api/learning-plan?itemId=SQL-001")).json())()');
   assert.equal(afterAssessment.kind, 'waiting', 'Correct prediction must schedule delayed recall');
-  console.log('PASS SQL-001 prediction → server feedback → delayed micro-recall without evidence form');
+  console.log('PASS SQL-001 incorrect diagnosis → misconception feedback → fresh transfer → independent success → delayed recall');
 
   console.log('PASS screenshots saved at ' + screenshotDir);
 } finally {
