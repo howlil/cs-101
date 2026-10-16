@@ -9,7 +9,7 @@ import {
   buildReviewBank,
   validateGenerationPlan,
 } from '../src/domain/generation/validate';
-import { requiredEvidenceForItem } from '../src/domain/learning/rules';
+import { contentCriteriaForItem } from '../src/domain/generation/criteria';
 
 const graph = buildCurriculumGraph(actualManifest);
 
@@ -64,7 +64,7 @@ test('generation plan harus menutup seluruh criterion, source, dan review covera
   );
   assert.ok(unit && unit.kind === 'unit' && unit.source.url);
 
-  const expected = requiredEvidenceForItem(unit);
+  const expected = contentCriteriaForItem(unit);
   const questions = Array.from({ length: 5 }, (_, index) => ({
     id: 'q' + (index + 1),
     prompt: 'Reasoning question ' + (index + 1),

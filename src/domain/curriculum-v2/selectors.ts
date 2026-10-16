@@ -192,9 +192,7 @@ export function getConnectionGroups(graph:CurriculumGraph,itemId:string){
 export function itemHref(graph:CurriculumGraph,itemId:string){
   const item=graph.itemsById.get(itemId);
   if(!item)throw new Error('Item tidak ditemukan: '+itemId);
-  if(item.kind==='unit')return '/learn/'+encodeURIComponent(item.id);
-  if(item.kind==='checkpoint')return '/project/'+encodeURIComponent(item.id);
-  return '/integration/'+encodeURIComponent(item.id);
+  return '/?item='+encodeURIComponent(item.id);
 }
 
 

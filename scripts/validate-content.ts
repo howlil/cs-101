@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { parse } from 'yaml';
 import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
-import { requiredEvidenceForItem } from '../src/domain/learning/rules';
+import { contentCriteriaForItem } from '../src/domain/generation/criteria';
 import { generationRecordSchema } from '../src/domain/generation/schema';
 
 const graph = buildCurriculumGraph(manifestSource);
@@ -41,7 +41,7 @@ for (const file of readdirSync('src/content/lessons', { recursive: true, withFil
     throw new Error(`Metadata stale: ${item.id}`);
   }
 
-  for (const criterion of requiredEvidenceForItem(item)) {
+  for (const criterion of contentCriteriaForItem(item)) {
     if (!record.coverage.some((entry) => entry.criterionId === criterion.id)) {
       throw new Error(`Coverage hilang: ${item.id}/${criterion.id}`);
     }

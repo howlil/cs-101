@@ -11,13 +11,6 @@
     "directory": "./dist",
     "binding": "ASSETS"
   },
-  "d1_databases": [
-    {
-      "binding": "LEARNING_DB",
-      "database_name": "cs101-learning",
-      "database_id": "699ad067-2200-4e8c-a040-5ef3cc04fbb6"
-    }
-  ],
   "observability": {
     "enabled": true,
     "logs": {
