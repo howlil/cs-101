@@ -59,7 +59,7 @@ New authored lesson specs **must** set `pedagogy.version: 3` and satisfy `pedago
 
 **Authoring quality gate:** verify that the first step is genuinely approachable, the explanation is correct, hints gradually reveal information, the transfer problem differs meaningfully, and the recovery hint helps rather than scolds. Structural validation is not proof of learning effectiveness. Do not conflate ADHD with low ability or a prescribed learning style.
 
-Render one coherent **Why → Understand → Try → Prove → Connect** cycle per meaningful objective, even when the unit has multiple segments. The MDX template is an authoring scaffold; full automated segment-to-MDX rendering checks are a later milestone.
+Render one coherent **Why → Understand → Try → Prove → Connect** cycle per meaningful objective. M2's shared renderer displays all provided V3 segments in three stages, but **does not prove that manually embedded lessonSegments equal lesson-spec.json**; M3 will add artifact-level parity and executable proof. Keep this limitation visible in review.
 ### Lesson specification
 
 Create `lesson-spec.json` before prose, including:
@@ -73,14 +73,14 @@ Create `lesson-spec.json` before prose, including:
 
 ### Write MDX
 
-Use `assets/lesson-template.mdx` with three **visible in-page sections**:
+Use `assets/lesson-template.mdx` with three **visible in-page sections**. In V3, write one `lessonSegments` array from the reviewed `lesson-spec.pedagogy.segments` and render it through `<LearningSegments stage="understand|practice|evidence" segments={lessonSegments} />` for the corresponding stage. Do not hand-build separate copies of the same data in the MDX. Each stage uses the same segment IDs; the reusable renderer provides the Why/Start/Understand, Try/Recover/Self-check, and Prove/Continue blocks respectively:
 1. Materi — mental model, explanations, traces, and sources.
 2. Latihan soal — formative quiz, guided practice and challenge.
 3. Praktik — self-verification checklist only; no evidence form, progress state, or upload.
 
-A separate **Ide project** section is composed by the content page using the nearest relevant checkpoint from the manifest.
+A separate **Ide project** section is composed by the content page using the nearest relevant checkpoint from the manifest. In formative quiz questions, supply optional `whenIncorrect` (one actionable correction) and `nextAction` (one next experiment) when appropriate. These do not track answers; no completion or session UI.
 
-Required components: `LessonStage`, `MentalModel`, `ConceptGraph`, `Quiz`, `Challenge`, `ExitCriteria`, `SourceList`. Use reusable content components; never add page navigation, global sidebar, or trackers into lesson MDX.
+Required components: `LessonStage`, `MentalModel`, `ConceptGraph`, `LearningSegments`, `Quiz`, `Challenge`, `ExitCriteria`, `SourceList`. The old `WorkedExample` and `GuidedPractice` components remain available to older V2 lessons; V3 consumes them through `LearningSegments`. Use reusable content components; never add page navigation, global sidebar, or trackers into lesson MDX.
 
 ### Validate and publish
 
