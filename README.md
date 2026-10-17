@@ -2,6 +2,8 @@
 
 CS-101 is a **single-page content library** for engineering lessons, practice questions, and project ideas.
 
+**Current content status: empty.** Active curriculum has 0 tracks, 0 units and 0 project items. Previously authored lessons, review banks and generated data were cleared from the feature branch; application and generator remain intact.
+
 - One page: `/`
 - Sidebar: domain selector, module accordion, and curriculum topics.
 - Content: authored MDX lessons with interactive self-check quizzes, or an explicit curriculum outline when content is not yet authored.
@@ -33,7 +35,7 @@ Cloudflare no longer needs the `LEARNING_DB` binding or migrations.
 
 ## Generate lessons
 
-The canonical curriculum is `curriculum/manifest.v2.json`. Only authored units have full MDX lesson content; the remaining units show honest outlines and manually defined challenges.
+The canonical curriculum is `curriculum/manifest.v2.json`. Once a new reviewed curriculum is imported, only authored units will have complete MDX content; other units will display verified outlines.
 
 ```sh
 pnpm generation:prepare JAV-003
