@@ -6,6 +6,9 @@ import { parse } from 'yaml';
 import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { validateGenerationPlan, buildGenerationRecord, buildReviewBank } from '../src/domain/generation/validate';
+import { assertV3LessonBindings } from '../src/domain/generation/verification';
+import { executeExamples } from './lib/executable-proof';
+import { executablePlanSchema } from '../src/domain/generation/executable-schema';
 
 const itemId = process.argv[2];
 if (!itemId) throw new Error('Gunakan: pnpm generation:validate <ITEM-ID>');
@@ -60,17 +63,7 @@ if (data.curriculumFingerprint !== item.fingerprint) {
 
 if (lessonSpec.pedagogy) {
   if (lessonSpec.pedagogy.version === 3) {
-    // M2 checks that every stage consumes one shared V3 segment collection.
-    // Exact content-to-spec parity will be verified by the M3 artifact gate.
-    if (!lesson.includes('export const lessonSegments =')) {
-      throw new Error('V3 lesson harus mengekspor lessonSegments yang sama untuk seluruh stage.');
-    }
-    for (const stage of ['understand', 'practice', 'evidence']) {
-      const binding = '<LearningSegments stage="' + stage + '" segments={lessonSegments} />';
-      if (!lesson.includes(binding)) {
-        throw new Error('V3 lesson tidak memakai shared segment renderer pada stage: ' + stage);
-      }
-    }
+    assertV3LessonBindings(lesson, item.id);
   } else {
     // Preserve V2 authored lesson rendering for backward compatibility.
     for (const component of ['WorkedExample', 'GuidedPractice']) {
@@ -119,6 +112,47 @@ writeFileSync(
   JSON.stringify(buildReviewBank(lessonSpec), null, 2) + '\n',
 );
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
+let v3Hashes: Record<string, string> = {};
+if (lessonSpec.pedagogy?.version === 3) {
+  const planPath = resolve(directory, 'executable-examples.json');
+  if (!existsSync(planPath)) throw new Error('V3 wajib memiliki executable-examples.json (atau alasan tidak executable).');
+  const planText = readFileSync(planPath, 'utf8');
+  const plan = executablePlanSchema.parse(JSON.parse(planText));
+  if (plan.itemId !== item.id || plan.curriculumFingerprint !== item.fingerprint) {
+    throw new Error('Executable plan identity stale.');
+  }
+  const proof = executeExamples(plan, resolve(directory, 'fixtures'));
+  const pedigree = {
+    unitId: item.id, curriculumFingerprint: item.fingerprint, pedagogy: lessonSpec.pedagogy,
+  };
+  const exportJson = (name: string, value: unknown) => {
+    const content = JSON.stringify(value, null, 2) + '\n';
+    writeFileSync(resolve(derivedDirectory, name), content);
+    return sha256(content);
+  };
+  const pedagogyHash = exportJson('pedagogy-record.json', pedigree);
+  const sourceHash = exportJson('source-pack.json', sourcePack);
+  const proofHash = exportJson('example-proof.json', proof);
+  const questionHash = sha256(readFileSync(resolve(derivedDirectory, 'review-bank.json'), 'utf8'));
+  const receipt = {
+    version: 3, itemId: item.id, curriculumFingerprint: item.fingerprint,
+    hashes: {
+      lesson: sha256(lesson),
+      pedagogy: pedagogyHash,
+      questionBank: questionHash,
+      sourcePack: sourceHash,
+      exampleProof: proofHash,
+      examplePlan: sha256(planText),
+    },
+  };
+  v3Hashes = {
+    pedagogy: pedagogyHash,
+    sourcePack: sourceHash,
+    exampleProof: proofHash,
+    examplePlan: sha256(planText),
+    verifiedReceipt: exportJson('verified-receipt.json', receipt),
+  };
+}
 writeFileSync(
   resolve(derivedDirectory, 'validation-report.json'),
   JSON.stringify({
@@ -131,6 +165,7 @@ writeFileSync(
       lessonSpec: sha256(readFileSync(specPath, 'utf8')),
       generationRecord: sha256(readFileSync(resolve(derivedDirectory, 'generation-record.json'), 'utf8')),
       reviewBank: sha256(readFileSync(resolve(derivedDirectory, 'review-bank.json'), 'utf8')),
+      ...v3Hashes,
     },
     checks: [
       'curriculum-fingerprint',
@@ -142,7 +177,7 @@ writeFileSync(
       'prerequisite-links',
       'source-links',
       ...(lessonSpec.pedagogy ? ['pedagogical-scaffolding', 'verified-project-bridge'] : []),
-      ...(lessonSpec.pedagogy?.version === 3 ? ['v3-shared-segment-stages'] : []),
+      ...(lessonSpec.pedagogy?.version === 3 ? ['v3-canonical-artifact-imports', 'source-claim-ledger', 'executable-proof', 'receipt-hashes'] : []),
     ],
   }, null, 2) + '\n',
 );
