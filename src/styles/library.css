@@ -54,7 +54,7 @@
 .library-authored > :nth-child(2),.library-content > .library-content-section:nth-of-type(2) { animation-delay:65ms; }
 @media (max-width:900px) { .library-content { padding:24px 22px 48px; } }
 @media (max-width:600px) { .library-content { padding:20px 15px 42px; } .library-heading h1 { font-size:25px; } }
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   .library-heading,.library-authored > :first-child,.library-content > .library-content-section { animation:none; }
   .library-jump a { transition:none; }
 }
