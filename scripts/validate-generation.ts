@@ -147,7 +147,7 @@ if (lessonSpec.pedagogy?.version === 3) {
   };
   v3Hashes = {
     pedagogy: pedagogyHash,
-    sourcePack: sourceHash,
+    sourceArtifact: sourceHash,
     exampleProof: proofHash,
     examplePlan: sha256(planText),
     verifiedReceipt: exportJson('verified-receipt.json', receipt),
