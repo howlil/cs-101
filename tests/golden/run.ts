@@ -4,7 +4,7 @@
  * repository's intentionally empty published curriculum.
  */
 import { strict as assert } from 'node:assert';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -66,7 +66,7 @@ async function assertRenderedHtml() {
     assert.ok(page.length > 0, 'Golden lesson route did not render. Server output:\n' + output);
     for (const expected of [
       'Equality, hashCode', 'same-object=false', 'equal-value=true',
-      'Duplicate Payment Checker', 'Jawaban', 'HashSet',
+      'Duplicate Payment Checker', 'Cek jawaban', 'HashSet',
       'Payment Replay Safety Lab',
     ]) {
       assert.ok(page.includes(expected), 'Rendered HTML missing: ' + expected);
@@ -91,7 +91,22 @@ try {
     filter: (path) => path === repository || !skip.has(basename(path)),
   });
   if (!existsSync(join(repository, 'node_modules'))) throw new Error('Install pnpm dependencies before running the golden harness.');
-  symlinkSync(join(repository,'node_modules'), join(work,'node_modules'), 'dir');
+  // Astro Vite expects dependency source and virtual modules beneath the same
+  // project root. An external node_modules symlink breaks its CSS metadata cache.
+  // Linux/macOS: clone the package tree using hardlinks, not copies of each byte.
+  // Windows: fall back to normal copy for CI-independent developer runs.
+  const dependencies = join(repository, 'node_modules');
+  const localDependencies = join(work, 'node_modules');
+  if (process.platform === 'win32') {
+    cpSync(dependencies, localDependencies, {recursive: true, dereference: false});
+  } else {
+    const clone = spawnSync('cp', ['-al', dependencies, localDependencies], {
+      encoding:'utf8', timeout:60000,
+    });
+    if (clone.error || clone.status !== 0) {
+      throw new Error('Isolated node_modules clone failed: ' + (clone.error?.message ?? clone.stderr));
+    }
+  }
 
   assert.equal(goldenUnit.fingerprint, curriculumItemFingerprint(goldenUnit));
   parseManifestV2(goldenManifest);
