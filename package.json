@@ -30,7 +30,8 @@
     "validate:ui": "tsx scripts/validate-ui-boundary.ts",
     "validate:architecture": "tsx scripts/validate-architecture.ts",
     "validate:pedagogy": "tsx scripts/validate-pedagogy.ts",
-    "validate:examples": "tsx scripts/validate-examples.ts"
+    "validate:examples": "tsx scripts/validate-examples.ts",
+    "test:golden": "tsx tests/golden/run.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",
