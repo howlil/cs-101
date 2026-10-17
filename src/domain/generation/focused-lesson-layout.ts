@@ -65,15 +65,15 @@ export function assertFocusedLessonLayout(source: string, itemId: string): void 
     // All visible content must be owned by a stage. Only imports and JavaScript
     // declarations should be left in the frontmatter of the MDX body.
     const forbiddenOutside = /<(?:Quiz|WorkedExample|GuidedPractice|MentalModel|ConceptGraph|LearningSegments|Challenge|ExitCriteria|ProjectContribution|SourceList)\b/;
-    if (forbiddenOutside.test(outside) || /^\s*#{1,6}\s+\S/m.test(outside)) {
+    if ((i > 0 && outside.trim() !== '') ||
+        forbiddenOutside.test(outside) || /^\s*#{1,6}\s+\S/m.test(outside)) {
       throw new Error('Konten pembelajaran berada di luar LessonStage pada ' + itemId + '.');
     }
     sections[stages[i]] = section;
     previousEnd = end.index + end[0].length;
   }
   const trailing = mdx.slice(previousEnd);
-  if (/<(?:Quiz|WorkedExample|GuidedPractice|MentalModel|ConceptGraph|LearningSegments|Challenge|ExitCriteria|ProjectContribution|SourceList)\b/.test(trailing) ||
-      /^\s*#{1,6}\s+\S/m.test(trailing)) {
+  if (trailing.trim() !== '') {
     throw new Error('Konten pembelajaran berada di luar LessonStage pada ' + itemId + '.');
   }
 
