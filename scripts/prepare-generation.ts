@@ -41,6 +41,14 @@ if (!existsSync(sourceTemplatePath)) {
     unsupportedClaims: [
       'Replace this template with source-pack.json only after every required concept is supported.',
     ],
+    claims: item.scope.map((scope, index) => ({
+      id: 'claim-' + (index + 1),
+      statement: '<specific factual statement supporting ' + scope + '>',
+      conceptIds: ['concept-' + (index + 1)],
+      sourceUrl: item.source.url ?? 'https://example.invalid/replace-with-primary-source',
+      locator: '<page section or anchor verified by author>',
+      rationale: '<why this source directly supports the factual statement>',
+    })),
   }, null, 2) + '\n');
 }
 
@@ -68,7 +76,8 @@ if (!existsSync(specTemplatePath)) {
   const segments = item.scope.map((concept, index) => ({
     id: 'segment-' + (index + 1),
     objective: '<one observable objective for ' + concept + '>',
-    whyItMatters: '<project problem that makes this concept necessary>',
+    whyItMatters: '<real engineering problem solved by the objective>',
+    firstAction: '<one concrete action that can be started without setup or planning ceremony>',
     mentalModel: '<simple but accurate mental model>',
     explanation: '<mechanism and limitations>',
     prerequisiteConceptIds: [],
@@ -84,8 +93,18 @@ if (!existsSync(specTemplatePath)) {
       hints: ['<conceptual hint>', '<more specific hint>'],
       explanation: '<explain answer and misconception>',
     },
+    misconceptionRepair: {
+      likelyMistake: '<a plausible wrong prediction or debugging behavior>',
+      whyItFails: '<specific causal reason the mistake fails>',
+      correctiveAction: '<the smallest action that repairs the misunderstanding>',
+    },
+    selfCheck: {
+      expectedObservation: '<observable output or invariant without submitting anything>',
+      ifUnexpected: '<what to inspect when the observation differs>',
+    },
     independentChallenge: {
       prompt: '<transfer problem, not a repeat of the example>',
+      variationFromExample: '<different data, environment, failure mode, or code path being tested>',
       criterionIds: [
         ...item.criteria.filter((_criterion, i) => i % item.scope.length === index)
           .map((criterion) => criterion.id),
@@ -93,6 +112,10 @@ if (!existsSync(specTemplatePath)) {
         ...(index >= item.criteria.length ? [item.criteria[0]?.id].filter((id): id is string => !!id) : []),
       ],
       expectedEvidence: ['<local observable verification>'],
+    },
+    continueFromHere: {
+      nextAction: '<specific optional next step after this segment>',
+      resumeCue: '<where to restart after an interruption, without persisted progress>',
     },
   }));
   writeFileSync(specTemplatePath, JSON.stringify({
@@ -124,7 +147,7 @@ if (!existsSync(specTemplatePath)) {
         evidenceExpected: '<challenge acceptance check>',
       },
     ],
-    pedagogy: { version: 2, segments, ...(projectBridge ? { projectBridge } : {}) },
+    pedagogy: { version: 3, segments, ...(projectBridge ? { projectBridge } : {}) },
     reviewQuestions: Array.from({ length: 5 }, (_, index) => ({
       id: 'q' + (index + 1),
       prompt: '<recall question>',
@@ -136,6 +159,22 @@ if (!existsSync(specTemplatePath)) {
   }, null, 2) + '\n');
 }
 
+const examplesTemplate = resolve(directory, 'executable-examples.template.json');
+if (!existsSync(examplesTemplate)) {
+  writeFileSync(examplesTemplate, JSON.stringify({
+    version: 1, itemId: item.id, curriculumFingerprint: item.fingerprint,
+    examples: [
+      {
+        id: 'predict-output',
+        runtime: 'node',
+        file: 'predict-output.mjs',
+        expectedStdout: '<expected stdout including trailing newline>',
+      },
+    ],
+    documentation: 'Replace this template with executable-examples.json. Create fixtures in staging/<ID>/fixtures. For non-executable concepts use examples: [] and noExecutableReason of at least 20 characters. Only node (.mjs) and java (.java) runtimes currently supported.',
+  }, null, 2) + '\n');
+}
+
 console.log('Prepared generation staging: ' + itemId);
 console.log('Context: ' + contextPath);
-console.log('Next: research sources, create source-pack.json + lesson-spec.json + lesson.mdx, then run generation:validate.');
+console.log('Next: research sources, create source-pack.json + lesson-spec.json + executable-examples.json + fixtures + lesson.mdx, then run generation:validate.');

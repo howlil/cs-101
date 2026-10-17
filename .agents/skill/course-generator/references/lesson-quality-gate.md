@@ -51,7 +51,16 @@ Prefer:
 - Source list contains direct URLs.
 - No unsupported strong claims remain.
 
-## 6. Cognitive-load quality — required
+## 6. Low-friction start and recovery — required
+
+- The first action is concrete and does not require a study-plan form.
+- Common wrong predictions receive causal repair, not merely a correct-answer badge.
+- Expected observations and a useful fallback are explicit.
+- Independent transfer uses different input or a different failure mode.
+- A resume cue explains what to do after interruption, without persisted learner state.
+- Timers, streaks, and compulsory reflection are not required.
+
+## 7. Cognitive-load quality — required
 
 - Main payoff appears before background.
 - New concepts are introduced in dependency order.
@@ -59,7 +68,7 @@ Prefer:
 - Related-but-noncritical material is deferred.
 - Page supports progressive disclosure for answers/deep dives without requiring a learner account or progress tracking.
 
-## 7. Technical artifact quality — required
+## 8. Technical artifact quality — required
 
 - Frontmatter passes schema.
 - MDX builds successfully.
@@ -75,4 +84,12 @@ Before accepting, produce a matrix internally:
 Exit criterion → taught at → assessed at → evidence expected → PASS/FAIL
 ```
 
-Any FAIL blocks persistence as a valid generated lesson.
+Any FAIL blocks publishing as a valid generated lesson. Schema validation cannot prove pedagogical quality or technical execution; review those separately.
+
+## 9. Reproducibility and provenance — required for V3
+
+- One authored claim with locator and source URL per concept; reviewers verify the referenced page actually supports each statement.
+- The V3 MDX imports promoted pedagogy JSON and question bank; no separately copied quiz keys or segment arrays.
+- Run local Node/Java examples as reviewed executable fixtures with pinned expected stdout, or declare why code execution is not applicable.
+- The validation receipt identifies the exact hashed MDX, pedagogy, bank, source pack, proof, and example manifest, checked again in CI.
+- A passed technical fixture demonstrates only that the example behaves as asserted in its runtime; it does not prove the lesson is pedagogically effective or a source claim is objectively true.

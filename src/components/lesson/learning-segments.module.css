@@ -1,0 +1,19 @@
+.list { display: grid; gap: 22px; min-width: 0; }
+.segment { min-width: 0; padding: 18px 0; border-bottom: 1px solid var(--border); }
+.segment:last-child { border-bottom: 0; }
+.kicker { margin: 0 0 5px; color: var(--text-muted); font-size: 11px; font-weight: 600; }
+.segment h3 { margin: 0 0 12px; font-size: 16px; letter-spacing: -.02em; }
+.segment h4 { margin: 18px 0 8px; font-size: 13px; font-weight: 650; }
+.segment p { line-height: 1.7; overflow-wrap: anywhere; }
+.why, .note { color: var(--text-secondary); }
+.firstStep { padding: 11px 14px; border-left: 2px solid var(--foreground); background: var(--surface-muted); margin: 16px 0 20px; }
+.firstStep strong { font-size: 12px; }
+.firstStep p { margin: 5px 0 0; }
+.repair, .selfCheck, .continue { padding: 4px 0 4px 13px; margin: 16px 0 0; border-left: 2px solid var(--border-strong); }
+.repair h4, .selfCheck h4, .continue h4 { margin: 0 0 8px; }
+.repair p, .selfCheck p, .continue p { margin: 6px 0; }
+.segment :global(.worked-example) { margin-top: 12px; }
+@media (max-width: 600px) {
+  .list { gap: 12px; }
+  .segment { padding: 14px 0; }
+}

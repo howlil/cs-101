@@ -1,3 +1,6 @@
 .quiz { display:grid; gap:10px; margin:14px 0; }
 .question { display:grid; gap:9px; }
 .intro { margin:0 0 6px; color:var(--text-secondary); font-size:12px; line-height:19px; }
+
+.question :global([role="alert"]) p { margin: 0 0 5px; }
+.question :global([role="alert"]) p:last-child { margin-bottom: 0; }

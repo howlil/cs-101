@@ -26,3 +26,9 @@ node scripts/validate-css.mjs
 ```
 
 Maintain content fidelity, mobile sidebar navigation, direct-link selection, and read-only rendering. Retired `/learn/:id`, `/project/:id`, `/integration/:id`, `/review/:id`, `/curriculum`, `/progress` URLs redirect to `/`. Do not resurrect old routes or persistence.
+
+## M5 — Eight-domain source snapshot
+
+The reviewed workbook snapshot `curriculum/source/engineering-2026-10-18.json` maps into 8 tracks, 67 modules and 370 source-backed **outlines**, not completed lessons. Priorities are 225 P0, 123 P1 and 22 P2. `pnpm curriculum:verify-import` detects source/manifest drift, and `pnpm curriculum:status` reports published coverage by domain.
+
+No standalone checkpoint or hard prerequisite may be inferred solely from row order: the workbook did not supply verified graph edges. Unit challenges are source-authored project ideas, not proof that standalone projects have been implemented. Publish P0 units gradually with the V3 source, quiz and executable-proof pipeline. Never present 370 imported outlines as 370 validated lessons or enable learner tracking.

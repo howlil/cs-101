@@ -9,20 +9,24 @@ curriculumFingerprint: "{{CURRICULUM_FINGERPRINT}}"
 import LessonStage from '../../components/lesson/LessonStage.astro';
 import MentalModel from '../../components/lesson/MentalModel.astro';
 import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
 import Quiz from '../../components/lesson/Quiz.astro';
 import Challenge from '../../components/lesson/Challenge.astro';
 import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
-import Reveal from '../../components/lesson/Reveal.astro';
-import WorkedExample from '../../components/lesson/WorkedExample.astro';
-import GuidedPractice from '../../components/lesson/GuidedPractice';
 import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
+
+// Imported artifacts are created by generation:validate, then generation:promote.
+// Do not copy questions or pedagogy metadata into MDX by hand.
+import pedagogyRecord from '../../../generation/pedagogy/{{ITEM_ID}}.json';
+import questionBank from '../../../review-banks/{{ITEM_ID}}.json';
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
 
 <LessonStage stage="understand">
 
 > {{ONE_SENTENCE_PAYOFF}}
 
-## Setelah materi ini, lo harus bisa
+## Hasil yang ingin dicapai
 
 {{LEARNING_OUTCOMES}}
 
@@ -38,41 +42,21 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
 
 {{PREREQUISITE_LINKS}}
 
-## Konsep inti dan mekanisme
-
-{{CORE_CONCEPTS_IN_DEPENDENCY_ORDER}}
-
-{{MECHANISM_OR_EXECUTION_TRACE}}
-
-## Contoh dan prediksi
-
-<WorkedExample
-  title="{{WORKED_EXAMPLE_TITLE}}"
-  problem="{{WORKED_EXAMPLE_PROBLEM}}"
-  steps={{{WORKED_EXAMPLE_STEPS}}}
-/>
-
-## Miskonsepsi yang harus dihindari
-
-{{MISCONCEPTION_TRAPS}}
+<LearningSegments stage="understand" segments={lessonSegments} />
 
 </LessonStage>
 
 <LessonStage stage="practice">
 
-## Guided practice
+<LearningSegments stage="practice" segments={lessonSegments} />
 
-<GuidedPractice
-  client:load
-  title="{{GUIDED_PRACTICE_TITLE}}"
-  prompt="{{GUIDED_PRACTICE_PROMPT}}"
-  hints={{{GUIDED_PRACTICE_HINTS}}}
-  explanation="{{GUIDED_PRACTICE_EXPLANATION}}"
-/>
+<Quiz bank={questionBank} />
 
-{{INDEPENDENT_PRACTICE}}
+</LessonStage>
 
-<Quiz items={{{QUIZ_DATA}}} />
+<LessonStage stage="evidence">
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
 
 <Challenge
   title="{{CHALLENGE_TITLE}}"
@@ -80,17 +64,9 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
   acceptanceCriteria={{{CHALLENGE_ACCEPTANCE}}}
 />
 
-</LessonStage>
-
-<LessonStage stage="evidence">
-
 <ExitCriteria items={{{EXIT_CRITERIA}}} />
 
 {{VERIFIED_PROJECT_BRIDGE_OR_EMPTY}}
-
-## Periksa hasil secara mandiri
-
-{{EVIDENCE_EXPECTED}}
 
 <SourceList sources={{{SOURCE_DATA}}} />
 

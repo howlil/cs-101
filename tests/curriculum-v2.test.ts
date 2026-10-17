@@ -20,7 +20,7 @@ test('semua cumulative checkpoint aktual punya inheritance clause yang dikenali'
   const cumulative = graph.manifest.items.filter(
     (item) => item.kind === 'checkpoint' && item.parentProjectId,
   );
-  if (cumulative.length === 0) { assert.deepEqual(graph.manifest.items, []); return; }
+  if (cumulative.length === 0) { assert.equal(graph.manifest.items.some((item)=>item.kind==='checkpoint'),false); return; }
   for (const project of cumulative) {
     const delta = getProjectDelta(graph, project.id);
     assert.ok(

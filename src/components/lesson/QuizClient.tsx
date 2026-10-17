@@ -12,6 +12,8 @@ interface QuizItem {
   options: string[];
   answer: number;
   explanation: string;
+  whenIncorrect?: string;
+  nextAction?: string;
 }
 
 function QuizQuestion({ item, index }: { item: QuizItem; index: number }) {
@@ -31,7 +33,11 @@ function QuizQuestion({ item, index }: { item: QuizItem; index: number }) {
       <CheckCircle2 size={14} strokeWidth={1.8} aria-hidden="true" />
       <span>Cek jawaban</span>
     </Button>
-    {result && <Alert title={result.correct ? 'Jawaban benar.' : 'Belum tepat.'} tone={result.correct ? 'success' : 'warning'}>{result.explanation}</Alert>}
+    {result && <Alert title={result.correct ? 'Jawaban benar.' : 'Belum tepat.'} tone={result.correct ? 'success' : 'warning'}>
+      <p>{result.explanation}</p>
+      {!result.correct && item.whenIncorrect && <p><strong>Coba perbaiki:</strong> {item.whenIncorrect}</p>}
+      {result.correct && item.nextAction && <p><strong>Langkah berikutnya:</strong> {item.nextAction}</p>}
+    </Alert>}
   </form>;
 }
 

@@ -1,11 +1,12 @@
 ---
 interface Step { action: string; reason: string; expectedResult: string }
-interface Props { title: string; problem: string; steps: Step[] }
-const { title, problem, steps } = Astro.props;
+interface Props { title: string; problem: string; steps: Step[]; predictionPrompt?: string }
+const { title, problem, steps, predictionPrompt } = Astro.props;
 ---
 <section class="worked-example" aria-label={'Contoh bertahap: ' + title}>
   <h3>{title}</h3>
   <p>{problem}</p>
+  {predictionPrompt && <p><strong>Prediksi sebelum melihat langkah:</strong> {predictionPrompt}</p>}
   <ol>
     {steps.map((step) => (
       <li>

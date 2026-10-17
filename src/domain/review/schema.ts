@@ -7,6 +7,8 @@ export const reviewQuestionSchema = z.object({
   options: z.array(z.string().min(1)).min(2).max(6),
   answer: z.number().int().nonnegative(),
   explanation: z.string().min(1),
+  whenIncorrect: z.string().min(1).optional(),
+  nextAction: z.string().min(1).optional(),
   criterionIds: z.array(z.string().min(1)).default([]),
 }).superRefine((question, ctx) => {
   if (question.answer >= question.options.length) {

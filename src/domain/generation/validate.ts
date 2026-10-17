@@ -1,5 +1,6 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
 import { validatePedagogySpec } from './pedagogy';
+import { verifySourceClaims } from './verification';
 import { contentCriteriaForItem } from './criteria';
 import {
   generationRecordSchema,
@@ -45,6 +46,8 @@ export function validateGenerationPlan(
       }
     }
   }
+
+  verifySourceClaims(sourcePack, lessonSpec.concepts, lessonSpec.pedagogy?.version === 3);
 
   const expectedCriteria = contentCriteriaForItem(item);
   const coverageIds = new Set(lessonSpec.coverage.map((entry) => entry.criterionId));

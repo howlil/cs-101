@@ -5,6 +5,9 @@ import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { contentCriteriaForItem } from '../src/domain/generation/criteria';
 import { generationRecordSchema } from '../src/domain/generation/schema';
+import { checkPublishedV3Files } from '../src/domain/generation/verification';
+import { validatePedagogySpec } from '../src/domain/generation/pedagogy';
+import { reviewBankSchema } from '../src/domain/review/schema';
 
 const graph = buildCurriculumGraph(manifestSource);
 
@@ -39,6 +42,17 @@ for (const file of readdirSync('src/content/lessons', { recursive: true, withFil
   const record = generationRecordSchema.parse(JSON.parse(readFileSync(recordPath, 'utf8')));
   if (record.itemId !== item.id || record.fingerprint !== item.fingerprint) {
     throw new Error(`Metadata stale: ${item.id}`);
+  }
+
+  const v3Receipt = resolve('generation', 'verified', item.id + '.json');
+  const v3Lesson = content.includes("import pedagogyRecord from");
+  if (v3Lesson && !existsSync(v3Receipt)) {
+    throw new Error('V3 lesson tidak memiliki published verification receipt: ' + item.id);
+  }
+  if (existsSync(v3Receipt)) {
+    const verified = checkPublishedV3Files(process.cwd(), item.id, item.fingerprint);
+    validatePedagogySpec(graph, item.id, verified.pedagogy.pedagogy);
+    reviewBankSchema.parse(verified.questionBank);
   }
 
   for (const criterion of contentCriteriaForItem(item)) {

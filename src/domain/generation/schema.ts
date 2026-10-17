@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { itemIdSchema, sourceRefSchema, criterionSchema } from '../curriculum-v2/schema';
 import { reviewQuestionSchema } from '../review/schema';
 import { pedagogySpecSchema } from './pedagogy';
+import { sourceClaimSchema } from './verification';
 
 export const contextItemSchema = z.object({
   id: itemIdSchema,
@@ -62,6 +63,7 @@ export const sourcePackSchema = z.object({
   curriculumFingerprint: z.string().regex(/^sha256:[0-9a-f]{64}$/),
   sources: z.array(sourcePackEntrySchema).min(1).max(5),
   unsupportedClaims: z.array(z.string().min(1)).default([]),
+  claims: z.array(sourceClaimSchema).default([]),
 });
 
 export const coverageEntrySchema = z.object({

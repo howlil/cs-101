@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "sourceSha256": "4cc54ad3f9c6c15ea9dc751b0e54481458add63ead0293ab960e774ec946b3c0",
+  "counts": {
+    "tracks": 8,
+    "modules": 67,
+    "units": 370,
+    "checkpoints": 0,
+    "integrations": 0,
+    "relations": 0,
+    "priorities": {
+      "P0": 225,
+      "P1": 123,
+      "P2": 22
+    }
+  },
+  "warnings": [
+    "Task without colon used source topic as title: JAV-007"
+  ],
+  "policy": "An imported item is an outline, never a published MDX lesson. Workbook has no verified prerequisite graph or standalone checkpoints: do not fabricate them."
+}
