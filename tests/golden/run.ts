@@ -64,16 +64,31 @@ async function assertRenderedHtml() {
       await new Promise((r) => setTimeout(r, 200));
     }
     assert.ok(page.length > 0, 'Golden lesson route did not render. Server output:\n' + output);
-    for (const expected of [
-      'Equality, hashCode', 'same-object=false', 'equal-value=true',
-      'Duplicate Payment Checker', 'Cek jawaban', 'HashSet',
-      'Payment Replay Safety Lab',
-    ]) {
-      assert.ok(page.includes(expected), 'Rendered HTML missing: ' + expected);
-    }
-    const empty = await fetch('http://127.0.0.1:' + port + '/?item=SQL-001');
-    assert.equal(empty.status, 200);
-    report('HTTP /?item=JAV-009 rendered MDX, scaffold, quiz and project link');
+    assert.ok(page.includes('Mental model: identitas vs nilai'), 'Materi tab missing worked explanation.');
+    assert.ok(!page.includes('Cek jawaban'), 'Quiz must not render in Materi tab.');
+    assert.ok(!page.includes('Kriteria selesai'), 'Project must not render in Materi tab.');
+
+    const root = 'http://127.0.0.1:' + port + '/?item=' + GOLDEN_UNIT_ID;
+    const quizResponse = await fetch(root + '&view=soal');
+    assert.equal(quizResponse.status, 200);
+    const quizPage = await quizResponse.text();
+    assert.ok(quizPage.includes('Cek jawaban'), 'Quiz must render in Soal tab.');
+    assert.ok(quizPage.includes('Coba prediksi dahulu'), 'Guided practice must render in Soal tab.');
+    assert.ok(!quizPage.includes('Mental model: identitas vs nilai'), 'Materi must not render in Soal tab.');
+    assert.ok(!quizPage.includes('Kriteria selesai'), 'Project must not render in Soal tab.');
+
+    const projectResponse = await fetch(root + '&view=project');
+    assert.equal(projectResponse.status, 200);
+    const projectPage = await projectResponse.text();
+    assert.ok(projectPage.includes('Kriteria selesai'), 'Project checklist must render in Project tab.');
+    assert.ok(projectPage.includes('Payment Replay Safety Lab'), 'Project bridge must render in Project tab.');
+    assert.ok(!projectPage.includes('Cek jawaban'), 'Quiz must not render in Project tab.');
+    assert.ok(!projectPage.includes('Mental model: identitas vs nilai'), 'Materi must not render in Project tab.');
+
+    const invalid = await fetch(root + '&view=invalid');
+    assert.equal(invalid.status, 200);
+    assert.ok((await invalid.text()).includes('Mental model: identitas vs nilai'));
+    report('Focused HTTP content: Materi, Soal and Project are independently rendered');
   } finally {
     server?.kill('SIGTERM');
   }

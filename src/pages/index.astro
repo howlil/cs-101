@@ -4,7 +4,7 @@ import AppLayout from '../layouts/AppLayout.astro';
 import ContentLibrary from '../components/library/ContentLibrary.astro';
 import EmptyCurriculum from '../components/library/EmptyCurriculum.astro';
 import { curriculumGraph } from '../server/curriculum';
-import { projectIdeaFor, selectLibraryItem } from '../domain/content-library';
+import { projectIdeaFor, selectLibraryItem, resolveLibraryView } from '../domain/content-library';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 import '../styles/library.css';
 
@@ -14,6 +14,7 @@ const selection = selectLibraryItem(
   Astro.url.searchParams.get('item'),
 );
 const item = selection.item;
+const view = item ? resolveLibraryView(Astro.url.searchParams.get('view'), item.kind) : 'materi';
 const location = item ? getItemLocation(curriculumGraph, item.id) : undefined;
 // Published status is derived from reviewed MDX, never from curriculum metadata alone.
 const lessons = await getCollection('lessons', ({ data }) => !data.demo);
@@ -36,6 +37,7 @@ const prerequisites = item?.prerequisites.map((id) => {
       moduleTitle={location?.module?.title}
       authored={Boolean(Content)}
       stale={Boolean(lesson && lesson.data.curriculumFingerprint !== item.fingerprint)}
+      view={view}
       project={projectIdeaFor(curriculumGraph, item)}
       prerequisites={prerequisites}
     >

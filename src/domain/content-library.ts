@@ -5,6 +5,21 @@ export function libraryHref(itemId: string): string {
   return '/?item=' + encodeURIComponent(itemId);
 }
 
+export type LibraryView = 'materi' | 'soal' | 'project';
+
+/**
+ * A view is a real, server-selected reading surface, not an anchor to scroll.
+ * Checkpoint/integration records have project content only; don't fabricate a quiz.
+ */
+export function resolveLibraryView(requested: string | null, kind: CurriculumItem['kind']): LibraryView {
+  if (kind !== 'unit') return 'project';
+  return requested === 'soal' || requested === 'project' ? requested : 'materi';
+}
+
+export function libraryViewHref(itemId: string, view: LibraryView): string {
+  return libraryHref(itemId) + (view === 'materi' ? '' : '&view=' + view);
+}
+
 /** Query parameters select content only: no progress, sessions, or writes. */
 export function selectLibraryItem(
   graph: CurriculumGraph,

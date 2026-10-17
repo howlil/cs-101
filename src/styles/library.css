@@ -1,4 +1,4 @@
-/* Reading-first content, content structure owns the hierarchy—not decorative tabs. */
+/* Focused reading surfaces: each view renders only one task, not a scroll anchor. */
 .library-content { width:min(755px,100%); margin:0 auto; padding:28px 32px 60px; min-width:0; }
 .library-heading { padding:0; }
 .library-location { color:var(--text-muted); font:500 11px/18px var(--font-body); margin:0 0 11px; }
@@ -6,18 +6,31 @@
 .library-muted { color:var(--text-secondary); font-size:13px; line-height:1.75; }
 .library-availability { margin:0 0 17px; border-left:2px solid var(--border-strong); padding:7px 11px; font-size:12px; line-height:1.7; color:var(--text-secondary); background:var(--surface-muted); }
 .library-id { color:var(--text-muted); font:500 11px/18px var(--font-body); margin:0 0 6px; }
-.library-jump {
-  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
-  margin:0 0 3px; padding:0 0 14px;
-  border-bottom:1px solid var(--border);
+.library-views {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px;
+  width:min(410px,100%); padding:3px; margin:0 0 16px;
+  background:var(--surface-muted); border:1px solid var(--border); border-radius:999px;
 }
-.library-jump a {
-  color:var(--text-secondary); text-decoration:underline; text-decoration-color:var(--border-strong);
-  text-underline-offset:4px; font-size:12px; font-weight:500; padding:4px 0;
-  transition:color var(--duration-fast) var(--ease-standard);
+.library-view-link {
+  display:flex; align-items:center; justify-content:center;
+  min-height:34px; padding:7px 11px; border-radius:999px;
+  color:var(--text-secondary); text-decoration:none; white-space:nowrap;
+  font-size:12px; font-weight:600;
+  transition:background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
-.library-jump a + a::before { content:"·"; color:var(--text-muted); display:inline-block; margin-right:8px; text-decoration:none; }
-.library-jump a:hover,.library-jump a:focus-visible { color:var(--foreground); text-decoration-color:var(--foreground); }
+.library-view-link:hover:not(.is-current) { background:var(--surface); color:var(--foreground); }
+.library-view-link.is-current { color:var(--accent-foreground); background:var(--foreground); }
+.library-view-link:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+.library-view-panel { min-width:0; }
+.library-next { display:flex; justify-content:flex-end; padding:18px 0 4px; }
+.library-next a {
+  display:inline-flex; align-items:center; gap:8px; color:var(--foreground);
+  font-size:12px; font-weight:600; text-decoration:none;
+  padding:9px 12px; border:1px solid var(--border); border-radius:999px;
+}
+.library-next a:hover { background:var(--surface-muted); }
+.library-next a:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
 .library-content-section { padding:22px 0 24px; border-bottom:1px solid var(--border); min-width:0; }
 .library-content-section h2:first-child { margin:0 0 11px; font-size:19px; font-weight:650; letter-spacing:-.02em; }
 .library-content-section h3 { font-size:15px; font-weight:650; margin:17px 0 9px; }
@@ -41,8 +54,8 @@
 .library-footer li { margin:5px 0; }
 .library-footer a { color:var(--foreground); }
 @media (max-width:900px) { .library-content { padding:24px 22px 48px; } }
-@media (max-width:600px) { .library-content { padding:20px 15px 42px; } .library-heading h1 { font-size:25px; } }
-@media (prefers-reduced-motion: reduce) { .library-jump a { transition:none; } }
+@media (max-width:600px) { .library-content { padding:20px 15px 42px; } .library-heading h1 { font-size:25px; } .library-views { width:100%; } .library-view-link { padding:7px 5px; font-size:11px; } }
+@media (prefers-reduced-motion: reduce) { .library-view-link { transition:none; } }
 
 .library-empty-main {padding-top:clamp(56px,10vh,124px);}
 .library-empty-main h1 {font-size:clamp(22px,2.6vw,30px);margin:0 0 10px;letter-spacing:-.035em;}
