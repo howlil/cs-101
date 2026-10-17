@@ -14,3 +14,5 @@
 @media (prefers-reduced-motion: reduce) {
   .root, .root * { scroll-behavior: auto; }
 }
+
+.hintCount { color: var(--text-secondary); font-size: 12px; margin: 9px 0 3px; }
