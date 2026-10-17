@@ -35,7 +35,7 @@
           "explanation": "Validasi di constructor/factory mencegah object invalid sekalipun dipanggil tanpa controller."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Kenapa validasi ID di controller saja tidak cukup?",
+          "prompt": "Implementasikan PaymentReference dengan format ref-[a-z0-9]+ dan test seluruh valid/invalid paths; pastikan tidak ada instance invalid dapat dibuat.",
           "criterionIds": [
             "criterion-2c5df23dea"
           ],
@@ -75,7 +75,7 @@
           "explanation": "Tambah implementasi ReceiptFormatter kedua dan gunakan constructor injection, bukan subclass seluruh ReceiptService."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Apa perubahan paling kecil untuk mendukung format receipt kedua?",
+          "prompt": "Buat interface FeeCalculator dengan dua implementasi dan service yang bergantung pada interface; uji substitusi tanpa perubahan source service.",
           "criterionIds": [
             "criterion-2c5df23dea"
           ],
@@ -115,7 +115,7 @@
           "explanation": "Buat salinan defensif seperti List.copyOf dan uji perubahan input setelah konstruksi tidak memodifikasi record."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Bagaimana membuktikan record aman bila menerima List mutable?",
+          "prompt": "Implementasikan record Batch(List<AccountId>) yang membuat defensive copy, lalu mutasi list sumber dan buktikan state batch tidak berubah.",
           "criterionIds": [
             "criterion-2c5df23dea",
             "criterion-30fedf22f2"
@@ -156,7 +156,7 @@
           "explanation": "Buktikan setiap pasangan equal mempunyai hashCode yang sama, dengan reflexive/symmetric/transitive tests."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Jika dua AccountId bernilai sama, apa yang harus dibuktikan selain equals?",
+          "prompt": "Generate 10.000 TransactionId dari seed baru; uji reflexive, symmetric, transitive, equal-hash untuk seluruh kelompok nilai setara.",
           "criterionIds": [
             "criterion-013fdc3dae"
           ],
@@ -196,7 +196,7 @@
           "explanation": "Gunakan BrokenId test-only dengan hash yang tak konsisten dan konfirmasi kegagalan disebabkan kontrak tersebut."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Bagaimana membuktikan suite menangkap sengaja-rusak hashCode tanpa mengubah production code?",
+          "prompt": "Masukkan generated Money/AccountId/TransactionId ke HashMap/HashSet dan bandingkan cardinality dengan oracle terpisah; buat test-only BrokenId dan pastikan suite menangkap pelanggaran hash.",
           "criterionIds": [
             "criterion-30fedf22f2",
             "criterion-38e6b5025a",
