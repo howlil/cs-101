@@ -22,6 +22,10 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
 
 > {{ONE_SENTENCE_PAYOFF}}
 
+## Mulai dari sini
+
+{{FIRST_ACTION}}
+
 ## Setelah materi ini, lo harus bisa
 
 {{LEARNING_OUTCOMES}}
@@ -44,6 +48,7 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
 
 {{MECHANISM_OR_EXECUTION_TRACE}}
 
+<!-- Author: repeat the cycle below for each V3 segment; automated per-segment rendering is M2. -->
 ## Contoh dan prediksi
 
 <WorkedExample
@@ -55,6 +60,14 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
 ## Miskonsepsi yang harus dihindari
 
 {{MISCONCEPTION_TRAPS}}
+
+### Kalau prediksimu meleset
+
+**Kesalahan yang umum:** {{LIKELY_MISTAKE}}
+
+**Penyebab:** {{WHY_IT_FAILS}}
+
+**Coba perbaiki dengan:** {{CORRECTIVE_ACTION}}
 
 </LessonStage>
 
@@ -70,7 +83,17 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
   explanation="{{GUIDED_PRACTICE_EXPLANATION}}"
 />
 
+### Periksa hasil
+
+**Yang diharapkan:** {{EXPECTED_OBSERVATION}}
+
+**Kalau berbeda:** {{IF_UNEXPECTED}}
+
+### Terapkan pada kasus baru
+
 {{INDEPENDENT_PRACTICE}}
+
+**Perbedaan dari contoh:** {{TRANSFER_VARIATION}}
 
 <Quiz items={{{QUIZ_DATA}}} />
 
@@ -91,6 +114,12 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
 ## Periksa hasil secara mandiri
 
 {{EVIDENCE_EXPECTED}}
+
+## Lanjutkan kapan saja
+
+**Aksi berikutnya:** {{NEXT_ACTION}}
+
+**Setelah terputus:** {{RESUME_CUE}}
 
 <SourceList sources={{{SOURCE_DATA}}} />
 
