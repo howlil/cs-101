@@ -1,121 +1,123 @@
 ---
 import type { CurriculumItem, ProjectCheckpoint } from '../../domain/curriculum-v2/schema';
-import { libraryHref } from '../../domain/content-library';
+import { libraryHref, libraryViewHref, type LibraryView } from '../../domain/content-library';
 interface Props {
   item: CurriculumItem;
   trackTitle?: string;
   moduleTitle?: string;
   authored: boolean;
   stale: boolean;
+  view: LibraryView;
   project?: ProjectCheckpoint;
   prerequisites: Array<{ id: string; title: string }>;
 }
-const { item, trackTitle, moduleTitle, authored, stale, project, prerequisites } = Astro.props;
+const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites } = Astro.props;
 const isUnit = item.kind === 'unit';
 const isCheckpoint = item.kind === 'checkpoint';
-const isIntegration = item.kind === 'integration';
 const scope = item.kind === 'checkpoint' ? [] : item.scope;
 const challenge = item.kind === 'checkpoint' ? undefined : item.challenge;
 const source = item.source;
+const views: Array<{ id: LibraryView; label: string }> = [
+  { id: 'materi', label: 'Materi' },
+  { id: 'soal', label: 'Latihan soal' },
+  { id: 'project', label: 'Project' },
+];
+const nextView = view === 'materi' ? 'soal' : view === 'soal' ? 'project' : undefined;
 ---
-<article class="library-content" aria-label="Konten kurikulum">
+<article class="library-content" aria-label="Konten kurikulum" data-active-view={view}>
   <header class="library-heading">
     <p class="library-location">{[trackTitle ?? 'Integrasi', moduleTitle, item.id].filter(Boolean).join(' / ')}</p>
     <h1>{item.title}</h1>
-    {isUnit && !authored && <p class="library-availability" role="status">Outline kurikulum — materi lengkap dan bank soal belum tersedia.</p>}
+    {isUnit && !authored && view === 'materi' && <p class="library-availability" role="status">Outline kurikulum — materi lengkap dan bank soal belum tersedia.</p>}
     {stale && <p class="library-availability" role="status">Materi tersedia, tetapi perlu peninjauan karena kurikulum sudah berubah.</p>}
-    <nav class="library-jump" aria-label="Lompat ke bagian halaman">
-      {isUnit ? (
-        <>
-          <a href="#materi">Materi</a>
-          <a href="#latihan">Latihan soal</a>
-          <a href="#ide-project">Ide project</a>
-        </>
-      ) : isCheckpoint ? (
-        <>
-          <a href="#materi">Masalah</a>
-          <a href="#latihan">Requirements</a>
-        </>
-      ) : (
-        <>
-          <a href="#materi">Integrasi</a>
-          <a href="#latihan">Praktik</a>
-        </>
-      )}
-    </nav>
+    {isUnit && (
+      <nav class="library-views" aria-label="Pilih bagian pembelajaran">
+        {views.map((tab) => (
+          <a
+            class:list={['library-view-link', { 'is-current': view === tab.id }]}
+            href={libraryViewHref(item.id, tab.id)}
+            aria-current={view === tab.id ? 'page' : undefined}
+          >{tab.label}</a>
+        ))}
+      </nav>
+    )}
   </header>
 
-  {isUnit && authored ? (
-    <div class="library-authored">
-      <slot />
-    </div>
-  ) : isUnit ? (
-    <>
-      <section class="library-content-section" id="materi" aria-labelledby="materi-label">
-        <h2 id="materi-label">Materi</h2>
-        <p class="library-muted">Cakupan konsep yang akan dibahas:</p>
+  <div class="library-view-panel" id={'view-' + view} aria-label={view === 'materi' ? 'Materi' : view === 'soal' ? 'Latihan soal' : 'Project'}>
+    {isUnit && authored ? (
+      <div class="library-authored">
+        <slot />
+      </div>
+    ) : isUnit && view === 'materi' ? (
+      <section class="library-content-section" id="materi">
+        <h2>Materi</h2>
+        <p class="library-muted">Outline konsep yang akan dibahas. Penjelasan lengkap belum diterbitkan.</p>
         <ul>{scope.map((text) => <li>{text}</li>)}</ul>
       </section>
-      <section class="library-content-section" id="latihan" aria-labelledby="latihan-label">
-        <h2 id="latihan-label">Latihan soal</h2>
-        <p class="library-muted">Soal dan pembahasan belum diterbitkan untuk unit ini.</p>
+    ) : isUnit && view === 'soal' ? (
+      <section class="library-content-section" id="latihan" aria-label="Latihan soal">
+        <h2>Latihan soal</h2>
+        <p class="library-muted">Soal dan pembahasan belum diterbitkan untuk unit ini. Materi yang belum dibuat tidak ditampilkan sebagai soal.</p>
       </section>
-    </>
-  ) : isCheckpoint ? (
-    <>
-      <section class="library-content-section" id="materi">
+    ) : isUnit ? (
+      <section class="library-content-section library-project" id="ide-project">
+        <h2>Ide project</h2>
+        {project ? (
+          <>
+            <h3><a href={libraryViewHref(project.id, 'project')}>{project.title}</a></h3>
+            <p>{project.problemStatement}</p>
+            <p class="library-muted">Buka project untuk membaca requirement dan kriteria verifikasinya.</p>
+          </>
+        ) : challenge ? (
+          <>
+            <h3>{challenge.title}</h3>
+            <ol>{challenge.steps.map((step) => <li>{step}</li>)}</ol>
+            <p class="library-muted">Project ini adalah ide dari workbook, bukan bukti bahwa implementasi sudah diverifikasi.</p>
+          </>
+        ) : (
+          <p class="library-muted">Belum ada ide project untuk unit ini.</p>
+        )}
+      </section>
+    ) : isCheckpoint ? (
+      <section class="library-content-section library-project" id="ide-project">
         <h2>Problem statement</h2>
         <p>{item.problemStatement}</p>
-      </section>
-      <section class="library-content-section" id="latihan">
-        <h2>Requirements & kriteria verifikasi</h2>
+        <h3>Requirements & kriteria verifikasi</h3>
         <ul>{item.requirements.map((requirement) => <li>{requirement.text}</li>)}</ul>
       </section>
-    </>
-  ) : (
-    <>
-      <section class="library-content-section" id="materi">
+    ) : (
+      <section class="library-content-section library-project" id="ide-project">
         <h2>Latihan integrasi</h2>
         <p>{item.brief}</p>
         <ul>{item.scope.map((text) => <li>{text}</li>)}</ul>
-      </section>
-      <section class="library-content-section" id="latihan">
-        <h2>Langkah praktik</h2>
         <h3>{item.challenge.title}</h3>
         <ol>{item.challenge.steps.map((step) => <li>{step}</li>)}</ol>
         <h3>Kriteria verifikasi</h3>
-        <ul>{[...item.criteria, ...item.requirements].map((c) => <li>{c.text}</li>)}</ul>
+        <ul>{[...item.criteria, ...item.requirements].map((criterion) => <li>{criterion.text}</li>)}</ul>
       </section>
-    </>
+    )}
+  </div>
+
+  {isUnit && nextView && (
+    <nav class="library-next" aria-label="Lanjut ke bagian berikutnya">
+      <a href={libraryViewHref(item.id, nextView)}>
+        {nextView === 'soal' ? 'Lanjut ke latihan soal' : 'Lanjut ke project'}
+        <span aria-hidden="true">→</span>
+      </a>
+    </nav>
   )}
 
-  {isUnit && <section class="library-content-section library-project" id="ide-project">
-    <h2>Ide project</h2>
-    {project ? (
-      <>
-        <h3><a href={libraryHref(project.id)}>{project.title}</a></h3>
-        <p>{project.problemStatement}</p>
-        <p class="library-muted">Lihat requirements dan kriteria verifikasi pada halaman project.</p>
-      </>
-    ) : challenge ? (
-      <>
-        <h3>{challenge.title}</h3>
-        <ol>{challenge.steps.map((step) => <li>{step}</li>)}</ol>
-      </>
-    ) : (
-      <p class="library-muted">Belum ada ide project terverifikasi untuk unit ini.</p>
-    )}
-  </section>}
-
-  <footer class="library-footer">
-    {prerequisites.length > 0 && (
-      <section aria-label="Materi prasyarat">
-        <h2>Materi terkait sebelumnya</h2>
-        <ul>{prerequisites.map((prerequisite) => (
-          <li><a href={libraryHref(prerequisite.id)}>{prerequisite.id} · {prerequisite.title}</a></li>
-        ))}</ul>
-      </section>
-    )}
-    {source.url && <p>Sumber: <a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></p>}
-  </footer>
+  {view === 'materi' && (
+    <footer class="library-footer">
+      {prerequisites.length > 0 && (
+        <section aria-label="Materi prasyarat">
+          <h2>Materi terkait sebelumnya</h2>
+          <ul>{prerequisites.map((prerequisite) => (
+            <li><a href={libraryHref(prerequisite.id)}>{prerequisite.id} · {prerequisite.title}</a></li>
+          ))}</ul>
+        </section>
+      )}
+      {source.url && <p>Sumber: <a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></p>}
+    </footer>
+  )}
 </article>
