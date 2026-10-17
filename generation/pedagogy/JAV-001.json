@@ -1,0 +1,221 @@
+{
+  "version": 2,
+  "segments": [
+    {
+      "id": "source-to-jvm",
+      "objective": "Jalankan kelas Java melalui compiler dan JVM tanpa IDE",
+      "whyItMatters": "Build reproducible membutuhkan kontrak command-line",
+      "mentalModel": "Source .java → bytecode .class → JVM",
+      "explanation": "Bedakan kompilasi dari eksekusi serta artifact yang dijalankan",
+      "prerequisiteConceptIds": [],
+      "workedExample": {
+        "problem": "Mulai dari file Hello.java",
+        "steps": [
+          {
+            "action": "Jalankan javac Hello.java",
+            "reason": "Compiler menerjemahkan source ke bytecode",
+            "expectedResult": "Hello.class muncul"
+          },
+          {
+            "action": "Jalankan java Hello",
+            "reason": "JVM mengeksekusi bytecode",
+            "expectedResult": "Output program terlihat"
+          }
+        ]
+      },
+      "guidedPractice": {
+        "prompt": "Command apa yang menghasilkan bytecode dan command apa yang menjalankannya?",
+        "hints": [
+          "Satu command dimulai dengan javac, yang lain dengan java",
+          "Cari artifact .class yang dibuat setelah kompilasi"
+        ],
+        "explanation": "javac mengompilasi source, java menjalankan kelas melalui JVM."
+      },
+      "independentChallenge": {
+        "prompt": "Selesaikan tanpa melihat pembahasan: Command apa yang menghasilkan bytecode dan command apa yang menjalankannya?",
+        "criterionIds": [
+          "criterion-52c56d6391"
+        ],
+        "expectedEvidence": [
+          "Program dapat dijalankan dari terminal tanpa konfigurasi IDE"
+        ]
+      }
+    },
+    {
+      "id": "maven-lifecycle",
+      "objective": "Bedakan Maven test dan package",
+      "whyItMatters": "Pengguna lain harus dapat memverifikasi hasil dari clean checkout",
+      "mentalModel": "Phase Maven menjalankan phase sebelumnya yang diperlukan",
+      "explanation": "`mvn package` juga menjalankan phase test sebelum packaging",
+      "prerequisiteConceptIds": [],
+      "workedExample": {
+        "problem": "Buat executable artifact lewat Maven",
+        "steps": [
+          {
+            "action": "Jalankan mvn test",
+            "reason": "Memverifikasi perubahan lewat automated tests",
+            "expectedResult": "Tests sukses"
+          },
+          {
+            "action": "Jalankan mvn package",
+            "reason": "Mencapai phase packaging setelah phase sebelumnya",
+            "expectedResult": "JAR terbuat"
+          }
+        ]
+      },
+      "guidedPractice": {
+        "prompt": "Bagaimana membuktikan Maven build benar-benar reproducible?",
+        "hints": [
+          "Jalankan dari terminal, bukan tombol IDE",
+          "Mulai dari clean checkout dan ulangi build beberapa kali"
+        ],
+        "explanation": "Ulangi `mvn test` dan `mvn package` dari clean checkout serta periksa bahwa executable JAR selalu terbentuk."
+      },
+      "independentChallenge": {
+        "prompt": "Selesaikan tanpa melihat pembahasan: Bagaimana membuktikan Maven build benar-benar reproducible?",
+        "criterionIds": [
+          "criterion-5a2766d788",
+          "criterion-52c56d6391"
+        ],
+        "expectedEvidence": [
+          "Lima build/test dari clean checkout sukses"
+        ]
+      }
+    },
+    {
+      "id": "value-and-reference",
+      "objective": "Prediksi assignment primitive dan reference",
+      "whyItMatters": "Bug domain model sering berasal dari asumsi identitas object",
+      "mentalModel": "Primitive menyimpan nilai; reference menyimpan rujukan object atau null",
+      "explanation": "Menyalin primitive tidak mengubah sumber. Menyalin reference tidak membuat object baru.",
+      "prerequisiteConceptIds": [],
+      "workedExample": {
+        "problem": "Prediksi nilai `a` setelah b ditambah",
+        "steps": [
+          {
+            "action": "Set int a=3; int b=a",
+            "reason": "Assignment primitive menyalin nilainya",
+            "expectedResult": "a dan b bernilai 3"
+          },
+          {
+            "action": "Jalankan b++",
+            "reason": "Perubahan hanya berlaku pada b",
+            "expectedResult": "a tetap 3"
+          }
+        ]
+      },
+      "guidedPractice": {
+        "prompt": "Setelah `int a=3; int b=a; b++;`, berapa nilai a?",
+        "hints": [
+          "Perhatikan tipe data a dan b",
+          "Primitive assignment menyalin nilai bukan alias object"
+        ],
+        "explanation": "Nilai a tetap 3 karena penambahan b tidak memodifikasi a."
+      },
+      "independentChallenge": {
+        "prompt": "Selesaikan tanpa melihat pembahasan: Setelah `int a=3; int b=a; b++;`, berapa nilai a?",
+        "criterionIds": [
+          "criterion-17cb87ed20"
+        ],
+        "expectedEvidence": [
+          "Prediksi primitive/reference sebelum eksekusi benar"
+        ]
+      }
+    },
+    {
+      "id": "identity-and-value-equality",
+      "objective": "Bedakan String identity, value equality, null, dan record",
+      "whyItMatters": "Deduplikasi transaksi memerlukan kontrak kesetaraan yang tepat",
+      "mentalModel": "`==` untuk referensi mengecek identitas; equals bergantung kontrak tipe",
+      "explanation": "String immutable menggunakan equals untuk membandingkan isi, record menyediakan value-based equality, null tidak boleh didereference.",
+      "prerequisiteConceptIds": [],
+      "workedExample": {
+        "problem": "Dua String berbeda berisi teks identik",
+        "steps": [
+          {
+            "action": "Buat dua new String(\"paid\")",
+            "reason": "`new` membuat dua object berbeda",
+            "expectedResult": "a == b false"
+          },
+          {
+            "action": "Panggil a.equals(b)",
+            "reason": "String.equals membandingkan konten",
+            "expectedResult": "equals true"
+          }
+        ]
+      },
+      "guidedPractice": {
+        "prompt": "Apa hasil `new String(\"x\")==new String(\"x\")` dan alasannya?",
+        "hints": [
+          "Operator == pada object tidak membandingkan konten",
+          "Bandingkan dengan perilaku `String.equals`"
+        ],
+        "explanation": "Hasil false karena keduanya object berbeda; untuk isi String gunakan equals."
+      },
+      "independentChallenge": {
+        "prompt": "Selesaikan tanpa melihat pembahasan: Apa hasil `new String(\"x\")==new String(\"x\")` dan alasannya?",
+        "criterionIds": [
+          "criterion-17cb87ed20"
+        ],
+        "expectedEvidence": [
+          "Prediksi 11 dari 12 skenario equality, null, primitive, record sebelum menjalankan"
+        ]
+      }
+    },
+    {
+      "id": "deterministic-cli",
+      "objective": "Bangun CLI dengan output byte-identical untuk input yang sama",
+      "whyItMatters": "Replaying financial events harus memberi hasil yang dapat diaudit",
+      "mentalModel": "Input → parse → domain → stable formatting → stdout",
+      "explanation": "Hindari waktu acak, order map yang tak dijamin, locale/timezone implicit, serta output diagnostics ke stdout.",
+      "prerequisiteConceptIds": [],
+      "workedExample": {
+        "problem": "Bangun CLI pembaca transaction records",
+        "steps": [
+          {
+            "action": "Pisahkan parser dari formatter",
+            "reason": "Output deterministic butuh alur input dan formatting yang terkontrol",
+            "expectedResult": "Input dapat diulang"
+          },
+          {
+            "action": "Jalankan input identik tiga kali",
+            "reason": "Mendeteksi nondeterminism",
+            "expectedResult": "Seluruh output byte-identical"
+          }
+        ]
+      },
+      "guidedPractice": {
+        "prompt": "Kenapa output bisa berbeda walau input identik?",
+        "hints": [
+          "Periksa timestamp dan random value",
+          "Periksa iteration order, locale/timezone, dan path lingkungan"
+        ],
+        "explanation": "Timestamp, random tanpa seed, urutan iterasi tanpa jaminan, dan locale dapat mengubah hasil. Stabilkan semuanya atau hilangkan."
+      },
+      "independentChallenge": {
+        "prompt": "Selesaikan tanpa melihat pembahasan: Kenapa output bisa berbeda walau input identik?",
+        "criterionIds": [
+          "criterion-86c471c16a",
+          "challenge"
+        ],
+        "expectedEvidence": [
+          "3 run byte-identical dan seluruh acceptance criteria Reproducible Build Trap terpenuhi"
+        ]
+      }
+    }
+  ],
+  "projectBridge": {
+    "checkpointId": "JAV-P01",
+    "requirementIds": [
+      "requirement-173104438b",
+      "requirement-a0623620bc",
+      "requirement-6ce4ee3a48"
+    ],
+    "contribution": "CLI reproducible menjadi fondasi replay ledger dan tes invariants pada Adversarial Ledger Kernel.",
+    "verification": [
+      "Jalankan build/test dari clean checkout",
+      "Ulangi input yang identik dan bandingkan output byte-for-byte",
+      "Tulis prediction tests sebelum membangun kernel ledger"
+    ]
+  }
+}
