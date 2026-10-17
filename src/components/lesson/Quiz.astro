@@ -1,5 +1,18 @@
 ---
 import QuizClient from './QuizClient';
-interface Props { items: { question: string; options: string[]; answer: number; explanation: string; whenIncorrect?: string; nextAction?: string }[] }
+import type { ReviewBank } from '../../domain/review/schema';
+interface QuizItem { question: string; options: string[]; answer: number; explanation: string; whenIncorrect?: string; nextAction?: string }
+interface Props { items?: QuizItem[]; bank?: ReviewBank }
+const { items, bank } = Astro.props;
+const questions = bank
+  ? bank.questions.map((question) => ({
+      question: question.prompt,
+      options: question.options,
+      answer: question.answer,
+      explanation: question.explanation,
+      whenIncorrect: question.whenIncorrect,
+      nextAction: question.nextAction,
+    }))
+  : (items ?? []);
 ---
-<QuizClient client:load items={Astro.props.items} />
+<QuizClient client:load items={questions} />
