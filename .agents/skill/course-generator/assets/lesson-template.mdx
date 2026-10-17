@@ -9,24 +9,23 @@ curriculumFingerprint: "{{CURRICULUM_FINGERPRINT}}"
 import LessonStage from '../../components/lesson/LessonStage.astro';
 import MentalModel from '../../components/lesson/MentalModel.astro';
 import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
 import Quiz from '../../components/lesson/Quiz.astro';
 import Challenge from '../../components/lesson/Challenge.astro';
 import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
-import Reveal from '../../components/lesson/Reveal.astro';
-import WorkedExample from '../../components/lesson/WorkedExample.astro';
-import GuidedPractice from '../../components/lesson/GuidedPractice';
 import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
+
+// Copy all reviewed Pedagogy V3 segments from the validated lesson spec.
+// Until M3, validate exact synchronization with lesson-spec.json manually.
+// Replace the placeholder with a serialized JavaScript array before validation.
+export const lessonSegments = {{PEDAGOGY_V3_SEGMENTS_JSON}};
 
 <LessonStage stage="understand">
 
 > {{ONE_SENTENCE_PAYOFF}}
 
-## Mulai dari sini
-
-{{FIRST_ACTION}}
-
-## Setelah materi ini, lo harus bisa
+## Hasil yang ingin dicapai
 
 {{LEARNING_OUTCOMES}}
 
@@ -42,60 +41,21 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
 
 {{PREREQUISITE_LINKS}}
 
-## Konsep inti dan mekanisme
-
-{{CORE_CONCEPTS_IN_DEPENDENCY_ORDER}}
-
-{{MECHANISM_OR_EXECUTION_TRACE}}
-
-<!-- Author: repeat the cycle below for each V3 segment; automated per-segment rendering is M2. -->
-## Contoh dan prediksi
-
-<WorkedExample
-  title="{{WORKED_EXAMPLE_TITLE}}"
-  problem="{{WORKED_EXAMPLE_PROBLEM}}"
-  steps={{{WORKED_EXAMPLE_STEPS}}}
-/>
-
-## Miskonsepsi yang harus dihindari
-
-{{MISCONCEPTION_TRAPS}}
-
-### Kalau prediksimu meleset
-
-**Kesalahan yang umum:** {{LIKELY_MISTAKE}}
-
-**Penyebab:** {{WHY_IT_FAILS}}
-
-**Coba perbaiki dengan:** {{CORRECTIVE_ACTION}}
+<LearningSegments stage="understand" segments={lessonSegments} />
 
 </LessonStage>
 
 <LessonStage stage="practice">
 
-## Guided practice
-
-<GuidedPractice
-  client:load
-  title="{{GUIDED_PRACTICE_TITLE}}"
-  prompt="{{GUIDED_PRACTICE_PROMPT}}"
-  hints={{{GUIDED_PRACTICE_HINTS}}}
-  explanation="{{GUIDED_PRACTICE_EXPLANATION}}"
-/>
-
-### Periksa hasil
-
-**Yang diharapkan:** {{EXPECTED_OBSERVATION}}
-
-**Kalau berbeda:** {{IF_UNEXPECTED}}
-
-### Terapkan pada kasus baru
-
-{{INDEPENDENT_PRACTICE}}
-
-**Perbedaan dari contoh:** {{TRANSFER_VARIATION}}
+<LearningSegments stage="practice" segments={lessonSegments} />
 
 <Quiz items={{{QUIZ_DATA}}} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
 
 <Challenge
   title="{{CHALLENGE_TITLE}}"
@@ -103,23 +63,9 @@ import ProjectContribution from '../../components/lesson/ProjectContribution.ast
   acceptanceCriteria={{{CHALLENGE_ACCEPTANCE}}}
 />
 
-</LessonStage>
-
-<LessonStage stage="evidence">
-
 <ExitCriteria items={{{EXIT_CRITERIA}}} />
 
 {{VERIFIED_PROJECT_BRIDGE_OR_EMPTY}}
-
-## Periksa hasil secara mandiri
-
-{{EVIDENCE_EXPECTED}}
-
-## Lanjutkan kapan saja
-
-**Aksi berikutnya:** {{NEXT_ACTION}}
-
-**Setelah terputus:** {{RESUME_CUE}}
 
 <SourceList sources={{{SOURCE_DATA}}} />
 
