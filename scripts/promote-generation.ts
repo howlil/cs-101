@@ -36,7 +36,7 @@ const validation = JSON.parse(readFileSync(report, 'utf8')) as {
     generationRecord?: string;
     reviewBank?: string;
     pedagogy?: string;
-    sourcePack?: string;
+    sourceArtifact?: string;
     exampleProof?: string;
     examplePlan?: string;
     verifiedReceipt?: string;
@@ -80,7 +80,7 @@ if (isV3) {
   const planPath = resolve(staging, 'executable-examples.json');
   const required = {
     pedagogy: resolve(derived, 'pedagogy-record.json'),
-    sourcePack: resolve(derived, 'source-pack.json'),
+    sourceArtifact: resolve(derived, 'source-pack.json'),
     exampleProof: resolve(derived, 'example-proof.json'),
     examplePlan: planPath,
     verifiedReceipt: resolve(derived, 'verified-receipt.json'),
