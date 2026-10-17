@@ -1,0 +1,227 @@
+{
+  "unitId": "JAV-002",
+  "curriculumFingerprint": "sha256:b7805221c341ff8966f9b10f822ebad72326f9a405e4bbf905bff53e5fedd1f6",
+  "pedagogy": {
+    "version": 2,
+    "segments": [
+      {
+        "id": "constructor-invariants",
+        "objective": "Mencegah AccountId invalid dibuat",
+        "whyItMatters": "Ledger rusak jika ID transaksi atau akun invalid lolos ke state",
+        "mentalModel": "Constructor adalah gerbang invariants; field private saja tidak cukup",
+        "explanation": "Record compact constructor wajib melempar exception untuk nilai null, kosong, atau format ilegal.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Uji AccountId pada domain ledger",
+          "steps": [
+            {
+              "action": "Tulis tabel input valid/invalid sebelum kode",
+              "reason": "Aturan domain harus bisa diuji secara independen",
+              "expectedResult": "Kasus acct-7 diterima, null dan user-7 ditolak"
+            },
+            {
+              "action": "Validasi dalam constructor",
+              "reason": "Semua jalur konstruksi tunduk ke satu aturan",
+              "expectedResult": "IllegalArgumentException untuk input invalid"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Kenapa validasi ID di controller saja tidak cukup?",
+          "hints": [
+            "Object juga bisa dibuat dari test dan jalur non-HTTP",
+            "Simpan aturan pada pemilik invariants, bukan di setiap caller"
+          ],
+          "explanation": "Validasi di constructor/factory mencegah object invalid sekalipun dipanggil tanpa controller."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Kenapa validasi ID di controller saja tidak cukup?",
+          "criterionIds": [
+            "criterion-2c5df23dea"
+          ],
+          "expectedEvidence": [
+            "Semua kasus invalid yang didefinisikan ditolak; valid tetap diterima"
+          ]
+        }
+      },
+      {
+        "id": "interfaces-composition",
+        "objective": "Gunakan interface dan composition untuk mengganti formatter",
+        "whyItMatters": "Project membutuhkan perilaku yang dapat diuji tanpa inheritance berlebih",
+        "mentalModel": "Client bergantung pada capability, bukan implementasi konkret",
+        "explanation": "ReceiptService menyimpan dependency ReceiptFormatter; formatter berbeda dapat disubstitusi tanpa mengubah service.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Ganti format struk tanpa subclass service",
+          "steps": [
+            {
+              "action": "Definisikan ReceiptFormatter.format",
+              "reason": "Interface menyatakan kontrak yang dibutuhkan",
+              "expectedResult": "Client compile terhadap interface"
+            },
+            {
+              "action": "Suntik formatter lain melalui constructor",
+              "reason": "Composition memisahkan variasi",
+              "expectedResult": "Output bisa diubah tanpa modifikasi service"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Apa perubahan paling kecil untuk mendukung format receipt kedua?",
+          "hints": [
+            "Tentukan behavior yang bervariasi",
+            "Jadikan behavior itu dependency interface dan inject"
+          ],
+          "explanation": "Tambah implementasi ReceiptFormatter kedua dan gunakan constructor injection, bukan subclass seluruh ReceiptService."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Apa perubahan paling kecil untuk mendukung format receipt kedua?",
+          "criterionIds": [
+            "criterion-2c5df23dea"
+          ],
+          "expectedEvidence": [
+            "Behavior berubah lewat implementasi tanpa mengendurkan validitas AccountId"
+          ]
+        }
+      },
+      {
+        "id": "records-immutability",
+        "objective": "Bedakan shallow dan deep immutability",
+        "whyItMatters": "Key hash tidak boleh berubah setelah dimasukkan ke koleksi",
+        "mentalModel": "Reference final tidak berarti object rujukannya immutable",
+        "explanation": "Record dengan List mutable harus membuat defensive copy dan tidak mengekspos mutable state.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Tutup celah alias list di record",
+          "steps": [
+            {
+              "action": "Terima List dari caller",
+              "reason": "Caller masih punya reference yang sama",
+              "expectedResult": "Perubahan caller bisa memengaruhi record naive"
+            },
+            {
+              "action": "Gunakan List.copyOf pada constructor",
+              "reason": "Buat snapshot immutable",
+              "expectedResult": "Mutasi caller tidak mengubah isi record"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Bagaimana membuktikan record aman bila menerima List mutable?",
+          "hints": [
+            "Periksa apakah component sendiri mutable",
+            "Ubah input list setelah constructor; hasil record harus tetap sama"
+          ],
+          "explanation": "Buat salinan defensif seperti List.copyOf dan uji perubahan input setelah konstruksi tidak memodifikasi record."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Bagaimana membuktikan record aman bila menerima List mutable?",
+          "criterionIds": [
+            "criterion-2c5df23dea",
+            "criterion-30fedf22f2"
+          ],
+          "expectedEvidence": [
+            "Tidak ada mutation via public API; key set stabil"
+          ]
+        }
+      },
+      {
+        "id": "equality-hash-contract",
+        "objective": "Buktikan dua nilai domain setara punya hash sama",
+        "whyItMatters": "Deduplikasi transaksi memakai equality dan hash",
+        "mentalModel": "a.equals(b) ⇒ a.hashCode()==b.hashCode(); kebalikannya tidak wajib",
+        "explanation": "Record memberi value-based equality; kontrak equals harus reflexive, symmetric, transitive, consistent.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Periksa equality dua AccountId",
+          "steps": [
+            {
+              "action": "Buat dua AccountId(\"acct-7\")",
+              "reason": "Dua instance berbagi nilai tetapi bukan identity",
+              "expectedResult": "== false; equals true"
+            },
+            {
+              "action": "Bandingkan hashCode",
+              "reason": "Equal values wajib memiliki hash sama",
+              "expectedResult": "hashCode equality true"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Jika dua AccountId bernilai sama, apa yang harus dibuktikan selain equals?",
+          "hints": [
+            "HashMap mencari bucket memakai hash",
+            "Kontrak equal hash wajib konsisten"
+          ],
+          "explanation": "Buktikan setiap pasangan equal mempunyai hashCode yang sama, dengan reflexive/symmetric/transitive tests."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Jika dua AccountId bernilai sama, apa yang harus dibuktikan selain equals?",
+          "criterionIds": [
+            "criterion-013fdc3dae"
+          ],
+          "expectedEvidence": [
+            "10.000 objek dari seed tetap memenuhi kontrak equality dan hashCode"
+          ]
+        }
+      },
+      {
+        "id": "hash-contract-ambush",
+        "objective": "Deteksi pelanggaran equality melalui HashMap, HashSet dan mutation test",
+        "whyItMatters": "Ledger tidak boleh kehilangan atau menggandakan transaksi",
+        "mentalModel": "Independent oracle memisahkan expected cardinality dari implementasi key",
+        "explanation": "Gunakan canonical string oracle, bandingkan hasil map/set, lalu injeksikan hash defect hanya di fixture.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Deteksi hash defect deterministik",
+          "steps": [
+            {
+              "action": "Generate 10.000 values dengan seed tetap",
+              "reason": "Kasus bisa direproduksi",
+              "expectedResult": "Set of expected canonical keys tersedia"
+            },
+            {
+              "action": "Sisipkan BrokenId pada fixture",
+              "reason": "Hash dari dua equal keys berbeda",
+              "expectedResult": "Test kontrak gagal; setelah diperbaiki hijau"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Bagaimana membuktikan suite menangkap sengaja-rusak hashCode tanpa mengubah production code?",
+          "hints": [
+            "Lakukan mutation pada fixture test-only",
+            "Jalankan test yang mengecek equal-hash dan cardinality oracle"
+          ],
+          "explanation": "Gunakan BrokenId test-only dengan hash yang tak konsisten dan konfirmasi kegagalan disebabkan kontrak tersebut."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Bagaimana membuktikan suite menangkap sengaja-rusak hashCode tanpa mengubah production code?",
+          "criterionIds": [
+            "criterion-30fedf22f2",
+            "criterion-38e6b5025a",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Oracle cardinality sama dengan HashSet/HashMap; injected defect menjadi red lalu green"
+          ]
+        }
+      }
+    ],
+    "projectBridge": {
+      "checkpointId": "JAV-P01",
+      "requirementIds": [
+        "requirement-173104438b",
+        "requirement-2f254ea9ba",
+        "requirement-e755c9ee08",
+        "requirement-6ce4ee3a48"
+      ],
+      "contribution": "Value objects valid dan stabil sebagai keys adalah fondasi ledger dan pendeteksian transaksi duplikat pada Adversarial Ledger Kernel.",
+      "verification": [
+        "ID invalid ditolak sebelum masuk state",
+        "10.000 generated equal-value cases lolos kontrak hash dan oracle",
+        "Test menangkap BrokenId yang melanggar equal-hash tanpa masuk source produksi"
+      ]
+    }
+  }
+}
