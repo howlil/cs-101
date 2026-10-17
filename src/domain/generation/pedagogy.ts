@@ -74,6 +74,8 @@ export const learningSegmentV3Schema = learningSegmentSchema.extend({
   }),
 });
 
+export type LearningSegmentV3 = z.infer<typeof learningSegmentV3Schema>;
+
 export const pedagogySpecV3Schema = z.object({
   version: z.literal(3),
   segments: z.array(learningSegmentV3Schema).min(1),
