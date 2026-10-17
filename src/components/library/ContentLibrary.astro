@@ -23,7 +23,12 @@ const views: Array<{ id: LibraryView; label: string }> = [
   { id: 'soal', label: 'Latihan soal' },
   { id: 'project', label: 'Project' },
 ];
-const nextView = view === 'materi' ? 'soal' : view === 'soal' ? 'project' : undefined;
+// An unpublished lesson has no quiz. Never send the learner to an empty Soal page.
+const projectAvailable = authored || Boolean(project || challenge);
+const nextView = !isUnit ? undefined
+  : view === 'materi' ? (authored ? 'soal' : projectAvailable ? 'project' : undefined)
+  : view === 'soal' && projectAvailable ? 'project'
+  : undefined;
 ---
 <article class="library-content" aria-label="Konten kurikulum" data-active-view={view}>
   <header class="library-heading">
