@@ -26,5 +26,5 @@ test('sidebar keeps the active module first and hides secondary navigation by de
 test('accessible lesson heading is retained without visual duplication', () => {
   const css = read('src/styles/library.css');
   assert.match(css, /\[data-lesson-stage="understand"\]/);
-  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /prefers-reduced-motion:\\s*reduce/);
 });
