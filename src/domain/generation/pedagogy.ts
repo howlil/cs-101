@@ -100,7 +100,7 @@ export function validatePedagogySpec(
   const criterionIds = new Set(contentCriteriaForItem(unit).map((criterion) => criterion.id));
   const covered = new Set<string>();
   for (const segment of spec.segments) {
-    if (spec.version === 3) {
+    if ('firstAction' in segment) {
       // Every V3 segment must specify a low-friction start and a distinct
       // next action. Human review still determines whether these are useful.
       if (segment.firstAction.toLocaleLowerCase() === segment.continueFromHere.nextAction.toLocaleLowerCase()) {
