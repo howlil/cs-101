@@ -66,6 +66,12 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/catalog-database.html
           grep -q 'SQL Workbench' /tmp/catalog-database.html
           grep -q 'Outline kurikulum' /tmp/catalog-database.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001&view=soal' > /tmp/catalog-soal.html
+          grep -q 'Soal dan pembahasan belum diterbitkan' /tmp/catalog-soal.html
+          if grep -q 'Outline konsep yang akan dibahas' /tmp/catalog-soal.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001&view=project' > /tmp/catalog-project.html
+          grep -q 'Project ini adalah ide dari workbook' /tmp/catalog-project.html
+          if grep -q 'Soal dan pembahasan belum diterbitkan' /tmp/catalog-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/catalog-networking.html
