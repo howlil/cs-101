@@ -1,0 +1,79 @@
+---
+import type { LearningSegmentV3 } from '../../domain/generation/pedagogy';
+import GuidedPractice from './GuidedPractice';
+import WorkedExample from './WorkedExample.astro';
+import styles from './learning-segments.module.css';
+
+interface Props {
+  stage: 'understand' | 'practice' | 'evidence';
+  segments: LearningSegmentV3[];
+}
+const { stage, segments } = Astro.props;
+---
+
+<div class={styles.list} data-v3-stage={stage}>
+  {segments.map((segment, index) => (
+    <section
+      class={styles.segment}
+      data-learning-segment={segment.id}
+      data-stage={stage}
+      aria-labelledby={'learning-' + stage + '-' + segment.id}
+    >
+      <p class={styles.kicker}>Konsep {index + 1} / {segments.length}</p>
+      <h3 id={'learning-' + stage + '-' + segment.id}>{segment.objective}</h3>
+      {stage === 'understand' && (
+        <>
+          <p class={styles.why}>{segment.whyItMatters}</p>
+          <div class={styles.firstStep}>
+            <strong>Mulai dari sini</strong>
+            <p>{segment.firstAction}</p>
+          </div>
+          <h4>Intuisi utama</h4>
+          <p>{segment.mentalModel}</p>
+          <p>{segment.explanation}</p>
+          <WorkedExample
+            title="Contoh bertahap"
+            problem={segment.workedExample.problem}
+            steps={segment.workedExample.steps}
+          />
+        </>
+      )}
+      {stage === 'practice' && (
+        <>
+          <GuidedPractice
+            client:load
+            title="Coba prediksi atau perbaiki"
+            prompt={segment.guidedPractice.prompt}
+            hints={segment.guidedPractice.hints}
+            explanation={segment.guidedPractice.explanation}
+            starterCode={segment.guidedPractice.starterCode}
+          />
+          <div class={styles.repair}>
+            <h4>Kalau jawabanmu berbeda</h4>
+            <p><strong>Kesalahan yang mungkin:</strong> {segment.misconceptionRepair.likelyMistake}</p>
+            <p><strong>Mengapa tidak bekerja:</strong> {segment.misconceptionRepair.whyItFails}</p>
+            <p><strong>Coba perbaiki:</strong> {segment.misconceptionRepair.correctiveAction}</p>
+          </div>
+          <div class={styles.selfCheck}>
+            <h4>Periksa hasil sendiri</h4>
+            <p><strong>Hasil yang diharapkan:</strong> {segment.selfCheck.expectedObservation}</p>
+            <p><strong>Kalau berbeda:</strong> {segment.selfCheck.ifUnexpected}</p>
+          </div>
+        </>
+      )}
+      {stage === 'evidence' && (
+        <>
+          <p>{segment.independentChallenge.prompt}</p>
+          <p class={styles.note}><strong>Kasus yang berbeda dari contoh:</strong> {segment.independentChallenge.variationFromExample}</p>
+          <h4>Bukti yang bisa kamu periksa</h4>
+          <ul>{segment.independentChallenge.expectedEvidence.map((expected) => <li>{expected}</li>)}</ul>
+          <div class={styles.continue}>
+            <h4>Jika ingin lanjut</h4>
+            <p>{segment.continueFromHere.nextAction}</p>
+            <p class={styles.note}><strong>Jika terputus:</strong> {segment.continueFromHere.resumeCue}</p>
+          </div>
+        </>
+      )}
+    </section>
+  ))}
+</div>
