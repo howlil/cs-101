@@ -31,7 +31,9 @@
     "validate:architecture": "tsx scripts/validate-architecture.ts",
     "validate:pedagogy": "tsx scripts/validate-pedagogy.ts",
     "validate:examples": "tsx scripts/validate-examples.ts",
-    "test:golden": "tsx tests/golden/run.ts"
+    "test:golden": "tsx tests/golden/run.ts",
+    "curriculum:import-eight": "tsx scripts/import-eight-domains.ts",
+    "curriculum:verify-import": "tsx scripts/import-eight-domains.ts --check"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",
