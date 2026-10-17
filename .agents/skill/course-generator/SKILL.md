@@ -40,26 +40,32 @@ Read `generation/staging/<ID>/context.json` from `generation:prepare`. This boun
 
 Inspect the curated source first, then 1–5 authoritative sources specific to the declared scope. Prefer primary documentation and standards. Record direct URLs in `source-pack.json`. Unsupported claims must be resolved or omitted before validating.
 
-### Pedagogical scaffolding (mandatory for newly generated units)
+### Pedagogical scaffolding V3 (mandatory for new lessons)
 
-The current manifest item ID remains stable. Split broad scopes into short *learning segments inside the same unit*, not new curriculum item IDs. Avoid fixed 5-minute caps or compulsory completion, reflection, uploads, learner tracking, or timers. Each segment must have exactly one actionable objective and provide:
+Keep stable curriculum unit IDs and preserve all acceptance criteria. Split broad scopes into one-objective learning segments inside each unit. Do not create mandatory sessions, timers, reflection forms, streaks, or a learner database.
 
-1. A concrete reason/context from the project's engineering problem.
-2. A mental model and mechanism in plain language, followed by correct technical detail.
-3. A worked example: each step includes an action, why it works, and observable result.
-4. A guided practice prompt with 2–3 hints disclosed on demand, plus a separate explanation.
-5. An independent transfer challenge mapped to original acceptance criteria.
+Every V3 segment must contain:
 
-Write optional \`pedagogy\` metadata in the new lesson-spec using \`pedagogySpecSchema\` (version 2). New authored units **must** include it; older staged specs without it remain readable for backwards compatibility while being migrated. Each original criterion and the challenge must be covered by at least one segment's independent challenge. Where a direct \`contributes_to\` edge exists, add a \`projectBridge\` with a real checkpoint and actual requirement IDs; do not invent a bridge from the nearest module checkpoint.
+1. **Why:** one real-world engineering problem and why the objective matters.
+2. **Start:** one small, concrete `firstAction` achievable without planning ceremony.
+3. **Understand:** an accurate mental model, mechanism, and worked example with action, reason, and observable result.
+4. **Try:** guided practice with 2-3 progressively specific optional hints and a separate explanation.
+5. **Recover:** `misconceptionRepair` specifying the likely error, causal explanation, and corrective action.
+6. **Self-check:** an expected observation and what to inspect if the result differs.
+7. **Prove:** an independent transfer challenge on a *different* case, mapped to canonical criterion IDs.
+8. **Continue:** a next action and a `resumeCue` to restart after interruption without saving progress.
 
-Keep the presentation reading-first. Reuse \`WorkedExample\`, \`GuidedPractice\`, and \`ProjectContribution\` when they improve the content; do not add separate routes, required interactions, completion gates or persisted state. Favor predictive reasoning, debugging and runnable examples over multiple-choice trivia. A knowledge check is formative, not a clinical ADHD test.
+New authored lesson specs **must** set `pedagogy.version: 3` and satisfy `pedagogySpecV3Schema`. V2 remains readable for earlier published lessons only. Every original criterion and challenge must be covered. A `projectBridge` may only reference a real checkpoint and requirements connected by an explicit `contributes_to` relation.
 
+**Authoring quality gate:** verify that the first step is genuinely approachable, the explanation is correct, hints gradually reveal information, the transfer problem differs meaningfully, and the recovery hint helps rather than scolds. Structural validation is not proof of learning effectiveness. Do not conflate ADHD with low ability or a prescribed learning style.
+
+Render one coherent **Why → Understand → Try → Prove → Connect** cycle per meaningful objective, even when the unit has multiple segments. The MDX template is an authoring scaffold; full automated segment-to-MDX rendering checks are a later milestone.
 ### Lesson specification
 
 Create `lesson-spec.json` before prose, including:
-- immediate learning payoff, predictive mental model, and dependency/causal graph;
+- immediate payoff, first action, predictive mental model, and causal graph;
 - mechanisms, invariants, worked examples, and misconceptions;
-- guided implementation and independent practice;
+- guided practice, explicit mistake repair, self-check, independent transfer, and resume cue;
 - every curriculum criterion plus the original challenge in the coverage matrix;
 - exactly five question-bank prompts aligned to criteria, with explanations.
 
@@ -84,7 +90,7 @@ pnpm generation:promote SQL-001
 pnpm ci
 ```
 
-Validation blocks stale fingerprints, unsupported claims, missing source coverage, missing criterion/challenge assessment coverage, malformed MDX/frontmatter, broken prerequisite identities, and invalid question banks. Promotion checks artifact hashes.
+Validation blocks stale fingerprints, unresolved claim declarations, invalid V3 shape, missing criterion/source mapping, malformed frontmatter, broken prerequisite references, and invalid question banks. Promotion checks artifact hashes. Actual source accuracy, executable code correctness, and teaching quality still require human/technical review.
 
 Outputs retain compatibility paths:
 - `src/content/lessons/<ID>.mdx` — material, quiz, manual challenge;
