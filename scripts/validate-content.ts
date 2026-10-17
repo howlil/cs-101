@@ -8,6 +8,7 @@ import { generationRecordSchema } from '../src/domain/generation/schema';
 import { checkPublishedV3Files } from '../src/domain/generation/verification';
 import { validatePedagogySpec } from '../src/domain/generation/pedagogy';
 import { reviewBankSchema } from '../src/domain/review/schema';
+import { assertFocusedLessonLayout } from '../src/domain/generation/focused-lesson-layout';
 
 const graph = buildCurriculumGraph(manifestSource);
 
@@ -32,6 +33,7 @@ for (const file of readdirSync('src/content/lessons', { recursive: true, withFil
   if (item.kind !== 'unit') throw new Error(`Lesson MDX hanya untuk unit: ${item.id}`);
   if (found.has(item.id)) throw new Error(`Lesson duplikat: ${item.id}`);
   found.add(item.id);
+  assertFocusedLessonLayout(content, item.id);
 
   if (data.curriculumFingerprint !== item.fingerprint) {
     throw new Error(`Lesson stale: ${item.id}`);
