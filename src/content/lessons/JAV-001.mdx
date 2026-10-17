@@ -14,6 +14,9 @@ import Challenge from '../../components/lesson/Challenge.astro';
 import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
 import Reveal from '../../components/lesson/Reveal.astro';
+import WorkedExample from '../../components/lesson/WorkedExample.astro';
+import GuidedPractice from '../../components/lesson/GuidedPractice';
+import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
 
 <LessonStage stage="understand">
 
@@ -28,6 +31,16 @@ import Reveal from '../../components/lesson/Reveal.astro';
 - menjelaskan efek `null` pada reference;
 - memakai record sebagai data carrier sederhana dan memahami equality-nya;
 - menghasilkan CLI dengan output deterministik untuk input yang sama.
+
+## Rute kecil sebelum challenge
+
+Pelajari satu tujuan pada satu waktu. Urutan ini adalah panduan, bukan gate atau timer wajib:
+
+1. Jalankan program dari terminal (source → compiler → JVM).
+2. Bedakan Maven test dan package.
+3. Prediksi primitive dan reference.
+4. Periksa String equality, null, dan record.
+5. Bangun CLI dengan output deterministik.
 
 <MentalModel title="Toolchain dan language model adalah satu rantai">
 Source code hanya berguna kalau build contract-nya reproducible. Maven membawa source melewati lifecycle sampai artifact; JVM menjalankan artifact itu. Di dalam program, variable menyimpan **primitive value** atau **reference value**. Prediksi behavior dari dua lapisan ini: apa yang build tool kerjakan, lalu nilai/reference apa yang program operasikan.
@@ -205,6 +218,18 @@ stdout
 
 Pisahkan diagnostics ke `stderr` bila perlu agar output data tetap punya contract yang jelas.
 
+## Contoh bertahap: identitas vs isi object
+
+<WorkedExample
+  title="Dua String, nilai sama, object berbeda"
+  problem="Prediksi hasil perbandingan sebelum menjalankan program."
+  steps={[
+    { action: 'Buat dua object dengan new String("paid")', reason: 'Pemanggilan new menciptakan object terpisah.', expectedResult: 'a dan b menunjuk object berbeda.' },
+    { action: 'Evaluasi a == b', reason: 'Operator == pada reference membandingkan identitas object.', expectedResult: 'false' },
+    { action: 'Evaluasi a.equals(b)', reason: 'String.equals membandingkan urutan karakter.', expectedResult: 'true' }
+  ]}
+/>
+
 ## Prediksi sebelum menjalankan
 
 Tulis jawaban sebelum mengeksekusi:
@@ -241,6 +266,18 @@ System.out.println(new Id("1").equals(new Id("1")));
 
 <LessonStage stage="practice">
 
+<GuidedPractice
+  client:load
+  title="Coba prediksi sebelum melihat pembahasan"
+  prompt="Dua String dibuat dengan new String(\"paid\"). Mengapa a == b menghasilkan false walaupun tulisannya sama?"
+  starterCode={'String a = new String("paid");\nString b = new String("paid");\nSystem.out.println(a == b);'}
+  hints={[
+    'Cari perbedaan antara object identity dan value equality.',
+    'Setiap new String membuat object baru. Operator == membandingkan reference, bukan karakter.'
+  ]}
+  explanation="a == b bernilai false karena referensi object berbeda. Gunakan a.equals(b) untuk membandingkan konten String."
+/>
+
 <Quiz items={[
   { question: 'Kalau tujuanmu menghasilkan JAR, Maven phase utama yang sesuai adalah?', options: ['compile', 'test', 'package'], answer: 2, explanation: 'Phase package menjalankan phase sebelumnya yang diperlukan lalu membuat artifact distributable seperti JAR.' },
   { question: 'Dua String object berbeda berisi "paid". Operator/method mana yang menyatakan content equality?', options: ['==', 'equals', '='], answer: 1, explanation: '== membandingkan reference identity pada object; String.equals membandingkan content.' },
@@ -272,6 +309,16 @@ System.out.println(new Id("1").equals(new Id("1")));
   'Same input produces byte-identical program output across 3 repeated runs',
   'Build and run require no IDE-specific configuration'
 ]} />
+
+<ProjectContribution
+  checkpointId="JAV-P01"
+  contribution="Build yang reproducible dan output deterministik menjadi fondasi replay serta pengujian ledger pada Adversarial Ledger Kernel. Materi ini belum membangun seluruh ledger."
+  verification={[
+    'Clean checkout dapat menjalankan Maven test/package tanpa IDE.',
+    'Input CLI identik menghasilkan output byte-identical tiga kali.',
+    'Contoh bahasa yang diprediksi sebelum eksekusi dinyatakan sebagai tests.'
+  ]}
+/>
 
 ## Bukti yang perlu disimpan
 
