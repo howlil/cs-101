@@ -13,7 +13,7 @@ const exampleStepSchema = z.object({
   reason: detail,
   expectedResult: detail,
 });
-export const learningSegmentSchema = z.object({
+const baseSegmentSchema = z.object({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   objective: detail,
   whyItMatters: detail,
@@ -44,7 +44,7 @@ const projectBridgeSchema = z.object({
 });
 
 /** Single supported pedagogy contract. All published lessons use V3. */
-export const learningSegmentV3Schema = learningSegmentSchema.extend({
+export const learningSegmentV3Schema = baseSegmentSchema.extend({
   firstAction: detail,
   misconceptionRepair: z.object({
     likelyMistake: detail,
@@ -55,7 +55,7 @@ export const learningSegmentV3Schema = learningSegmentSchema.extend({
     expectedObservation: detail,
     ifUnexpected: detail,
   }),
-  independentChallenge: learningSegmentSchema.shape.independentChallenge.extend({
+  independentChallenge: baseSegmentSchema.shape.independentChallenge.extend({
     variationFromExample: detail,
   }),
   continueFromHere: z.object({
