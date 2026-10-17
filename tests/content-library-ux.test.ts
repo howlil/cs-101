@@ -14,7 +14,7 @@ test('published status is derived from reviewed authored lessons, not the manife
   assert.match(layout, /item\.kind === 'unit' && published\.has\(item\.id\)/);
   assert.match(explorer, /item\.kind === 'unit' && item\.published/);
   assert.match(explorer, /Materi lengkap tersedia/);
-  assert.ok(source.items.filter((item) => item.kind === 'unit').length > 6);
+  assert.deepEqual(source.items, []);
 });
 
 test('navigation anchors match item-specific content without duplicate checkpoint project', () => {
