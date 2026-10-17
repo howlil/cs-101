@@ -31,9 +31,10 @@ const { sourcePack, lessonSpec } = validateGenerationPlan(
   JSON.parse(readFileSync(specPath, 'utf8')),
 );
 
-// Legacy published units remain valid; all new authoring must use the v2 scaffold.
-if (!lessonSpec.pedagogy && !existsSync(resolve('generation', itemId + '.json'))) {
-  throw new Error('Materi baru wajib memiliki pedagogy version 2 (segments + guided practice).');
+// Older authored units remain readable; every NEW lesson must use V3.
+const previouslyPublished = existsSync(resolve('generation', itemId + '.json'));
+if (!previouslyPublished && lessonSpec.pedagogy?.version !== 3) {
+  throw new Error('Materi baru wajib memiliki Pedagogy V3 (first action, self-check, feedback, continuation).');
 }
 
 const lesson = readFileSync(lessonPath, 'utf8');
@@ -60,7 +61,7 @@ if (data.curriculumFingerprint !== item.fingerprint) {
 if (lessonSpec.pedagogy) {
   for (const component of ['WorkedExample', 'GuidedPractice']) {
     if (!lesson.includes('<' + component)) {
-      throw new Error('Pedagogy v2 belum dirender di MDX: ' + component);
+      throw new Error('Pedagogy belum dirender di MDX: ' + component);
     }
   }
   if (lessonSpec.pedagogy.projectBridge && !lesson.includes('<ProjectContribution')) {
