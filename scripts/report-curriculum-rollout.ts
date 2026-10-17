@@ -6,7 +6,7 @@ const parsed=parseManifestV2(manifest);
 const published=new Set(existsSync('src/content/lessons') ? readdirSync('src/content/lessons').filter(n=>n.endsWith('.mdx')).map(n=>n.slice(0,-4)) : []);
 const tracks=parsed.tracks.map(track=>{
   const units=parsed.items.filter(item=>item.kind==='unit' && item.trackId===track.id);
-  const rank=(item:typeof units[number])=>item.marketExpectation[0]?.slice(0,2)??'unknown';
+  const rank=(item:typeof units[number])=>item.kind==='unit' ? item.marketExpectation[0]?.slice(0,2)??'unknown' : 'unknown';
   const byPriority=Object.fromEntries(['P0','P1','P2'].map(rankName=>[rankName,units.filter(item=>rank(item)===rankName).length]));
   const released=units.filter(item=>published.has(item.id)).map(item=>item.id);
   return {domain:track.title,trackId:track.id,total:units.length,byPriority,published:released.length,unpublishedP0:units.filter(item=>rank(item)==='P0'&&!published.has(item.id)).map(item=>item.id)};
