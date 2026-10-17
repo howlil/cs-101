@@ -59,9 +59,24 @@ if (data.curriculumFingerprint !== item.fingerprint) {
 }
 
 if (lessonSpec.pedagogy) {
-  for (const component of ['WorkedExample', 'GuidedPractice']) {
-    if (!lesson.includes('<' + component)) {
-      throw new Error('Pedagogy belum dirender di MDX: ' + component);
+  if (lessonSpec.pedagogy.version === 3) {
+    // M2 checks that every stage consumes one shared V3 segment collection.
+    // Exact content-to-spec parity will be verified by the M3 artifact gate.
+    if (!lesson.includes('export const lessonSegments =')) {
+      throw new Error('V3 lesson harus mengekspor lessonSegments yang sama untuk seluruh stage.');
+    }
+    for (const stage of ['understand', 'practice', 'evidence']) {
+      const binding = '<LearningSegments stage="' + stage + '" segments={lessonSegments} />';
+      if (!lesson.includes(binding)) {
+        throw new Error('V3 lesson tidak memakai shared segment renderer pada stage: ' + stage);
+      }
+    }
+  } else {
+    // Preserve V2 authored lesson rendering for backward compatibility.
+    for (const component of ['WorkedExample', 'GuidedPractice']) {
+      if (!lesson.includes('<' + component)) {
+        throw new Error('Pedagogy V2 belum dirender di MDX: ' + component);
+      }
     }
   }
   if (lessonSpec.pedagogy.projectBridge && !lesson.includes('<ProjectContribution')) {
@@ -127,6 +142,7 @@ writeFileSync(
       'prerequisite-links',
       'source-links',
       ...(lessonSpec.pedagogy ? ['pedagogical-scaffolding', 'verified-project-bridge'] : []),
+      ...(lessonSpec.pedagogy?.version === 3 ? ['v3-shared-segment-stages'] : []),
     ],
   }, null, 2) + '\n',
 );
