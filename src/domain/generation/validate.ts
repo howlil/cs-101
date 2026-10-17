@@ -23,7 +23,7 @@ export function validateGenerationPlan(
 
   const sourcePack = sourcePackSchema.parse(sourcePackInput);
   const lessonSpec = lessonSpecSchema.parse(lessonSpecInput);
-  if (lessonSpec.pedagogy) validatePedagogySpec(graph, itemId, lessonSpec.pedagogy);
+  validatePedagogySpec(graph, itemId, lessonSpec.pedagogy);
 
   if (sourcePack.itemId !== item.id || lessonSpec.itemId !== item.id) {
     throw new Error('Generation artifact menunjuk item yang berbeda.');
@@ -47,7 +47,7 @@ export function validateGenerationPlan(
     }
   }
 
-  verifySourceClaims(sourcePack, lessonSpec.concepts, lessonSpec.pedagogy?.version === 3);
+  verifySourceClaims(sourcePack, lessonSpec.concepts);
 
   const expectedCriteria = contentCriteriaForItem(item);
   const coverageIds = new Set(lessonSpec.coverage.map((entry) => entry.criterionId));
