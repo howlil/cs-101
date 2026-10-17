@@ -7,11 +7,14 @@ import { libraryHref, selectLibraryItem } from '../src/domain/content-library';
 
 const graph = buildCurriculumGraph(source);
 
-test('empty curriculum resolves all old item URLs to the empty page', () => {
-  const a=selectLibraryItem(graph,'db-sql',null);
-  const b=selectLibraryItem(graph,'java','JAV-001');
+test('8-domain curriculum resolves direct item links and falls back to a real topic', () => {
+  const a=selectLibraryItem(graph,'database',null);
+  const b=selectLibraryItem(graph,'java','JAV-009');
   const c=selectLibraryItem(graph,'missing','missing');
-  for(const result of [a,b,c]) assert.deepEqual(result,{trackId:'',item:undefined});
+  assert.equal(a.item?.id,'SQL-001');
+  assert.equal(b.item?.id,'JAV-009');
+  assert.equal(c.item?.id,'JAV-001');
+  assert.equal(c.trackId,'java');
 });
 test('link generator stays compatible with future lesson and project IDs',()=>{
   assert.equal(libraryHref('SQL-001'),'/?item=SQL-001');
