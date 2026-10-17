@@ -1,0 +1,131 @@
+---
+taskId: "JAV-009"
+title: "Equality, hashCode, dan deteksi pembayaran duplikat"
+description: "Buktikan mengapa dua objek Java yang berbeda dapat mewakili pembayaran yang sama, kemudian gunakan HashSet dengan aman."
+demo: false
+curriculumFingerprint: "__GOLDEN_FINGERPRINT__"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
+import pedagogyRecord from '../../../generation/pedagogy/JAV-009.json';
+import questionBank from '../../../review-banks/JAV-009.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Tujuan:** satu pembayaran yang dikirim ulang tidak boleh diproses sebagai pembayaran baru.
+
+**Mulai sekarang:** tanpa menulis kode, prediksi jawaban untuk dua objek yang dibuat terpisah tetapi punya `reference` dan `merchantId` yang sama. Apakah `first == replay` bernilai `true`?
+
+## Setelah materi ini, kamu bisa
+
+- Menjelaskan perbedaan identitas objek (`==`) dan kesetaraan nilai (`.equals()`).
+- Memeriksa kontrak `equals` dan `hashCode` untuk value object.
+- Menguji deduplikasi dengan `HashSet.add`, serta menolak input ID kosong tanpa mengubah nol di depan.
+
+<MentalModel title="Mental model: identitas vs nilai">
+
+`==` bertanya apakah dua referensi menunjuk objek yang sama. `equals` bertanya apakah keduanya dinilai setara menurut kontrak kelasnya. Untuk koleksi berbasis hash, objek yang setara **harus** mempunyai hash code sama. Hash yang sama saja tidak membuktikan dua objek setara.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+Input mentah (reference, merchantId)
+                 |
+        Validasi ID non-kosong
+                 |
+        PaymentKey (value object)
+            /           \
+     equals()         hashCode()
+            \           /
+             Set<PaymentKey>
+                |
+    add() = true  -> pembayaran baru
+    add() = false -> duplikat / replay
+```
+
+</ConceptGraph>
+
+## Sebelum mencoba
+
+Sudah mengenal constructor atau record Java, `String`, serta `Set` dasar. Tidak diperlukan login, timer, atau progress form. Semua langkah dapat diulang kapan saja.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Coba prediksi dahulu, baru jalankan
+
+Buat file `DuplicatePaymentChecker.java` dari contoh fixture, lalu jalankan dengan Java 21:
+
+```bash
+java DuplicatePaymentChecker.java
+```
+
+Tebak lebih dulu keluaran tiga baris `same-object`, `equal-value`, dan `replay-accepted`. Setelah menjalankan, cocokkan dengan hasil yang diharapkan dalam segmen di bawah.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Cek pemahaman
+
+Pilih jawaban dan periksa alasannya. Jawaban boleh diubah kapan saja dan tidak disimpan.
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Terapkan pada kasus baru
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+  title="Duplicate Payment Checker"
+  brief="Buat pengecek replay berbasis value object dan HashSet; pastikan reference '00041' tetap string, kunci lintas merchant berbeda, dan ID kosong ditolak. Implementasi solusi tetap dikerjakan mandiri."
+  acceptanceCriteria={[
+    'Objek dengan reference dan merchant sama dianggap setara meski instansinya berbeda.',
+    'Objek setara mempunyai hash code sama, dan hanya satu kunci duplikat yang disimpan.',
+    'Reference sama pada dua merchant berbeda tidak dianggap duplikat.',
+    'Reference dengan leading zero tidak dikonversi ke angka; ID kosong ditolak.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Bisa menjelaskan mengapa == bernilai false tetapi equals dapat true.',
+  'Memprediksi output HashSet.add untuk replay dan membuktikannya lewat Java.',
+  'Menunjukkan satu test input tidak valid dan satu variasi merchant.'
+]} />
+
+<ProjectContribution
+  checkpointId="JAV-P01"
+  contribution="Kunci pembayaran yang konsisten adalah prasyarat deteksi replay pada payment-lab. Gunakan kembali konsep ini sebagai bagian checkpoint Duplicate Payment Checker."
+  verification={[
+    'Dua request yang mewakili pembayaran yang sama menghasilkan satu kunci dalam Set.',
+    'Identitas merchant menjadi bagian value object sehingga replay lintas merchant tidak keliru terdeteksi.',
+    'Input reference kosong ditolak sebelum memasuki Set.'
+  ]}
+/>
+
+## Sumber teknis
+
+<SourceList sources={[
+  {title: 'Java SE 21 — Object.equals dan Object.hashCode contract', url: 'https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html'},
+  {title: 'Java SE 21 — HashSet.add dan contains', url: 'https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashSet.html'},
+  {title: 'Java SE 21 — record equality dan hashCode', url: 'https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html'}
+]} />
+
+</LessonStage>
