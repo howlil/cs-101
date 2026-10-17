@@ -18,7 +18,7 @@ test('M5 deterministic source import',()=>{
 test('Source outlines do not fabricate ungrounded hard prerequisites',()=>{
   assert.deepEqual(manifest.relations,[]);
   assert.equal(manifest.items.filter(x=>x.kind==='checkpoint').length,0);
-  for(const item of manifest.items){
+  for(const item of parseManifestV2(manifest).items){
     if(item.kind!=='unit')throw new Error('Only source-grounded units should be imported.');
     assert.equal(item.prerequisites.length,0);
     assert.ok(item.source.url?.startsWith('https://'));
