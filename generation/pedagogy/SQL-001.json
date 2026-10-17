@@ -1,0 +1,228 @@
+{
+  "unitId": "SQL-001",
+  "curriculumFingerprint": "sha256:b1b18a1cd01a9bc0db3adef707acaf05afc4291aedf96d250a9126ca08e5bf67",
+  "pedagogy": {
+    "version": 2,
+    "segments": [
+      {
+        "id": "relations-and-bags",
+        "objective": "Bedakan relasi matematika, SQL rows, dan duplikat",
+        "whyItMatters": "Recon reports dapat menghitung berlebihan bila duplikat tidak dipahami",
+        "mentalModel": "SQL SELECT biasa menggunakan bag semantics: duplicate rows mungkin muncul",
+        "explanation": "Primary key menjaga keunikan identitas tabel; SELECT kolom non-unik tetap bisa memunculkan nilai berulang.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "SELECT status dari dua pembayaran PAID",
+          "steps": [
+            {
+              "action": "Masukkan dua row berstatus PAID dengan id berbeda",
+              "reason": "Primary key unik tidak membuat status unik",
+              "expectedResult": "Dua row legal"
+            },
+            {
+              "action": "SELECT status tanpa DISTINCT",
+              "reason": "Projection tidak otomatis dedup",
+              "expectedResult": "Dua nilai PAID muncul"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "SELECT status dari dua row PAID: tanpa DISTINCT hasilnya berapa baris?",
+          "hints": [
+            "Pisahkan primary key pada tabel dari kolom yang di-select",
+            "SQL result tidak otomatis set unik"
+          ],
+          "explanation": "Dua baris PAID muncul kecuali DISTINCT atau operator lain menghilangkan duplikasi."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: SELECT status dari dua row PAID: tanpa DISTINCT hasilnya berapa baris?",
+          "criterionIds": [
+            "criterion-2f0d9333e1"
+          ],
+          "expectedEvidence": [
+            "Prediksi duplicate result tercatat sebelum query"
+          ]
+        }
+      },
+      {
+        "id": "null-three-valued-logic",
+        "objective": "Prediksi TRUE, FALSE, UNKNOWN dalam SQL",
+        "whyItMatters": "Filter status transaksi nullable bisa diam-diam membuang row",
+        "mentalModel": "WHERE hanya memilih TRUE; UNKNOWN bukan FALSE",
+        "explanation": "NULL comparisons menghasilkan UNKNOWN kecuali operator null-aware seperti IS NULL atau IS DISTINCT FROM.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "WHERE status <> 'PAID' pada status NULL",
+          "steps": [
+            {
+              "action": "Evaluasi NULL <> 'PAID'",
+              "reason": "Perbandingan dengan NULL biasanya UNKNOWN",
+              "expectedResult": "Hasil UNKNOWN"
+            },
+            {
+              "action": "Terapkan WHERE pada nilai UNKNOWN",
+              "reason": "WHERE hanya menyaring TRUE",
+              "expectedResult": "Row tidak termasuk"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Mengapa NULL tidak lolos WHERE status <> 'PAID'?",
+          "hints": [
+            "Evaluasi predikat per baris menjadi tiga nilai logika",
+            "WHERE membuang FALSE dan UNKNOWN"
+          ],
+          "explanation": "Perbandingan menghasilkan UNKNOWN, yang tidak diterima oleh WHERE."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Mengapa NULL tidak lolos WHERE status <> 'PAID'?",
+          "criterionIds": [
+            "criterion-2f0d9333e1"
+          ],
+          "expectedEvidence": [
+            "Trace 3VL untuk nullable status dan NOT IN benar"
+          ]
+        }
+      },
+      {
+        "id": "types-and-casts",
+        "objective": "Pilih tipe Postgres dengan representasi uang dan waktu tepat",
+        "whyItMatters": "Kesalahan tipe dapat menghilangkan presisi atau mengubah interpretasi waktu",
+        "mentalModel": "Typed columns menetapkan kontrak nilai dan operasi",
+        "explanation": "Gunakan numeric untuk exact decimal bila cocok, integer minor units untuk kebijakan fixed currency, dan timestamptz untuk instant; jelaskan NULL secara eksplisit.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Bedakan numeric dan floating point",
+          "steps": [
+            {
+              "action": "Simpan amount desimal di numeric",
+              "reason": "numeric mendukung exact decimal representation",
+              "expectedResult": "Perhitungan desimal yang sesuai presisi tetap exact"
+            },
+            {
+              "action": "Gunakan timestamptz untuk event instant",
+              "reason": "Moment berbeda dari local wall-clock time",
+              "expectedResult": "Instants bisa dibandingkan lintas zona"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Untuk ledger pembayaran, apa risiko menaruh nilai nominal dalam double precision?",
+          "hints": [
+            "Binary floating point sering tidak merepresentasikan pecahan desimal dengan tepat",
+            "Audit amount butuh representasi exact dan rounding eksplisit"
+          ],
+          "explanation": "Gunakan NUMERIC dengan skala/rounding yang dinyatakan atau integer minor units sesuai kontrak keuangan; jangan berasumsi double exact."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Untuk ledger pembayaran, apa risiko menaruh nilai nominal dalam double precision?",
+          "criterionIds": [
+            "criterion-2f0d9333e1",
+            "criterion-141c1bd6ee"
+          ],
+          "expectedEvidence": [
+            "Schema dan seed psql menggunakan tipe yang masuk akal, tanpa ORM"
+          ]
+        }
+      },
+      {
+        "id": "ordering-and-limit",
+        "objective": "Definisikan total ordering saat memakai LIMIT",
+        "whyItMatters": "Laporan pembayaran harus dapat direproduksi",
+        "mentalModel": "ORDER BY created_at saja bukan total order bila timestamp seri",
+        "explanation": "Gunakan tie-break unik seperti ORDER BY created_at,id; jangan mengklaim subset deterministik tanpa ORDER BY.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Dua transaksi punya created_at sama",
+          "steps": [
+            {
+              "action": "ORDER BY created_at saja",
+              "reason": "Tie timestamp tidak dipecahkan",
+              "expectedResult": "Posisi antar tie tidak dijamin"
+            },
+            {
+              "action": "ORDER BY created_at,id",
+              "reason": "Primary key unik jadi tie-break",
+              "expectedResult": "Total order hasil stabil"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Apa perbedaan ORDER BY created_at LIMIT 2 dan ORDER BY created_at,id LIMIT 2?",
+          "hints": [
+            "Cari timestamp yang sama pada dataset",
+            "Gunakan tie-break ID unik untuk total order"
+          ],
+          "explanation": "Hanya ORDER BY created_at,id memberi urutan total bila id unik, sehingga subset LIMIT dapat ditentukan."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Apa perbedaan ORDER BY created_at LIMIT 2 dan ORDER BY created_at,id LIMIT 2?",
+          "criterionIds": [
+            "criterion-9b52958986"
+          ],
+          "expectedEvidence": [
+            "Query yang menuntut urutan memiliki tie-break yang benar"
+          ]
+        }
+      },
+      {
+        "id": "psql-predict-verify",
+        "objective": "Jalankan 20 prediksi SQL dengan assertion yang gagal bila salah",
+        "whyItMatters": "Belajar SQL memerlukan evidence output, bukan sekadar menjalankan query",
+        "mentalModel": "Prediction → execute → compare against independent expected result → repair",
+        "explanation": "Gunakan psql -v ON_ERROR_STOP=1 dan assert 20 kasus; tetap pertahankan 18/20 first-attempt requirement.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Assertion hasil COUNT pada fixture",
+          "steps": [
+            {
+              "action": "Tulis expected count sebelum SELECT",
+              "reason": "Mencegah menyelaraskan jawaban dengan hasil secara retroaktif",
+              "expectedResult": "Prediction tertanggal sebelum eksekusi"
+            },
+            {
+              "action": "Gunakan assertion yang RAISE EXCEPTION saat mismatch",
+              "reason": "Command exit success saja tidak membuktikan correctness",
+              "expectedResult": "Mismatch menyebabkan psql fail-hard"
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Bagaimana memverifikasi query tanpa menganggap tampilan output sebagai bukti lulus?",
+          "hints": [
+            "Gunakan expectation file atau DO/RAISE EXCEPTION",
+            "Simpan prediksi sebelum run dan gunakan psql ON_ERROR_STOP"
+          ],
+          "explanation": "Pasangkan prediksi awal dengan assertion fail-hard, cek skema dari database bersih, dan perbaiki konsep memakai kasus baru tanpa melonggarkan 18/20."
+        },
+        "independentChallenge": {
+          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Bagaimana memverifikasi query tanpa menganggap tampilan output sebagai bukti lulus?",
+          "criterionIds": [
+            "criterion-2f0d9333e1",
+            "criterion-141c1bd6ee",
+            "criterion-9b52958986",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Minimal 18 dari 20 prediksi sebelum run benar; transcript psql + assertions mendemonstrasikan hasil"
+          ]
+        }
+      }
+    ],
+    "projectBridge": {
+      "checkpointId": "SQL-P01",
+      "requirementIds": [
+        "requirement-bb5b02cc88",
+        "requirement-d49bf9edaa",
+        "requirement-7e4fa143d3",
+        "requirement-5e173e2f7f"
+      ],
+      "contribution": "SQL fundamentals menjadi dasar prediksi, query deterministik, dan assertion yang dapat direproduksi dalam SQL Forensics Pack, sebelum joins dan window functions dipelajari.",
+      "verification": [
+        "Buat schema dan fixture dari psql tanpa ORM",
+        "Simpan prediksi sebelum menjalankan query",
+        "Buktikan hasil query dengan assertion, tanpa mengandalkan ordering yang tidak dijamin"
+      ]
+    }
+  }
+}
