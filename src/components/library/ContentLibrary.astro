@@ -19,10 +19,8 @@ const source = item.source;
 ---
 <article class="library-content" aria-label="Konten kurikulum">
   <header class="library-heading">
-    <p class="library-location">{[trackTitle ?? 'Integrasi', moduleTitle].filter(Boolean).join(' / ')}</p>
-    <p class="library-id">{item.id} · {isCheckpoint ? 'Ide project' : item.kind === 'integration' ? 'Latihan integrasi' : 'Materi'}</p>
+    <p class="library-location">{[trackTitle ?? 'Integrasi', moduleTitle, item.id].filter(Boolean).join(' / ')}</p>
     <h1>{item.title}</h1>
-    {isUnit && <p class="library-description">Materi, latihan soal, dan implementasi praktis dalam satu halaman.</p>}
     {isUnit && !authored && <p class="library-availability" role="status">Materi lengkap dan bank soal untuk topik ini belum diterbitkan. Berikut cakupan dan tantangan dari kurikulum; bukan materi yang sudah digenerate.</p>}
     {stale && <p class="library-availability" role="status">Materi tersedia, tetapi fingerprint-nya tidak cocok dengan kurikulum saat ini. Perlu regenerasi dan review.</p>}
     <nav class="library-jump" aria-label="Bagian konten">

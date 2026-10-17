@@ -25,7 +25,6 @@ const row = (item: typeof graph.manifest.items[number]) => ({
   active: current?.id === item.id,
 });
 const sidebarData: SidebarData = {
-  total: graph.manifest.items.length,
   activeTrackId: selection.trackId,
   selectedModuleId: location?.module?.id,
   tracks: [...graph.manifest.tracks].sort((a, b) => a.order - b.order).map((track) => ({
@@ -70,10 +69,7 @@ const sidebarData: SidebarData = {
   <body transition:animate="none">
     <a class="skip-link" href="#main">Langsung ke konten</a>
     <header class="topbar">
-      <a class="brand" href="/" aria-label="CS-101 · Materi">
-        <span class="brand-mark" aria-hidden="true">CS</span><span>CS-101</span>
-      </a>
-      <div class="topbar-location"><strong>Library</strong><span class="separator" aria-hidden="true">/</span><span class="current-track">{location?.track?.title ?? "Content Library"}</span></div>
+      <div class="topbar-location"><strong>Library</strong></div>
       <AppHeaderActions client:load />
     </header>
     <div class="app-shell">
