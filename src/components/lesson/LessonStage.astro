@@ -1,13 +1,18 @@
 ---
+import { resolveLibraryView, type LibraryView } from '../../domain/content-library';
 interface Props { stage: 'understand' | 'practice' | 'evidence' }
 const { stage } = Astro.props;
-const section = {
-  understand: { id: 'materi', title: 'Materi' },
-  practice: { id: 'latihan', title: 'Latihan soal' },
-  evidence: { id: 'praktik', title: 'Praktik dan verifikasi mandiri' },
-}[stage];
+const section: Record<Props['stage'], { id: string; title: string; view: LibraryView }> = {
+  understand: { id: 'materi', title: 'Materi', view: 'materi' },
+  practice: { id: 'latihan', title: 'Latihan soal', view: 'soal' },
+  evidence: { id: 'praktik', title: 'Praktik dan verifikasi mandiri', view: 'project' },
+};
+const current = resolveLibraryView(Astro.url.searchParams.get('view'), 'unit');
+const selected = section[stage];
 ---
-<section class="library-content-section prose" id={section.id} data-lesson-stage={stage} aria-label={section.title}>
-  <h2>{section.title}</h2>
-  <slot />
-</section>
+{current === selected.view && (
+  <section class="library-content-section prose" id={selected.id} data-lesson-stage={stage} aria-label={selected.title}>
+    <h2>{selected.title}</h2>
+    <slot />
+  </section>
+)}
