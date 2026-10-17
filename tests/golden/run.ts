@@ -1,7 +1,7 @@
 /**
  * M4 Golden Lesson acceptance harness.
  * Clones source files into an isolated temporary workspace; never mutates the
- * repository's intentionally empty published curriculum.
+ * repository's production curriculum source; the pilot fixture is disposable.
  */
 import { strict as assert } from 'node:assert';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -81,8 +81,9 @@ async function assertRenderedHtml() {
 
 let failure: unknown;
 try {
-  assert.equal(JSON.parse(readFileSync(join(repository,'curriculum/manifest.v2.json'),'utf8')).items.length, 0,
-    'Golden pilot must not run against a populated production manifest.');
+  // The real workbook has 370 source-grounded outlines; the golden fixture
+  // temporarily replaces those ONLY inside the copied test workspace.
+  parseManifestV2(JSON.parse(readFileSync(join(repository,'curriculum/manifest.v2.json'),'utf8')));
 
   // Copy a clean source tree, excluding non-source dependencies/build output.
   const skip = new Set(['node_modules','.git','.astro','dist','.wrangler','.data','coverage']);
