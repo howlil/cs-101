@@ -74,7 +74,7 @@ test('one lessonSegments collection is used for each of understand, practice and
     assert.ok(template.includes('<LearningSegments stage="' + stage + '" segments={lessonSegments} />'));
   }
   assert.match(artifactVerifier, /V3 lesson tidak memakai shared segment renderer/);
-  assert.match(validator, /pedagogy\.version === 3/);
+  assert.match(validator, /assertV3LessonBindings\(lesson, item\.id\)/);
 });
 
 test('hint disclosure and quiz feedback stay optional, keyboard-accessible and ephemeral', () => {
