@@ -35,7 +35,7 @@
           "explanation": "javac mengompilasi source, java menjalankan kelas melalui JVM."
         },
         "independentChallenge": {
-          "prompt": "Selesaikan tanpa melihat pembahasan: Command apa yang menghasilkan bytecode dan command apa yang menjalankannya?",
+          "prompt": "Di repository baru tanpa IDE, jalankan App.java dari terminal dan tampilkan hasilnya; catat perintah dan artefak class yang dibentuk.",
           "criterionIds": [
             "criterion-52c56d6391"
           ],
@@ -75,7 +75,7 @@
           "explanation": "Ulangi `mvn test` dan `mvn package` dari clean checkout serta periksa bahwa executable JAR selalu terbentuk."
         },
         "independentChallenge": {
-          "prompt": "Selesaikan tanpa melihat pembahasan: Bagaimana membuktikan Maven build benar-benar reproducible?",
+          "prompt": "Clone Maven project ke direktori kosong dan buktikan 5 kali test/package berhasil serta executable artifact dapat dijalankan.",
           "criterionIds": [
             "criterion-5a2766d788",
             "criterion-52c56d6391"
@@ -116,7 +116,7 @@
           "explanation": "Nilai a tetap 3 karena penambahan b tidak memodifikasi a."
         },
         "independentChallenge": {
-          "prompt": "Selesaikan tanpa melihat pembahasan: Setelah `int a=3; int b=a; b++;`, berapa nilai a?",
+          "prompt": "Buat program baru yang mengubah primitive dan memutasi object melalui dua alias; prediksi kedua output sebelum execute.",
           "criterionIds": [
             "criterion-17cb87ed20"
           ],
@@ -156,7 +156,7 @@
           "explanation": "Hasil false karena keduanya object berbeda; untuk isi String gunakan equals."
         },
         "independentChallenge": {
-          "prompt": "Selesaikan tanpa melihat pembahasan: Apa hasil `new String(\"x\")==new String(\"x\")` dan alasannya?",
+          "prompt": "Tulis 12 prediction tests baru untuk String, null, record, primitive dan reference; bandingkan prediksi dengan eksekusi sebelum menilai minimal 11/12.",
           "criterionIds": [
             "criterion-17cb87ed20"
           ],
@@ -196,7 +196,7 @@
           "explanation": "Timestamp, random tanpa seed, urutan iterasi tanpa jaminan, dan locale dapat mengubah hasil. Stabilkan semuanya atau hilangkan."
         },
         "independentChallenge": {
-          "prompt": "Selesaikan tanpa melihat pembahasan: Kenapa output bisa berbeda walau input identik?",
+          "prompt": "Bangun CLI ledger kecil yang menerima fixture transaksi berbeda dari worked example; buktikan tiga eksekusi input identik menghasilkan byte-identical stdout.",
           "criterionIds": [
             "criterion-86c471c16a",
             "challenge"
