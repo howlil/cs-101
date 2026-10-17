@@ -33,7 +33,8 @@
     "validate:examples": "tsx scripts/validate-examples.ts",
     "test:golden": "tsx tests/golden/run.ts",
     "curriculum:import-eight": "tsx scripts/import-eight-domains.ts",
-    "curriculum:verify-import": "tsx scripts/import-eight-domains.ts --check"
+    "curriculum:verify-import": "tsx scripts/import-eight-domains.ts --check",
+    "curriculum:status": "tsx scripts/report-curriculum-rollout.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.3",
