@@ -62,6 +62,11 @@ export function validatePedagogySpec(
   const criterionIds = new Set(contentCriteriaForItem(unit).map((criterion) => criterion.id));
   const covered = new Set<string>();
   for (const segment of spec.segments) {
+    const guided = segment.guidedPractice.prompt.toLocaleLowerCase().replace(/\\s+/g, ' ').trim();
+    const independent = segment.independentChallenge.prompt.toLocaleLowerCase().replace(/\\s+/g, ' ').trim();
+    if (guided === independent || independent.includes(guided)) {
+      throw new Error('Independent challenge harus berbeda dari guided practice: ' + unitId + '/' + segment.id);
+    }
     for (const id of segment.independentChallenge.criterionIds) {
       if (!criterionIds.has(id)) throw new Error('Criterion segment tidak dikenal: ' + id);
       covered.add(id);
