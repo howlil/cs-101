@@ -85,6 +85,15 @@ export function assertFocusedLessonLayout(source: string, itemId: string): void 
   requireExactlyOnce(sections, 'Challenge', 'evidence');
   requireExactlyOnce(sections, 'ExitCriteria', 'evidence');
 
+  // A legacy Pedagogy V2 lesson renders these directly instead of through
+  // LearningSegments. Keep both the old data contract and strict focus rules.
+  if (occurrences(mdx, 'WorkedExample') > 0) {
+    requireExactlyOnce(sections, 'WorkedExample', 'understand');
+  }
+  if (occurrences(mdx, 'GuidedPractice') > 0) {
+    requireExactlyOnce(sections, 'GuidedPractice', 'practice');
+  }
+
   // Optional bridge remains project-owned when present.
   if (occurrences(mdx, 'ProjectContribution') > 0) {
     requireExactlyOnce(sections, 'ProjectContribution', 'evidence');
