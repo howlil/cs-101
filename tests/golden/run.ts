@@ -47,7 +47,7 @@ async function assertRenderedHtml() {
   let server: ChildProcess | undefined;
   let output = '';
   try {
-    server = spawn(pnpm, ['start'], {
+    server = spawn(process.execPath, ['scripts/start.mjs'], {
       cwd: work, shell: false,
       env: {...process.env, PORT: String(port), HOST: '127.0.0.1'},
       stdio: ['ignore', 'pipe', 'pipe'],
