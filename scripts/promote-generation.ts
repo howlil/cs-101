@@ -1,7 +1,9 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { parse } from 'yaml';
+import { executablePlanSchema } from '../src/domain/generation/executable-schema';
+import { executeExamples } from './lib/executable-proof';
 
 import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
@@ -33,6 +35,11 @@ const validation = JSON.parse(readFileSync(report, 'utf8')) as {
     lessonSpec?: string;
     generationRecord?: string;
     reviewBank?: string;
+    pedagogy?: string;
+    sourcePack?: string;
+    exampleProof?: string;
+    examplePlan?: string;
+    verifiedReceipt?: string;
   };
 };
 if (
@@ -67,6 +74,33 @@ if (data.curriculumFingerprint !== item.fingerprint) {
   throw new Error('Lesson berubah setelah validation.');
 }
 
+const isV3 = !!hashes.verifiedReceipt;
+if (isV3) {
+  const derived = resolve(staging, 'derived');
+  const planPath = resolve(staging, 'executable-examples.json');
+  const required = {
+    pedagogy: resolve(derived, 'pedagogy-record.json'),
+    sourcePack: resolve(derived, 'source-pack.json'),
+    exampleProof: resolve(derived, 'example-proof.json'),
+    examplePlan: planPath,
+    verifiedReceipt: resolve(derived, 'verified-receipt.json'),
+  } as const;
+  for (const [kind, path] of Object.entries(required) as [keyof typeof required, string][]) {
+    if (!existsSync(path) || hashes[kind] !== sha256File(path)) {
+      throw new Error('V3 artifact berubah sejak validasi: ' + kind);
+    }
+  }
+  const plan = executablePlanSchema.parse(JSON.parse(readFileSync(planPath, 'utf8')));
+  if (plan.itemId !== item.id || plan.curriculumFingerprint !== item.fingerprint) {
+    throw new Error('Executable example manifest mismatch.');
+  }
+  const rerun = executeExamples(plan, resolve(staging, 'fixtures'));
+  const proof = JSON.parse(readFileSync(required.exampleProof, 'utf8'));
+  if (JSON.stringify(rerun) !== JSON.stringify(proof)) {
+    throw new Error('Executable example proof tidak cocok dengan fixture saat promote.');
+  }
+}
+
 const lessonDestination = resolve('src', 'content', 'lessons', item.id + '.mdx');
 const recordDestination = resolve('generation', item.id + '.json');
 const reviewDestination = resolve('review-banks', item.id + '.json');
@@ -75,6 +109,28 @@ mkdirSync(dirname(lessonDestination), { recursive: true });
 copyFileSync(lesson, lessonDestination);
 copyFileSync(record, recordDestination);
 copyFileSync(review, reviewDestination);
+
+if (isV3) {
+  const derived = resolve(staging, 'derived');
+  const targets = [
+    [resolve(derived, 'pedagogy-record.json'), resolve('generation','pedagogy', item.id + '.json')],
+    [resolve(derived, 'source-pack.json'), resolve('generation','sources', item.id + '.json')],
+    [resolve(derived, 'example-proof.json'), resolve('generation','proofs', item.id + '.json')],
+    [resolve(staging, 'executable-examples.json'), resolve('generation','executables', item.id + '.json')],
+    [resolve(derived, 'verified-receipt.json'), resolve('generation','verified', item.id + '.json')],
+  ];
+  for (const [source, target] of targets) {
+    mkdirSync(dirname(target), {recursive:true});
+    copyFileSync(source, target);
+  }
+  const plan = executablePlanSchema.parse(JSON.parse(readFileSync(resolve(staging,'executable-examples.json'),'utf8')));
+  const destination = resolve('generation','fixtures',item.id);
+  rmSync(destination, {recursive:true,force:true});
+  mkdirSync(destination,{recursive:true});
+  for (const fixture of plan.examples) {
+    copyFileSync(resolve(staging,'fixtures',fixture.file), resolve(destination,fixture.file));
+  }
+}
 
 console.log('Promoted: ' + item.id);
 console.log('- ' + lessonDestination);
