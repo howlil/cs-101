@@ -139,6 +139,6 @@ test('new unit authoring template and validation gate require V3 without learner
   const generatorSkill = readFileSync('.agents/skill/course-generator/SKILL.md', 'utf8');
   assert.match(prepare, /pedagogy: \{ version: 3, segments/);
   assert.match(validate, /lessonSpec\.pedagogy\?\.version !== 3/);
-  assert.match(generatorSkill, /Pedagogy V3/);
+  assert.match(generatorSkill, /Pedagogical scaffolding V3/);
   assert.doesNotMatch(prepare, /learnerProgress|userSession|reviewScheduler/);
 });
