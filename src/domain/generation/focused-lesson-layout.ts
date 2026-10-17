@@ -3,9 +3,8 @@
  * runtime splitter: arbitrary legacy MDX cannot be separated reliably by
  * guessing which prose belongs to a quiz or a project.
  *
- * Both V2 and V3 lesson content must explicitly group content into three
- * LessonStage regions before publishing. The existing V2 pedagogy data shape
- * remains valid; only the layout of its MDX needs migration.
+ * All published lesson content uses Pedagogy V3 and exactly three owned
+ * LessonStage regions. No legacy content-format fallback is retained.
  */
 export type FocusedLessonStage = 'understand' | 'practice' | 'evidence';
 
@@ -47,7 +46,7 @@ export function assertFocusedLessonLayout(source: string, itemId: string): void 
   if (opens.length !== 3 || closes.length !== 3) {
     throw new Error(
       'Lesson ' + itemId + ' harus memiliki tepat tiga LessonStage: understand, practice, evidence. ' +
-      'Migrasikan MDX V2 sebelum publikasi.',
+      'Gunakan template Pedagogy V3 sebelum publikasi.',
     );
   }
   const sections = {} as Record<FocusedLessonStage, string>;
@@ -85,13 +84,13 @@ export function assertFocusedLessonLayout(source: string, itemId: string): void 
   requireExactlyOnce(sections, 'Challenge', 'evidence');
   requireExactlyOnce(sections, 'ExitCriteria', 'evidence');
 
-  // A legacy Pedagogy V2 lesson renders these directly instead of through
-  // LearningSegments. Keep both the old data contract and strict focus rules.
-  if (occurrences(mdx, 'WorkedExample') > 0) {
-    requireExactlyOnce(sections, 'WorkedExample', 'understand');
-  }
-  if (occurrences(mdx, 'GuidedPractice') > 0) {
-    requireExactlyOnce(sections, 'GuidedPractice', 'practice');
+  // Worked examples and guided practice are rendered inside the canonical
+  // V3 LearningSegments component; authored MDX must not reintroduce a
+  // parallel direct-rendering path.
+  for (const obsolete of ['WorkedExample', 'GuidedPractice']) {
+    if (occurrences(mdx, obsolete) > 0) {
+      throw new Error(obsolete + ' must be rendered by LearningSegments V3: ' + itemId);
+    }
   }
 
   // Optional bridge remains project-owned when present.
