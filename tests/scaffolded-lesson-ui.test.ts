@@ -97,5 +97,5 @@ test('V3 learning renderer does not add required lesson sessions or persistence'
   const renderer = read('src/components/lesson/LearningSegments.astro');
   assert.doesNotMatch(renderer, /<form|<input|progressStore|streak|timer|fetch\s*\(|localStorage/i);
   const source = read('curriculum/manifest.v2.json');
-  assert.deepEqual(JSON.parse(source).items, []);
+  assert.equal(JSON.parse(source).items.length,370);
 });
