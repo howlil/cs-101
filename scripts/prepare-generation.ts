@@ -68,7 +68,8 @@ if (!existsSync(specTemplatePath)) {
   const segments = item.scope.map((concept, index) => ({
     id: 'segment-' + (index + 1),
     objective: '<one observable objective for ' + concept + '>',
-    whyItMatters: '<project problem that makes this concept necessary>',
+    whyItMatters: '<real engineering problem solved by the objective>',
+    firstAction: '<one concrete action that can be started without setup or planning ceremony>',
     mentalModel: '<simple but accurate mental model>',
     explanation: '<mechanism and limitations>',
     prerequisiteConceptIds: [],
@@ -84,8 +85,18 @@ if (!existsSync(specTemplatePath)) {
       hints: ['<conceptual hint>', '<more specific hint>'],
       explanation: '<explain answer and misconception>',
     },
+    misconceptionRepair: {
+      likelyMistake: '<a plausible wrong prediction or debugging behavior>',
+      whyItFails: '<specific causal reason the mistake fails>',
+      correctiveAction: '<the smallest action that repairs the misunderstanding>',
+    },
+    selfCheck: {
+      expectedObservation: '<observable output or invariant without submitting anything>',
+      ifUnexpected: '<what to inspect when the observation differs>',
+    },
     independentChallenge: {
       prompt: '<transfer problem, not a repeat of the example>',
+      variationFromExample: '<different data, environment, failure mode, or code path being tested>',
       criterionIds: [
         ...item.criteria.filter((_criterion, i) => i % item.scope.length === index)
           .map((criterion) => criterion.id),
@@ -93,6 +104,10 @@ if (!existsSync(specTemplatePath)) {
         ...(index >= item.criteria.length ? [item.criteria[0]?.id].filter((id): id is string => !!id) : []),
       ],
       expectedEvidence: ['<local observable verification>'],
+    },
+    continueFromHere: {
+      nextAction: '<specific optional next step after this segment>',
+      resumeCue: '<where to restart after an interruption, without persisted progress>',
     },
   }));
   writeFileSync(specTemplatePath, JSON.stringify({
@@ -124,7 +139,7 @@ if (!existsSync(specTemplatePath)) {
         evidenceExpected: '<challenge acceptance check>',
       },
     ],
-    pedagogy: { version: 2, segments, ...(projectBridge ? { projectBridge } : {}) },
+    pedagogy: { version: 3, segments, ...(projectBridge ? { projectBridge } : {}) },
     reviewQuestions: Array.from({ length: 5 }, (_, index) => ({
       id: 'q' + (index + 1),
       prompt: '<recall question>',
