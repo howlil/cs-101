@@ -24,3 +24,5 @@
   background:var(--foreground);
 }
 @media (prefers-reduced-motion: reduce) { .item-row { transition:none; } }
+
+.curriculum-empty {color:var(--text-secondary);font-size:12px;line-height:1.6;padding:8px 2px;}
