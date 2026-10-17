@@ -80,3 +80,65 @@ test('do not couple non-persistent pedagogical content to learner states', () =>
   assert.doesNotMatch(component, /localStorage|sessionStorage|fetch\s*\(|indexedDB/i);
   assert.doesNotMatch(generator, /learnerId|userId|reviewDueDate|progressStore/);
 });
+
+// V3 extends the same canonical acceptance criteria without reviving learner state.
+const v3 = () => ({
+  ...structuredClone(fixture.pedagogy),
+  version: 3 as const,
+  segments: fixture.pedagogy.segments.map((segment) => ({
+    ...structuredClone(segment),
+    firstAction: 'Predict which value is used by the lookup',
+    misconceptionRepair: {
+      likelyMistake: 'Assume identical content implies reference identity',
+      whyItFails: 'Reference identity and value equality use different contracts',
+      correctiveAction: 'Compare two independently created values using equals',
+    },
+    selfCheck: {
+      expectedObservation: 'The two equal values satisfy the equality contract',
+      ifUnexpected: 'Inspect each value and the equals implementation',
+    },
+    independentChallenge: {
+      ...segment.independentChallenge,
+      variationFromExample: 'Use a new account key type with a different fixture and expected output',
+    },
+    continueFromHere: {
+      nextAction: 'Try the same invariant on another test fixture',
+      resumeCue: 'Resume at the independent equality challenge after a break',
+    },
+  })),
+});
+
+test('V3 provides a low-friction first action, correction, self-check, transfer, and resume cue', () => {
+  const spec = validatePedagogySpec(graph, fixture.unitId, v3());
+  assert.equal(spec.version, 3);
+  assert.equal(spec.segments.length, 5);
+  assert.equal(spec.projectBridge?.checkpointId, 'JAV-P01');
+});
+
+test('V3 rejects an absent first action, misconception repair, self-check, and resume cue', () => {
+  for (const field of ['firstAction', 'misconceptionRepair', 'selfCheck', 'continueFromHere']) {
+    const broken = v3() as any;
+    delete broken.segments[0][field];
+    assert.throws(() => validatePedagogySpec(graph, fixture.unitId, broken), undefined, field);
+  }
+});
+
+test('V3 rejects repeated next steps and non-transferring challenges', () => {
+  const noNext = v3();
+  noNext.segments[0].continueFromHere.nextAction = noNext.segments[0].firstAction;
+  assert.throws(() => validatePedagogySpec(graph, fixture.unitId, noNext), /First action dan next action/);
+
+  const sameProblem = v3();
+  sameProblem.segments[0].independentChallenge.variationFromExample = sameProblem.segments[0].workedExample.problem;
+  assert.throws(() => validatePedagogySpec(graph, fixture.unitId, sameProblem), /Transfer context/);
+});
+
+test('new unit authoring template and validation gate require V3 without learner persistence', () => {
+  const prepare = readFileSync('scripts/prepare-generation.ts', 'utf8');
+  const validate = readFileSync('scripts/validate-generation.ts', 'utf8');
+  const generatorSkill = readFileSync('.agents/skill/course-generator/SKILL.md', 'utf8');
+  assert.match(prepare, /pedagogy: \{ version: 3, segments/);
+  assert.match(validate, /lessonSpec\.pedagogy\?\.version !== 3/);
+  assert.match(generatorSkill, /Pedagogy V3/);
+  assert.doesNotMatch(prepare, /learnerProgress|userSession|reviewScheduler/);
+});
