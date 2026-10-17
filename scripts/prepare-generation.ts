@@ -56,6 +56,45 @@ if (!existsSync(specTemplatePath)) {
     return assigned;
   });
 
+  const projectId = (graph.relationsFrom.get(itemId) ?? [])
+    .find((relation) => relation.type === 'contributes_to')?.to;
+  const targetProject = projectId ? graph.itemsById.get(projectId) : undefined;
+  const projectBridge = targetProject?.kind === 'checkpoint' ? {
+    checkpointId: targetProject.id,
+    requirementIds: [targetProject.requirements[0].id],
+    contribution: '<specific behavior this unit enables in the project>',
+    verification: ['<observable project-level result>'],
+  } : undefined;
+  const segments = item.scope.map((concept, index) => ({
+    id: 'segment-' + (index + 1),
+    objective: '<one observable objective for ' + concept + '>',
+    whyItMatters: '<project problem that makes this concept necessary>',
+    mentalModel: '<simple but accurate mental model>',
+    explanation: '<mechanism and limitations>',
+    prerequisiteConceptIds: [],
+    workedExample: {
+      problem: '<concrete example problem>',
+      steps: [
+        { action: '<first step>', reason: '<why it works>', expectedResult: '<observable result>' },
+        { action: '<next step>', reason: '<why this step>', expectedResult: '<observable result>' },
+      ],
+    },
+    guidedPractice: {
+      prompt: '<learner performs a prediction or repairs one bug>',
+      hints: ['<conceptual hint>', '<more specific hint>'],
+      explanation: '<explain answer and misconception>',
+    },
+    independentChallenge: {
+      prompt: '<transfer problem, not a repeat of the example>',
+      criterionIds: [
+        ...item.criteria.filter((_criterion, i) => i % item.scope.length === index)
+          .map((criterion) => criterion.id),
+        ...(index === item.scope.length - 1 ? ['challenge'] : []),
+        ...(index >= item.criteria.length ? [item.criteria[0]?.id].filter((id): id is string => !!id) : []),
+      ],
+      expectedEvidence: ['<local observable verification>'],
+    },
+  }));
   writeFileSync(specTemplatePath, JSON.stringify({
     itemId: item.id,
     curriculumFingerprint: item.fingerprint,
@@ -85,6 +124,7 @@ if (!existsSync(specTemplatePath)) {
         evidenceExpected: '<challenge acceptance check>',
       },
     ],
+    pedagogy: { version: 2, segments, ...(projectBridge ? { projectBridge } : {}) },
     reviewQuestions: Array.from({ length: 5 }, (_, index) => ({
       id: 'q' + (index + 1),
       prompt: '<recall question>',

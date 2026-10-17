@@ -14,6 +14,9 @@ import Challenge from '../../components/lesson/Challenge.astro';
 import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
 import Reveal from '../../components/lesson/Reveal.astro';
+import WorkedExample from '../../components/lesson/WorkedExample.astro';
+import GuidedPractice from '../../components/lesson/GuidedPractice';
+import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
 
 <LessonStage stage="understand">
 
@@ -49,6 +52,10 @@ immutable value object ──────→ invariant selalu valid
 client → interface → implementasi A / B
                     (polymorphism melalui composition)`}</pre>
 </ConceptGraph>
+
+## Jalur kecil sebelum Hash Contract Ambush
+
+Selesaikan konsepnya secara bertahap: **(1) invariant constructor → (2) interface dan composition → (3) immutability record → (4) equality/hash → (5) eksperimen HashMap/HashSet**. Kamu boleh langsung membaca konsep yang sudah dikuasai. Target akhir tetap 10.000 object dan test yang mampu menangkap hash defect.
 
 ## Prasyarat
 
@@ -118,6 +125,16 @@ record TransactionId(String value) {
 
 Untuk `Money`, pilih representasi exact yang disengaja. Pada latihan ini gunakan `long minorUnits` bersama currency code; *jangan* menjadikan `double` sebagai amount finansial. Tetapkan invariant dengan jelas: currency wajib tersedia dan berbentuk kode yang didukung; apakah nilai negatif boleh ada bergantung apakah `Money` berarti nominal pembayaran atau perubahan saldo. Jangan menyembunyikan keputusan domain itu di formatter UI.
 
+<WorkedExample
+  title="Dua object AccountId, satu nilai domain"
+  problem={'Kedua AccountId memiliki value "acct-7". Apakah ==, equals, dan hashCode akan sepakat?'}
+  steps={[
+    {action: 'Buat dua AccountId("acct-7") terpisah',reason: 'Instansiasi dua kali membentuk dua object berbeda.',expectedResult: 'Reference identity berbeda.'},
+    {action: 'Bandingkan first == second dan first.equals(second)',reason: '== membandingkan identity; record equals membandingkan component values.',expectedResult: 'false lalu true.'},
+    {action: 'Bandingkan kedua hashCode',reason: 'Object setara wajib memiliki hash sama agar hash-based lookup benar.',expectedResult: 'Kedua hashCode sama.'}
+  ]}
+/>
+
 ## 4. Identity berbeda dari equality
 
 ```java
@@ -185,6 +202,33 @@ System.out.println(byAccount.size());                         // 1
 
 <LessonStage stage="practice">
 
+## Mulai dari eksperimen kecil
+
+Tidak perlu langsung menghasilkan 10.000 object. Prediksi dahulu satu contoh, uji perilakunya, lalu gunakan pola yang sama pada dataset besar.
+
+<GuidedPractice
+  client:load
+  title="Mengapa HashSet bisa menghitung dua akun sebagai satu?"
+  prompt={'Dua instance AccountId("acct-7") dibuat terpisah lalu dimasukkan ke HashSet. Prediksi set.size() dan alasannya.'}
+  starterCode={'var ids = new java.util.HashSet<AccountId>();\nids.add(new AccountId("acct-7"));\nids.add(new AccountId("acct-7"));\nSystem.out.println(ids.size());'}
+  hints={[
+    'Pikirkan perbedaan object identity dan value equality.',
+    'HashSet menggunakan hashCode dan equals; record dengan component sama mempunyai value equality.'
+  ]}
+  explanation="Ukuran set adalah 1: record menyamakan nilai dari component dan equal keys mempunyai hash yang sama. Tambahan instance setara tidak menjadi elemen baru."
+/>
+
+<GuidedPractice
+  client:load
+  title="Kenapa record dengan List bisa tetap berubah?"
+  prompt="Sebuah record menyimpan List mutable yang diberikan caller. Bagaimana mencegah pemanggil mengubah isi record setelah construction?"
+  hints={[
+    'Final pada reference tidak menjadikan objek yang direferensikan immutable.',
+    'Buat snapshot seperti List.copyOf pada constructor dan hindari membocorkan mutable component.'
+  ]}
+  explanation="Gunakan defensive copy saat constructor; kemudian uji mutasi list sumber setelah object dibuat. Record yang immutable secara observabel tidak boleh berubah."
+/>
+
 ## Cek pemahaman
 
 Jawab dari model perilaku, bukan dari hafalan definisi. Setelah mengecek jawaban, langsung kerjakan satu eksperimen Java.
@@ -233,6 +277,16 @@ Dua instance `BrokenId("acct-7", 1)` dan `BrokenId("acct-7", 2)` boleh dibuat un
 </LessonStage>
 
 <LessonStage stage="evidence">
+
+<ProjectContribution
+  checkpointId="JAV-P01"
+  contribution="AccountId, TransactionId, dan Money yang memvalidasi invariant serta mematuhi equality/hash menjadi input aman untuk ledger dan deduplikasi record. Pelajaran ini belum mengimplementasikan seluruh accounting lifecycle."
+  verification={[
+    'Seluruh construction cases invalid ditolak oleh domain boundary.',
+    'Uji deterministic dataset minimal 10.000 objek dan bandingkan cardinality dengan oracle.',
+    'Injeksikan hash defect ke fixture test-only dan buktikan suite gagal sebelum diperbaiki.'
+  ]}
+/>
 
 <ExitCriteria items={[
   '100% of invalid domain-construction cases are rejected by object invariants',

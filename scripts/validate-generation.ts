@@ -31,6 +31,11 @@ const { sourcePack, lessonSpec } = validateGenerationPlan(
   JSON.parse(readFileSync(specPath, 'utf8')),
 );
 
+// Legacy published units remain valid; all new authoring must use the v2 scaffold.
+if (!lessonSpec.pedagogy && !existsSync(resolve('generation', itemId + '.json'))) {
+  throw new Error('Materi baru wajib memiliki pedagogy version 2 (segments + guided practice).');
+}
+
 const lesson = readFileSync(lessonPath, 'utf8');
 const frontmatter = lesson.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 if (!frontmatter) throw new Error('lesson.mdx tidak punya frontmatter.');
@@ -50,6 +55,17 @@ if (typeof data.description !== 'string' || !data.description.trim()) {
 }
 if (data.curriculumFingerprint !== item.fingerprint) {
   throw new Error('Lesson frontmatter stale.');
+}
+
+if (lessonSpec.pedagogy) {
+  for (const component of ['WorkedExample', 'GuidedPractice']) {
+    if (!lesson.includes('<' + component)) {
+      throw new Error('Pedagogy v2 belum dirender di MDX: ' + component);
+    }
+  }
+  if (lessonSpec.pedagogy.projectBridge && !lesson.includes('<ProjectContribution')) {
+    throw new Error('Project bridge dari metadata belum dirender pada lesson.');
+  }
 }
 
 const requiredImports = [
@@ -109,6 +125,7 @@ writeFileSync(
       'required-components',
       'prerequisite-links',
       'source-links',
+      ...(lessonSpec.pedagogy ? ['pedagogical-scaffolding', 'verified-project-bridge'] : []),
     ],
   }, null, 2) + '\n',
 );

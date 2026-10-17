@@ -14,12 +14,19 @@ import Challenge from '../../components/lesson/Challenge.astro';
 import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
 import Reveal from '../../components/lesson/Reveal.astro';
+import WorkedExample from '../../components/lesson/WorkedExample.astro';
+import GuidedPractice from '../../components/lesson/GuidedPractice';
+import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
 
 <LessonStage stage="understand">
 
 > **Mulai di sini.** Jangan langsung mengerjakan 20 soal. Pahami dulu cara SQL menghasilkan baris, cara `NULL` mengubah logika, dan cara PostgreSQL menentukan hasil. Semua contoh menggunakan domain pembayaran, tetapi yang dinilai adalah ketepatan reasoning SQL, bukan pengetahuan bisnis pembayaran.
 
 **Posisi dalam kurikulum:** DB & SQL → SQL Core → `SQL-001`. Tidak ada prasyarat wajib. Materi joins, indeks, concurrency, dan transaksi akan muncul di unit selanjutnya; jangan pindah ke sana dulu.
+
+## Mulai dari satu prediksi
+
+Jalur ringkas: **(1) row dan duplikat → (2) NULL dan 3VL → (3) tipe PostgreSQL → (4) ORDER BY/LIMIT → (5) prediksi dan assertion psql**. Pelajari satu konsep lalu jalankan contoh yang kecil. Tantangan 20 kasus dikerjakan setelah paham fondasinya; tidak ada timer wajib.
 
 ## Outcome dan urutan belajar
 
@@ -119,6 +126,16 @@ Gunakan **lima baris** pada `00_setup.sql` di bawah (bukan tabel ilustrasi empat
 | 5 | PENDING | FALSE | Tidak |
 
 Output berurutan adalah `1, 4`. Kalau kamu mengira `id = 3` ikut karena UNKNOWN bukan FALSE, modelnya keliru: **WHERE hanya mengambil TRUE**. Untuk memprediksi query lain, pisahkan pertanyaan *nilai kondisi per row* dan *urutan hasil*.
+
+<WorkedExample
+  title="Kenapa WHERE menyembunyikan row dengan status NULL?"
+  problem={'Pada status NULL, periksa kondisi status <> \'PAID\'. Prediksi apakah row lolos WHERE.'}
+  steps={[
+    {action: "Evaluasi NULL <> 'PAID'",reason: 'Perbandingan biasa dengan NULL menghasilkan UNKNOWN.',expectedResult: 'UNKNOWN, bukan TRUE atau FALSE.'},
+    {action: 'Terapkan filter WHERE',reason: 'WHERE hanya mempertahankan predicate yang TRUE.',expectedResult: 'Row berstatus NULL tidak muncul.'},
+    {action: 'Bandingkan dengan status IS NULL',reason: 'IS NULL melakukan pemeriksaan khusus nilai NULL.',expectedResult: 'Row NULL terpilih.'}
+  ]}
+/>
 
 ## 3. NULL dan three-valued logic (3VL)
 
@@ -352,6 +369,31 @@ Referensi tambahan untuk penjelasan 3VL, tipe, implicit cast, dan ordering: [Log
 
 <LessonStage stage="practice">
 
+## Dua latihan kecil sebelum 20 prediksi
+
+<GuidedPractice
+  client:load
+  title="Tebak output NULL filter"
+  prompt={'Apakah row dengan status NULL muncul dari WHERE status <> \'PAID\'? Jelaskan tanpa menjalankan query.'}
+  starterCode={"SELECT id FROM payments WHERE status <> 'PAID';"}
+  hints={[
+    'Di SQL, pembandingan NULL dengan nilai biasa tidak menghasilkan TRUE/FALSE.',
+    'WHERE memilih hanya row yang predicate-nya TRUE; UNKNOWN juga dikeluarkan.'
+  ]}
+  explanation="Tidak muncul. NULL <> 'PAID' menghasilkan UNKNOWN sehingga WHERE menyaring row tersebut. Untuk menemukan NULL, gunakan IS NULL."
+/>
+
+<GuidedPractice
+  client:load
+  title="Tebak LIMIT saat waktu sama"
+  prompt="Dua pembayaran memiliki created_at identik. Apakah ORDER BY created_at LIMIT 1 menjamin id yang sama di setiap run?"
+  hints={[
+    'Dua row dapat mempunyai nilai pengurutan created_at yang sama.',
+    'Tambahkan kolom unik seperti id sebagai tie-break: ORDER BY created_at, id.'
+  ]}
+  explanation="Tidak dijamin. Gunakan ORDER BY created_at, id bila id unik dan kebutuhan adalah subset deterministik."
+/>
+
 ## 9. Cek pemahaman — bukan skor kelulusan
 
 Coba lima pertanyaan berbasis skenario ini **setelah** membaca tahap Pahami. Quiz ini membantu menemukan miskonsepsi; skor kelulusan berasal dari 20 kasus terpisah yang diprediksi sebelum dijalankan.
@@ -507,6 +549,17 @@ Jika klaim `18/20` belum terbukti, **jangan** tandai unit lulus. Review reasonin
 <LessonStage stage="evidence">
 
 ## 12. Evidence dan gate akhir SQL-001
+
+<ProjectContribution
+  checkpointId="SQL-P01"
+  contribution="Model SQL bag semantics, NULL, ordering, dan assertion psql dipakai sebagai fondasi SQL Forensics Pack. SQL joins dan window functions datang pada tahap berikutnya, bukan prasyarat untuk mulai."
+  verification={[
+    'Schema, seed, dan query dapat dijalankan hanya dengan psql, tanpa ORM.',
+    'Prediksi sebelum eksekusi mencapai minimal 18/20 dengan kasus baru.',
+    'Assertion psql gagal saat expected result berbeda dan query yang butuh order memiliki tie-break.'
+  ]}
+/>
+
 
 <ExitCriteria items={[
   'Predict at least 18 of 20 SQL semantics traps correctly before execution',
