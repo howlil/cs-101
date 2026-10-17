@@ -21,11 +21,12 @@ CS-101 has **one content page**, `/`, whose sidebar selects domains and items. I
 Item ID
   → pnpm generation:prepare <ID>
   → bounded graph context
-  → researched source-pack.json
-  → lesson-spec.json (model, explanation, examples, practice, questions, challenge coverage)
+  → researched source-pack.json + claim-to-source ledger
+  → lesson-spec.json (model, explanations, criterion mapping, reviewed V3 pedagogy, questions)
+  → executable-examples.json + reviewed single-file fixtures (.mjs or .java)
   → lesson.mdx using assets/lesson-template.mdx
   → pnpm generation:validate <ID>
-  → derived metadata and question bank
+  → derived pedagogy, question bank, verified source pack, runnable proof and receipt
   → pnpm generation:promote <ID>
   → pnpm ci
 ```
@@ -38,7 +39,7 @@ Read `generation/staging/<ID>/context.json` from `generation:prepare`. This boun
 
 ### Research
 
-Inspect the curated source first, then 1–5 authoritative sources specific to the declared scope. Prefer primary documentation and standards. Record direct URLs in `source-pack.json`. Unsupported claims must be resolved or omitted before validating.
+Inspect the curated source first, then 1–5 authoritative sources specific to the declared scope. Prefer primary documentation and standards. Record direct URLs in `source-pack.json`. For V3, give each authored concept at least one factual claim with a source URL, stable concept ID, direct source-page locator and a reason this source supports the claim. Source URLs must exist in the pack. Inspect the actual referenced page yourself: the validator **checks coverage and references, not factual truth or live website content**. Unsupported claims must be resolved or omitted before validating.
 
 ### Pedagogical scaffolding V3 (mandatory for new lessons)
 
@@ -82,6 +83,14 @@ A separate **Ide project** section is composed by the content page using the nea
 
 Required components: `LessonStage`, `MentalModel`, `ConceptGraph`, `LearningSegments`, `Quiz`, `Challenge`, `ExitCriteria`, `SourceList`. The old `WorkedExample` and `GuidedPractice` components remain available to older V2 lessons; V3 consumes them through `LearningSegments`. Use reusable content components; never add page navigation, global sidebar, or trackers into lesson MDX.
 
+### M3 verification artifacts (required for new V3 lessons)
+
+- Create `generation/staging/<ID>/executable-examples.json` from the prepared template. Supported runners are **Node .mjs** and **Java .java** (source-file launcher, JDK 21). Place reviewed fixtures inside `generation/staging/<ID>/fixtures/`. Each fixture defines exact expected stdout. Use only local code you have reviewed; the runner executes these files in CI without a shell. If the topic truly has no executable artifact, use `examples: []` and a meaningful `noExecutableReason`; this is explicitly marked **not executable**, not passed as verified.
+- `generation:validate` executes fixtures, checks source claim mapping, validates the shared MDX imports and writes pedagogy/source/quiz/proof artifacts and a digest receipt.
+- `generation:promote` checks every digest and re-executes fixtures before publishing `generation/pedagogy/<ID>.json`, `generation/sources/<ID>.json`, `generation/proofs/<ID>.json`, `generation/executables/<ID>.json`, `generation/fixtures/<ID>/`, `generation/verified/<ID>.json` plus lesson, record and bank.
+- The authored MDX must import `../../../generation/pedagogy/<ID>.json` and `../../../review-banks/<ID>.json`, define `lessonSegments = pedagogyRecord.pedagogy.segments`, use `<Quiz bank={questionBank} />`, and consume the shared segments for all three stages. Do not author inline quiz arrays or duplicate segment JSON.
+- `pnpm validate` rechecks receipt hashes and reruns all published fixtures on each build. A mismatch fails the build. This is a reproducibility check, **not** general-purpose code isolation, network fact-checking, or proof that learners understand the content. PostgreSQL / SQL execution support and real-world usability evaluation remain follow-up work.
+
 ### Validate and publish
 
 ```sh
@@ -90,7 +99,7 @@ pnpm generation:promote SQL-001
 pnpm ci
 ```
 
-Validation blocks stale fingerprints, unresolved claim declarations, invalid V3 shape, missing criterion/source mapping, malformed frontmatter, broken prerequisite references, and invalid question banks. Promotion checks artifact hashes. Actual source accuracy, executable code correctness, and teaching quality still require human/technical review.
+Validation blocks stale fingerprints, unresolved claim declarations, invalid V3 shape, missing criterion/source mapping, malformed frontmatter, broken prerequisite references, and invalid question banks. Promotion checks artifact hashes. Source credibility and teaching quality still require human/technical review; executable fixtures now have reproducible local proof for supported runtimes. Claims without fixtures remain editorial review only.
 
 Outputs retain compatibility paths:
 - `src/content/lessons/<ID>.mdx` — material, quiz, manual challenge;
