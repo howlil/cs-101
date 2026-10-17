@@ -41,6 +41,14 @@ if (!existsSync(sourceTemplatePath)) {
     unsupportedClaims: [
       'Replace this template with source-pack.json only after every required concept is supported.',
     ],
+    claims: item.scope.map((scope, index) => ({
+      id: 'claim-' + (index + 1),
+      statement: '<specific factual statement supporting ' + scope + '>',
+      conceptIds: ['concept-' + (index + 1)],
+      sourceUrl: item.source.url ?? 'https://example.invalid/replace-with-primary-source',
+      locator: '<page section or anchor verified by author>',
+      rationale: '<why this source directly supports the factual statement>',
+    })),
   }, null, 2) + '\n');
 }
 
@@ -151,6 +159,22 @@ if (!existsSync(specTemplatePath)) {
   }, null, 2) + '\n');
 }
 
+const examplesTemplate = resolve(directory, 'executable-examples.template.json');
+if (!existsSync(examplesTemplate)) {
+  writeFileSync(examplesTemplate, JSON.stringify({
+    version: 1, itemId: item.id, curriculumFingerprint: item.fingerprint,
+    examples: [
+      {
+        id: 'predict-output',
+        runtime: 'node',
+        file: 'predict-output.mjs',
+        expectedStdout: '<expected stdout including trailing newline>',
+      },
+    ],
+    documentation: 'Replace this template with executable-examples.json. Create fixtures in staging/<ID>/fixtures. For non-executable concepts use examples: [] and noExecutableReason of at least 20 characters. Only node (.mjs) and java (.java) runtimes currently supported.',
+  }, null, 2) + '\n');
+}
+
 console.log('Prepared generation staging: ' + itemId);
 console.log('Context: ' + contextPath);
-console.log('Next: research sources, create source-pack.json + lesson-spec.json + lesson.mdx, then run generation:validate.');
+console.log('Next: research sources, create source-pack.json + lesson-spec.json + executable-examples.json + fixtures + lesson.mdx, then run generation:validate.');
