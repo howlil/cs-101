@@ -10,6 +10,7 @@ export type ExplorerItem = {
   href: string;
   kind: 'unit' | 'checkpoint' | 'integration';
   active: boolean;
+  published: boolean;
 };
 export type TrackOption = { id: string; title: string; total: number };
 export type ModuleOption = { id: string; title: string; items: ExplorerItem[] };
@@ -18,6 +19,7 @@ function ItemRow({ item }: { item: ExplorerItem }) {
   return <a className="item-row" href={item.href} aria-current={item.active ? 'page' : undefined}>
     <span className="item-title">{item.title}</span>
     <span className="item-id">{item.id}</span>
+    {item.kind === 'unit' && item.published && <span className="item-published-marker" title="Materi tersedia"><span className="sr-only">Materi lengkap tersedia</span></span>}
   </a>;
 }
 

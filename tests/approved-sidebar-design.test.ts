@@ -24,6 +24,6 @@ test('single content page keeps Jakarta Sans, monochrome and motion',()=>{
   const lib=source('src/styles/library.css');
   assert.match(tokens, /--font-body: "Plus Jakarta Sans"/);
   assert.match(tokens, /--accent: #111111/);
-  assert.match(lib, /@keyframes library-content-enter/);
+  assert.doesNotMatch(lib, /@keyframes library-content-enter/);
   assert.match(lib, /prefers-reduced-motion: reduce/);
 });

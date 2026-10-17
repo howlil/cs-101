@@ -17,8 +17,8 @@ test('content navigation retains UIArc motion and reduced-motion alternative', (
   const layout = read('src/layouts/AppLayout.astro');
   const styles = read('src/styles/library.css');
   const accordion = read('src/components/arc/accordion/accordion.tsx');
-  assert.match(layout, /fade\(\{duration:'0\.26s'\}\)/);
-  assert.match(styles, /@keyframes library-content-enter/);
+  assert.match(layout, /fade\(\{duration:'0\.18s'\}\)/);
+  assert.doesNotMatch(styles, /@keyframes library-content-enter/);
   assert.match(styles, /prefers-reduced-motion:\s*reduce/);
   assert.match(accordion, /motionTokens\.spring\.smooth/);
   assert.match(accordion, /useReducedMotion/);

@@ -10,8 +10,9 @@ import { curriculumGraph } from '../server/curriculum';
 import { getTrackExplorer, getItemLocation } from '../domain/curriculum-v2/selectors';
 import { libraryHref, selectLibraryItem } from '../domain/content-library';
 
-interface Props { title: string; description?: string }
-const { title, description = 'Materi, latihan soal, dan ide project CS-101.' } = Astro.props;
+interface Props { title: string; description?: string; publishedLessonIds?: string[] }
+const { title, description = 'Materi, latihan soal, dan ide project CS-101.', publishedLessonIds = [] } = Astro.props;
+const published = new Set(publishedLessonIds);
 const graph = curriculumGraph;
 const selection = selectLibraryItem(graph, Astro.url.searchParams.get('track'), Astro.url.searchParams.get('item'));
 const current = selection.item;
@@ -23,6 +24,7 @@ const row = (item: typeof graph.manifest.items[number]) => ({
   href: libraryHref(item.id),
   kind: item.kind,
   active: current?.id === item.id,
+  published: item.kind === 'unit' && published.has(item.id),
 });
 const sidebarData: SidebarData = {
   activeTrackId: selection.trackId,
@@ -74,7 +76,7 @@ const sidebarData: SidebarData = {
     </header>
     <div class="app-shell">
       <AppSidebar client:load data={sidebarData} />
-      <main id="main" tabindex="-1" class="app-main" transition:name="page-workspace" transition:animate={fade({duration:'0.26s'})}>
+      <main id="main" tabindex="-1" class="app-main" transition:name="page-workspace" transition:animate={fade({duration:'0.18s'})}>
         <slot />
       </main>
     </div>

@@ -13,6 +13,7 @@ interface Props {
 const { item, trackTitle, moduleTitle, authored, stale, project, prerequisites } = Astro.props;
 const isUnit = item.kind === 'unit';
 const isCheckpoint = item.kind === 'checkpoint';
+const isIntegration = item.kind === 'integration';
 const scope = item.kind === 'checkpoint' ? [] : item.scope;
 const challenge = item.kind === 'checkpoint' ? undefined : item.challenge;
 const source = item.source;
@@ -21,12 +22,26 @@ const source = item.source;
   <header class="library-heading">
     <p class="library-location">{[trackTitle ?? 'Integrasi', moduleTitle, item.id].filter(Boolean).join(' / ')}</p>
     <h1>{item.title}</h1>
-    {isUnit && !authored && <p class="library-availability" role="status">Materi lengkap dan bank soal untuk topik ini belum diterbitkan. Berikut cakupan dan tantangan dari kurikulum; bukan materi yang sudah digenerate.</p>}
-    {stale && <p class="library-availability" role="status">Materi tersedia, tetapi fingerprint-nya tidak cocok dengan kurikulum saat ini. Perlu regenerasi dan review.</p>}
-    <nav class="library-jump" aria-label="Bagian konten">
-      <a href="#materi">Materi</a>
-      <a href="#latihan">Latihan soal</a>
-      <a href="#ide-project">Ide project</a>
+    {isUnit && !authored && <p class="library-availability" role="status">Outline kurikulum — materi lengkap dan bank soal belum tersedia.</p>}
+    {stale && <p class="library-availability" role="status">Materi tersedia, tetapi perlu peninjauan karena kurikulum sudah berubah.</p>}
+    <nav class="library-jump" aria-label="Lompat ke bagian halaman">
+      {isUnit ? (
+        <>
+          <a href="#materi">Materi</a>
+          <a href="#latihan">Latihan soal</a>
+          <a href="#ide-project">Ide project</a>
+        </>
+      ) : isCheckpoint ? (
+        <>
+          <a href="#materi">Masalah</a>
+          <a href="#latihan">Requirements</a>
+        </>
+      ) : (
+        <>
+          <a href="#materi">Integrasi</a>
+          <a href="#latihan">Praktik</a>
+        </>
+      )}
     </nav>
   </header>
 
@@ -38,15 +53,12 @@ const source = item.source;
     <>
       <section class="library-content-section" id="materi" aria-labelledby="materi-label">
         <h2 id="materi-label">Materi</h2>
-        <p class="library-muted">Outline topik yang perlu dijelaskan di materi yang akan digenerate.</p>
+        <p class="library-muted">Cakupan konsep yang akan dibahas:</p>
         <ul>{scope.map((text) => <li>{text}</li>)}</ul>
-        <p class="library-muted">Belum ada penjelasan lengkap atau contoh kode terverifikasi.</p>
       </section>
       <section class="library-content-section" id="latihan" aria-labelledby="latihan-label">
         <h2 id="latihan-label">Latihan soal</h2>
-        <p class="library-muted">Bank soal interaktif belum tersedia. Tantangan manual dari manifest:</p>
-        <h3>{challenge?.title}</h3>
-        <ol>{challenge?.steps.map((step) => <li>{step}</li>)}</ol>
+        <p class="library-muted">Soal dan pembahasan belum diterbitkan untuk unit ini.</p>
       </section>
     </>
   ) : isCheckpoint ? (
@@ -77,28 +89,23 @@ const source = item.source;
     </>
   )}
 
-  <section class="library-content-section library-project" id="ide-project">
+  {isUnit && <section class="library-content-section library-project" id="ide-project">
     <h2>Ide project</h2>
-    {isCheckpoint ? (
+    {project ? (
       <>
-        <p>{item.problemStatement}</p>
-        <h3>Deliverables</h3>
-        <ul>{item.requirements.map((requirement) => <li>{requirement.text}</li>)}</ul>
-      </>
-    ) : project ? (
-      <>
-        <p class="library-id">{project.id} · Project kurikulum</p>
         <h3><a href={libraryHref(project.id)}>{project.title}</a></h3>
         <p>{project.problemStatement}</p>
-        <p class="library-muted">{project.requirements.length} requirements tersedia pada halaman project.</p>
+        <p class="library-muted">Lihat requirements dan kriteria verifikasi pada halaman project.</p>
+      </>
+    ) : challenge ? (
+      <>
+        <h3>{challenge.title}</h3>
+        <ol>{challenge.steps.map((step) => <li>{step}</li>)}</ol>
       </>
     ) : (
-      <>
-        <p>Gunakan konsep ini untuk membuat implementasi kecil yang dapat diuji.</p>
-        {challenge && <ol>{challenge.steps.map((step) => <li>{step}</li>)}</ol>}
-      </>
+      <p class="library-muted">Belum ada ide project terverifikasi untuk unit ini.</p>
     )}
-  </section>
+  </section>}
 
   <footer class="library-footer">
     {prerequisites.length > 0 && (
