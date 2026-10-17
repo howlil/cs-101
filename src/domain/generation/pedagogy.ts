@@ -43,17 +43,7 @@ const projectBridgeSchema = z.object({
   verification: z.array(detail).min(1),
 });
 
-/**
- * V2 remains readable for older authored content. New units use V3 to make
- * the first action, misconception repair, self-check and resumption explicit.
- * No timers, learner model, progress scores or storage are introduced.
- */
-export const pedagogySpecV2Schema = z.object({
-  version: z.literal(2),
-  segments: z.array(learningSegmentSchema).min(1),
-  projectBridge: projectBridgeSchema.optional(),
-});
-
+/** Single supported pedagogy contract. All published lessons use V3. */
 export const learningSegmentV3Schema = learningSegmentSchema.extend({
   firstAction: detail,
   misconceptionRepair: z.object({
@@ -82,10 +72,7 @@ export const pedagogySpecV3Schema = z.object({
   projectBridge: projectBridgeSchema.optional(),
 });
 
-export const pedagogySpecSchema = z.discriminatedUnion('version', [
-  pedagogySpecV2Schema,
-  pedagogySpecV3Schema,
-]);
+export const pedagogySpecSchema = pedagogySpecV3Schema;
 export type PedagogySpec = z.infer<typeof pedagogySpecSchema>;
 
 export function validatePedagogySpec(
@@ -102,15 +89,12 @@ export function validatePedagogySpec(
   const criterionIds = new Set(contentCriteriaForItem(unit).map((criterion) => criterion.id));
   const covered = new Set<string>();
   for (const segment of spec.segments) {
-    if ('firstAction' in segment) {
-      // Every V3 segment must specify a low-friction start and a distinct
-      // next action. Human review still determines whether these are useful.
-      if (segment.firstAction.toLocaleLowerCase() === segment.continueFromHere.nextAction.toLocaleLowerCase()) {
-        throw new Error('First action dan next action tidak boleh identik: ' + unitId + '/' + segment.id);
-      }
-      if (segment.independentChallenge.variationFromExample.trim() === segment.workedExample.problem.trim()) {
-        throw new Error('Transfer context harus berbeda dari worked example: ' + unitId + '/' + segment.id);
-      }
+    // The V3 contract makes firstAction, self-check, repair and continuation mandatory.
+    if (segment.firstAction.toLocaleLowerCase() === segment.continueFromHere.nextAction.toLocaleLowerCase()) {
+      throw new Error('First action dan next action tidak boleh identik: ' + unitId + '/' + segment.id);
+    }
+    if (segment.independentChallenge.variationFromExample.trim() === segment.workedExample.problem.trim()) {
+      throw new Error('Transfer context harus berbeda dari worked example: ' + unitId + '/' + segment.id);
     }
     const guided = segment.guidedPractice.prompt.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
     const independent = segment.independentChallenge.prompt.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
