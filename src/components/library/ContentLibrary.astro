@@ -44,7 +44,7 @@ const nextView = view === 'materi' ? 'soal' : view === 'soal' ? 'project' : unde
     )}
   </header>
 
-  <div class="library-view-panel" id={'view-' + view} aria-label={view === 'materi' ? 'Materi' : view === 'soal' ? 'Latihan soal' : 'Project'}>
+  <div class="library-view-panel" role="region" id={'view-' + view} aria-label={view === 'materi' ? 'Materi' : view === 'soal' ? 'Latihan soal' : 'Project'}>
     {isUnit && authored ? (
       <div class="library-authored">
         <slot />
@@ -103,7 +103,7 @@ const nextView = view === 'materi' ? 'soal' : view === 'soal' ? 'project' : unde
     <nav class="library-next" aria-label="Lanjut ke bagian berikutnya">
       <a href={libraryViewHref(item.id, nextView)}>
         {nextView === 'soal' ? 'Lanjut ke latihan soal' : 'Lanjut ke project'}
-        <span aria-hidden="true">→</span>
+        <ArrowRight size={15} strokeWidth={1.8} aria-hidden="true" />
       </a>
     </nav>
   )}
