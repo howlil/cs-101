@@ -1,7 +1,6 @@
 "use client";
 
 import { navigate } from 'astro:transitions/client';
-import { BookOpen, Boxes, FolderKanban } from 'lucide-react';
 import { Select } from '../arc/select/select';
 import { Accordion } from '../arc/accordion/accordion';
 
@@ -16,13 +15,9 @@ export type TrackOption = { id: string; title: string; total: number };
 export type ModuleOption = { id: string; title: string; items: ExplorerItem[] };
 
 function ItemRow({ item }: { item: ExplorerItem }) {
-  const Icon = item.kind === 'checkpoint' ? FolderKanban : item.kind === 'integration' ? Boxes : BookOpen;
   return <a className="item-row" href={item.href} aria-current={item.active ? 'page' : undefined}>
-    <span className="item-marker" aria-hidden="true"><Icon size={13} strokeWidth={1.8} /></span>
-    <span className="item-copy">
-      <span className="item-id">{item.id}</span>
-      <span className="item-title">{item.title}</span>
-    </span>
+    <span className="item-title">{item.title}</span>
+    <span className="item-id">{item.id}</span>
   </a>;
 }
 
@@ -33,8 +28,25 @@ export default function CurriculumExplorer({ tracks, activeTrackId, modules, int
   integrations: ExplorerItem[];
   selectedModuleId?: string;
 }) {
-  const count = modules.reduce((total, module) => total + module.items.length, 0);
-  const defaultOpen = Math.max(0, modules.findIndex((module) => module.id === selectedModuleId));
+  const activeIntegration = integrations.some((item) => item.active);
+  const selectedModuleIndex = modules.findIndex((module) => module.id === selectedModuleId);
+  const defaultOpen = activeIntegration ? modules.length : Math.max(0, selectedModuleIndex);
+  const items = modules.map((module) => ({
+    title: module.title,
+    content: <nav aria-label={module.title} className="module-items">
+      {module.items.map((item) => <ItemRow key={item.id} item={item} />)}
+    </nav>,
+  }));
+
+  // Cross-domain integrations are available on demand, not a permanently exposed second tree.
+  if (integrations.length > 0) {
+    items.push({
+      title: 'Integrasi lintas domain',
+      content: <nav aria-label="Integrasi lintas domain" className="module-items">
+        {integrations.map((item) => <ItemRow key={item.id} item={item} />)}
+      </nav>,
+    });
+  }
 
   return <div className="curriculum-controls">
     <div className="track-select-uiarc">
@@ -45,24 +57,10 @@ export default function CurriculumExplorer({ tracks, activeTrackId, modules, int
         }}
       />
     </div>
-
     <div className="module-tree module-tree--uiarc">
-      <div className="curriculum-tree-heading">
-        <span>KURIKULUM</span><span>{count} ITEMS</span>
-      </div>
-      <Accordion key={activeTrackId + ':' + (selectedModuleId ?? '')} size="sm" defaultOpen={defaultOpen}
-        items={modules.map((module) => ({
-          title: module.title,
-          meta: module.items.length,
-          content: <nav aria-label={module.title} className="module-items">
-            {module.items.map((item) => <ItemRow key={item.id} item={item} />)}
-          </nav>,
-        }))} />
+      <p className="curriculum-tree-heading">Materi</p>
+      <Accordion key={activeTrackId + ':' + (selectedModuleId ?? (activeIntegration ? 'integration' : ''))}
+        size="sm" defaultOpen={defaultOpen} items={items} />
     </div>
-
-    {integrations.length > 0 && <div className="integration-list">
-      <p className="explorer-label"><Boxes size={12} aria-hidden="true" /> INTEGRASI</p>
-      {integrations.map((item) => <ItemRow key={item.id} item={item} />)}
-    </div>}
   </div>;
 }

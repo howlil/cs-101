@@ -1,183 +1,27 @@
-/* Sidebar owns navigation; this stylesheet only styles its explorer and the
- * contextual detail workspace. No second curriculum layout is mounted. */
-.curriculum-workspace { min-width:0; height:100%; overflow:auto; overscroll-behavior:contain; background:var(--canvas); }
-.curriculum-detail { width:min(760px,100%); margin-inline:auto; padding:32px 28px 64px; }
-.curriculum-controls { display:grid; gap:11px; }
-.track-select-uiarc { padding-bottom:10px; border-bottom:1px solid var(--line); }
-.track-select-uiarc label {
-  color:var(--text-muted); font-size:12px; font-weight:500; letter-spacing:.025em;
-}
-.track-select-uiarc button { min-height:36px; }
-.explorer-label {
-  display:flex; align-items:center; gap:6px; margin:0 0 7px;
-  color:var(--text-muted); font-size:12px; font-weight:500;
-  letter-spacing:.035em;
-}
-.module-tree { margin-top:9px; }
-.module-tree--uiarc > .explorer-label { margin-bottom:6px; }
-.module-tree--uiarc .module-items { display:grid; gap:2px; padding:4px 0 6px; }
-.item-row {
-  min-width:0; display:grid; grid-template-columns:17px minmax(0,1fr); gap:8px;
-  align-items:start; padding:9px 8px; border-radius:9px;
-  color:var(--text-secondary); text-decoration:none;
-}
-.item-row:hover { color:var(--foreground); background:var(--surface-muted); }
-.item-row[aria-current="page"] { color:var(--foreground); background:var(--accent-subtle); }
-.item-marker { padding-top:2px; text-align:center; color:currentColor; line-height:1.3; }
-.item-copy { min-width:0; display:grid; gap:3px; }
-.item-id {
-  color:currentColor; font:400 12px/16px var(--font-body); letter-spacing:0;
-}
-.item-title {
-  color:currentColor; font-size:13px; line-height:19px;
-  white-space:normal; overflow-wrap:anywhere;
-}
-.item-header { padding-bottom:19px; border-bottom:1px solid var(--line); }
-.breadcrumb { margin:0 0 8px; color:var(--text-muted); font-size:12px; }
-.item-id-standalone { display:inline-block; margin-bottom:8px; color:var(--text-muted); font-size:12px; }
-.item-header h2 {
-  margin:0; font-size:clamp(24px,3vw,30px); line-height:1.18;
-  font-weight:500; max-width:760px; letter-spacing:-.025em;
-}
-.item-state-actions {
-  display:flex; flex-wrap:wrap; align-items:center; gap:9px;
-  padding:20px 0 21px; border-bottom:1px solid var(--line);
-}
-.item-workbench { min-width:0; display:flex; flex-direction:column; gap:18px; }
-.item-main { min-width:0; width:100%; }
-.item-section { max-width:760px; padding:21px 0; border-bottom:1px solid var(--line); }
-.item-section h3 { display:flex; align-items:center; gap:7px; margin:0 0 11px; font-size:18px; font-weight:500; }
-.compact-list { padding-left:21px; margin:0; }
-.compact-list li { margin:6px 0; font-size:14px; line-height:23px; }
-.item-next-step {
-  margin-top:16px; padding:14px 0; border:0; border-top:1px solid var(--border);
-  border-radius:0; background:transparent;
-}
-.item-next-step strong { display:block; font-size:14px; line-height:22px; color:var(--foreground); }
-.item-details-disclosure { max-width:760px; margin:10px 0 25px; }
-.item-context { min-width:0; padding:7px 0 20px; display:grid; gap:16px; }
-.item-context-section { padding:8px 0; }
-.item-context-section h3 { display:flex; align-items:center; gap:7px; margin:0 0 10px; font-size:14px; font-weight:500; }
-.item-meta { display:grid; gap:13px; margin:0; }
-.item-meta > div { min-width:0; display:grid; gap:5px; font-size:13px; }
-.item-meta a,.item-meta > div > span:last-child { color:var(--text-secondary); overflow-wrap:anywhere; }
-.connection-list { display:grid; gap:3px; }
-.connection-list a {
-  min-width:0; display:grid; grid-template-columns:auto minmax(0,1fr);
-  gap:10px; align-items:start; padding:9px 0; border-bottom:1px solid var(--line);
-  color:var(--text); text-decoration:none;
-}
-.connection-list code { color:var(--text-muted); font-size:12px; }
-.connection-list span { min-width:0; font-size:13px; line-height:21px; overflow-wrap:anywhere; }
-.curriculum-empty { padding:38px 0; }
-@media(max-width:900px) {
-  .curriculum-workspace { height:auto; min-height:calc(100dvh - var(--app-topbar-height)); overflow:visible; }
-  .curriculum-detail { width:100%; padding:27px 20px 50px; }
-}
-@media(max-width:600px) {
-  .curriculum-detail { padding:22px 14px 40px; }
-  .item-header h2 { font-size:24px; }
-}
-
-/* Curriculum browse is a module overview; item previews remain compact. */
-.item-brief-note { color:var(--text-muted); font-size:13px; margin:14px 0 0; }
-.item-section:first-child { border-top:0; }
-.item-workbench .item-section { padding:19px 0; }
-.item-details-disclosure { margin-top:24px; }
-
-.item-state-actions .item-action-status { width:100%; }
-.item-state-actions .item-action-prerequisites { width:100%; }
-
-
-/* Browse overview is a different surface from item preview. */
-.curriculum-overview-summary {
-  margin:14px 0 0; color:var(--text-secondary);
-  font-size:14px; line-height:22px;
-}
-.curriculum-overview-modules { display:grid; margin-top:15px; }
-.curriculum-overview-modules a {
-  display:grid; grid-template-columns:32px minmax(0,1fr) auto;
-  gap:14px; align-items:center; min-height:72px; padding:14px 6px;
-  border-bottom:1px solid var(--line);
-  text-decoration:none; color:var(--text-secondary);
-}
-.curriculum-overview-modules a:hover { color:var(--foreground); background:var(--surface-muted); }
-.curriculum-overview-number { font:400 12px/16px var(--font-body); color:var(--text-muted); }
-.curriculum-overview-copy { display:grid; gap:4px; min-width:0; }
-.curriculum-overview-copy .curriculum-module-first { display:block; color:var(--text-secondary); font:400 12px/18px var(--font-body); overflow-wrap:anywhere; }
-.curriculum-overview-copy strong { font-size:15px; line-height:22px; font-weight:500; color:var(--foreground); }
-.curriculum-overview-copy small { font:400 12px/16px var(--font-body); color:var(--text-muted); }
-
-.item-outline-status { max-width:60ch; margin:13px 0 0; padding:0 0 0 12px; border-left:2px solid var(--border-strong); color:var(--text-secondary); font-size:13px; line-height:21px; }
-
-.search-more { width:100%; margin:10px 0 4px; justify-content:center; }
-
-/* Curriculum scan and prerequisites, without adding another explorer. */
-.curriculum-overview-progress {
-  appearance:none; display:block; width:100%; height:4px;
-  margin:16px 0 6px; overflow:hidden; border:0;
-  border-radius:999px; background:var(--border);
-}
-.curriculum-overview-progress::-webkit-progress-bar { background:var(--border); }
-.curriculum-overview-progress::-webkit-progress-value { background:var(--accent-strong); }
-.curriculum-overview-progress::-moz-progress-bar { background:var(--accent-strong); }
-.item-context-prerequisites {
-  max-width:760px; padding:16px 0 5px; border-bottom:1px solid var(--line);
-}
-.item-context-prerequisites h3 {
-  display:flex; align-items:center; gap:7px; margin:0 0 10px;
-  font-size:14px; font-weight:500;
-}
-.item-context-prerequisites .connection-list a { min-height:38px; }
-
-/* Compact monochrome catalogue overrides; UIArc owns the interactive controls. */
-.curriculum-controls { gap:9px; }
-.track-select-uiarc button { min-height:34px; }
-.track-select-uiarc label { font-size:11px; }
-.module-tree { margin-top:3px; }
-.module-tree--uiarc > .explorer-label { margin-bottom:4px; }
-.module-tree--uiarc .module-items { gap:1px; padding:3px 0 5px; }
-.item-row[aria-current="page"] { background:var(--accent-subtle); }
-.item-copy { gap:1px; }
-.item-id { font-size:10px; line-height:14px; }
-.item-title { font-size:12px; line-height:17px; }
-
-/* UIArc navigation hover feedback; keep the selection steady during route swaps. */
-.item-row {
-  transition: background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
-}
-@media(prefers-reduced-motion:reduce) { .item-row { transition:none; } }
-
-/* Approved preview: domain selector first, then a separated curriculum tree. */
+/* The only curriculum UI is the sidebar. Reuse UIArc Select and Accordion.
+   Domain → modules → lessons; do not introduce competing progress/search chrome. */
 .curriculum-controls { display:grid; gap:0; }
-.track-select-uiarc { border:0; padding:0; }
-.track-select-uiarc > div { gap:7px; }
-.track-select-uiarc label { font-size:10px; font-weight:750; letter-spacing:.075em; color:var(--text-muted); }
-.track-select-uiarc button { min-height:38px; padding-inline:12px; border-radius:8px; background:var(--background); font-size:12px; font-weight:650; }
-.module-tree { margin-top:24px; }
+.track-select-uiarc { padding:0; }
+.track-select-uiarc > div { gap:6px; }
+.track-select-uiarc label { color:var(--text-muted); font-size:11px; font-weight:600; letter-spacing:0; }
+.track-select-uiarc button {
+  min-height:36px; border-radius:8px; padding-inline:10px;
+  background:var(--background); font-size:12px; font-weight:600;
+}
+.module-tree { margin-top:21px; }
 .curriculum-tree-heading {
-  display:flex; justify-content:space-between; gap:8px;
-  padding:0 6px; margin-bottom:9px;
-  color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.075em;
+  color:var(--text-muted); font-size:11px; font-weight:600;
+  margin:0 2px 8px; letter-spacing:0;
 }
-.curriculum-tree-heading span:last-child { font-weight:400; letter-spacing:0; }
-.module-tree--uiarc .module-items {
-  display:grid; gap:1px; margin-left:11px; border-left:1px solid var(--border);
-  padding:0 0 8px 13px;
-}
+.module-tree--uiarc .module-items { display:grid; gap:2px; padding:2px 0 8px 10px; border-left:1px solid var(--border); margin-left:8px; }
 .item-row {
-  grid-template-columns:13px minmax(0,1fr);
-  gap:10px; align-items:start;
-  padding:8px 9px; border-radius:7px;
+  display:grid; min-width:0; gap:1px; text-decoration:none;
+  padding:8px 10px; border-radius:7px; color:var(--text-secondary);
   transition:background-color var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard);
 }
-.item-marker { padding-top:2px; }
-.item-copy { gap:2px; }
-.item-id { font:500 10px/14px var(--font-body); color:var(--text-muted); letter-spacing:.012em; }
-.item-title { font-size:11.5px; line-height:17px; color:inherit; }
-.item-row[aria-current="page"] { background:var(--accent-subtle); color:var(--foreground); font-weight:650; }
-.integration-list { padding-top:13px; margin-top:14px; border-top:1px solid var(--border); }
-.integration-list .explorer-label { font-size:10px; letter-spacing:.075em; font-weight:750; }
-.integration-list .item-row { margin-left:10px; }
-@media(prefers-reduced-motion:reduce) { .item-row { transition:none; } }
+.item-row:hover { background:var(--surface-muted); color:var(--foreground); }
+.item-row[aria-current="page"] { background:var(--accent-subtle); color:var(--foreground); }
+.item-title { font-size:12px; line-height:18px; font-weight:500; min-width:0; overflow-wrap:anywhere; }
+.item-row[aria-current="page"] .item-title { font-weight:650; }
+.item-id { font-size:10px; line-height:15px; font-weight:450; color:var(--text-muted); }
+@media (prefers-reduced-motion: reduce) { .item-row { transition:none; } }

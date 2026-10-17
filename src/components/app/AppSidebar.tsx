@@ -8,7 +8,6 @@ import { Tooltip } from '../arc/tooltip/tooltip';
 import CurriculumExplorer, { type ExplorerItem, type ModuleOption, type TrackOption } from '../curriculum/CurriculumExplorer';
 
 export type SidebarData = {
-  total: number;
   activeTrackId: string;
   selectedModuleId?: string;
   tracks: TrackOption[];
@@ -27,14 +26,6 @@ function SidebarContent({ data }: { data: SidebarData }) {
       modules={data.modules}
       integrations={data.integrations}
     />
-  </div>;
-}
-
-function SidebarFooter() {
-  return <div className="sidebar-footer" aria-label="Content library">
-    <span className="sidebar-footer-square" aria-hidden="true" />
-    <span>Content Library</span>
-    <span className="sidebar-footer-version">v2</span>
   </div>;
 }
 
@@ -57,7 +48,6 @@ export default function AppSidebar({ data }: { data: SidebarData }) {
           <span className="sidebar-brand-mark" aria-hidden="true">CS</span>
           <span className="sidebar-brand-copy">
             <span className="sidebar-brand-label">CS-101</span>
-            <span className="sidebar-brand-subtitle">Engineering Library</span>
           </span>
         </a>
         <Tooltip content="Ciutkan atau buka sidebar">
@@ -72,7 +62,6 @@ export default function AppSidebar({ data }: { data: SidebarData }) {
         </Tooltip>
       </div>
       <div className="sidebar-frame"><SidebarContent data={data} /></div>
-      <SidebarFooter />
     </aside>
     <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
       <DialogTrigger asChild>
