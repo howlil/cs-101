@@ -51,6 +51,15 @@ test('review finding: learning objects cannot leak into other views', () => {
   assert.throws(() => assertFocusedLessonLayout(leaked,'JAV-001'), /di luar LessonStage/);
 });
 
+test('unscoped text between and after sections cannot leak into every tab', () => {
+  const between = legacyV2.replace(
+    '</LessonStage>\n<LessonStage stage="practice">',
+    '</LessonStage>\nUnscoped learning explanation\n<LessonStage stage="practice">',
+  );
+  assert.throws(() => assertFocusedLessonLayout(between, 'JAV-001'), /di luar LessonStage/);
+  assert.throws(() => assertFocusedLessonLayout(legacyV2 + '\nUnscoped closing text', 'JAV-001'), /di luar LessonStage/);
+});
+
 test('review finding: source references are owned by Materi, not Project or Soal', () => {
   const misplaced = legacyV2.replace('<SourceList sources={[]} />','')
     .replace('<Challenge title=', '<SourceList sources={[]} />\n<Challenge title=');
