@@ -37,6 +37,8 @@ jobs:
         run: pnpm validate
       - name: Unit tests
         run: pnpm test
+      - name: Golden lesson end-to-end acceptance
+        run: pnpm run test:golden
       - name: Astro type check
         run: pnpm check
       - name: CSS parse
