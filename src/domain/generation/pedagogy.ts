@@ -36,16 +36,54 @@ export const learningSegmentSchema = z.object({
     expectedEvidence: z.array(detail).min(1),
   }),
 });
-export const pedagogySpecSchema = z.object({
+const projectBridgeSchema = z.object({
+  checkpointId: detail,
+  requirementIds: z.array(detail).min(1),
+  contribution: detail,
+  verification: z.array(detail).min(1),
+});
+
+/**
+ * V2 remains readable for older authored content. New units use V3 to make
+ * the first action, misconception repair, self-check and resumption explicit.
+ * No timers, learner model, progress scores or storage are introduced.
+ */
+export const pedagogySpecV2Schema = z.object({
   version: z.literal(2),
   segments: z.array(learningSegmentSchema).min(1),
-  projectBridge: z.object({
-    checkpointId: detail,
-    requirementIds: z.array(detail).min(1),
-    contribution: detail,
-    verification: z.array(detail).min(1),
-  }).optional(),
+  projectBridge: projectBridgeSchema.optional(),
 });
+
+export const learningSegmentV3Schema = learningSegmentSchema.extend({
+  firstAction: detail,
+  misconceptionRepair: z.object({
+    likelyMistake: detail,
+    whyItFails: detail,
+    correctiveAction: detail,
+  }),
+  selfCheck: z.object({
+    expectedObservation: detail,
+    ifUnexpected: detail,
+  }),
+  independentChallenge: learningSegmentSchema.shape.independentChallenge.extend({
+    variationFromExample: detail,
+  }),
+  continueFromHere: z.object({
+    nextAction: detail,
+    resumeCue: detail,
+  }),
+});
+
+export const pedagogySpecV3Schema = z.object({
+  version: z.literal(3),
+  segments: z.array(learningSegmentV3Schema).min(1),
+  projectBridge: projectBridgeSchema.optional(),
+});
+
+export const pedagogySpecSchema = z.discriminatedUnion('version', [
+  pedagogySpecV2Schema,
+  pedagogySpecV3Schema,
+]);
 export type PedagogySpec = z.infer<typeof pedagogySpecSchema>;
 
 export function validatePedagogySpec(
@@ -62,6 +100,16 @@ export function validatePedagogySpec(
   const criterionIds = new Set(contentCriteriaForItem(unit).map((criterion) => criterion.id));
   const covered = new Set<string>();
   for (const segment of spec.segments) {
+    if (spec.version === 3) {
+      // Every V3 segment must specify a low-friction start and a distinct
+      // next action. Human review still determines whether these are useful.
+      if (segment.firstAction.toLocaleLowerCase() === segment.continueFromHere.nextAction.toLocaleLowerCase()) {
+        throw new Error('First action dan next action tidak boleh identik: ' + unitId + '/' + segment.id);
+      }
+      if (segment.independentChallenge.variationFromExample.trim() === segment.workedExample.problem.trim()) {
+        throw new Error('Transfer context harus berbeda dari worked example: ' + unitId + '/' + segment.id);
+      }
+    }
     const guided = segment.guidedPractice.prompt.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
     const independent = segment.independentChallenge.prompt.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
     if (guided === independent || independent.includes(guided)) {
