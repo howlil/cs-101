@@ -17,3 +17,9 @@ The MDX template now imports the promoted pedagogy record and question bank inst
 Eight domain sheets are now represented in `curriculum/source/engineering-2026-10-18.json`: 370 scoped units in 67 modules, with source URLs, authentic challenge tasks and P0/P1/P2 priorities. The resulting `curriculum/manifest.v2.json` is a catalogue of outlines only, not a set of generated lessons. No project checkpoint or hard prerequisite is invented from row adjacency.
 
 Run `pnpm curriculum:verify-import` to verify source-to-manifest parity or `pnpm curriculum:status` to see how many P0/P1/P2 units remain unpublished in each track. Generate authored MDX one reviewed unit at a time using the M1–M4 V3 pipeline. The current state deliberately includes no mass-published lesson text or fabricated quizzes; the content-quality gate still applies.
+
+## Focused lesson layout gate (post PR #39)
+
+All published lessons, including existing Pedagogy V2, must use exactly three `LessonStage` wrappers in order: `understand`, `practice`, `evidence`. Content ownership: mental model, concept graph, worked examples and complete technical `SourceList` belong to **Materi**; `GuidedPractice` and quiz belong to **Soal**; `Challenge`, `ExitCriteria`, and optional project bridge belong to **Project**. The validator enforces the gate when generating and when checking already-published MDX. An unwrapped legacy V2 lesson must be manually migrated; the old V2 schema/record format remains supported. The repo currently has zero published lessons, so no live data migration is performed here.
+
+For outline-only units, the Materi follow-up CTA skips empty Soal and goes directly to the workbook project idea. Direct `&view=soal` still displays an honest unavailable state. No learning state or new page route is introduced.
