@@ -36,5 +36,5 @@ No standalone checkpoint or hard prerequisite may be inferred solely from row or
 ## Published lesson view ownership
 
 - `?item=<ID>`: Materi; `&view=soal`: guided practice/quiz; `&view=project`: implementation challenge. Only the active view renders in MDX; links are addressable without learner state.
-- All published V2/V3 authored lessons require exactly three ordered `LessonStage` wrappers, with complete `SourceList` in `understand`, `Quiz` in `practice`, and `Challenge`/verification in `evidence`. Stage layout is checked both before promotion and during every published content validation. Legacy V2 without wrappers must be manually segmented before publication.
+- All published Pedagogy V3 lessons require exactly three ordered `LessonStage` wrappers, with complete `SourceList` in `understand`, `Quiz` in `practice`, and `Challenge`/verification in `evidence`. Stage layout is checked both before promotion and during every published content validation. No older pedagogy schemas are accepted; previously preserved materials require new V3 review before publication.
 - An unauthored outline has no real quiz: its Materi CTA goes directly to Project rather than an empty Soal page. Never manufacture questions from the workbook.
