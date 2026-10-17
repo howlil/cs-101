@@ -41,7 +41,7 @@ export function verifySourceClaims(
     }
   }
   for (const id of conceptIds) {
-    if (!supportedConcepts.has(id)) throw new Error('Concept tanpa source claim terlac ak: ' + id);
+    if (!supportedConcepts.has(id)) throw new Error('Concept tanpa source claim terlacak: ' + id);
   }
   return claims;
 }
@@ -78,6 +78,7 @@ export const verifiedLessonSchema = z.object({
     questionBank: z.string().length(64),
     sourcePack: z.string().length(64),
     exampleProof: z.string().length(64),
+    examplePlan: z.string().length(64),
   }),
 });
 
@@ -93,6 +94,7 @@ export function checkPublishedV3Files(root: string, itemId: string, fingerprint:
     questionBank: 'review-banks/' + itemId + '.json',
     sourcePack: 'generation/sources/' + itemId + '.json',
     exampleProof: 'generation/proofs/' + itemId + '.json',
+    examplePlan: 'generation/executables/' + itemId + '.json',
   } as const;
   for (const [kind, path] of Object.entries(files) as [keyof typeof files, string][]) {
     if (sha256(read(path)) !== receipt.hashes[kind]) {
