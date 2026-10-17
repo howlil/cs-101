@@ -1,39 +1,32 @@
-/* Minimal reading surface: typography and navigation, no decorative chrome. */
-.library-content { width:min(790px,100%); margin:0 auto; padding:30px 36px 64px; min-width:0; }
+/* Reading-first content, content structure owns the hierarchy—not decorative tabs. */
+.library-content { width:min(755px,100%); margin:0 auto; padding:28px 32px 60px; min-width:0; }
 .library-heading { padding:0; }
 .library-location { color:var(--text-muted); font:500 11px/18px var(--font-body); margin:0 0 11px; }
-.library-heading h1 { color:var(--foreground); font-size:clamp(25px,2.8vw,31px); line-height:1.28; letter-spacing:-.04em; font-weight:650; margin:0 0 21px; }
-.library-description,.library-muted { color:var(--text-secondary); font-size:13px; line-height:1.75; }
-.library-id { color:var(--text-muted); font:500 11px/18px var(--font-body); margin:0 0 6px; }
+.library-heading h1 { color:var(--foreground); font-size:clamp(25px,2.8vw,31px); line-height:1.28; letter-spacing:-.04em; font-weight:650; margin:0 0 20px; }
+.library-muted { color:var(--text-secondary); font-size:13px; line-height:1.75; }
 .library-availability { margin:0 0 17px; border-left:2px solid var(--border-strong); padding:7px 11px; font-size:12px; line-height:1.7; color:var(--text-secondary); background:var(--surface-muted); }
-.library-jump { display:flex; flex-wrap:wrap; gap:4px; border-bottom:1px solid var(--border); margin:0; }
+.library-id { color:var(--text-muted); font:500 11px/18px var(--font-body); margin:0 0 6px; }
+.library-jump {
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  margin:0 0 3px; padding:0 0 14px;
+  border-bottom:1px solid var(--border);
+}
 .library-jump a {
-  text-decoration:none; color:var(--text-muted);
-  background:transparent; border:0; border-bottom:2px solid transparent;
-  padding:10px 12px; margin-bottom:-1px; font-size:12px; font-weight:550;
-  transition:color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard);
+  color:var(--text-secondary); text-decoration:underline; text-decoration-color:var(--border-strong);
+  text-underline-offset:4px; font-size:12px; font-weight:500; padding:4px 0;
+  transition:color var(--duration-fast) var(--ease-standard);
 }
-.library-jump a:hover { color:var(--foreground); }
-.library-jump a:first-child,
-.library-content:has(#materi:target) .library-jump a[href="#materi"],
-.library-content:has(#latihan:target) .library-jump a[href="#latihan"],
-.library-content:has(#ide-project:target) .library-jump a[href="#ide-project"] {
-  border-bottom-color:var(--foreground); color:var(--foreground);
-}
-.library-content:has(#latihan:target) .library-jump a:first-child,
-.library-content:has(#ide-project:target) .library-jump a:first-child {
-  border-bottom-color:transparent; color:var(--text-muted);
-}
-.library-content-section { padding:21px 0 24px; border-bottom:1px solid var(--border); min-width:0; }
+.library-jump a + a::before { content:"·"; color:var(--text-muted); display:inline-block; margin-right:8px; text-decoration:none; }
+.library-jump a:hover,.library-jump a:focus-visible { color:var(--foreground); text-decoration-color:var(--foreground); }
+.library-content-section { padding:22px 0 24px; border-bottom:1px solid var(--border); min-width:0; }
 .library-content-section h2:first-child { margin:0 0 11px; font-size:19px; font-weight:650; letter-spacing:-.02em; }
 .library-content-section h3 { font-size:15px; font-weight:650; margin:17px 0 9px; }
-.library-content-section :is(p,li) { overflow-wrap:anywhere; }
-.library-content-section :is(pre,table,figure) { max-width:100%; overflow-x:auto; }
-.library-content-section :is(ul,ol) { padding-left:22px; }
+.library-content-section :is(p,li,blockquote) { max-width:68ch; overflow-wrap:anywhere; }
+.library-content-section :is(ul,ol) { max-width:74ch; padding-left:22px; }
 .library-content-section li { margin:4px 0; }
+.library-content-section :is(pre,table,figure) { max-width:100%; overflow-x:auto; }
 .library-content-section .prose { max-width:100%; }
 .library-authored .prose { font-size:14px; line-height:1.7; }
-/* The navigation already labels the first section "Materi"; keep the h2 accessible, not duplicated on-screen. */
 .library-content-section#materi > h2:first-child,
 .library-authored [data-lesson-stage="understand"] > h2:first-child {
   position:absolute; width:1px; height:1px; padding:0; margin:-1px;
@@ -47,14 +40,6 @@
 .library-footer ul { padding-left:20px; }
 .library-footer li { margin:5px 0; }
 .library-footer a { color:var(--foreground); }
-@keyframes library-content-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-.library-heading,.library-authored > :first-child,.library-content > .library-content-section {
-  animation:library-content-enter 440ms var(--ease-enter) both;
-}
-.library-authored > :nth-child(2),.library-content > .library-content-section:nth-of-type(2) { animation-delay:65ms; }
 @media (max-width:900px) { .library-content { padding:24px 22px 48px; } }
 @media (max-width:600px) { .library-content { padding:20px 15px 42px; } .library-heading h1 { font-size:25px; } }
-@media (prefers-reduced-motion: reduce) {
-  .library-heading,.library-authored > :first-child,.library-content > .library-content-section { animation:none; }
-  .library-jump a { transition:none; }
-}
+@media (prefers-reduced-motion: reduce) { .library-jump a { transition:none; } }

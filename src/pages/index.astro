@@ -14,7 +14,9 @@ const selection = selectLibraryItem(
 );
 const item = selection.item;
 const location = item ? getItemLocation(curriculumGraph, item.id) : undefined;
-const lessons = item?.kind === 'unit' ? await getCollection('lessons') : [];
+// Published status is derived from reviewed MDX, never from curriculum metadata alone.
+const lessons = await getCollection('lessons', ({ data }) => !data.demo);
+const publishedLessonIds = lessons.map((entry) => entry.data.taskId);
 const lesson = item?.kind === 'unit'
   ? lessons.find((entry) => !entry.data.demo && entry.data.taskId === item.id)
   : undefined;
@@ -25,7 +27,7 @@ const prerequisites = item?.prerequisites.map((id) => {
   return { id, title: previous?.title ?? id };
 }) ?? [];
 ---
-<AppLayout title={item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101.">
+<AppLayout title={item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101." publishedLessonIds={publishedLessonIds}>
   {item ? (
     <ContentLibrary
       item={item}
