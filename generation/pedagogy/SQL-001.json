@@ -35,7 +35,7 @@
           "explanation": "Dua baris PAID muncul kecuali DISTINCT atau operator lain menghilangkan duplikasi."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: SELECT status dari dua row PAID: tanpa DISTINCT hasilnya berapa baris?",
+          "prompt": "Prediksi row count untuk SELECT merchant_id pada fixture enam pembayaran dengan tiga merchant duplikat, kemudian bandingkan dengan SELECT DISTINCT merchant_id.",
           "criterionIds": [
             "criterion-2f0d9333e1"
           ],
@@ -75,7 +75,7 @@
           "explanation": "Perbandingan menghasilkan UNKNOWN, yang tidak diterima oleh WHERE."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Mengapa NULL tidak lolos WHERE status <> 'PAID'?",
+          "prompt": "Pada fixture baru, prediksi hasil WHERE status NOT IN ('CAPTURED', NULL) untuk PAID, FAILED dan NULL; jalankan dan jelaskan hasil TRUE/FALSE/UNKNOWN tiap row.",
           "criterionIds": [
             "criterion-2f0d9333e1"
           ],
@@ -115,7 +115,7 @@
           "explanation": "Gunakan NUMERIC dengan skala/rounding yang dinyatakan atau integer minor units sesuai kontrak keuangan; jangan berasumsi double exact."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Untuk ledger pembayaran, apa risiko menaruh nilai nominal dalam double precision?",
+          "prompt": "Rancang schema psql baru dengan amount exact dan occurred_at bertipe timestamptz; tambahkan assertion yang membuktikan representasi amount/time memenuhi kontraknya.",
           "criterionIds": [
             "criterion-2f0d9333e1",
             "criterion-141c1bd6ee"
@@ -156,7 +156,7 @@
           "explanation": "Hanya ORDER BY created_at,id memberi urutan total bila id unik, sehingga subset LIMIT dapat ditentukan."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Apa perbedaan ORDER BY created_at LIMIT 2 dan ORDER BY created_at,id LIMIT 2?",
+          "prompt": "Buat fixture dengan lima payment dan tiga tied created_at; buktikan ORDER BY created_at DESC, id ASC LIMIT 3 memilih subset deterministik sementara query tanpa total order tidak menjaminnya.",
           "criterionIds": [
             "criterion-9b52958986"
           ],
@@ -196,7 +196,7 @@
           "explanation": "Pasangkan prediksi awal dengan assertion fail-hard, cek skema dari database bersih, dan perbaiki konsep memakai kasus baru tanpa melonggarkan 18/20."
         },
         "independentChallenge": {
-          "prompt": "Kerjakan variasi kasus baru tanpa memakai solusi contoh: Bagaimana memverifikasi query tanpa menganggap tampilan output sebagai bukti lulus?",
+          "prompt": "Mulai dari schema+seed bersih dan tulis 20 prediksi kasus SQL baru sebelum eksekusi; gunakan psql -v ON_ERROR_STOP=1 beserta assertions yang bisa gagal, lalu buktikan minimal 18/20 akurat.",
           "criterionIds": [
             "criterion-2f0d9333e1",
             "criterion-141c1bd6ee",
