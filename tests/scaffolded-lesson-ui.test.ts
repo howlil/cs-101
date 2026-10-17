@@ -68,11 +68,12 @@ test('V3 lesson renderer exposes every authored segment field across the three s
 test('one lessonSegments collection is used for each of understand, practice and evidence', () => {
   const template = read('.agents/skill/course-generator/assets/lesson-template.mdx');
   const validator = read('scripts/validate-generation.ts');
+  const artifactVerifier = read('src/domain/generation/verification.ts');
   assert.match(template, /export const lessonSegments =/);
   for (const stage of ['understand', 'practice', 'evidence']) {
     assert.ok(template.includes('<LearningSegments stage="' + stage + '" segments={lessonSegments} />'));
   }
-  assert.match(validator, /V3 lesson tidak memakai shared segment renderer/);
+  assert.match(artifactVerifier, /V3 lesson tidak memakai shared segment renderer/);
   assert.match(validator, /pedagogy\.version === 3/);
 });
 
