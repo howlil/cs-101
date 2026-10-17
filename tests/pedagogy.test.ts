@@ -23,10 +23,21 @@ const makeSegment=(id:string,criterionIds:string[])=>({
   prerequisiteConceptIds:[],
   workedExample:{problem:'Compare objects',steps:[{action:'Construct',reason:'Observe',expectedResult:'Two values'}]},
   guidedPractice:{prompt:'Why do values match?',hints:['Think values','Not identity'],explanation:'They share values'},
-  independentChallenge:{prompt:'Implement a new value object and test its behavior.',criterionIds,expectedEvidence:['Verified output']},
+  independentChallenge:{prompt:'Implement a new value object and test its behavior.',criterionIds,expectedEvidence:['Verified output'],
+    variationFromExample:'Apply equality to another type of account identifier'},
+  firstAction:'Predict the object comparison before running code',
+  misconceptionRepair:{
+    likelyMistake:'Objects with the same fields must be identical references',
+    whyItFails:'Reference identity and value equality are different',
+    correctiveAction:'Compare constructed values with equals and ==',
+  },
+  selfCheck:{expectedObservation:'Equal values satisfy the equality contract',
+    ifUnexpected:'Compare field values and the equals method'},
+  continueFromHere:{nextAction:'Apply the same comparison to a new fixture',
+    resumeCue:'Restart by predicting equality before running the test'},
 });
 const fixture={unitId:unit.id,curriculumFingerprint:unit.fingerprint,pedagogy:{
-  version:2 as const,
+  version:3 as const,
   segments:[makeSegment('first',['c1']),makeSegment('second',['c2']),makeSegment('third',['c1']),
     makeSegment('fourth',['c2']),makeSegment('deterministic-cli',['challenge'])],
   projectBridge:{checkpointId:'JAV-P01',requirementIds:['r1'],contribution:'Bridge to project',verification:['Test project']},
@@ -81,32 +92,7 @@ test('do not couple non-persistent pedagogical content to learner states', () =>
   assert.doesNotMatch(generator, /learnerId|userId|reviewDueDate|progressStore/);
 });
 
-// V3 extends the same canonical acceptance criteria without reviving learner state.
-const v3 = () => ({
-  ...structuredClone(fixture.pedagogy),
-  version: 3 as const,
-  segments: fixture.pedagogy.segments.map((segment) => ({
-    ...structuredClone(segment),
-    firstAction: 'Predict which value is used by the lookup',
-    misconceptionRepair: {
-      likelyMistake: 'Assume identical content implies reference identity',
-      whyItFails: 'Reference identity and value equality use different contracts',
-      correctiveAction: 'Compare two independently created values using equals',
-    },
-    selfCheck: {
-      expectedObservation: 'The two equal values satisfy the equality contract',
-      ifUnexpected: 'Inspect each value and the equals implementation',
-    },
-    independentChallenge: {
-      ...segment.independentChallenge,
-      variationFromExample: 'Use a new account key type with a different fixture and expected output',
-    },
-    continueFromHere: {
-      nextAction: 'Try the same invariant on another test fixture',
-      resumeCue: 'Resume at the independent equality challenge after a break',
-    },
-  })),
-});
+const v3 = () => structuredClone(fixture.pedagogy);
 
 test('V3 provides a low-friction first action, correction, self-check, transfer, and resume cue', () => {
   const spec = validatePedagogySpec(graph, fixture.unitId, v3());
@@ -138,7 +124,7 @@ test('new unit authoring template and validation gate require V3 without learner
   const validate = readFileSync('scripts/validate-generation.ts', 'utf8');
   const generatorSkill = readFileSync('.agents/skill/course-generator/SKILL.md', 'utf8');
   assert.match(prepare, /pedagogy: \{ version: 3, segments/);
-  assert.match(validate, /lessonSpec\.pedagogy\?\.version !== 3/);
+  assert.match(validate, /assertV3LessonBindings/);
   assert.match(generatorSkill, /Pedagogical scaffolding V3/);
   assert.doesNotMatch(prepare, /learnerProgress|userSession|reviewScheduler/);
 });
