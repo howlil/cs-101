@@ -1,0 +1,16 @@
+.root {
+  padding: 1rem;
+  border: 1px solid var(--border, #d5d5d5);
+  border-radius: 1rem;
+}
+.root h3 { margin-top: 0; }
+.root p { max-width: 68ch; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .85rem; }
+.hints { margin: .75rem 0; padding-inline-start: 1.5rem; }
+.hints li + li { margin-top: .5rem; }
+.explanation { margin-top: .75rem; padding: .75rem; border-radius: .75rem; background: var(--surface-subtle, #f3f3f3); }
+.explanation p { margin-bottom: 0; }
+.code { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .root, .root * { scroll-behavior: auto; }
+}

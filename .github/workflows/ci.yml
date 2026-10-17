@@ -52,13 +52,13 @@ jobs:
             sleep 0.5
           done
           if [ "$ready" -ne 1 ]; then cat /tmp/cs101-smoke.log; exit 1; fi
-          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/cs101-lesson.html
-          grep -q 'data-lesson-stage="understand"' /tmp/cs101-lesson.html
-          grep -q 'data-lesson-stage="practice"' /tmp/cs101-lesson.html
-          grep -q 'id="ide-project"' /tmp/cs101-lesson.html
-          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-P01' > /tmp/cs101-project.html
-          grep -q 'Problem statement' /tmp/cs101-project.html
-          curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/cs101-domain.html
-          grep -q 'NET-001' /tmp/cs101-domain.html
+          curl --fail --silent --show-error http://127.0.0.1:4321/ > /tmp/empty-root.html
+          grep -q 'Belum ada materi' /tmp/empty-root.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/empty-lesson.html
+          grep -q 'Belum ada materi' /tmp/empty-lesson.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-P01' > /tmp/empty-project.html
+          grep -q 'Belum ada materi' /tmp/empty-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/empty-domain.html
+          grep -q 'Belum ada materi' /tmp/empty-domain.html
           curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/api/learning | grep -q 404
           curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/learn/SQL-001 | grep -q 302

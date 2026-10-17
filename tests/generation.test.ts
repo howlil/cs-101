@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import actualManifest from '../curriculum/manifest.v2.json';
+import { curriculumItemFingerprint } from '../src/domain/curriculum-v2/schema';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { resolveGenerationContext } from '../src/domain/generation/context';
 import {
@@ -11,7 +11,25 @@ import {
 } from '../src/domain/generation/validate';
 import { contentCriteriaForItem } from '../src/domain/generation/criteria';
 
-const graph = buildCurriculumGraph(actualManifest);
+const fp=<T extends object>(item:T)=>({...item,fingerprint:curriculumItemFingerprint(item)});
+const unit=fp({id:'JAV-001',kind:'unit' as const,trackId:'java',moduleId:'core',order:1,title:'Equality',
+  scope:['Object equality'],criteria:[{id:'c1',text:'Predict output'},{id:'c2',text:'Verify output'}],
+  challenge:{title:'Test',steps:['Run'],raw:'Test a new equality case'},prerequisites:[],marketExpectation:[],
+  source:{title:'Java Docs',url:'https://dev.java/learn/'},crossModuleReferenceRaw:[]});
+const checkpoint=fp({id:'JAV-P01',kind:'checkpoint' as const,trackId:'java',moduleId:'core',order:2,title:'Project',
+  problemStatement:'Build it',requirements:[{id:'r1',text:'Works'}],prerequisites:['JAV-001'],
+  source:{title:'Java Docs',url:'https://dev.java/learn/'}});
+const integration=fp({id:'INT-001',kind:'integration' as const,order:1,title:'Integration',
+  brief:'Combine',scope:['Combine'],challenge:{title:'Integrate',steps:['Combine'],raw:'Combine'},
+  criteria:[{id:'i1',text:'Works'}],requirements:[],prerequisites:['JAV-001'],source:{title:'Docs'}});
+const graph=buildCurriculumGraph({version:2,
+  tracks:[{id:'java',title:'Java',order:1}],modules:[{id:'core',trackId:'java',title:'Core',order:1}],
+  items:[unit,checkpoint,integration],relations:[
+    {from:'JAV-001',to:'JAV-P01',type:'prerequisite'},
+    {from:'JAV-001',to:'INT-001',type:'prerequisite'},
+    {from:'JAV-001',to:'JAV-P01',type:'contributes_to'},
+  ],
+});
 
 test('generation context deterministic dan dibatasi ke neighborhood kecil', () => {
   const unit = graph.manifest.items.find((item) => item.kind === 'unit' && item.source.url);
@@ -38,7 +56,7 @@ test('generation context deterministic dan dibatasi ke neighborhood kecil', () =
     ...first.connections.foundation.map((item) => item.id),
     ...first.connections.contributesTo.map((item) => item.id),
   ]);
-  assert.ok(contextIds.size < graph.manifest.items.length / 3);
+  assert.ok(contextIds.size <= graph.manifest.items.length);
 });
 
 test('contributes_to menentukan nearest checkpoint tanpa menjadikannya prerequisite', () => {

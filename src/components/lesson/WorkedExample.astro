@@ -1,0 +1,18 @@
+---
+interface Step { action: string; reason: string; expectedResult: string }
+interface Props { title: string; problem: string; steps: Step[] }
+const { title, problem, steps } = Astro.props;
+---
+<section class="worked-example" aria-label={'Contoh bertahap: ' + title}>
+  <h3>{title}</h3>
+  <p>{problem}</p>
+  <ol>
+    {steps.map((step) => (
+      <li>
+        <strong>{step.action}</strong>
+        <p><strong>Mengapa:</strong> {step.reason}</p>
+        <p><strong>Hasil yang diharapkan:</strong> {step.expectedResult}</p>
+      </li>
+    ))}
+  </ol>
+</section>

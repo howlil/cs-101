@@ -1,4 +1,5 @@
 import type { CurriculumGraph } from '../curriculum-v2/graph';
+import { validatePedagogySpec } from './pedagogy';
 import { contentCriteriaForItem } from './criteria';
 import {
   generationRecordSchema,
@@ -21,6 +22,7 @@ export function validateGenerationPlan(
 
   const sourcePack = sourcePackSchema.parse(sourcePackInput);
   const lessonSpec = lessonSpecSchema.parse(lessonSpecInput);
+  if (lessonSpec.pedagogy) validatePedagogySpec(graph, itemId, lessonSpec.pedagogy);
 
   if (sourcePack.itemId !== item.id || lessonSpec.itemId !== item.id) {
     throw new Error('Generation artifact menunjuk item yang berbeda.');

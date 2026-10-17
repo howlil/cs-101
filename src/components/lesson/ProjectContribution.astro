@@ -1,0 +1,16 @@
+---
+interface Props {
+  checkpointId: string;
+  contribution: string;
+  verification: string[];
+}
+const { checkpointId, contribution, verification } = Astro.props;
+const projectHref = '/?item=' + encodeURIComponent(checkpointId);
+---
+<section aria-label="Hubungan dengan project">
+  <h3>Dipakai untuk apa di project?</h3>
+  <p>{contribution}</p>
+  <p><a href={projectHref}>Lihat project {checkpointId}</a></p>
+  <h4>Cara memeriksanya</h4>
+  <ul>{verification.map((step) => <li>{step}</li>)}</ul>
+</section>

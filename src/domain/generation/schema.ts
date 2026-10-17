@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { itemIdSchema, sourceRefSchema, criterionSchema } from '../curriculum-v2/schema';
 import { reviewQuestionSchema } from '../review/schema';
+import { pedagogySpecSchema } from './pedagogy';
 
 export const contextItemSchema = z.object({
   id: itemIdSchema,
@@ -87,6 +88,7 @@ export const lessonSpecSchema = z.object({
   practice: z.array(z.string().min(1)).min(1),
   coverage: z.array(coverageEntrySchema).min(1),
   reviewQuestions: z.array(reviewQuestionSchema).length(5),
+  pedagogy: pedagogySpecSchema.optional(), // v1 authored specs remain readable
 });
 
 export const generationRecordSchema = z.object({

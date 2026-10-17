@@ -40,6 +40,20 @@ Read `generation/staging/<ID>/context.json` from `generation:prepare`. This boun
 
 Inspect the curated source first, then 1–5 authoritative sources specific to the declared scope. Prefer primary documentation and standards. Record direct URLs in `source-pack.json`. Unsupported claims must be resolved or omitted before validating.
 
+### Pedagogical scaffolding (mandatory for newly generated units)
+
+The current manifest item ID remains stable. Split broad scopes into short *learning segments inside the same unit*, not new curriculum item IDs. Avoid fixed 5-minute caps or compulsory completion, reflection, uploads, learner tracking, or timers. Each segment must have exactly one actionable objective and provide:
+
+1. A concrete reason/context from the project's engineering problem.
+2. A mental model and mechanism in plain language, followed by correct technical detail.
+3. A worked example: each step includes an action, why it works, and observable result.
+4. A guided practice prompt with 2–3 hints disclosed on demand, plus a separate explanation.
+5. An independent transfer challenge mapped to original acceptance criteria.
+
+Write optional \`pedagogy\` metadata in the new lesson-spec using \`pedagogySpecSchema\` (version 2). New authored units **must** include it; older staged specs without it remain readable for backwards compatibility while being migrated. Each original criterion and the challenge must be covered by at least one segment's independent challenge. Where a direct \`contributes_to\` edge exists, add a \`projectBridge\` with a real checkpoint and actual requirement IDs; do not invent a bridge from the nearest module checkpoint.
+
+Keep the presentation reading-first. Reuse \`WorkedExample\`, \`GuidedPractice\`, and \`ProjectContribution\` when they improve the content; do not add separate routes, required interactions, completion gates or persisted state. Favor predictive reasoning, debugging and runnable examples over multiple-choice trivia. A knowledge check is formative, not a clinical ADHD test.
+
 ### Lesson specification
 
 Create `lesson-spec.json` before prose, including:

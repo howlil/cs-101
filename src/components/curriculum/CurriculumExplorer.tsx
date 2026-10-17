@@ -30,6 +30,7 @@ export default function CurriculumExplorer({ tracks, activeTrackId, modules, int
   integrations: ExplorerItem[];
   selectedModuleId?: string;
 }) {
+  if (tracks.length === 0) return <div className="curriculum-controls"><p className="curriculum-empty" role="status">Belum ada domain kurikulum.</p></div>;
   const activeIntegration = integrations.some((item) => item.active);
   const selectedModuleIndex = modules.findIndex((module) => module.id === selectedModuleId);
   const defaultOpen = activeIntegration ? modules.length : Math.max(0, selectedModuleIndex);
