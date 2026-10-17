@@ -16,10 +16,11 @@ import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
 import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
 
-// Copy all reviewed Pedagogy V3 segments from the validated lesson spec.
-// Until M3, validate exact synchronization with lesson-spec.json manually.
-// Replace the placeholder with a serialized JavaScript array before validation.
-export const lessonSegments = {{PEDAGOGY_V3_SEGMENTS_JSON}};
+// Imported artifacts are created by generation:validate, then generation:promote.
+// Do not copy questions or pedagogy metadata into MDX by hand.
+import pedagogyRecord from '../../../generation/pedagogy/{{ITEM_ID}}.json';
+import questionBank from '../../../review-banks/{{ITEM_ID}}.json';
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
 
 <LessonStage stage="understand">
 
@@ -49,7 +50,7 @@ export const lessonSegments = {{PEDAGOGY_V3_SEGMENTS_JSON}};
 
 <LearningSegments stage="practice" segments={lessonSegments} />
 
-<Quiz items={{{QUIZ_DATA}}} />
+<Quiz bank={questionBank} />
 
 </LessonStage>
 
