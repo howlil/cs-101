@@ -20,10 +20,8 @@ export const sourceClaimSchema = z.object({
 export function verifySourceClaims(
   pack: SourcePack,
   concepts: { id: string }[],
-  requireLedger: boolean,
 ) {
   const claims = z.array(sourceClaimSchema).parse(pack.claims ?? []);
-  if (!requireLedger) return claims;
   if (!claims.length) throw new Error('V3 wajib memiliki source claim ledger.');
   const sourceUrls = new Set(pack.sources.map((s) => s.url));
   const conceptIds = new Set(concepts.map((c) => c.id));
