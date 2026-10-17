@@ -167,3 +167,7 @@ pnpm generation:promote SQL-001
 ```
 
 Promotion refuses a bundle changed since validation and writes the final lesson, generation record, and review bank. Generation has no learner completion state to change.
+
+## M3 artifact gates
+
+The researcher records concept-level claims with direct source URLs and section locators in `source-pack.json`. For technical worked examples, author an `executable-examples.json` plan and local fixtures with exact stdout. Validation runs those fixtures and checks IDs, source mapping and MDX artifact imports. Promotion re-runs them and publishes JSON, code fixtures, a proof file, and an integrity receipt. A future source revision or artifact mutation fails `pnpm validate`. The author still reviews accuracy and relevance; links and hashes alone are not factual verification.
