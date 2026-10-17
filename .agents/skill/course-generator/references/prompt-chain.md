@@ -95,7 +95,8 @@ The spec must include:
 - misconception traps;
 - practice;
 - coverage matrix for every curriculum criterion plus challenge;
-- exactly five review questions.
+- exactly five review questions;
+- Pedagogy V3 firstAction, misconceptionRepair, selfCheck, independentChallenge.variationFromExample and continueFromHere.
 
 Every curriculum criterion must appear in at least one review-question `criterionIds`.
 
