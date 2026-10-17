@@ -7,6 +7,7 @@ import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { validateGenerationPlan, buildGenerationRecord, buildReviewBank } from '../src/domain/generation/validate';
 import { assertV3LessonBindings } from '../src/domain/generation/verification';
+import { assertFocusedLessonLayout } from '../src/domain/generation/focused-lesson-layout';
 import { executeExamples } from './lib/executable-proof';
 import { executablePlanSchema } from '../src/domain/generation/executable-schema';
 
@@ -41,6 +42,7 @@ if (!previouslyPublished && lessonSpec.pedagogy?.version !== 3) {
 }
 
 const lesson = readFileSync(lessonPath, 'utf8');
+assertFocusedLessonLayout(lesson, item.id);
 const frontmatter = lesson.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 if (!frontmatter) throw new Error('lesson.mdx tidak punya frontmatter.');
 
@@ -173,6 +175,7 @@ writeFileSync(
       'criterion-coverage',
       'review-coverage',
       'lesson-frontmatter',
+      'focused-three-stage-layout',
       'required-components',
       'prerequisite-links',
       'source-links',
