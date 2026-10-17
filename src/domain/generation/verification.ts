@@ -48,8 +48,8 @@ export function verifySourceClaims(
 
 export function assertV3LessonBindings(lesson: string, itemId: string) {
   if (!/^[A-Z]+-(?:P\d{2,3}|\d{3})$/.test(itemId)) throw new Error('Item ID invalid.');
-  const pedigree = "import pedagogyRecord from '../../../generation/pedagogy/" + itemId + ".json';";
-  const bank = "import questionBank from '../../../review-banks/" + itemId + ".json';";
+  const pedigree = ['import pedagogyRecord', 'from', "'../../../generation/pedagogy/" + itemId + ".json';"].join(' ');
+  const bank = ['import questionBank', 'from', "'../../../review-banks/" + itemId + ".json';"].join(' ');
   const shared = 'export const lessonSegments = pedagogyRecord.pedagogy.segments;';
   for (const [label, literal] of [
     ['V3 pedagogy import', pedigree], ['V3 question bank import', bank],
