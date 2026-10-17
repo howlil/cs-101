@@ -10,6 +10,12 @@ if (process.argv.includes('--write')) {
   writeFileSync(target, output);
   writeFileSync(resolve('curriculum/import-report.json'), JSON.stringify(report,null,2) + '\n');
 } else if (process.argv.includes('--check') && readFileSync(target,'utf8') !== output) {
-  throw new Error('Imported manifest drift. Run import with --write and inspect the diff.');
+  const current=readFileSync(target,'utf8');
+  let index=0;
+  while(index<current.length && index<output.length && current[index]===output[index])index++;
+  const difference='first mismatch offset='+index+
+    ' current='+JSON.stringify(current.slice(index,index+180))+
+    ' generated='+JSON.stringify(output.slice(index,index+180));
+  throw new Error('Imported manifest drift. '+difference);
 }
 console.log(JSON.stringify({mode:process.argv.slice(2), source:report.sourceSha256, counts:report.counts, warnings:report.warnings.slice(0,20)},null,2));
