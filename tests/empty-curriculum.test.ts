@@ -5,16 +5,16 @@ import manifest from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { selectLibraryItem } from '../src/domain/content-library';
 
-test('curriculum reset leaves a valid empty source of truth', () => {
+test('workbook rollout restores eight domains as outlines, without invented graph edges', () => {
   const graph=buildCurriculumGraph(manifest);
   assert.equal(graph.manifest.version,2);
-  assert.deepEqual(graph.manifest.tracks,[]);
-  assert.deepEqual(graph.manifest.modules,[]);
-  assert.deepEqual(graph.manifest.items,[]);
+  assert.equal(graph.manifest.tracks.length,8);
+  assert.equal(graph.manifest.modules.length,67);
+  assert.equal(graph.manifest.items.length,370);
   assert.deepEqual(graph.manifest.relations,[]);
-  assert.deepEqual(selectLibraryItem(graph,'java','JAV-001'),{trackId:'',item:undefined});
+  assert.equal(selectLibraryItem(graph,'java','JAV-009').item?.id,'JAV-009');
 });
-test('no authored lessons, staged content, generated records or review banks survive reset', () => {
+test('outlines do not silently become published MDX or generated review banks', () => {
   const list=(path:string)=>readdirSync(path,{recursive:true}).map(String);
   assert.deepEqual(list('src/content/lessons').filter(x=>x.endsWith('.mdx')),[]);
   assert.deepEqual(list('review-banks').filter(x=>x.endsWith('.json')),[]);
