@@ -14,6 +14,9 @@ import Challenge from '../../components/lesson/Challenge.astro';
 import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
 import SourceList from '../../components/lesson/SourceList.astro';
 import Reveal from '../../components/lesson/Reveal.astro';
+import WorkedExample from '../../components/lesson/WorkedExample.astro';
+import GuidedPractice from '../../components/lesson/GuidedPractice';
+import ProjectContribution from '../../components/lesson/ProjectContribution.astro';
 
 <LessonStage stage="understand">
 
@@ -43,7 +46,11 @@ import Reveal from '../../components/lesson/Reveal.astro';
 
 ## Contoh dan prediksi
 
-{{WORKED_EXAMPLE}}
+<WorkedExample
+  title="{{WORKED_EXAMPLE_TITLE}}"
+  problem="{{WORKED_EXAMPLE_PROBLEM}}"
+  steps={{{WORKED_EXAMPLE_STEPS}}}
+/>
 
 ## Miskonsepsi yang harus dihindari
 
@@ -55,7 +62,15 @@ import Reveal from '../../components/lesson/Reveal.astro';
 
 ## Guided practice
 
-{{PRACTICE}}
+<GuidedPractice
+  client:load
+  title="{{GUIDED_PRACTICE_TITLE}}"
+  prompt="{{GUIDED_PRACTICE_PROMPT}}"
+  hints={{{GUIDED_PRACTICE_HINTS}}}
+  explanation="{{GUIDED_PRACTICE_EXPLANATION}}"
+/>
+
+{{INDEPENDENT_PRACTICE}}
 
 <Quiz items={{{QUIZ_DATA}}} />
 
@@ -70,6 +85,8 @@ import Reveal from '../../components/lesson/Reveal.astro';
 <LessonStage stage="evidence">
 
 <ExitCriteria items={{{EXIT_CRITERIA}}} />
+
+{{VERIFIED_PROJECT_BRIDGE_OR_EMPTY}}
 
 ## Periksa hasil secara mandiri
 
