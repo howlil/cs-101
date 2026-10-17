@@ -33,6 +33,8 @@ jobs:
           java-version: '21'
       - name: Install
         run: pnpm install --frozen-lockfile
+      - name: Verify workbook import snapshot is deterministic
+        run: pnpm run curriculum:verify-import
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -58,13 +60,15 @@ jobs:
             sleep 0.5
           done
           if [ "$ready" -ne 1 ]; then cat /tmp/cs101-smoke.log; exit 1; fi
-          curl --fail --silent --show-error http://127.0.0.1:4321/ > /tmp/empty-root.html
-          grep -q 'Belum ada materi' /tmp/empty-root.html
-          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/empty-lesson.html
-          grep -q 'Belum ada materi' /tmp/empty-lesson.html
-          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-P01' > /tmp/empty-project.html
-          grep -q 'Belum ada materi' /tmp/empty-project.html
-          curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/empty-domain.html
-          grep -q 'Belum ada materi' /tmp/empty-domain.html
+          curl --fail --silent --show-error http://127.0.0.1:4321/ > /tmp/catalog-root.html
+          grep -q 'Build Doctor' /tmp/catalog-root.html
+          grep -q 'Outline kurikulum' /tmp/catalog-root.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/catalog-database.html
+          grep -q 'SQL Workbench' /tmp/catalog-database.html
+          grep -q 'Outline kurikulum' /tmp/catalog-database.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
+          grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/catalog-networking.html
+          grep -q 'Request Path' /tmp/catalog-networking.html
           curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/api/learning | grep -q 404
           curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/learn/SQL-001 | grep -q 302
