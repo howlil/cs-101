@@ -119,7 +119,7 @@ test('V3 rejects an absent first action, misconception repair, self-check, and r
   for (const field of ['firstAction', 'misconceptionRepair', 'selfCheck', 'continueFromHere']) {
     const broken = v3() as any;
     delete broken.segments[0][field];
-    assert.throws(() => validatePedagogySpec(graph, fixture.unitId, broken), undefined, field);
+    assert.throws(() => validatePedagogySpec(graph, fixture.unitId, broken), { name: 'ZodError' }, field);
   }
 });
 
