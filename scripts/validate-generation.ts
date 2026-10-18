@@ -7,6 +7,7 @@ import manifestSource from '../curriculum/manifest.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { validateGenerationPlan, buildGenerationRecord, buildReviewBank } from '../src/domain/generation/validate';
 import { assertV3LessonBindings } from '../src/domain/generation/verification';
+import { assertFocusedLessonLayout } from '../src/domain/generation/focused-lesson-layout';
 import { executeExamples } from './lib/executable-proof';
 import { executablePlanSchema } from '../src/domain/generation/executable-schema';
 
@@ -34,13 +35,8 @@ const { sourcePack, lessonSpec } = validateGenerationPlan(
   JSON.parse(readFileSync(specPath, 'utf8')),
 );
 
-// Older authored units remain readable; every NEW lesson must use V3.
-const previouslyPublished = existsSync(resolve('generation', itemId + '.json'));
-if (!previouslyPublished && lessonSpec.pedagogy?.version !== 3) {
-  throw new Error('Materi baru wajib memiliki Pedagogy V3 (first action, self-check, feedback, continuation).');
-}
-
 const lesson = readFileSync(lessonPath, 'utf8');
+assertFocusedLessonLayout(lesson, item.id);
 const frontmatter = lesson.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 if (!frontmatter) throw new Error('lesson.mdx tidak punya frontmatter.');
 
@@ -61,20 +57,9 @@ if (data.curriculumFingerprint !== item.fingerprint) {
   throw new Error('Lesson frontmatter stale.');
 }
 
-if (lessonSpec.pedagogy) {
-  if (lessonSpec.pedagogy.version === 3) {
-    assertV3LessonBindings(lesson, item.id);
-  } else {
-    // Preserve V2 authored lesson rendering for backward compatibility.
-    for (const component of ['WorkedExample', 'GuidedPractice']) {
-      if (!lesson.includes('<' + component)) {
-        throw new Error('Pedagogy V2 belum dirender di MDX: ' + component);
-      }
-    }
-  }
-  if (lessonSpec.pedagogy.projectBridge && !lesson.includes('<ProjectContribution')) {
-    throw new Error('Project bridge dari metadata belum dirender pada lesson.');
-  }
+assertV3LessonBindings(lesson, item.id);
+if (lessonSpec.pedagogy.projectBridge && !lesson.includes('<ProjectContribution')) {
+  throw new Error('Project bridge dari metadata belum dirender pada lesson.');
 }
 
 const requiredImports = [
@@ -113,7 +98,7 @@ writeFileSync(
 );
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 let v3Hashes: Record<string, string> = {};
-if (lessonSpec.pedagogy?.version === 3) {
+{
   const planPath = resolve(directory, 'executable-examples.json');
   if (!existsSync(planPath)) throw new Error('V3 wajib memiliki executable-examples.json (atau alasan tidak executable).');
   const planText = readFileSync(planPath, 'utf8');
@@ -173,11 +158,16 @@ writeFileSync(
       'criterion-coverage',
       'review-coverage',
       'lesson-frontmatter',
+      'focused-three-stage-layout',
       'required-components',
       'prerequisite-links',
       'source-links',
-      ...(lessonSpec.pedagogy ? ['pedagogical-scaffolding', 'verified-project-bridge'] : []),
-      ...(lessonSpec.pedagogy?.version === 3 ? ['v3-canonical-artifact-imports', 'source-claim-ledger', 'executable-proof', 'receipt-hashes'] : []),
+      'pedagogical-scaffolding',
+      'verified-project-bridge',
+      'v3-canonical-artifact-imports',
+      'source-claim-ledger',
+      'executable-proof',
+      'receipt-hashes',
     ],
   }, null, 2) + '\n',
 );

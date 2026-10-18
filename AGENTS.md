@@ -32,3 +32,9 @@ Maintain content fidelity, mobile sidebar navigation, direct-link selection, and
 The reviewed workbook snapshot `curriculum/source/engineering-2026-10-18.json` maps into 8 tracks, 67 modules and 370 source-backed **outlines**, not completed lessons. Priorities are 225 P0, 123 P1 and 22 P2. `pnpm curriculum:verify-import` detects source/manifest drift, and `pnpm curriculum:status` reports published coverage by domain.
 
 No standalone checkpoint or hard prerequisite may be inferred solely from row order: the workbook did not supply verified graph edges. Unit challenges are source-authored project ideas, not proof that standalone projects have been implemented. Publish P0 units gradually with the V3 source, quiz and executable-proof pipeline. Never present 370 imported outlines as 370 validated lessons or enable learner tracking.
+
+## Published lesson view ownership
+
+- `?item=<ID>`: Materi; `&view=soal`: guided practice/quiz; `&view=project`: implementation challenge. Only the active view renders in MDX; links are addressable without learner state.
+- All published Pedagogy V3 lessons require exactly three ordered `LessonStage` wrappers, with complete `SourceList` in `understand`, `Quiz` in `practice`, and `Challenge`/verification in `evidence`. Stage layout is checked both before promotion and during every published content validation. No older pedagogy schemas are accepted; previously preserved materials require new V3 review before publication.
+- An unauthored outline has no real quiz: its Materi CTA goes directly to Project rather than an empty Soal page. Never manufacture questions from the workbook.

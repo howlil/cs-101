@@ -67,6 +67,8 @@ async function assertRenderedHtml() {
     assert.ok(page.includes('Mental model: identitas vs nilai'), 'Materi tab missing worked explanation.');
     assert.ok(!page.includes('Cek jawaban'), 'Quiz must not render in Materi tab.');
     assert.ok(!page.includes('Kriteria selesai'), 'Project must not render in Materi tab.');
+    assert.ok(page.includes('Sumber teknis'), 'Full technical source list must render in Materi tab.');
+    assert.ok(page.includes('docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html'), 'Official reference must be accessible from Materi.');
 
     const root = 'http://127.0.0.1:' + port + '/?item=' + GOLDEN_UNIT_ID;
     const quizResponse = await fetch(root + '&view=soal');
@@ -76,6 +78,7 @@ async function assertRenderedHtml() {
     assert.ok(quizPage.includes('Coba prediksi dahulu'), 'Guided practice must render in Soal tab.');
     assert.ok(!quizPage.includes('Mental model: identitas vs nilai'), 'Materi must not render in Soal tab.');
     assert.ok(!quizPage.includes('Kriteria selesai'), 'Project must not render in Soal tab.');
+    assert.ok(!quizPage.includes('Sumber teknis'), 'SourceList must not be gated behind the Soal tab.');
 
     const projectResponse = await fetch(root + '&view=project');
     assert.equal(projectResponse.status, 200);
@@ -84,6 +87,7 @@ async function assertRenderedHtml() {
     assert.ok(projectPage.includes('Payment Replay Safety Lab'), 'Project bridge must render in Project tab.');
     assert.ok(!projectPage.includes('Cek jawaban'), 'Quiz must not render in Project tab.');
     assert.ok(!projectPage.includes('Mental model: identitas vs nilai'), 'Materi must not render in Project tab.');
+    assert.ok(!projectPage.includes('Sumber teknis'), 'SourceList must not be gated behind Project.');
 
     const invalid = await fetch(root + '&view=invalid');
     assert.equal(invalid.status, 200);

@@ -56,11 +56,11 @@ Every V3 segment must contain:
 7. **Prove:** an independent transfer challenge on a *different* case, mapped to canonical criterion IDs.
 8. **Continue:** a next action and a `resumeCue` to restart after interruption without saving progress.
 
-New authored lesson specs **must** set `pedagogy.version: 3` and satisfy `pedagogySpecV3Schema`. V2 remains readable for earlier published lessons only. Every original criterion and challenge must be covered. A `projectBridge` may only reference a real checkpoint and requirements connected by an explicit `contributes_to` relation.
+New authored lesson specs **must** set `pedagogy.version: 3` and satisfy `pedagogySpecV3Schema`. Pedagogy V2 is retired; only the V3 contract is supported. Every original criterion and challenge must be covered. A `projectBridge` may only reference a real checkpoint and requirements connected by an explicit `contributes_to` relation.
 
 **Authoring quality gate:** verify that the first step is genuinely approachable, the explanation is correct, hints gradually reveal information, the transfer problem differs meaningfully, and the recovery hint helps rather than scolds. Structural validation is not proof of learning effectiveness. Do not conflate ADHD with low ability or a prescribed learning style.
 
-Render one coherent **Why → Understand → Try → Prove → Connect** cycle per meaningful objective. M2's shared renderer displays all provided V3 segments in three stages, but **does not prove that manually embedded lessonSegments equal lesson-spec.json**; M3 will add artifact-level parity and executable proof. Keep this limitation visible in review.
+Render one coherent **Why → Understand → Try → Prove → Connect** cycle per objective. The three focused views consume canonical promoted V3 artifacts rather than manually duplicated segment JSON; M3 verifies release receipts and reproducible code examples.
 ### Lesson specification
 
 Create `lesson-spec.json` before prose, including:
@@ -72,16 +72,21 @@ Create `lesson-spec.json` before prose, including:
 
 `evidenceExpected` in metadata means **a locally observable result**, not a submission or persisted learner record.
 
-### Write MDX
+### Write MDX — three focused views (Pedagogy V3 only)
 
-Use `assets/lesson-template.mdx` with three **visible in-page sections**. In V3, write one `lessonSegments` array from the reviewed `lesson-spec.pedagogy.segments` and render it through `<LearningSegments stage="understand|practice|evidence" segments={lessonSegments} />` for the corresponding stage. Do not hand-build separate copies of the same data in the MDX. Each stage uses the same segment IDs; the reusable renderer provides the Why/Start/Understand, Try/Recover/Self-check, and Prove/Continue blocks respectively:
-1. Materi — mental model, explanations, traces, and sources.
-2. Latihan soal — formative quiz, guided practice and challenge.
-3. Praktik — self-verification checklist only; no evidence form, progress state, or upload.
+Use `assets/lesson-template.mdx`. The application routes through a **single page** with `?item=ID`, `&view=soal` and `&view=project`. This is **not** an anchor-scrolling page: `LessonStage` selectively renders only the active stage.
 
-A separate **Ide project** section is composed by the content page using the nearest relevant checkpoint from the manifest. In formative quiz questions, supply optional `whenIncorrect` (one actionable correction) and `nextAction` (one next experiment) when appropriate. These do not track answers; no completion or session UI.
+- `<LessonStage stage="understand">` → **Materi**: `MentalModel`, `ConceptGraph`, `LearningSegments stage="understand"` (which renders `WorkedExample`), and the **full** `SourceList`.
+- `<LessonStage stage="practice">` → **Soal**: `LearningSegments stage="practice"` (which renders `GuidedPractice`) and the `Quiz`.
+- `<LessonStage stage="evidence">` → **Project**: V3 `LearningSegments stage="evidence"`, `Challenge`, `ExitCriteria`, and an optional verified `ProjectContribution`.
 
-Required components: `LessonStage`, `MentalModel`, `ConceptGraph`, `LearningSegments`, `Quiz`, `Challenge`, `ExitCriteria`, `SourceList`. The old `WorkedExample` and `GuidedPractice` components remain available to older V2 lessons; V3 consumes them through `LearningSegments`. Use reusable content components; never add page navigation, global sidebar, or trackers into lesson MDX.
+No quiz, challenge, or source list should be copied across view boundaries. The three-stage structure and component ownership are validated by `assertFocusedLessonLayout` in **generation:validate** and in **validate:content** on every published non-demo lesson.
+
+**No legacy authoring compatibility.** Old Pedagogy V1/V2 source data is not accepted. Re-author any externally preserved lesson into a fully reviewed Pedagogy V3 spec, canonical JSON imports and all three `LessonStage` wrappers before publishing. Do not create direct `<WorkedExample>` or `<GuidedPractice>` tags in authored MDX; the V3 renderer owns them.
+
+V3 imports canonical data from `generation/pedagogy/<ID>.json` and `review-banks/<ID>.json`: no inline copies of segment arrays or questions. Optional `whenIncorrect` and `nextAction` improve local quiz feedback, with no answer persistence.
+
+Unauthored outlines display only available content. **Materi's next action jumps to Project** when no authored quiz exists; do not prompt learners to open an unavailable quiz. All design remains compact, monochrome and read-only.
 
 ### M3 verification artifacts (required for new V3 lessons)
 

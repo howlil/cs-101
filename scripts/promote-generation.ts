@@ -74,8 +74,10 @@ if (data.curriculumFingerprint !== item.fingerprint) {
   throw new Error('Lesson berubah setelah validation.');
 }
 
-const isV3 = !!hashes.verifiedReceipt;
-if (isV3) {
+if (!hashes.verifiedReceipt) {
+  throw new Error('Generation artifacts wajib menggunakan verified V3 receipt.');
+}
+{
   const derived = resolve(staging, 'derived');
   const planPath = resolve(staging, 'executable-examples.json');
   const required = {
@@ -110,7 +112,7 @@ copyFileSync(lesson, lessonDestination);
 copyFileSync(record, recordDestination);
 copyFileSync(review, reviewDestination);
 
-if (isV3) {
+{
   const derived = resolve(staging, 'derived');
   const targets = [
     [resolve(derived, 'pedagogy-record.json'), resolve('generation','pedagogy', item.id + '.json')],

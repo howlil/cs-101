@@ -35,11 +35,11 @@ const ledger = () => sourcePackSchema.parse({
 
 test('V3 claims must cover concepts with a traceable source and locator',()=>{
   const pack=ledger();
-  assert.equal(verifySourceClaims(pack,[{id:'equality'}],true).length,1);
-  assert.throws(()=>verifySourceClaims({...pack,claims:[]},[{id:'equality'}],true),/claim ledger/);
-  assert.throws(()=>verifySourceClaims(pack,[{id:'another-concept'}],true),/concept tidak dikenal/);
-  assert.throws(()=>verifySourceClaims({...pack,claims:[{...pack.claims[0],sourceUrl:'https://fake.invalid'}]},[{id:'equality'}],true),/di luar source pack/);
-  assert.throws(()=>verifySourceClaims({...pack,claims:[pack.claims[0],pack.claims[0]]},[{id:'equality'}],true),/duplikat/);
+  assert.equal(verifySourceClaims(pack,[{id:'equality'}]).length,1);
+  assert.throws(()=>verifySourceClaims({...pack,claims:[]},[{id:'equality'}]),/claim ledger/);
+  assert.throws(()=>verifySourceClaims(pack,[{id:'another-concept'}]),/concept tidak dikenal/);
+  assert.throws(()=>verifySourceClaims({...pack,claims:[{...pack.claims[0],sourceUrl:'https://fake.invalid'}]},[{id:'equality'}]),/di luar source pack/);
+  assert.throws(()=>verifySourceClaims({...pack,claims:[pack.claims[0],pack.claims[0]]},[{id:'equality'}]),/duplikat/);
 });
 
 test('V3 MDX can only consume canonical published pedagogy and question bank',()=>{

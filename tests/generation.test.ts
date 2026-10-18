@@ -106,6 +106,9 @@ test('generation plan harus menutup seluruh criterion, source, dan review covera
       notes: ['Fixture'],
     }],
     unsupportedClaims: [],
+    claims:[{id:'core-claim',statement:'Java value objects can compare their stored data for equality.',
+      conceptIds:['core'],sourceUrl:unit.source.url,locator:'Java object equality documentation',
+      rationale:'The referenced documentation explains the value and identity equality contract.'}],
   };
 
   const spec = {
@@ -130,6 +133,45 @@ test('generation plan harus menutup seluruh criterion, source, dan review covera
       evidenceExpected: 'Observable evidence',
     })),
     reviewQuestions: questions,
+    pedagogy: {
+      version: 3 as const,
+      segments: [{
+        id: 'core-concept',
+        objective: 'Predict reliable Java equality behavior',
+        whyItMatters: 'The equality contract controls how collections match values',
+        firstAction: 'Predict how separate objects compare',
+        mentalModel: 'Reference identity differs from value equality',
+        explanation: 'Compare field values with the domain equality contract',
+        prerequisiteConceptIds: [],
+        workedExample: {
+          problem: 'Compare two independently constructed objects',
+          steps: [{action:'Create both',reason:'Separate instances test identity',expectedResult:'Different references'}],
+        },
+        guidedPractice: {
+          prompt:'Predict equals for the given values',
+          hints:['Find the compared fields','Check the equality contract'],
+          explanation:'Objects with equal values can be equal despite different references',
+        },
+        misconceptionRepair: {
+          likelyMistake:'Same data means same reference',
+          whyItFails:'Two allocations produce different reference identities',
+          correctiveAction:'Use equals for domain value comparison',
+        },
+        selfCheck:{expectedObservation:'Values match under equals',ifUnexpected:'Inspect equality definition'},
+        independentChallenge:{
+          prompt:'Use another immutable key type to prove the equality behavior',
+          criterionIds:expected.map((criterion)=>criterion.id),
+          expectedEvidence:['Verified comparison of two newly created keys'],
+          variationFromExample:'Use a different domain key and sample values',
+        },
+        continueFromHere:{nextAction:'Try a new key in a HashSet',resumeCue:'Resume at predicting equal fields'},
+      }],
+      projectBridge: {
+        checkpointId:'JAV-P01',requirementIds:['r1'],
+        contribution:'Apply reliable identity to the project',
+        verification:['Demonstrate stable equality before insertion'],
+      },
+    },
   };
 
   const validated = validateGenerationPlan(graph, unit.id, sourcePack, spec);
