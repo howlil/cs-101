@@ -160,6 +160,18 @@ try {
   assert.equal(goldenUnit.fingerprint, curriculumItemFingerprint(goldenUnit));
   parseManifestV2(goldenManifest);
   writeJson('curriculum/manifest.v2.json', goldenManifest);
+  // Golden must isolate all real published lessons and their V3 records before
+  // replacing the manifest with one fixture. Otherwise a newly published real
+  // unit would fail validation against the isolated JAV-009-only curriculum.
+  for (const directory of [
+    'src/content/lessons', 'generation/pedagogy', 'generation/sources',
+    'generation/verified', 'generation/proofs', 'generation/executables',
+    'generation/fixtures', 'review-banks',
+  ]) {
+    rmSync(join(work, directory), {recursive:true,force:true});
+    mkdirSync(join(work, directory), {recursive:true});
+  }
+  rmSync(join(work, 'generation/NET-001.json'), {force:true});
   // This isolated manifest deliberately contains only JAV-009. Its concept
   // overlay must be equally isolated; never weaken production link validation.
   writeJson('curriculum/learning-graph.v1.json', {

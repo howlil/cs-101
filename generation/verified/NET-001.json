@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "NET-001",
+  "curriculumFingerprint": "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "hashes": {
+    "lesson": "67877e4fde2bb76913434b1c643597da7c52b54fab4a651f638e4424846d5fe9",
+    "pedagogy": "58709654c10896c2c029692af58e5641624b1ede84efe426ffd5616c7150efa2",
+    "questionBank": "fe077ba32498201115867f96d7e34b6746615377954743f5c639290bef5ee442",
+    "sourcePack": "45982ea36150120ab48ab88ee5033b69e27bd048c893aa00e78b08854710facd",
+    "exampleProof": "e68fc19df5490d4ef55fdb247599635dced7f62f8c46e1c1774b288eb2dc5cd1",
+    "examplePlan": "68eb873b36b211ae6a3384c08b7d2891654177b3984144ec4e6ec035af2038a1"
+  }
+}

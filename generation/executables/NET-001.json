@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "NET-001",
+  "curriculumFingerprint": "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "examples": [
+    {
+      "id": "http-versus-connect",
+      "runtime": "node",
+      "file": "request-path.mjs",
+      "expectedStdout": "http-created=201\nhttp-unavailable=503\nconnect-error=ECONNREFUSED\n"
+    }
+  ]
+}

@@ -32,7 +32,7 @@ Maintain content fidelity, mobile sidebar navigation, direct-link selection, and
 
 The reviewed workbook snapshot `curriculum/source/engineering-2026-10-18.json` maps into 8 tracks, 67 modules and 370 source-backed **outlines**, not completed lessons. Priorities are 225 P0, 123 P1 and 22 P2. `pnpm curriculum:verify-import` detects source/manifest drift, and `pnpm curriculum:status` reports published coverage by domain.
 
-No standalone checkpoint or hard prerequisite may be inferred solely from row order: the workbook did not supply verified graph edges. Unit challenges are source-authored project ideas, not proof that standalone projects have been implemented. Publish P0 units gradually with the V3 source, quiz and executable-proof pipeline. Never present 370 imported outlines as 370 validated lessons or enable learner tracking.
+No standalone checkpoint or hard prerequisite may be inferred solely from row order: the workbook did not supply verified graph edges. Unit challenges are source-authored project ideas, not proof that standalone projects have been implemented. Publish P0 units gradually with the V3 source, quiz and executable-proof pipeline. NET-001 is the first authored unit; revalidate its tracked staging source/spec and promoted artifacts using `pnpm generation:validate NET-001` followed by `pnpm generation:promote NET-001`. Never present 370 imported outlines as 370 validated lessons or enable learner tracking.
 
 ## Published lesson view ownership
 

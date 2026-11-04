@@ -1,0 +1,44 @@
+{
+  "itemId": "NET-001",
+  "fingerprint": "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "sources": [
+    {
+      "title": "RFC 1122 — Internet Host Communication Layers",
+      "url": "https://www.rfc-editor.org/rfc/rfc1122.html"
+    },
+    {
+      "title": "RFC 791 — Internet Protocol",
+      "url": "https://www.rfc-editor.org/rfc/rfc791.html"
+    },
+    {
+      "title": "RFC 9293 — Transmission Control Protocol",
+      "url": "https://www.rfc-editor.org/rfc/rfc9293.html"
+    },
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+    },
+    {
+      "title": "RFC 9112 — HTTP/1.1",
+      "url": "https://www.rfc-editor.org/rfc/rfc9112.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments: layered path, encapsulation and six failures",
+      "assessedAt": "Five local quiz questions plus independent six-failure request diagram",
+      "evidenceExpected": "Drawing of POST /transfers from client to backend across components, with six failure cases classified by boundary and observed evidence."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Section six-failure model and executable transport-vs-HTTP example",
+      "assessedAt": "Project evidence: independent diagram and diagnostics",
+      "evidenceExpected": "A complete request-path diagnostic with distinct network/transport failures and HTTP statuses; peer can reproduce one local example."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

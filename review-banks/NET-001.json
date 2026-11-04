@@ -1,0 +1,81 @@
+{
+  "itemId": "NET-001",
+  "version": "lesson-spec-v1:sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "curriculumFingerprint": "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Dalam contoh HTTP/1.1 melalui TCP/IPv4/Ethernet, urutan encapsulation saat client mengirim pesan adalah?",
+      "options": [
+        "HTTP → TCP → IP → Ethernet",
+        "Ethernet → IP → TCP → HTTP",
+        "HTTP → IP → Ethernet → TCP"
+      ],
+      "answer": 0,
+      "explanation": "HTTP adalah payload yang dibawa TCP, TCP dibawa IP, dan IP dibawa frame link lokal.",
+      "whenIncorrect": "Jangan tertukar dengan decapsulation pada sisi penerima.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa yang biasanya digunakan router IPv4 untuk keputusan forwarding biasa?",
+      "options": [
+        "String path /transfers",
+        "Alamat tujuan IP dan routing table",
+        "Status code 503"
+      ],
+      "answer": 1,
+      "explanation": "Routing menggunakan alamat IP, bukan URL HTTP. Proxy L7 berbeda dari router biasa.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Client menerima ECONNREFUSED tanpa status HTTP. Diagnosis pertama yang paling kuat adalah?",
+      "options": [
+        "Controller telah mengembalikan 500",
+        "Koneksi TCP ke alamat/port ditolak sebelum mendapat respons HTTP",
+        "Backend pasti mengembalikan 404"
+      ],
+      "answer": 1,
+      "explanation": "ECONNREFUSED bukan respons HTTP; periksa listener, bind address dan policy jaringan.",
+      "whenIncorrect": "Kode HTTP hanya ada jika HTTP component benar-benar mengirim response.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Apa arti hasil http-unavailable=503 di fixture lokal?",
+      "options": [
+        "Tidak ada koneksi TCP terbentuk",
+        "Komponen HTTP mengembalikan 503 Service Unavailable",
+        "DNS resolver gagal"
+      ],
+      "answer": 1,
+      "explanation": "503 adalah status HTTP yang dikirim server; berbeda dari kegagalan koneksi.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Reverse proxy mengembalikan HTTP 502 saat backend tak bisa dihubungi. Mana yang benar?",
+      "options": [
+        "Client mendapat respons HTTP dari intermediary; penyebab upstream perlu diperiksa",
+        "Router IPv4 biasa pasti membuat HTTP 502",
+        "Seluruh perangkat di jalur menjalankan HTTP controller"
+      ],
+      "answer": 0,
+      "explanation": "Intermediary HTTP bisa menghasilkan responsnya sendiri meskipun origin tidak mengirim respons.",
+      "whenIncorrect": "Pisahkan lokasi asal status yang diterima client dari root cause yang ada di upstream.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

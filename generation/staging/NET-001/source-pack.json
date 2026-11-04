@@ -1,0 +1,126 @@
+{
+  "itemId": "NET-001",
+  "curriculumFingerprint": "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "sources": [
+    {
+      "title": "RFC 1122 — Internet Host Communication Layers",
+      "url": "https://www.rfc-editor.org/rfc/rfc1122.html",
+      "tier": 0,
+      "supports": [
+        "Link, internet and transport layers as a diagnostic mental model",
+        "Layers are logical distinctions, not a guarantee about implementation"
+      ],
+      "notes": [
+        "Section 1.1.3, Link Layer, Internet Layer and Transport Layer"
+      ]
+    },
+    {
+      "title": "RFC 791 — Internet Protocol",
+      "url": "https://www.rfc-editor.org/rfc/rfc791.html",
+      "tier": 0,
+      "supports": [
+        "IPv4 datagram addressing, forwarding and routing decisions"
+      ],
+      "notes": [
+        "Section 1.4 Operation / Addressing and Routing"
+      ]
+    },
+    {
+      "title": "RFC 9293 — Transmission Control Protocol",
+      "url": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "tier": 0,
+      "supports": [
+        "Connection synchronization and established TCP data transfer"
+      ],
+      "notes": [
+        "Section 3.3.2 state machine and Section 3.5 establishing a connection"
+      ]
+    },
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "tier": 0,
+      "supports": [
+        "POST request semantics, HTTP status codes, origin/intermediary responsibilities"
+      ],
+      "notes": [
+        "Sections 3, 9.3.3 and 15: HTTP requests and responses are not transport errors"
+      ]
+    },
+    {
+      "title": "RFC 9112 — HTTP/1.1",
+      "url": "https://www.rfc-editor.org/rfc/rfc9112.html",
+      "tier": 0,
+      "supports": [
+        "HTTP/1.1 message framing and connection management over transport"
+      ],
+      "notes": [
+        "Sections 2.1 and 9; example transport is HTTP/1.1 over TCP, not all HTTP versions"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "layered-model",
+      "statement": "Internet host communication can be analyzed through link, internet and transport layers; the layers are a logical model rather than a requirement for distinct physical modules.",
+      "conceptIds": [
+        "layering"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc1122.html",
+      "locator": "Section 1.1.3 / Section 1.3: Layering",
+      "rationale": "RFC 1122 explicitly names the layers and cautions that strict implementation layering is imperfect."
+    },
+    {
+      "id": "ip-address-routing",
+      "statement": "IPv4 datagrams carry addressing used for routing across networks; the IP layer does not itself provide a reliable connection.",
+      "conceptIds": [
+        "encapsulation"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc791.html",
+      "locator": "Section 1.4 Operation / Addressing and Routing",
+      "rationale": "RFC 791 defines datagram addressing and how gateways select paths without end-to-end circuits."
+    },
+    {
+      "id": "tcp-connection",
+      "statement": "TCP establishes connection state before application data transfer, with SYN and ACK synchronization and an ESTABLISHED state.",
+      "conceptIds": [
+        "encapsulation"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "locator": "Section 3.3.2 State Machine Overview; Section 3.5 Establishing a Connection",
+      "rationale": "RFC 9293 documents the three-way handshake and transfer of data after connection establishment."
+    },
+    {
+      "id": "http-framing",
+      "statement": "A basic HTTP/1.1 request contains a request-line, header section and optional body, sent over a transport connection.",
+      "conceptIds": [
+        "layering",
+        "encapsulation"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9112.html",
+      "locator": "Section 2.1 Message Format; Section 9 Connection Management",
+      "rationale": "RFC 9112 states the wire format and the expected connection management for HTTP/1.1."
+    },
+    {
+      "id": "http-status-boundary",
+      "statement": "HTTP response status codes communicate an HTTP request result, unlike a connection-refused failure where no HTTP response arrives.",
+      "conceptIds": [
+        "operations"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Section 15 Status Codes; Section 3 Message Semantics",
+      "rationale": "RFC 9110 defines a status code as part of an HTTP response; transport connection refusal cannot carry one."
+    },
+    {
+      "id": "http-intermediaries",
+      "statement": "HTTP interactions can involve intermediaries that forward or interpret requests before they reach the origin server.",
+      "conceptIds": [
+        "operations"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Section 3.7 Intermediaries; Section 7.6 Message Forwarding",
+      "rationale": "RFC 9110 describes HTTP intermediaries, which provides a grounded L7 proxy/load-balancer example."
+    }
+  ]
+}

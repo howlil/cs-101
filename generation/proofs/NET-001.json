@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "NET-001",
+  "curriculumFingerprint": "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "http-versus-connect",
+      "runtime": "node",
+      "file": "request-path.mjs",
+      "fixtureSha256": "7f865a838461fef6e792548014054a3750d87d28ec10155e05900bab6bbbabaf",
+      "stdoutSha256": "a57635a0b9853f04e78cc03e357938e4bddc9f536ec23f253032746b177a27e0",
+      "verified": true
+    }
+  ]
+}

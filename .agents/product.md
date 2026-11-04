@@ -12,6 +12,7 @@ B4: A user selects G0–G4 depth and sees level-specific competency evidence and
 B5: A user follows a deterministic suggested study path, with reviewed prerequisites first where they exist and editorial unit order otherwise.
 B6: From a path unit, navigation preserves its context across Materi, Soal and Project; after Project the next unit is addressable.
 B7: A user can inspect a proposed task and observable assessment rubric for each mapped competency, then find only the applicable criterion in that unit's Project view.
+B8: A user can open NET-001 as a real source-backed V3 lesson, take five local quiz questions and inspect a cross-layer failure challenge.
 X1: Unknown concept IDs recover to the first valid focus.
 X2: Unauthored items are labeled outline-only.
 X3: Unmapped levels or concept-depth pairs show explicit gaps.
@@ -23,9 +24,10 @@ C3: Proposed relations must never gate study as prerequisites.
 C4: Competency proposals do not imply mastery, job seniority, or published authored lessons.
 C5: Related/deepens edges do not impose prerequisites. Workbook and suggested outcome order alone do not establish hard prerequisites.
 C6: Rubrics are editorial proposals for human review, not generated quiz banks, automatically scored evidence, learner certifications or stored submissions.
+C7: Published lessons require generation provenance, source claim ledger, executable fixture and deterministic V3 receipt. No fabricated packet captures or unstated protocol assumptions.
 
 ## Scope
-In: HTTP pilot, level outcomes, read-only study routes and source-unit-scoped proposed rubric criteria in graph and Project views.
+In: HTTP pilot, depth-specific paths/rubrics, and one source-backed published NET-001 V3 unit with verified local executable differentiation.
 Out: learner tracking, adaptive mastery, inferred graph edges, bulk lesson generation.
 
 ## Proof
@@ -39,3 +41,4 @@ P7 (B5,C5): Deterministic prerequisite traversal is dependency-first, stable, an
 P8 (B6,X4): Route item context survives views, allows a next-unit handoff, and fails closed for invalid/unrelated URLs.
 P9 (B7,C6): Every mapped competency has an assessable task and criteria tied to canonical outcome units.
 P10 (X5,C6): Project-only rubric is scoped to validated concept/level/unit context and never exposes a quiz, score, or learner state.
+P11 (B8,C7): NET-001 runs source→spec→fixture→promote byte-identically in CI, and Materi/Soal/Project render separately.

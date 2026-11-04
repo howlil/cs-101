@@ -1,0 +1,136 @@
+---
+taskId: "NET-001"
+title: "Request Path — HTTP, TCP/IP, dan diagnosis lintas layer"
+description: "Lacak POST /transfers dari client sampai backend; bedakan kegagalan routing, transport, dan respons HTTP dengan bukti lokal."
+demo: false
+curriculumFingerprint: "sha256:e3d51455cfb7a49fa3bcd5a162e82a0fa14b166ee6ba2f9dfd238b5d48fe8aa5"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/NET-001.json';
+import questionBank from '../../../review-banks/NET-001.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Tujuan:** kamu bisa menelusuri satu request POST /transfers dan membuktikan di mana enam kegagalan berbeda terjadi.
+
+**Mulai:** gambar empat lapisan HTTP → TCP → IPv4 → Ethernet. Ini urutan data **saat dikirim** pada contoh HTTP/1.1 melalui TCP/IP di jaringan Ethernet, bukan susunan universal semua versi HTTP.
+
+## Mengapa perlu?
+
+Log controller yang kosong bukan bukti bahwa backend tidak bermasalah; bisa saja request gagal pada nama host, interface, routing, firewall, TCP listener, atau proxy. Sebaliknya, kode 503 yang diterima client sudah merupakan sebuah **respons HTTP** dari origin atau intermediary.
+
+<MentalModel title="Mental model: boundary sebelum HTTP">
+
+- **Application (HTTP):** method, target /transfers, request body, dan status respons.
+- **Transport (TCP):** koneksi antar endpoint dan pengiriman aliran byte pada contoh HTTP/1.1.
+- **Internet (IPv4):** alamat dan pemilihan jalur forwarding datagram.
+- **Link (Ethernet):** pengiriman frame pada satu segmen jaringan menuju next hop.
+
+Model OSI berguna sebagai penjelas, tetapi implementasi protokol tidak harus tepat tujuh modul. HTTPS menambah keamanan transport; HTTP/3 tidak menggunakan TCP.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+POST /transfers  [HTTP/1.1]
+         ↓ encapsulation
+TCP connection / stream
+         ↓
+IPv4 datagram ── router / filter ── next hop
+         ↓                                 ↓
+Ethernet frame (link A)          Ethernet frame (link B)
+                                           ↓
+                            [HTTP proxy / LB, optional]
+                                           ↓
+                              Backend HTTP handler
+                                           ↓
+                        HTTP response OR transport error
+```
+
+</ConceptGraph>
+
+## Pelajari mekanismenya
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Batas contoh
+
+Fixture hanya menguji HTTP 201, HTTP 503 dan koneksi TCP yang ditolak. Ia **tidak** memalsukan capture Wireshark, DNS, routing, atau simulasi firewall. Untuk diagnosis produksi, gunakan observasi jaringan yang sebenarnya.
+
+## Sumber teknis
+
+<SourceList sources={[
+  {title: 'RFC 1122 — Internet Host Communication Layers', url: 'https://www.rfc-editor.org/rfc/rfc1122.html'},
+  {title: 'RFC 791 — Internet Protocol', url: 'https://www.rfc-editor.org/rfc/rfc791.html'},
+  {title: 'RFC 9293 — Transmission Control Protocol', url: 'https://www.rfc-editor.org/rfc/rfc9293.html'},
+  {title: 'RFC 9110 — HTTP Semantics', url: 'https://www.rfc-editor.org/rfc/rfc9110.html'},
+  {title: 'RFC 9112 — HTTP/1.1', url: 'https://www.rfc-editor.org/rfc/rfc9112.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Uji request dan connection failure
+
+Jalankan fixture yang tersedia dalam repo pada Node 24:
+
+```sh
+node generation/fixtures/NET-001/request-path.mjs
+```
+
+Prediksi terlebih dahulu tiga baris output:
+
+```text
+http-created=201
+http-unavailable=503
+connect-error=ECONNREFUSED
+```
+
+Dua baris pertama berasal dari respons HTTP. Baris ketiga terjadi setelah listener dihentikan, tanpa respons HTTP.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima pertanyaan pembeda
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Prove: request path dan enam failure
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+  title="Request Path — POST /transfers"
+  brief="Gambarkan request HTTP/1.1 dari client melalui router, kemungkinan firewall dan reverse proxy/load balancer, hingga backend. Tandai Ethernet/IP/TCP/HTTP lalu klasifikasikan enam failure berdasarkan boundary, bukti observasi, dan apakah client benar-benar menerima status HTTP."
+  acceptanceCriteria={[
+    'Diagram menunjukkan arah encapsulation dan posisi client, router, policy filter, proxy/LB (bila digunakan) serta backend.',
+    'Enam kasus dibedakan: name resolution, local link, IP routing, firewall policy, TCP refusal, dan respons HTTP 5xx.',
+    'Setiap kasus memiliki satu gejala terukur dan komponen yang harus diperiksa, bukan status HTTP yang ditebak.',
+    'Dapat menjelaskan perbedaan HTTP 503, HTTP 502 dari intermediary, dan ECONNREFUSED.',
+    'Fixture Node 24 mengeluarkan output yang diharapkan; catat batas pengujiannya.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Mampu menggambar HTTP → TCP → IP → link untuk skenario HTTP/1.1 over TCP.',
+  'Membedakan router IP biasa dari perantara HTTP L7.',
+  'Menjelaskan mengapa HTTP 503 adalah respons, sedangkan ECONNREFUSED bukan.',
+  'Menyerahkan enam failure berikut observasi dan owner boundary untuk review manual.'
+]} />
+
+</LessonStage>

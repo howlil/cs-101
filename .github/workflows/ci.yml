@@ -35,6 +35,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Verify workbook import snapshot is deterministic
         run: pnpm run curriculum:verify-import
+      - name: Verify NET-001 reproducible authoring and executable fixture
+        run: |
+          pnpm generation:validate NET-001
+          pnpm generation:promote NET-001
+          git diff --exit-code -- src/content/lessons/NET-001.mdx generation/NET-001.json review-banks/NET-001.json generation/pedagogy/NET-001.json generation/sources/NET-001.json generation/proofs/NET-001.json generation/executables/NET-001.json generation/verified/NET-001.json generation/fixtures/NET-001/request-path.mjs
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -78,6 +83,13 @@ jobs:
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
           grep -q 'Suggested study path' /tmp/graph-g2.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001' > /tmp/net-lesson.html
+          grep -q 'Mental model: boundary sebelum HTTP' /tmp/net-lesson.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=soal' > /tmp/net-quiz.html
+          grep -q 'Lima pertanyaan pembeda' /tmp/net-quiz.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=project&concept=http-request-lifecycle&level=G1' > /tmp/net-project.html
+          grep -q 'Enam kasus dibedakan' /tmp/net-project.html
+          grep -q 'Assessment guide' /tmp/net-project.html
           grep -q 'PRD-002' /tmp/graph-g2.html
           grep -q 'Assessment blueprint' /tmp/graph-g2.html
           grep -q 'Explain how a database outage' /tmp/graph-g2.html
