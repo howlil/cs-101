@@ -7,12 +7,13 @@ import { buildLearningGraph, conceptsAtLevel, conceptsForItem, getFocusedConcept
 
 const curriculum = buildCurriculumGraph(manifest);
 
-test('pilot graph uses 4 real domains without mutating 370 source units', () => {
+test('pilot retains four canonical domain mappings across competency levels', () => {
   const graph = buildLearningGraph(overlay, curriculum);
   const focus = getFocusedConcept(graph, 'http-request-lifecycle');
   assert.equal(curriculum.manifest.items.length, 370);
-  assert.deepEqual(focus.applications.map((a) => a.itemId), ['NET-001', 'SPR-006', 'OSX-029', 'PRD-002']);
-  assert.equal(new Set(focus.applications.map((a) => a.trackTitle)).size, 4);
+  const depthTwo = getFocusedConcept(graph, 'http-request-lifecycle', 'G2');
+  assert.deepEqual(focus.applications.map((a) => a.itemId), ['NET-001', 'SPR-006', 'OSX-029']);
+  assert.equal(new Set([...focus.applications, ...depthTwo.applications].map((a) => a.trackTitle)).size, 4);
   assert.equal(focus.neighbors.length, 4);
   assert.ok(graph.relations.every((r) => r.type === 'related' && r.status === 'proposed'));
   assert.deepEqual(conceptsForItem(graph, 'SPR-006').map((c) => c.id), ['http-request-lifecycle', 'http-controller']);
