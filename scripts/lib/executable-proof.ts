@@ -36,7 +36,8 @@ export function executeExamples(input: unknown, fixturesDirectory: string): Exec
     const run = spawnSync(executable, [path], {
       cwd: fixturesDirectory,
       encoding: 'utf8',
-      timeout: 8000,
+      // Java source-file launch includes cold compilation on CI; Node fixtures remain 8s.
+      timeout: example.runtime === 'java' ? 30000 : 8000,
       maxBuffer: 64 * 1024,
       shell: false,
       env: { PATH: process.env.PATH, HOME: process.env.HOME, LANG: 'C.UTF-8' },
