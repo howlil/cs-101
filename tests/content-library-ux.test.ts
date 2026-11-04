@@ -22,7 +22,8 @@ test('real focused sections replace anchor jumps without duplicating the project
   const page = read('src/components/library/ContentLibrary.astro');
   assert.match(page, /view === 'materi'/);
   assert.match(page, /view === 'soal'/);
-  assert.match(page, /libraryViewHref\(item\.id, tab\.id\)/);
+  assert.match(page, /href=\{sectionHref\(item\.id, tab\.id\)\}/);
+  assert.match(page, /pathItemHref\(id, pathContext\.conceptId, pathContext\.level, section\)/);
   assert.match(page, /aria-current=\{view === tab\.id \? 'page'/);
   assert.match(page, /isCheckpoint \? \(/);
   assert.match(page, /<h3>\{challenge\.title\}<\/h3>/);
