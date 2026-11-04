@@ -76,6 +76,10 @@ async function assertRenderedHtml() {
     const graphPage = await graphResponse.text();
     assert.ok(graphPage.includes('Golden lesson concept'), 'Concept graph must render the selected concept.');
     assert.ok(graphPage.includes('JAV-009'), 'Graph must link to its canonical unit.');
+    assert.ok(graphPage.includes('Competency target'), 'Level outcome must render.');
+    const emptyDepth = await fetch('http://127.0.0.1:' + port + '/?mode=graph&level=G4');
+    assert.equal(emptyDepth.status, 200);
+    assert.ok((await emptyDepth.text()).includes('No curated G4 outcomes yet'), 'Missing depth must show real coverage gap.');
 
     const root = 'http://127.0.0.1:' + port + '/?item=' + GOLDEN_UNIT_ID;
     const quizResponse = await fetch(root + '&view=soal');
@@ -144,9 +148,9 @@ try {
     concepts:[{
       id:'golden-fixture',
       title:'Golden lesson concept',
-      level:'G1',
       description:'Fixture-local concept for validating a published lesson.',
-      objective:'Navigate from concept graph to the golden lesson.',
+      outcomes:[{level:'G1',competency:'Explain the authored golden lesson.',
+        evidence:'Complete a local self-check.',itemIds:[GOLDEN_UNIT_ID],status:'proposed'}],
     }],
     applications:[{conceptId:'golden-fixture',itemId:GOLDEN_UNIT_ID,role:'application'}],
     relations:[],

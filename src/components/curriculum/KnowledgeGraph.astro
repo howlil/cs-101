@@ -1,77 +1,107 @@
 ---
-import type { Concept, FocusedConcept } from '../../domain/learning-graph';
+import type { Concept, FocusedConcept, LearningLevel } from '../../domain/learning-graph';
 import { learningGraphHref } from '../../domain/learning-graph';
 import { libraryHref } from '../../domain/content-library';
-interface Props {
-  view: FocusedConcept;
-  concepts: Concept[];
-  publishedLessonIds: string[];
-}
-const { view, concepts, publishedLessonIds } = Astro.props;
-const published = new Set(publishedLessonIds);
-const relationLabel = (type: string) =>
-  type === 'requires' ? 'Prerequisite' : type === 'deepens' ? 'Deepens' : 'Related';
-const applicationLabel = (role: string) =>
-  ({ foundation: 'Foundation', application: 'Application', diagnostic: 'Diagnosis', operation: 'Operations' } as Record<string, string>)[role] ?? role;
+interface Props {view:FocusedConcept;concepts:Concept[];publishedLessonIds:string[]}
+const {view,concepts,publishedLessonIds}=Astro.props;
+const published=new Set(publishedLessonIds);
+const activeConcepts=concepts.filter(c=>c.outcomes.some(o=>o.level===view.level));
+const depths:Array<{id:LearningLevel;title:string}>=[
+  {id:'G0',title:'Foundations'},{id:'G1',title:'Implement'},{id:'G2',title:'Diagnose'},
+  {id:'G3',title:'Design'},{id:'G4',title:'Architecture'},
+];
+const relationLabel=(type:string)=>type==='requires'?'Prerequisite':type==='deepens'?'Deepens':'Related';
+const applicationLabel:Record<string,string>={foundation:'Foundation',application:'Application',diagnostic:'Diagnosis',operation:'Operations'};
 ---
 <section class="knowledge-page" aria-label="Knowledge graph">
   <header class="knowledge-heading">
     <p class="knowledge-eyebrow">Graph-based learning · Curated pilot</p>
     <h1>Explore engineering concepts</h1>
-    <p>Follow one concept across different engineering domains. Pilot connections are suggestions, not mandatory prerequisites.</p>
+    <p>Choose learning depth and follow cross-domain applications. These are proposed competencies, not completed lessons or professional certifications.</p>
   </header>
-  <nav class="knowledge-concepts" aria-label="Choose a concept">
-    {concepts.map((concept) => (
-      <a href={learningGraphHref(concept.id)}
-        aria-current={concept.id === view.concept.id ? 'page' : undefined}
-        class:list={['knowledge-chip', { 'is-active': concept.id === view.concept.id }]}>
-        {concept.title}
+  <nav class="knowledge-levels" aria-label="Learning depth">
+    {depths.map(depth=>(
+      <a href={learningGraphHref(view.concept.id,depth.id)}
+         class:list={['knowledge-level-link',{'is-active':depth.id===view.level}]}
+         aria-current={depth.id===view.level?'page':undefined}>
+        <strong>{depth.id}</strong><span>{depth.title}</span>
       </a>
     ))}
   </nav>
-  <section class="knowledge-map" aria-label="Focused concept and connections">
-    <article class="knowledge-focus">
-      <p class="knowledge-eyebrow">{view.concept.level} · Focused concept</p>
-      <h2>{view.concept.title}</h2>
-      <p>{view.concept.description}</p>
-      <div class="knowledge-outcome">
-        <strong>Learning outcome</strong>
-        <span>{view.concept.objective}</span>
-      </div>
-    </article>
-    <div class="knowledge-neighbors">
-      <h3>Connected concepts</h3>
-      {view.neighbors.length === 0 ? (
-        <p class="knowledge-empty">No curated connections yet. Choose another concept above.</p>
-      ) : (
-        <nav aria-label="Connected concept links">
-          {view.neighbors.map(({ concept, relation, direction }) => (
-            <a class="knowledge-neighbor" href={learningGraphHref(concept.id)}>
-              <span class="knowledge-relation">
-                {relationLabel(relation.type)} · {relation.status === 'proposed' ? 'Suggested' : 'Reviewed'}
-                {relation.type === 'requires' ? (direction === 'in' ? ' · Required before' : ' · Required by') : ''}
-              </span>
-              <strong>{concept.title}</strong>
-              <span>{relation.rationale}</span>
-            </a>
-          ))}
-        </nav>
+  <p class="knowledge-level-summary">{activeConcepts.length} mapped {activeConcepts.length===1?'concept':'concepts'} at {view.level}. Missing levels are curriculum gaps, not locked content.</p>
+  {activeConcepts.length===0 ? (
+    <section class="knowledge-gap" role="status">
+      <h2>No curated {view.level} outcomes yet</h2>
+      <p>This pilot currently maps G1 and G2. Other levels need source-backed competency review.</p>
+      <a href={learningGraphHref(view.concept.id,'G1')}>Explore G1 concepts</a>
+    </section>
+  ) : (
+    <>
+      <nav class="knowledge-concepts" aria-label="Choose a concept at this level">
+        {activeConcepts.map(c=>(
+          <a href={learningGraphHref(c.id,view.level)} aria-current={c.id===view.concept.id?'page':undefined}
+             class:list={['knowledge-chip',{'is-active':c.id===view.concept.id}]}>{c.title}</a>
+        ))}
+      </nav>
+      <section class="knowledge-map" aria-label="Focused concept and connections">
+        <article class="knowledge-focus">
+          <p class="knowledge-eyebrow">{view.level} · Focused concept</p>
+          <h2>{view.concept.title}</h2><p>{view.concept.description}</p>
+          {view.outcome ? (
+            <div class="knowledge-outcome">
+              <span class="knowledge-proposal">{view.outcome.status==='proposed'?'Proposed outcome':'Reviewed outcome'}</span>
+              <strong>Competency target</strong><span>{view.outcome.competency}</span>
+              <strong>Evidence to demonstrate</strong><span>{view.outcome.evidence}</span>
+              {view.nextOutcome&&<a href={learningGraphHref(view.concept.id,view.nextOutcome.level)}>Explore {view.nextOutcome.level} depth</a>}
+            </div>
+          ) : (
+            <div class="knowledge-outcome" role="status">
+              <strong>No {view.level} outcome mapped for this concept</strong>
+              <span>Choose a mapped concept above or another depth for this topic.</span>
+              <div class="knowledge-other-levels">
+                {view.concept.outcomes.map(o=><a href={learningGraphHref(view.concept.id,o.level)}>{o.level} · {o.competency}</a>)}
+              </div>
+            </div>
+          )}
+        </article>
+        {view.outcome&&(
+          <div class="knowledge-neighbors">
+            <h3>Related concepts at {view.level}</h3>
+            {view.neighbors.length===0 ? (
+              <p class="knowledge-empty">No same-level connections yet. Explore the mapped units below.</p>
+            ) : (
+              <nav aria-label="Related concepts at selected depth">
+                {view.neighbors.map(({concept,relation,direction})=>(
+                  <a class="knowledge-neighbor" href={learningGraphHref(concept.id,view.level)}>
+                    <span class="knowledge-relation">
+                      {relationLabel(relation.type)} · {relation.status==='proposed'?'Suggested':'Reviewed'}
+                      {relation.type==='requires'?(direction==='in'?' · Required before':' · Required by'):''}
+                    </span>
+                    <strong>{concept.title}</strong><span>{relation.rationale}</span>
+                  </a>
+                ))}
+              </nav>
+            )}
+          </div>
+        )}
+      </section>
+      {view.outcome&&(
+        <section class="knowledge-applications" aria-label="Learning material for selected depth">
+          <div class="knowledge-section-heading">
+            <h2>Recommended units for {view.level}</h2>
+            <span>{view.applications.length} curriculum {view.applications.length===1?'unit':'units'}</span>
+          </div>
+          <div class="knowledge-unit-list">
+            {view.applications.map(app=>(
+              <a class="knowledge-unit" href={libraryHref(app.itemId)}>
+                <span class="knowledge-unit-meta">{app.trackTitle} · {applicationLabel[app.role]}</span>
+                <strong>{app.title}</strong>
+                <span class="knowledge-unit-foot">{app.itemId} · {published.has(app.itemId)?'Full lesson available':'Curriculum outline only'}</span>
+              </a>
+            ))}
+          </div>
+        </section>
       )}
-    </div>
-  </section>
-  <section class="knowledge-applications" aria-label="Learning material across domains">
-    <div class="knowledge-section-heading">
-      <h2>Learn across domains</h2>
-      <span>{view.applications.length} curriculum units</span>
-    </div>
-    <div class="knowledge-unit-list">
-      {view.applications.map((app) => (
-        <a class="knowledge-unit" href={libraryHref(app.itemId)}>
-          <span class="knowledge-unit-meta">{app.trackTitle} · {applicationLabel(app.role)}</span>
-          <strong>{app.title}</strong>
-          <span class="knowledge-unit-foot">{app.itemId} · {published.has(app.itemId) ? 'Full lesson available' : 'Curriculum outline only'}</span>
-        </a>
-      ))}
-    </div>
-  </section>
+    </>
+  )}
 </section>

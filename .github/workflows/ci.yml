@@ -76,6 +76,11 @@ jobs:
           if grep -q 'Soal dan pembahasan belum diterbitkan' /tmp/catalog-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
+          grep -q 'Recommended units for G2' /tmp/graph-g2.html
+          grep -q 'PRD-002' /tmp/graph-g2.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&level=G3' > /tmp/graph-g3.html
+          grep -q 'No curated G3 outcomes yet' /tmp/graph-g3.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/catalog-networking.html
           grep -q 'Request Path' /tmp/catalog-networking.html
           curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4321/api/learning | grep -q 404

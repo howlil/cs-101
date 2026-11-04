@@ -14,7 +14,7 @@ import '../styles/knowledge-graph.css';
 
 const learningGraph = buildLearningGraph(graphOverlay, curriculumGraph);
 const isGraph = Astro.url.searchParams.get('mode') === 'graph';
-const focusedConcept = getFocusedConcept(learningGraph, Astro.url.searchParams.get('concept'));
+const focusedConcept = getFocusedConcept(learningGraph, Astro.url.searchParams.get('concept'), Astro.url.searchParams.get('level'));
 const selection = selectLibraryItem(
   curriculumGraph,
   Astro.url.searchParams.get('track'),
