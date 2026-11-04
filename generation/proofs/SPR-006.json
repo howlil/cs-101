@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "SPR-006",
+  "curriculumFingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "http-contract-java",
+      "runtime": "java",
+      "file": "TransferContractFixture.java",
+      "fixtureSha256": "35d53987e795e4021c388d7fd8946a8a68fba9273a29c3fbb862eae02c357889",
+      "stdoutSha256": "54e56fed49e3c59738cc8c6ce35b8fc2b971b92706767d8e83d4788da3459415",
+      "verified": true
+    }
+  ]
+}

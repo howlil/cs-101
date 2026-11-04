@@ -1,0 +1,160 @@
+---
+taskId: "SPR-006"
+title: "Transfer API — Spring MVC Contract"
+description: "Bangun kontrak POST 201, GET 200/404, validasi input dan batas controller-service di Spring Boot."
+demo: false
+curriculumFingerprint: "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/SPR-006.json';
+import questionBank from '../../../review-banks/SPR-006.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Target:** implementasikan `POST /transfers` yang menghasilkan HTTP 201 + ID, dan `GET /transfers/{id}` yang menghasilkan 200 atau 404, tanpa business logic dalam controller.
+
+**Mulai:** sebelum menulis kode, tulis tabel kasus: create sukses → 201, get ditemukan → 200, get tidak ditemukan → 404, request tidak valid → 400 (bila validasi dikonfigurasi).
+
+<MentalModel title="HTTP adapter ≠ transfer engine">
+
+Controller menghubungkan **kontrak HTTP** ke **service**. Spring MVC memilih handler melalui method dan path, mengubah body/parameter menjadi nilai Java, lalu menghasilkan respons melalui `ResponseEntity`. Service-lah yang mengurus aturan domain dan penyimpanan. Respons 201 sendiri **tidak menjamin** transaksi atau idempotency aman.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+HTTP client
+   |
+   +-- POST /transfers + JSON body
+   |       -> @PostMapping + @Valid @RequestBody
+   |       -> TransferService.create(...)
+   |       -> 201 Created + Location + id
+   |
+   +-- GET /transfers/{id}
+           -> @GetMapping + @PathVariable
+           -> TransferService.findById(...)
+           +-- found -> 200 OK + DTO
+           +-- absent -> 404 Not Found
+```
+
+</ConceptGraph>
+
+## Peta annotation Spring MVC
+
+- `@RestController`: controller yang mengembalikan response body sebagai representasi data.
+- `@RequestMapping("/transfers")`: prefix route; `@PostMapping` dan `@GetMapping("/{id}")` memisahkan HTTP method.
+- `@PathVariable`: bagian dari path; `@RequestParam`: parameter query/form; `@RequestHeader`: metadata HTTP.
+- `@Valid @RequestBody`: binding dan validasi DTO jika ada field constraint serta Bean Validation provider yang terkonfigurasi.
+- `ResponseEntity`: status, header (mis. Location) dan response body.
+
+## Contoh controller tipis (ilustrasi Spring MVC)
+
+```java
+@RestController
+@RequestMapping("/transfers")
+class TransferController {
+  private final TransferService service;
+
+  TransferController(TransferService service) { this.service = service; }
+
+  @PostMapping
+  ResponseEntity<TransferResponse> create(
+      @Valid @RequestBody CreateTransferRequest input) {
+    Transfer saved = service.create(input);
+    var body = new TransferResponse(saved.id());
+    return ResponseEntity.created(URI.create("/transfers/" + saved.id())).body(body);
+  }
+
+  @GetMapping("/{id}")
+  ResponseEntity<TransferResponse> find(@PathVariable String id) {
+    return service.findById(id)
+        .map(found -> ResponseEntity.ok(new TransferResponse(found.id())))
+        .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+}
+```
+
+`CreateTransferRequest`, `TransferResponse`, `Transfer`, dan `TransferService` adalah tipe aplikasi yang **harus kamu implementasikan**. Tambahkan constraint misalnya `@NotBlank` dan `@Positive` serta dependency `spring-boot-starter-validation` jika ingin validasi DTO. Contoh ini tidak menyertakan database, authorization, atau transaksi dana.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Referensi resmi
+
+<SourceList sources={[
+  {title: 'Spring MVC — Mapping Requests', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html'},
+  {title: 'Spring MVC — @RequestBody', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html'},
+  {title: 'Spring MVC — ResponseEntity', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/responseentity.html'},
+  {title: 'Spring MVC — @RequestParam', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestparam.html'},
+  {title: 'Spring MVC — @RequestHeader', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestheader.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## HTTP contract proof dengan Java 21
+
+Jalankan fixture tanpa dependency eksternal:
+
+```sh
+java generation/fixtures/SPR-006/TransferContractFixture.java
+```
+
+Output yang harus diprediksi:
+
+```text
+post-status=201
+location=/transfers/tr-001
+get-status=200
+missing-status=404
+invalid-status=400
+```
+
+**Scope bukti:** fixture memakai JDK `HttpServer` dan `HttpClient` untuk benar-benar menguji status HTTP serta `Location`. Fixture **bukan Spring Boot**, tidak menguji `@RestController`, binding JSON, `@Valid`, atau wiring service Spring. Gunakan `@WebMvcTest` / MockMvc di proyek Spring Boot sendiri untuk kontrak framework dan negative cases.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Cek kontrak Spring MVC
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Build: Transfer Controller Contract
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+  title="Transfer API — POST 201, GET 200/404"
+  brief="Dalam proyek Spring Boot sendiri, implementasikan service interface, DTO request/response, dan controller yang memakai @PostMapping / @GetMapping. Fokus pada kontrak HTTP dan pemisahan tanggung jawab; jangan menganggap ini payment processor produksi."
+  acceptanceCriteria={[
+    'POST /transfers dengan DTO valid menghasilkan status 201, Location /transfers/{id}, serta body berisi resource ID.',
+    'GET /transfers/{id} menghasilkan 200 untuk id ada dan 404 ketika service tidak menemukan id.',
+    'Request DTO memiliki constraint validasi nyata; input tidak valid menghasilkan 400 ketika validation provider aktif.',
+    'Controller melakukan binding, delegasi service, dan pemetaan status; tidak ada eksekusi transfer atau persistence di controller.',
+    'Tes MockMvc membuktikan happy path serta negative case 400/404; fixture JDK membuktikan kontrak HTTP tetapi bukan integrasi Spring.',
+    'Jelaskan pemisahan @PathVariable, @RequestParam, dan @RequestHeader serta alasan memilih masing-masing.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Dapat menjelaskan 201 + Location versus 200 dan 404.',
+  'Dapat menulis signature controller Spring MVC tanpa business logic.',
+  'Dapat menjelaskan mengapa @Valid membutuhkan constraint dan konfigurasi validasi.',
+  'Dapat menunjukkan hasil HTTP proof Java 21 dan MockMvc yang berbeda cakupannya.'
+]} />
+
+</LessonStage>

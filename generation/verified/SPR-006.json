@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "SPR-006",
+  "curriculumFingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "hashes": {
+    "lesson": "fe2d17b5eb58077c2d14bcec5c7cc373ab7f7f6979baf81ad3cfa1514002e08b",
+    "pedagogy": "b39277c3598ae24ff00fe55a8aa892fb7c5a5e205042aa99a94a7c4d5b641ffe",
+    "questionBank": "b825484c4aebf31def440c052642c11790d978a9ccd8badbf4290d86bc08dd93",
+    "sourcePack": "8eb3b81e14a64a49449edb749c15f8618562722682c046ca9714b141b23efede",
+    "exampleProof": "0012970d0b7c693e79b4aadac9b8d991bc6f5ff94b4094741db50a6de3602e23",
+    "examplePlan": "50be851b97b098207832fd41bc2f47ec5a571d17b27741e69b0d8aee71cf8536"
+  }
+}

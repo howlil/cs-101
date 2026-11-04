@@ -40,6 +40,11 @@ jobs:
           pnpm generation:validate NET-001
           pnpm generation:promote NET-001
           git diff --exit-code -- src/content/lessons/NET-001.mdx generation/NET-001.json review-banks/NET-001.json generation/pedagogy/NET-001.json generation/sources/NET-001.json generation/proofs/NET-001.json generation/executables/NET-001.json generation/verified/NET-001.json generation/fixtures/NET-001/request-path.mjs
+      - name: Verify SPR-006 reproducible authoring and Java HTTP fixture
+        run: |
+          pnpm generation:validate SPR-006
+          pnpm generation:promote SPR-006
+          git diff --exit-code -- src/content/lessons/SPR-006.mdx generation/SPR-006.json review-banks/SPR-006.json generation/pedagogy/SPR-006.json generation/sources/SPR-006.json generation/proofs/SPR-006.json generation/executables/SPR-006.json generation/verified/SPR-006.json generation/fixtures/SPR-006/TransferContractFixture.java
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -87,6 +92,17 @@ jobs:
           grep -q 'Mental model: boundary sebelum HTTP' /tmp/net-lesson.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=soal' > /tmp/net-quiz.html
           grep -q 'Lima pertanyaan pembeda' /tmp/net-quiz.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&concept=http-request-lifecycle&level=G1' > /tmp/spring-lesson.html
+          grep -q 'HTTP adapter' /tmp/spring-lesson.html
+          grep -q 'Spring MVC — Mapping Requests' /tmp/spring-lesson.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&view=soal&concept=http-request-lifecycle&level=G1' > /tmp/spring-quiz.html
+          grep -q 'Cek kontrak Spring MVC' /tmp/spring-quiz.html
+          grep -q 'Cek jawaban' /tmp/spring-quiz.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&view=project&concept=http-request-lifecycle&level=G1' > /tmp/spring-project.html
+          grep -q 'Transfer API — POST 201' /tmp/spring-project.html
+          grep -q 'Assessment guide' /tmp/spring-project.html
+          grep -q 'Step 2 of 3' /tmp/spring-project.html
+          grep -q 'Next unit' /tmp/spring-project.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=project&concept=http-request-lifecycle&level=G1' > /tmp/net-project.html
           grep -q 'Enam kasus dibedakan' /tmp/net-project.html
           grep -q 'Assessment guide' /tmp/net-project.html

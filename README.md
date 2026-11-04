@@ -2,7 +2,7 @@
 
 CS-101 is a **single-page content library** for engineering lessons, practice questions, and project ideas.
 
-**Current content status:** 8 tracks, 67 modules and 370 source-backed curriculum entries. NET-001 is the first authored Pedagogy V3 lesson; remaining unauthored units are outlines.
+**Current content status:** 8 tracks, 67 modules and 370 source-backed curriculum entries. NET-001 (Request Path) and SPR-006 (Transfer API) are authored Pedagogy V3 lessons. All other unauthored units remain outlines.
 
 - One page: `/` with Library and Knowledge Graph modes.
 - Cross-domain pilot: `/?mode=graph&concept=http-request-lifecycle&level=G1` and `&level=G2` have distinct competency evidence and mapped units.
@@ -12,7 +12,8 @@ CS-101 is a **single-page content library** for engineering lessons, practice qu
 - Curated relations and competency outcomes are validated against canonical unit IDs; workbook imports are unchanged.
 - Each G1/G2 pilot outcome has a **proposed assessment blueprint** (task, observable checks, pass conditions, linked curriculum units). The graph shows the complete rubric, and a contextual Project view shows criteria for only its mapped unit. These are human-review guides, not published quizzes or automatically scored submissions.
 - Sidebar: domain selector, module accordion, and curriculum topics.
-- Content: NET-001 — Request Path is a full three-view lesson with five local quiz questions, RFC claim references, a six-failure challenge and a Node fixture distinguishing HTTP responses from connection errors. All other unauthored units remain explicit outlines.
+- Content: NET-001 — Request Path covers HTTP/TCP/IP with RFC sources and a Node fixture. SPR-006 — Transfer API teaches Spring MVC POST 201/Location, GET 200/404, DTO validation and service boundaries, with five questions and a JDK 21 HTTP contract fixture. All other unauthored units remain explicit outlines.
+- SPR-006's Java fixture tests protocol responses; it is not a Spring MVC integration test. Implement Spring Boot + MockMvc in the learner's independent challenge.
 - Editorial competency rubrics remain proposed; published content does not imply assessment mastery.
 - Projects: project checkpoints and integration challenges from the curriculum manifest.
 - No learner account, progress, study sessions, evidence submission, spaced repetition, database reads or writes.

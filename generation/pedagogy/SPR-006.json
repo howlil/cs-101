@@ -1,0 +1,195 @@
+{
+  "unitId": "SPR-006",
+  "curriculumFingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "map-http-contract",
+        "objective": "Map Spring MVC controller methods to the correct path, verb, query parameter and header.",
+        "whyItMatters": "A service can work internally yet expose the wrong route or HTTP method, giving clients unexpected 404/405 responses.",
+        "mentalModel": "The controller owns HTTP boundary translation. @RequestMapping supplies the base path; @PostMapping or @GetMapping selects the verb; @PathVariable identifies a resource; query and header bind metadata, not service business rules.",
+        "explanation": "A Spring MVC @RestController under @RequestMapping(\"/transfers\") can declare @PostMapping for resource creation and @GetMapping(\"/{id}\") for lookup. A resource path id and an optional filter query have distinct semantics. @RequestHeader resolves metadata such as X-Request-Id; do not treat that header as an authenticated identity without verification.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Map the API request GET /transfers/tr-001?verbose=true with X-Request-Id: req-7.",
+          "steps": [
+            {
+              "action": "Put @RequestMapping(\"/transfers\") on the controller class.",
+              "reason": "This forms the shared route prefix for both handlers.",
+              "expectedResult": "Both handlers start under /transfers."
+            },
+            {
+              "action": "Add @GetMapping(\"/{id}\") and @PathVariable String id.",
+              "reason": "The path variable captures one resource identifier.",
+              "expectedResult": "id is tr-001, not the query parameter."
+            },
+            {
+              "action": "Read optional @RequestParam boolean verbose and @RequestHeader(name=\"X-Request-Id\",required=false).",
+              "reason": "Query options and request tracing metadata are independent of resource identity.",
+              "expectedResult": "verbose is true; the optional request-id is req-7."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "What Spring MVC annotation should receive tr-009 in GET /transfers/tr-009 while keeping a separate ?verbose=false query?",
+          "hints": [
+            "One value is inside a route path segment; the other follows ?.",
+            "Use @PathVariable for the resource ID and @RequestParam for query options."
+          ],
+          "explanation": "Use @PathVariable String id and an optional @RequestParam Boolean verbose. @RequestHeader is for header values, not URL path segments."
+        },
+        "independentChallenge": {
+          "prompt": "Design GET /transfers/tr-800?verbose=true with an optional X-Trace-Id header and label all three argument sources.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Annotated method signature with a path variable, optional query parameter and optional request header."
+          ],
+          "variationFromExample": "Different resource ID and different tracing-header name; produce a new signature rather than repeating the sample."
+        },
+        "firstAction": "Write @RequestMapping(\"/transfers\") and predict which suffix belongs to GET versus POST.",
+        "misconceptionRepair": {
+          "likelyMistake": "Using @RequestParam for the ID in /transfers/{id}.",
+          "whyItFails": "A path variable appears inside the path; a query parameter appears after the question mark.",
+          "correctiveAction": "Change the signature to @PathVariable String id and reserve @RequestParam for optional query inputs."
+        },
+        "selfCheck": {
+          "expectedObservation": "Two methods map POST /transfers and GET /transfers/{id}; the path ID is not confused with query/header values.",
+          "ifUnexpected": "Inspect the concatenation of class-level and method-level mapping paths."
+        },
+        "continueFromHere": {
+          "nextAction": "Define the POST request DTO and response contract, including Location.",
+          "resumeCue": "Resume from the difference between path, query and request header bindings."
+        }
+      },
+      {
+        "id": "create-transfer-response",
+        "objective": "Design a POST endpoint with validated input that returns 201, a resource ID and Location header.",
+        "whyItMatters": "A money-movement API must distinguish syntactically invalid input from a successfully created resource and make the resource address explicit.",
+        "mentalModel": "Binding converts the request body to a DTO; Bean Validation checks declared constraints; the service performs the operation; ResponseEntity builds the HTTP result. A 201 response requires explicit controller mapping, not a consequence of using POST alone.",
+        "explanation": "@Valid @RequestBody CreateTransferRequest requires field constraints such as @NotBlank and @Positive and a configured Bean Validation implementation. ResponseEntity.created(URI.create(\"/transfers/\"+id)).body(response) represents a design choice: 201 Created, Location and an ID in the body. Default validation failures return 400 when MVC validation is configured, but malformed JSON and other exception handling may have different pathways. Do not claim transactional safety, ledger integrity or idempotency from this HTTP controller alone.",
+        "prerequisiteConceptIds": [
+          "mvc-routing"
+        ],
+        "workedExample": {
+          "problem": "Accept POST /transfers with a valid sender and a positive amount, returning a stable transfer ID.",
+          "steps": [
+            {
+              "action": "Declare a CreateTransferRequest DTO with @NotBlank sender and @Positive amount.",
+              "reason": "Field-level constraints give @Valid concrete rules to evaluate.",
+              "expectedResult": "A blank sender or non-positive amount fails validation when configured."
+            },
+            {
+              "action": "Delegate to service.create(request) and obtain tr-001.",
+              "reason": "Domain creation and persistence belong in the service, not the HTTP adapter.",
+              "expectedResult": "The controller only receives the resulting resource ID."
+            },
+            {
+              "action": "Build ResponseEntity.created(URI.create(\"/transfers/tr-001\")).body(response).",
+              "reason": "ResponseEntity controls status, headers and body.",
+              "expectedResult": "HTTP 201 plus Location: /transfers/tr-001 and a response containing id tr-001."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A POST handler returns ResponseEntity.ok(id) after creating a resource. What API contract detail is missing?",
+          "hints": [
+            "200 can be successful, but this specific contract promises a newly created resource.",
+            "Use 201 Created and supply a Location header pointing to the resource."
+          ],
+          "explanation": "The workbook's contract is 201 plus resource ID. A 201 response should describe the created resource; a Location link is a useful explicit design choice."
+        },
+        "independentChallenge": {
+          "prompt": "Write a controller-only POST /transfers signature using a different valid amount and demonstrate how a blank sender produces 400 under configured validation.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "201 response with resource id and Location; 400 validation example; service method invoked without ledger logic inside controller."
+          ],
+          "variationFromExample": "Include a field-validation negative case rather than only the happy-path example."
+        },
+        "firstAction": "Write the expected POST response status and Location before implementing the controller.",
+        "misconceptionRepair": {
+          "likelyMistake": "Thinking @Valid guarantees rejection even if the DTO has no field constraints or no validation provider.",
+          "whyItFails": "@Valid triggers configured validation; without constraints or provider it cannot enforce the intended input rules.",
+          "correctiveAction": "Add a Jakarta Validation constraint and the appropriate Spring Boot validation starter, then assert 400 with MockMvc."
+        },
+        "selfCheck": {
+          "expectedObservation": "Valid POST maps to 201 with /transfers/{id} and invalid bean constraints map to 400 when validation is configured.",
+          "ifUnexpected": "Verify constraint annotations, validation dependency and any custom exception advice or response mapping."
+        },
+        "continueFromHere": {
+          "nextAction": "Define GET lookup semantics for existing and missing transfer IDs.",
+          "resumeCue": "Begin with the difference between status 201 and the Location header."
+        }
+      },
+      {
+        "id": "lookup-and-separation",
+        "objective": "Implement GET 200/404 and keep controller logic limited to HTTP translation.",
+        "whyItMatters": "Putting transfer execution, retries or transaction handling inside a controller makes boundary tests misleading and couples domain policy to HTTP.",
+        "mentalModel": "The service returns an Optional transfer. The controller turns present into 200 + DTO and absent into 404, without exposing internal storage or deciding payment policy.",
+        "explanation": "Spring MVC @GetMapping(\"/{id}\") reads an ID through @PathVariable; a controller may use ResponseEntity.ok(...) for found and ResponseEntity.notFound().build() for absent. This is an explicit API contract choice. Service creation, authorization, idempotency, transaction and persistence are separate responsibilities; this lesson demonstrates boundary separation but does not implement production finance safety. A Java 21 JDK HttpServer fixture proves the observable 201/Location/200/404/400 protocol mapping, not Spring annotation wiring.",
+        "prerequisiteConceptIds": [
+          "mvc-routing",
+          "request-binding"
+        ],
+        "workedExample": {
+          "problem": "Fetch tr-001 after creation and request tr-missing for an absent resource.",
+          "steps": [
+            {
+              "action": "Call service.findById(\"tr-001\").",
+              "reason": "The service owns lookup and exposes the domain result.",
+              "expectedResult": "Optional containing one transfer."
+            },
+            {
+              "action": "Map that transfer to ResponseEntity.ok(response).",
+              "reason": "An existing resource is represented as 200.",
+              "expectedResult": "GET /transfers/tr-001 returns HTTP 200."
+            },
+            {
+              "action": "Map Optional.empty() to ResponseEntity.notFound().build().",
+              "reason": "A missing ID should not be disguised as a successful empty response.",
+              "expectedResult": "GET /transfers/unknown returns HTTP 404."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "The service returns Optional.empty() for transfer ID tr-404. What should the controller return in this contract?",
+          "hints": [
+            "The ID is absent, not a success with null body.",
+            "Use ResponseEntity.notFound().build() for the documented 404 contract."
+          ],
+          "explanation": "A not-found service result maps to HTTP 404; the controller does not invent a transfer or execute domain transactions."
+        },
+        "independentChallenge": {
+          "prompt": "Add a MockMvc controller-slice test for GET /transfers/tr-999 with mocked service empty, and a separate POST test proving the service is delegated to exactly once.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "GET 404 when missing, GET 200 when present, POST 201 with resource ID and Location, 400 for invalid DTO, no business logic inside the controller."
+          ],
+          "variationFromExample": "Tests use an absent record and mocked service interaction rather than the provided in-memory success lookup."
+        },
+        "firstAction": "Write the 200 and 404 cases for GET /transfers/{id} before implementing the controller method.",
+        "misconceptionRepair": {
+          "likelyMistake": "Returning 200 with a null body for a nonexistent transfer.",
+          "whyItFails": "The requested resource does not exist; the explicitly chosen API contract requires 404.",
+          "correctiveAction": "Map Optional.empty() to ResponseEntity.notFound().build() and assert it via MockMvc."
+        },
+        "selfCheck": {
+          "expectedObservation": "The standalone Java fixture prints 201/Location, 200 for found, 404 for missing and 400 for blank input.",
+          "ifUnexpected": "Inspect the route id handling and distinguish the JDK reference fixture from a real Spring Boot MVC integration test."
+        },
+        "continueFromHere": {
+          "nextAction": "Implement actual @WebMvcTest controller tests in a Spring Boot application with a mocked service, and continue to OSX-029 for remote reachability.",
+          "resumeCue": "Resume from Optional.of versus Optional.empty and their 200/404 mapping."
+        }
+      }
+    ]
+  }
+}

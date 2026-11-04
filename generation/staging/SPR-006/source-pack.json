@@ -1,0 +1,140 @@
+{
+  "itemId": "SPR-006",
+  "curriculumFingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "sources": [
+    {
+      "title": "Spring Framework — Mapping Requests",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html",
+      "tier": 0,
+      "supports": [
+        "@RestController and @RequestMapping",
+        "@PostMapping, @GetMapping and @PathVariable"
+      ],
+      "notes": [
+        "Request Mapping section: method-specific shortcut annotations and URI path variables"
+      ]
+    },
+    {
+      "title": "Spring Framework — @RequestBody",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html",
+      "tier": 0,
+      "supports": [
+        "Request-body deserialization",
+        "@Valid DTO with field constraints, default 400 validation error"
+      ],
+      "notes": [
+        "Method Argument @RequestBody: HttpMessageConverter, validation and default error handling"
+      ]
+    },
+    {
+      "title": "Spring Framework — ResponseEntity",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/responseentity.html",
+      "tier": 0,
+      "supports": [
+        "Return HTTP status and Location header separately from the DTO body",
+        "200, 201, 404 controller output contract"
+      ],
+      "notes": [
+        "Return Value ResponseEntity: status, headers and body; status choices in lesson are an explicit API design"
+      ]
+    },
+    {
+      "title": "Spring Framework — @RequestParam",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestparam.html",
+      "tier": 0,
+      "supports": [
+        "Query parameters versus resource IDs"
+      ],
+      "notes": [
+        "Method Argument @RequestParam: binds Servlet request parameters including query strings"
+      ]
+    },
+    {
+      "title": "Spring Framework — @RequestHeader",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestheader.html",
+      "tier": 0,
+      "supports": [
+        "Request metadata in HTTP headers"
+      ],
+      "notes": [
+        "Method Argument @RequestHeader: binds request header values to method arguments"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "method-mapping",
+      "statement": "Spring MVC supports method-specific mapping annotations such as @PostMapping and @GetMapping, including class-level shared request paths.",
+      "conceptIds": [
+        "mvc-routing"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html",
+      "locator": "Mapping Requests / @RequestMapping method-specific variants",
+      "rationale": "The Spring MVC reference documents composed HTTP method annotations and a class-level @RequestMapping example."
+    },
+    {
+      "id": "path-variable",
+      "statement": "The @PathVariable annotation binds values captured from a mapped URL path into handler method arguments.",
+      "conceptIds": [
+        "mvc-routing",
+        "request-binding"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html",
+      "locator": "Mapping Requests / URI patterns / @PathVariable",
+      "rationale": "The official MVC reference shows captured URI variables passed as method parameters."
+    },
+    {
+      "id": "body-conversion",
+      "statement": "Spring MVC uses an HttpMessageConverter to read and deserialize an @RequestBody argument into a Java object.",
+      "conceptIds": [
+        "request-binding"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html",
+      "locator": "@RequestBody / HttpMessageConverter",
+      "rationale": "The official reference documents deserialization into a target object through registered converters."
+    },
+    {
+      "id": "validation-bad-request",
+      "statement": "With configured Bean Validation and field constraints, @Valid @RequestBody validation errors produce a 400 response by default.",
+      "conceptIds": [
+        "request-binding",
+        "response-contract"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html",
+      "locator": "@RequestBody / @Valid / MethodArgumentNotValidException",
+      "rationale": "The reference explicitly describes validation and the default 400 response for invalid request bodies."
+    },
+    {
+      "id": "response-entity",
+      "statement": "ResponseEntity allows a Spring MVC controller to choose HTTP status and response headers in addition to a serialized response body.",
+      "conceptIds": [
+        "response-contract",
+        "service-separation"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/responseentity.html",
+      "locator": "ResponseEntity / status headers and body",
+      "rationale": "Spring MVC describes ResponseEntity as status-plus-headers-plus-body, enabling a thin HTTP mapping layer."
+    },
+    {
+      "id": "query-parameter",
+      "statement": "Spring MVC @RequestParam can bind a query-string parameter to a typed controller argument.",
+      "conceptIds": [
+        "request-binding"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestparam.html",
+      "locator": "@RequestParam / request parameter method argument",
+      "rationale": "The reference covers query and form request parameter binding with automatic conversion."
+    },
+    {
+      "id": "header-parameter",
+      "statement": "Spring MVC @RequestHeader can bind a named HTTP request header to a controller method argument.",
+      "conceptIds": [
+        "request-binding"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestheader.html",
+      "locator": "@RequestHeader / annotated controller method arguments",
+      "rationale": "The official documentation shows typed request header binding."
+    }
+  ]
+}

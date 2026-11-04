@@ -1,0 +1,78 @@
+{
+  "itemId": "SPR-006",
+  "version": "lesson-spec-v1:sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "curriculumFingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Spring MVC: mana route yang cocok untuk GET /transfers/tr-009?",
+      "options": [
+        "@GetMapping(\"/{id}\") pada @RequestMapping(\"/transfers\")",
+        "@PostMapping(\"/transfers\") tanpa GET",
+        "@RequestParam(\"id\") tanpa route GET"
+      ],
+      "answer": 0,
+      "explanation": "Class-level prefix plus GET method-level path variable memetakan /transfers/{id}.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa respons POST /transfers yang benar menurut kontrak unit ini?",
+      "options": [
+        "HTTP 200 tanpa ID",
+        "HTTP 201, ID sumber daya baru dan Location yang menuju resource",
+        "HTTP 404 jika service create berhasil"
+      ],
+      "answer": 1,
+      "explanation": "POST create dalam unit ini berkontrak 201 + resource ID; Location adalah penunjuk resource yang baru dibuat.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Service mengembalikan Optional.empty() untuk GET /transfers/tr-404. Status apa yang harus dihasilkan controller?",
+      "options": [
+        "200 dengan body null",
+        "201 Created",
+        "404 Not Found"
+      ],
+      "answer": 2,
+      "explanation": "Resource tidak ada, sehingga controller memetakan hasil service yang kosong menjadi HTTP 404.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Bagaimana membuat @Valid @RequestBody menolak sender kosong pada Spring MVC?",
+      "options": [
+        "Hanya menambah @Valid tanpa constraint",
+        "Tambahkan constraint seperti @NotBlank dan provider Bean Validation, lalu verifikasi 400",
+        "Pindahkan validasi ke router IPv4"
+      ],
+      "answer": 1,
+      "explanation": "@Valid mengeksekusi Bean Validation yang dikonfigurasi terhadap constraint DTO; default error respons 400.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Di mana seharusnya transfer execution dan persistence berada?",
+      "options": [
+        "Di controller agar dekat dengan @PostMapping",
+        "Di request header X-Request-Id",
+        "Di TransferService; controller hanya memetakan input/output HTTP"
+      ],
+      "answer": 2,
+      "explanation": "Controller sebagai adapter HTTP dan service sebagai pemilik domain mengurangi coupling dan memungkinkan controller slice tests dengan mock service.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

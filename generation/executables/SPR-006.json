@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "SPR-006",
+  "curriculumFingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "examples": [
+    {
+      "id": "http-contract-java",
+      "runtime": "java",
+      "file": "TransferContractFixture.java",
+      "expectedStdout": "post-status=201\nlocation=/transfers/tr-001\nget-status=200\nmissing-status=404\ninvalid-status=400\n"
+    }
+  ]
+}

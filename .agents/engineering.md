@@ -24,7 +24,8 @@ DEC1: JSON overlay + in-memory adjacency preferred to changing generated manifes
 D1: Pilot proposed relationships require editorial review before promotion to reviewed.
 DEC2: A read-only, depth-specific path derives from concept-level reviewed requires and the existing proposed itemIds editorial ordering. Missing prerequisite outcomes are surfaced as gaps.
 DEC3: Rubrics live under curated outcomes; Graph shows the full proposed rubric, Project shows criteria only for the active path item.
-DEC4: NET-001 is the first authored cross-domain pilot; its staged source/spec are tracked for CI reproduction, while Golden acceptance isolates itself from real authored units.
+DEC4: NET-001 is the first authored cross-domain pilot; staged source/spec for NET-001 and SPR-006 are tracked for byte-identical CI reproduction, while Golden acceptance remains isolated.
+DEC5: The SPR-006 reference fixture executes JDK 21 local HTTP contract tests, not Spring application wiring; framework integration remains an explicit MockMvc learner challenge.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -33,4 +34,5 @@ PF3 (P1,P3,P5,P6) [important] | Astro golden and HTTP smoke | merge | pnpm ci
 PF4 (P5,P6,G3) [important] | level mapping and gap unit tests | iter/pr | pnpm test
 PF5 (P7,P8,G4,G5) [important] | prerequisite traversal and URL context | iter/merge | pnpm test; pnpm ci
 PF6 (P9,P10,G6) [important] | assessment schema integrity, scoped Project and Golden/smoke | iter/merge | pnpm test; pnpm ci
-PF7 (P11,G7) [important] | promote byte-idempotence, executable fixture, focused views, isolated Golden | merge | pnpm ci
+PF7 (P11,G7) [important] | NET-001 authoring receipt, proof and isolated Golden | merge | pnpm ci
+PF8 (P12,G7) [important] | SPR-006 reproducible artifacts, Java HTTP proof and focused route smoke | merge | pnpm ci

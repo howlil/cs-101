@@ -1,0 +1,44 @@
+{
+  "itemId": "SPR-006",
+  "fingerprint": "sha256:6b5de0672c0f2662b51846c983e138e2dcabe9ff5fff4fd541891156c56d5cee",
+  "sources": [
+    {
+      "title": "Spring Framework — Mapping Requests",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html"
+    },
+    {
+      "title": "Spring Framework — @RequestBody",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html"
+    },
+    {
+      "title": "Spring Framework — ResponseEntity",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/responseentity.html"
+    },
+    {
+      "title": "Spring Framework — @RequestParam",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestparam.html"
+    },
+    {
+      "title": "Spring Framework — @RequestHeader",
+      "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestheader.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Mapping, creation and lookup V3 segments",
+      "assessedAt": "Five question bank prompts plus controller code and MockMvc challenge",
+      "evidenceExpected": "Spring MVC routes implement POST /transfers returning 201 and a resource ID, and GET /transfers/{id} returning 200/404 with service delegation."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Creation and lookup worked examples with validation boundary",
+      "assessedAt": "Independent controller slice verification and Java 21 JDK protocol fixture",
+      "evidenceExpected": "Runnable reference fixture prints 201, Location, 200, 404 and 400; Spring integration remains a separate MockMvc exercise."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}
