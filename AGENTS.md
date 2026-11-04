@@ -4,7 +4,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 
 ## Product invariant
 
-- `/` is the only content page; `?item=ID` selects the material and `?track=ID` selects the domain.
+- `/` is the only content page; `?item=ID` selects material, `?track=ID` selects a domain, and `?mode=graph&concept=ID` selects a read-only concept neighborhood.
 - Sidebar reuses the domain selector and module accordion. No search field, global search button or command palette. Never add Today, progress, study sessions, reviews, evidence forms, or mandatory reflection UI.
 - Authored content is MDX at `src/content/lessons`. Quiz feedback is local/ephemeral and never persisted.
 - Unauthored items must say they are outlines and **must not fabricate explanations or generated questions**.
@@ -14,6 +14,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 ## Source of truth and authoring
 
 - `curriculum/manifest.v2.json`: domains, modules, topics, prerequisites, checkpoint ideas.
+- `curriculum/learning-graph.v1.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only.
 - `.agents/skill/course-generator/SKILL.md`: generate one unit at a time.
 - `generation/`: metadata and authoring provenance.
 - `review-banks/`: authored self-check question sets; there is no scheduling backend.

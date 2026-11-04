@@ -3,11 +3,18 @@ import { getCollection, render } from 'astro:content';
 import AppLayout from '../layouts/AppLayout.astro';
 import ContentLibrary from '../components/library/ContentLibrary.astro';
 import EmptyCurriculum from '../components/library/EmptyCurriculum.astro';
+import KnowledgeGraph from '../components/curriculum/KnowledgeGraph.astro';
+import graphOverlay from '../../curriculum/learning-graph.v1.json';
+import { buildLearningGraph, getFocusedConcept, conceptsForItem } from '../domain/learning-graph';
 import { curriculumGraph } from '../server/curriculum';
 import { projectIdeaFor, selectLibraryItem, resolveLibraryView } from '../domain/content-library';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 import '../styles/library.css';
+import '../styles/knowledge-graph.css';
 
+const learningGraph = buildLearningGraph(graphOverlay, curriculumGraph);
+const isGraph = Astro.url.searchParams.get('mode') === 'graph';
+const focusedConcept = getFocusedConcept(learningGraph, Astro.url.searchParams.get('concept'));
 const selection = selectLibraryItem(
   curriculumGraph,
   Astro.url.searchParams.get('track'),
@@ -29,8 +36,10 @@ const prerequisites = item?.prerequisites.map((id) => {
   return { id, title: previous?.title ?? id };
 }) ?? [];
 ---
-<AppLayout title={item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101." publishedLessonIds={publishedLessonIds}>
-  {item ? (
+<AppLayout title={isGraph ? 'Knowledge Graph' : item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101." publishedLessonIds={publishedLessonIds}>
+  {isGraph ? (
+    <KnowledgeGraph view={focusedConcept} concepts={learningGraph.concepts} publishedLessonIds={publishedLessonIds} />
+  ) : item ? (
     <ContentLibrary
       item={item}
       trackTitle={location?.track?.title}
@@ -40,6 +49,7 @@ const prerequisites = item?.prerequisites.map((id) => {
       view={view}
       project={projectIdeaFor(curriculumGraph, item)}
       prerequisites={prerequisites}
+      conceptLinks={conceptsForItem(learningGraph, item.id).map(({ id, title }) => ({ id, title }))}
     >
       {Content && <Content />}
     </ContentLibrary>

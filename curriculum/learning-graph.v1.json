@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "concepts": [
+    {
+      "id": "http-request-lifecycle",
+      "title": "HTTP Request Lifecycle",
+      "level": "G1",
+      "description": "How an HTTP request travels from the client through network and OS boundaries to a backend service.",
+      "objective": "Trace POST /transfers end to end and classify failures by system boundary."
+    },
+    {
+      "id": "tcp-connection",
+      "title": "TCP Connection Lifecycle",
+      "level": "G1",
+      "description": "Connection establishment, acknowledgement, retransmission, and closure before HTTP application handling.",
+      "objective": "Identify transport failures separately from HTTP response failures."
+    },
+    {
+      "id": "server-binding",
+      "title": "Server Address & Binding",
+      "level": "G1",
+      "description": "Loopback addresses, interfaces, bind addresses, and access across network namespaces.",
+      "objective": "Explain why a localhost service is unreachable remotely and prove the cause."
+    },
+    {
+      "id": "http-controller",
+      "title": "HTTP Controller Contract",
+      "level": "G1",
+      "description": "Endpoint routing, HTTP methods, status codes, and the application boundary.",
+      "objective": "Implement request handling without placing business rules inside controllers."
+    },
+    {
+      "id": "service-readiness",
+      "title": "Service Readiness",
+      "level": "G1",
+      "description": "Service readiness, liveness, dependencies, and the conditions for accepting traffic.",
+      "objective": "Distinguish a running process from a service ready to serve requests."
+    }
+  ],
+  "applications": [
+    {
+      "conceptId": "http-request-lifecycle",
+      "itemId": "NET-001",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "http-request-lifecycle",
+      "itemId": "SPR-006",
+      "role": "application"
+    },
+    {
+      "conceptId": "http-request-lifecycle",
+      "itemId": "OSX-029",
+      "role": "diagnostic"
+    },
+    {
+      "conceptId": "http-request-lifecycle",
+      "itemId": "PRD-002",
+      "role": "operation"
+    },
+    {
+      "conceptId": "tcp-connection",
+      "itemId": "NET-006",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "server-binding",
+      "itemId": "OSX-029",
+      "role": "diagnostic"
+    },
+    {
+      "conceptId": "http-controller",
+      "itemId": "SPR-006",
+      "role": "application"
+    },
+    {
+      "conceptId": "service-readiness",
+      "itemId": "PRD-002",
+      "role": "operation"
+    }
+  ],
+  "relations": [
+    {
+      "from": "http-request-lifecycle",
+      "to": "tcp-connection",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Connection behavior explains failures before application handling."
+    },
+    {
+      "from": "http-request-lifecycle",
+      "to": "server-binding",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "The listening address determines whether requests can reach a process."
+    },
+    {
+      "from": "http-request-lifecycle",
+      "to": "http-controller",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "A controller interprets the request after transport delivery."
+    },
+    {
+      "from": "http-request-lifecycle",
+      "to": "service-readiness",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Operational health determines whether a service should receive traffic."
+    }
+  ]
+}

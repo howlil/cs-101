@@ -2,6 +2,7 @@
 import type { CurriculumItem, ProjectCheckpoint } from '../../domain/curriculum-v2/schema';
 import { libraryHref, libraryViewHref, type LibraryView } from '../../domain/content-library';
 import { ArrowRight } from 'lucide-react';
+import { learningGraphHref } from '../../domain/learning-graph';
 interface Props {
   item: CurriculumItem;
   trackTitle?: string;
@@ -11,8 +12,9 @@ interface Props {
   view: LibraryView;
   project?: ProjectCheckpoint;
   prerequisites: Array<{ id: string; title: string }>;
+  conceptLinks: Array<{ id: string; title: string }>;
 }
-const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites } = Astro.props;
+const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks } = Astro.props;
 const isUnit = item.kind === 'unit';
 const isCheckpoint = item.kind === 'checkpoint';
 const scope = item.kind === 'checkpoint' ? [] : item.scope;
@@ -121,6 +123,12 @@ const nextView = !isUnit ? undefined
           <ul>{prerequisites.map((prerequisite) => (
             <li><a href={libraryHref(prerequisite.id)}>{prerequisite.id} · {prerequisite.title}</a></li>
           ))}</ul>
+        </section>
+      )}
+      {conceptLinks.length > 0 && (
+        <section class="library-graph-return" aria-label="Knowledge graph connections">
+          <h2>Explore this concept across domains</h2>
+          {conceptLinks.map(({ id, title }) => <a href={learningGraphHref(id)}>{title}</a>)}
         </section>
       )}
       {source.url && <p>Sumber: <a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></p>}

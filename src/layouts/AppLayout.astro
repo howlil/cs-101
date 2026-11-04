@@ -13,6 +13,7 @@ import { libraryHref, selectLibraryItem } from '../domain/content-library';
 interface Props { title: string; description?: string; publishedLessonIds?: string[] }
 const { title, description = 'Materi, latihan soal, dan ide project CS-101.', publishedLessonIds = [] } = Astro.props;
 const published = new Set(publishedLessonIds);
+const isGraph = Astro.url.searchParams.get('mode') === 'graph';
 const graph = curriculumGraph;
 const selection = selectLibraryItem(graph, Astro.url.searchParams.get('track'), Astro.url.searchParams.get('item'));
 const current = selection.item;
@@ -71,7 +72,10 @@ const sidebarData: SidebarData = {
   <body transition:animate="none">
     <a class="skip-link" href="#main">Langsung ke konten</a>
     <header class="topbar">
-      <div class="topbar-location"><strong>Library</strong></div>
+      <nav class="topbar-location library-mode-switch" aria-label="Library modes">
+        <a href="/" aria-current={!isGraph ? "page" : undefined}>Library</a>
+        <a href="/?mode=graph" aria-current={isGraph ? "page" : undefined}>Knowledge Graph</a>
+      </nav>
       <AppHeaderActions client:load />
     </header>
     <div class="app-shell">

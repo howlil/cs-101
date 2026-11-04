@@ -2,9 +2,11 @@
 
 CS-101 is a **single-page content library** for engineering lessons, practice questions, and project ideas.
 
-**Current content status: empty.** Active curriculum has 0 tracks, 0 units and 0 project items. Previously authored lessons, review banks and generated data were cleared from the feature branch; application and generator remain intact.
+**Current content status:** 8 tracks, 67 modules and 370 source-backed curriculum outlines; no published authored lessons. Outlines are not complete lessons.
 
-- One page: `/`
+- One page: `/` with Library and Knowledge Graph modes.
+- Cross-domain pilot: `/?mode=graph&concept=http-request-lifecycle`.
+- Curated connections are validated against the canonical manifest and do not modify workbook imports.
 - Sidebar: domain selector, module accordion, and curriculum topics.
 - Content: authored MDX lessons with interactive self-check quizzes, or an explicit curriculum outline when content is not yet authored.
 - Projects: project checkpoints and integration challenges from the curriculum manifest.
