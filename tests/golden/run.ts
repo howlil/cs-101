@@ -69,6 +69,13 @@ async function assertRenderedHtml() {
     assert.ok(!page.includes('Kriteria selesai'), 'Project must not render in Materi tab.');
     assert.ok(page.includes('Sumber teknis'), 'Full technical source list must render in Materi tab.');
     assert.ok(page.includes('docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html'), 'Official reference must be accessible from Materi.');
+    assert.ok(page.includes('Explore this concept across domains'), 'Published lesson must link back to its curated concept.');
+
+    const graphResponse = await fetch('http://127.0.0.1:' + port + '/?mode=graph&concept=golden-fixture');
+    assert.equal(graphResponse.status, 200);
+    const graphPage = await graphResponse.text();
+    assert.ok(graphPage.includes('Golden lesson concept'), 'Concept graph must render the selected concept.');
+    assert.ok(graphPage.includes('JAV-009'), 'Graph must link to its canonical unit.');
 
     const root = 'http://127.0.0.1:' + port + '/?item=' + GOLDEN_UNIT_ID;
     const quizResponse = await fetch(root + '&view=soal');
@@ -111,26 +118,39 @@ try {
     filter: (path) => path === repository || !skip.has(basename(path)),
   });
   if (!existsSync(join(repository, 'node_modules'))) throw new Error('Install pnpm dependencies before running the golden harness.');
-  // Astro Vite expects dependency source and virtual modules beneath the same
-  // project root. An external node_modules symlink breaks its CSS metadata cache.
-  // Linux/macOS: clone the package tree using hardlinks, not copies of each byte.
-  // Windows: fall back to normal copy for CI-independent developer runs.
+  // Vite needs a local node_modules tree; symlinking it from another root
+  // breaks module/CSS metadata resolution. Hardlinks can fail across mounts
+  // (e.g. a temp filesystem), so a portable copy is used for this fixture.
   const dependencies = join(repository, 'node_modules');
   const localDependencies = join(work, 'node_modules');
   if (process.platform === 'win32') {
     cpSync(dependencies, localDependencies, {recursive: true, dereference: false});
   } else {
-    const clone = spawnSync('cp', ['-al', dependencies, localDependencies], {
-      encoding:'utf8', timeout:60000,
+    const clone = spawnSync('cp', ['-a', '--reflink=auto', dependencies, localDependencies], {
+      encoding:'utf8', timeout:120000, maxBuffer:5 * 1024 * 1024,
     });
     if (clone.error || clone.status !== 0) {
-      throw new Error('Isolated node_modules clone failed: ' + (clone.error?.message ?? clone.stderr));
+      throw new Error('Isolated node_modules copy failed: ' + (clone.error?.message ?? clone.stderr));
     }
   }
 
   assert.equal(goldenUnit.fingerprint, curriculumItemFingerprint(goldenUnit));
   parseManifestV2(goldenManifest);
   writeJson('curriculum/manifest.v2.json', goldenManifest);
+  // This isolated manifest deliberately contains only JAV-009. Its concept
+  // overlay must be equally isolated; never weaken production link validation.
+  writeJson('curriculum/learning-graph.v1.json', {
+    version:1,
+    concepts:[{
+      id:'golden-fixture',
+      title:'Golden lesson concept',
+      level:'G1',
+      description:'Fixture-local concept for validating a published lesson.',
+      objective:'Navigate from concept graph to the golden lesson.',
+    }],
+    applications:[{conceptId:'golden-fixture',itemId:GOLDEN_UNIT_ID,role:'application'}],
+    relations:[],
+  });
   report('isolated curriculum fixture: 1 unit + 1 linked project; production manifest untouched');
 
   run('generation:prepare', GOLDEN_UNIT_ID);
