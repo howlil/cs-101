@@ -1,0 +1,336 @@
+{
+  "itemId": "OSX-029",
+  "curriculumFingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "payoff": "Diagnose a Linux localhost-only API using real socket, interface and namespace evidence.",
+  "learningOutcomes": [
+    "API di 127.0.0.1:8080 bisa diakses lokal tetapi tidak dari network namespace lain; buktikan dengan ip/ss/curl dan jelaskan 0.0.0.0 risiko exposure."
+  ],
+  "mentalModel": "Binding determines matching local destination addresses; routing determines paths, and network namespaces isolate devices, routes and sockets.",
+  "relationshipGraph": "Peer namespace route → veth link → host interface → firewall → bound TCP socket → backend HTTP handler.",
+  "concepts": [
+    {
+      "id": "binding",
+      "title": "IPv4 loopback vs wildcard listening",
+      "mechanism": "INADDR_LOOPBACK selects one loopback destination while INADDR_ANY listens on all local IPv4 addresses.",
+      "sourceUrls": [
+        "https://man7.org/linux/man-pages/man7/ip.7.html"
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "title": "Interface, route and listening socket",
+      "mechanism": "ip and ss expose distinct address, route and socket state from the invoking namespace.",
+      "sourceUrls": [
+        "https://man7.org/linux/man-pages/man8/ip.8.html",
+        "https://man7.org/linux/man-pages/man8/ss.8.html"
+      ]
+    },
+    {
+      "id": "namespace",
+      "title": "Network namespace and veth",
+      "mechanism": "Each namespace has independent lo, routes and sockets; veth explicitly links networks across the namespace boundary.",
+      "sourceUrls": [
+        "https://man7.org/linux/man-pages/man7/network_namespaces.7.html",
+        "https://man7.org/linux/man-pages/man8/ip-netns.8.html"
+      ]
+    },
+    {
+      "id": "exposure",
+      "title": "Bind-surface and firewall tradeoff",
+      "mechanism": "A wildcard IPv4 listener expands the local address set without bypassing filtering or routing.",
+      "sourceUrls": [
+        "https://man7.org/linux/man-pages/man7/ip.7.html",
+        "https://man7.org/linux/man-pages/man8/ss.8.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "0.0.0.0 is a wildcard bind value, not a client URL.",
+    "127.0.0.2 remains in the same namespace as 127.0.0.1.",
+    "A running process is not proof a particular destination address accepts connections.",
+    "Wildcard bind does not bypass routing, filters, or IPv6 family differences."
+  ],
+  "practice": [
+    "Predict loopback versus wildcard bind outcomes.",
+    "Distinguish interface, route, socket and curl observations.",
+    "Design and run an optional privileged veth namespace experiment with cleanup."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Binding, diagnostics and namespace segments",
+      "assessedAt": "Five questions, local TCP fixture and privileged manual veth lab",
+      "evidenceExpected": "ip addr, ip route, ss and curl observations explaining localhost-only reachability and wildcard exposure."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Peer namespace veth and safe rebinding walkthrough",
+      "assessedAt": "Independent new namespace lab with cleanup evidence",
+      "evidenceExpected": "Peer curl failure with host loopback-only socket and an evidence-backed interface-specific correction, or honest blocker report."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "bind-address-contract",
+        "objective": "Predict Linux IPv4 loopback and wildcard listening behavior without assuming remote reachability.",
+        "whyItMatters": "A healthy backend may work from host localhost while clients in a container or another namespace fail to connect.",
+        "mentalModel": "A TCP listener matches a destination IP and port within its network namespace. 127.0.0.1 is one local IPv4 loopback address; 0.0.0.0 is a wildcard bind for local IPv4 addresses, not a client destination.",
+        "explanation": "Linux ip(7) distinguishes INADDR_LOOPBACK from INADDR_ANY. A listener on 127.0.0.1:8080 is not listening at the host's non-loopback interface IP. Binding 0.0.0.0:8080 accepts more local IPv4 destinations, but routes, firewall filters and namespace isolation still apply. IPv6 is a separate address family; verify actual -4/-6 listeners rather than assuming dual-stack.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "An HTTP server works on host localhost but not when addressed via host veth IPv4.",
+          "steps": [
+            {
+              "action": "Inspect ss -lntp '( sport = :8080 )'.",
+              "reason": "Local socket address distinguishes the listener from a running process.",
+              "expectedResult": "127.0.0.1:8080, rather than the host's veth address."
+            },
+            {
+              "action": "Curl 127.0.0.1:8080 inside the host namespace.",
+              "reason": "The local destination matches the loopback-bound socket.",
+              "expectedResult": "Local request succeeds when the server runs and policy allows."
+            },
+            {
+              "action": "In a disposable lab, rebind to the host veth IP or 0.0.0.0.",
+              "reason": "The server now accepts a different set of local destination addresses.",
+              "expectedResult": "ss shows the chosen address; remote reachability still depends on routing/filtering."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A service bound to 127.0.0.1:8080 is unreachable at 10.200.30.1:8080. Is changing the URL path or adding a route enough?",
+          "hints": [
+            "Check the socket local address in ss first.",
+            "Compare 127.0.0.1 and 10.200.30.1 as destination addresses."
+          ],
+          "explanation": "No. A route does not change which destination address a TCP socket accepts. Rebind to a suitable local interface IP after evaluating access policy."
+        },
+        "independentChallenge": {
+          "prompt": "Compare bind 127.0.0.1, 0.0.0.0 and 10.200.30.1 for an otherwise identical server, listing accepted local IPv4 destinations.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Three binding predictions plus a warning that 0.0.0.0 does not guarantee external access."
+          ],
+          "variationFromExample": "Add a specific veth-only bind case rather than repeating the first two binding options."
+        },
+        "firstAction": "Predict what happens if a Linux client connects to 127.0.0.2 while the server listens only on 127.0.0.1.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming 0.0.0.0 should be typed as the client URL or opens every firewall.",
+          "whyItFails": "0.0.0.0 is a wildcard for binding the server socket, not a routable remote destination or firewall override.",
+          "correctiveAction": "Use a real destination IP with curl, inspect the bound socket with ss, and check route/filter policy separately."
+        },
+        "selfCheck": {
+          "expectedObservation": "The local Node fixture accepts target 127.0.0.1 only with a loopback bind, and target 127.0.0.2 with a wildcard bind.",
+          "ifUnexpected": "Verify that you are on Linux and that 127.0.0.2 is inside the same namespace's loopback range."
+        },
+        "continueFromHere": {
+          "nextAction": "Investigate assigned interface addresses, routing and socket state.",
+          "resumeCue": "Resume by contrasting server bind address and client destination address."
+        }
+      },
+      {
+        "id": "diagnose-ip-and-socket",
+        "objective": "Use ip addr, ip route, ss and curl as independent reachability observations.",
+        "whyItMatters": "A refusal, timeout or 5xx is ambiguous until interface, routing, bind and application boundaries are separated.",
+        "mentalModel": "ip addr shows assigned interface addresses, ip route shows paths, ss shows sockets and curl probes the end-to-end connection. Each observes a different stage.",
+        "explanation": "ip -br addr reports interface addresses; ip route get DEST predicts a route from the command's namespace. ss -lntp shows the process listening address and port, subject to permissions. curl targets an actual host/interface address, not 0.0.0.0. A refusal may arise from no matching listener or active reject; a timeout may indicate filtering or missing return path. Do not infer a root cause from the client error alone.",
+        "prerequisiteConceptIds": [
+          "binding"
+        ],
+        "workedExample": {
+          "problem": "A peer attempts http://10.200.30.1:8080 but the host service is only bound to localhost.",
+          "steps": [
+            {
+              "action": "Read host ip -br addr and ip route get 10.200.30.2.",
+              "reason": "Check that the host veth address exists and can route toward peer.",
+              "expectedResult": "A veth address and connected route, independently of the server."
+            },
+            {
+              "action": "Read host ss -lntp '( sport = :8080 )'.",
+              "reason": "The listener must match the destination IP and port.",
+              "expectedResult": "127.0.0.1:8080 is narrower than 10.200.30.1:8080."
+            },
+            {
+              "action": "Read peer ip -n cs101-peer route, then test curl from the peer.",
+              "reason": "The peer has its own route table and must use host veth IP.",
+              "expectedResult": "An observed connection error or HTTP response with an identifiable boundary."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "ip addr confirms 10.200.30.1 on the host but ss shows only 127.0.0.1:8080. Has the host IP assignment proved the endpoint is listening there?",
+          "hints": [
+            "ip addr and ss inspect different kernel objects.",
+            "Does the listener local IP equal the curl target IP?"
+          ],
+          "explanation": "No. The interface exists, but the service socket is not bound to the veth destination address."
+        },
+        "independentChallenge": {
+          "prompt": "Diagnose port 9090 on a different veth prefix, recording one interface, one route and one listener observation before changing any configuration.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Three factual observations, predicted fault boundary and proposed minimal repair."
+          ],
+          "variationFromExample": "Use a new port and address and write a diagnosis before changing the bind."
+        },
+        "firstAction": "Run ip -br addr, ip route and ss -lnt; label what each command observes.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating the presence of an interface IP as proof that an application listens on that IP.",
+          "whyItFails": "A socket can be bound only to loopback even when a host has other usable interface addresses.",
+          "correctiveAction": "Compare ss's listener local address with the client's destination IP and inspect each namespace's route."
+        },
+        "selfCheck": {
+          "expectedObservation": "You can explain each diagnostic command without confusing route availability with socket address matching.",
+          "ifUnexpected": "Run the command from the correct namespace and check permission to view process details in ss."
+        },
+        "continueFromHere": {
+          "nextAction": "Build a real veth-backed namespace lab to test from a peer.",
+          "resumeCue": "Start with interface → route → socket → curl as separate tests."
+        }
+      },
+      {
+        "id": "verify-namespace-veth",
+        "objective": "Demonstrate that peer namespace localhost is not host localhost, then prove an interface-specific bind correction in a disposable lab.",
+        "whyItMatters": "Containers and pods have independent network stacks; relying on host localhost can hide an otherwise healthy API from peers.",
+        "mentalModel": "Each network namespace owns its own lo interface, sockets and routes. A veth pair plus addresses creates a connection between two separate stacks.",
+        "explanation": "ip netns add creates a named namespace. A veth pair can connect its interface to one left in the host namespace, with 10.200.30.1/30 on the host and 10.200.30.2/30 on the peer. A host service listening only on 127.0.0.1:8080 cannot accept a TCP request to the host's veth IP. Binding instead to the specific veth IP allows a match if routes and firewall policy permit. Creating netns and veth needs administrative privileges and must occur only on a disposable VM. The CI fixture checks 127.0.0.1 versus 127.0.0.2 in ONE namespace, not veth or peer isolation.",
+        "prerequisiteConceptIds": [
+          "binding",
+          "diagnostics"
+        ],
+        "workedExample": {
+          "problem": "A learner wants peer namespace cs101-peer to reach the host server at 10.200.30.1:8080.",
+          "steps": [
+            {
+              "action": "Create cs101-peer with ip netns add and a veth pair, assigning peer interface into cs101-peer.",
+              "reason": "Both network stacks need a link before peer traffic can reach the host.",
+              "expectedResult": "Separate host and peer interfaces are listed by ip."
+            },
+            {
+              "action": "Assign 10.200.30.1/30 and 10.200.30.2/30, and bring both veth links and the peer lo up.",
+              "reason": "Interfaces require addresses and operational state.",
+              "expectedResult": "ip route in both namespaces reports the connected /30 network."
+            },
+            {
+              "action": "Curl from peer to host veth IP with host bound to 127.0.0.1, then rebind host to 10.200.30.1 and retry.",
+              "reason": "Destination matching changes while the peer address stays constant.",
+              "expectedResult": "The first connection has no matching listener; the second may succeed if filtering permits."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "From cs101-peer, what does curl http://127.0.0.1:8080 contact?",
+          "hints": [
+            "A network namespace owns a private loopback device.",
+            "The host veth address is 10.200.30.1, not peer localhost."
+          ],
+          "explanation": "It contacts cs101-peer's own loopback, not a service on the host. Use host veth address when testing peer-to-host connectivity."
+        },
+        "independentChallenge": {
+          "prompt": "Repeat with a new namespace name and port 9090, record ss/curl before and after binding to the host's veth address, then clean up.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Named peer namespace, IP/route and socket observations, host/peer curl comparison, explanation of wildcard exposure and cleanup."
+          ],
+          "variationFromExample": "Use a new port and namespace, and compare interface-specific bind against wildcard rather than reusing the sample output."
+        },
+        "firstAction": "Check whether you have sudo and iproute2 inside a disposable Linux VM before creating any namespace.",
+        "misconceptionRepair": {
+          "likelyMistake": "Claiming local 127.0.0.2 fixture demonstrates a second namespace.",
+          "whyItFails": "127.0.0.2 is another loopback destination inside the same Linux namespace, not an independent network stack.",
+          "correctiveAction": "Run ip netns exec from a real peer with configured veth and record the actual observations."
+        },
+        "selfCheck": {
+          "expectedObservation": "Peer curl to host veth fails when the server is localhost-only and may succeed after interface-specific rebinding; teardown removes test netns and veth.",
+          "ifUnexpected": "If results differ, inspect privileges, veth link state, /30 assignments, host firewall and ss output; do not invent success."
+        },
+        "continueFromHere": {
+          "nextAction": "Link these findings to the HTTP lifecycle G1/G2 assessment and the remaining production readiness module.",
+          "resumeCue": "Recall why peer lo and host lo are independent, even if both have address 127.0.0.1."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Peer netns menjalankan curl 127.0.0.1:8080. Server mana yang dituju?",
+      "options": [
+        "Host network namespace",
+        "Peer netns loopback sendiri",
+        "Alamat wildcard server"
+      ],
+      "answer": 1,
+      "explanation": "127.0.0.1 selalu loopback di namespace tempat proses berjalan; gunakan IP veth host untuk peer-to-host.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa arti bind 0.0.0.0:8080 pada IPv4 Linux?",
+      "options": [
+        "Alamat client yang harus dipakai",
+        "Listen di seluruh alamat IPv4 lokal, tetap tunduk pada route/firewall",
+        "Buka IPv6 dan firewall otomatis"
+      ],
+      "answer": 1,
+      "explanation": "INADDR_ANY adalah wildcard IPv4 untuk local socket binding; bukan bypass keamanan.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Perintah mana melihat bound address TCP listener?",
+      "options": [
+        "ss -lntp",
+        "ip route list",
+        "ip netns list"
+      ],
+      "answer": 0,
+      "explanation": "ss menampilkan socket listening; ip route menjelaskan jalur pengiriman paket.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Fixture membandingkan 127.0.0.1 dan 127.0.0.2. Apa yang dibuktikan?",
+      "options": [
+        "Akses dari namespace lain",
+        "Akses wildcard vs loopback destination di satu namespace",
+        "Firewall eksternal pasti mati"
+      ],
+      "answer": 1,
+      "explanation": "127.0.0.2 adalah loopback alias dalam namespace yang sama; tidak membuktikan veth isolation.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Peer menargetkan host veth IP dan gagal sementara ss menunjukkan 127.0.0.1:8080. Langkah benar?",
+      "options": [
+        "Ubah HTTP method tanpa cek network",
+        "Hapus semua firewall host permanen",
+        "Periksa ip addr, route dan ss; bind ke host veth IP secara terkontrol"
+      ],
+      "answer": 2,
+      "explanation": "Address binding, route dan filter adalah batas terpisah; bind spesifik mengurangi exposure dibanding wildcard.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

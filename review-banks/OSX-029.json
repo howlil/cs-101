@@ -1,0 +1,78 @@
+{
+  "itemId": "OSX-029",
+  "version": "lesson-spec-v1:sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "curriculumFingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Peer netns menjalankan curl 127.0.0.1:8080. Server mana yang dituju?",
+      "options": [
+        "Host network namespace",
+        "Peer netns loopback sendiri",
+        "Alamat wildcard server"
+      ],
+      "answer": 1,
+      "explanation": "127.0.0.1 selalu loopback di namespace tempat proses berjalan; gunakan IP veth host untuk peer-to-host.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa arti bind 0.0.0.0:8080 pada IPv4 Linux?",
+      "options": [
+        "Alamat client yang harus dipakai",
+        "Listen di seluruh alamat IPv4 lokal, tetap tunduk pada route/firewall",
+        "Buka IPv6 dan firewall otomatis"
+      ],
+      "answer": 1,
+      "explanation": "INADDR_ANY adalah wildcard IPv4 untuk local socket binding; bukan bypass keamanan.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Perintah mana melihat bound address TCP listener?",
+      "options": [
+        "ss -lntp",
+        "ip route list",
+        "ip netns list"
+      ],
+      "answer": 0,
+      "explanation": "ss menampilkan socket listening; ip route menjelaskan jalur pengiriman paket.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Fixture membandingkan 127.0.0.1 dan 127.0.0.2. Apa yang dibuktikan?",
+      "options": [
+        "Akses dari namespace lain",
+        "Akses wildcard vs loopback destination di satu namespace",
+        "Firewall eksternal pasti mati"
+      ],
+      "answer": 1,
+      "explanation": "127.0.0.2 adalah loopback alias dalam namespace yang sama; tidak membuktikan veth isolation.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Peer menargetkan host veth IP dan gagal sementara ss menunjukkan 127.0.0.1:8080. Langkah benar?",
+      "options": [
+        "Ubah HTTP method tanpa cek network",
+        "Hapus semua firewall host permanen",
+        "Periksa ip addr, route dan ss; bind ke host veth IP secara terkontrol"
+      ],
+      "answer": 2,
+      "explanation": "Address binding, route dan filter adalah batas terpisah; bind spesifik mengurangi exposure dibanding wildcard.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

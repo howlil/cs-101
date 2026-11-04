@@ -14,6 +14,7 @@ B6: From a path unit, navigation preserves its context across Materi, Soal and P
 B7: A user can inspect a proposed task and observable assessment rubric for each mapped competency, then find only the applicable criterion in that unit's Project view.
 B8: A user can open NET-001 as a real source-backed V3 lesson, take five local quiz questions and inspect a cross-layer failure challenge.
 B9: A user proceeds from NET-001 to a fully authored SPR-006 controller contract lesson: routing, 201/Location, GET 200/404, validation and service delegation.
+B10: A user opens an authored OSX-029 G1/G2 lesson with five self-check questions, socket binding proof and an independent privileged veth namespace lab.
 X1: Unknown concept IDs recover to the first valid focus.
 X2: Unauthored items are labeled outline-only.
 X3: Unmapped levels or concept-depth pairs show explicit gaps.
@@ -27,9 +28,10 @@ C5: Related/deepens edges do not impose prerequisites. Workbook and suggested ou
 C6: Rubrics are editorial proposals for human review, not generated quiz banks, automatically scored evidence, learner certifications or stored submissions.
 C7: Published lessons require generation provenance, source claim ledger, executable fixture and deterministic V3 receipt. No fabricated packet captures or unstated protocol assumptions.
 C8: SPR-006's JDK HTTP fixture proves protocol status/header behavior, not Spring runtime annotation wiring; a Spring MockMvc challenge is explicitly separate.
+C9: OSX-029's CI fixture proves local Linux IPv4 socket bind behavior, not cross-namespace networking, firewall or external exposure; those are a manual challenge.
 
 ## Scope
-In: HTTP pilot, depth-specific paths/rubrics, and two authored source-backed V3 units (NET-001 and SPR-006) with bounded executable proofs.
+In: HTTP pilot, depth-specific paths/rubrics, and three authored V3 units (NET-001, SPR-006, OSX-029) with bounded executable proofs.
 Out: learner tracking, adaptive mastery, inferred graph edges, bulk lesson generation.
 
 ## Proof
@@ -45,3 +47,4 @@ P9 (B7,C6): Every mapped competency has an assessable task and criteria tied to 
 P10 (X5,C6): Project-only rubric is scoped to validated concept/level/unit context and never exposes a quiz, score, or learner state.
 P11 (B8,C7): NET-001 runs source→spec→fixture→promote byte-identically in CI, and Materi/Soal/Project render separately.
 P12 (B9,C8): SPR-006 reproducible generation, JDK status/header fixture, and three separate focused views with G1 path context in CI.
+P13 (B10,C9): OSX-029 generation and local fixture are byte-reproducible; G1/G2 focused views render accurately without claiming automatic netns proof.

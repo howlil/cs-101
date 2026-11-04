@@ -1,0 +1,44 @@
+{
+  "itemId": "OSX-029",
+  "fingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "sources": [
+    {
+      "title": "Linux ip(7): IPv4 socket bind and reserved addresses",
+      "url": "https://man7.org/linux/man-pages/man7/ip.7.html"
+    },
+    {
+      "title": "Linux network_namespaces(7): isolated network resources",
+      "url": "https://man7.org/linux/man-pages/man7/network_namespaces.7.html"
+    },
+    {
+      "title": "ip-netns(8): run commands in network namespaces",
+      "url": "https://man7.org/linux/man-pages/man8/ip-netns.8.html"
+    },
+    {
+      "title": "ip(8): interface and route inspection",
+      "url": "https://man7.org/linux/man-pages/man8/ip.8.html"
+    },
+    {
+      "title": "ss(8): listening TCP socket inspection",
+      "url": "https://man7.org/linux/man-pages/man8/ss.8.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Binding, diagnostics and namespace segments",
+      "assessedAt": "Five questions, local TCP fixture and privileged manual veth lab",
+      "evidenceExpected": "ip addr, ip route, ss and curl observations explaining localhost-only reachability and wildcard exposure."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Peer namespace veth and safe rebinding walkthrough",
+      "assessedAt": "Independent new namespace lab with cleanup evidence",
+      "evidenceExpected": "Peer curl failure with host loopback-only socket and an evidence-backed interface-specific correction, or honest blocker report."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

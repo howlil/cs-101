@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "OSX-029",
+  "curriculumFingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "hashes": {
+    "lesson": "eb50068ecd8dbe2aa9174322743527c9e87db8afb3d0b046120f6a2bd155430d",
+    "pedagogy": "ae956e55ec86d21e32b074083fad3ea63b485e83452f3d358f203fe2eeaa0c47",
+    "questionBank": "7b04d66d168b52231a2758c23a524b9606be9ed6795b2e2e8acfa82695750447",
+    "sourcePack": "f0934ebe1cab6e5b2d6ec74bf86e5d120717c18dbece997c4411949aa04fa65a",
+    "exampleProof": "6c209aa8b6fa21eafaa2a8d5494bbe6a8784696b846f455908c6a9cf8a0ff7b5",
+    "examplePlan": "71d5ad5ba3e0df861aeee3bde04e11c43d947c4b524cce2af04b0bc3c7b1ec54"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "itemId": "OSX-029",
+  "curriculumFingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "sources": [
+    {
+      "title": "Linux ip(7): IPv4 socket bind and reserved addresses",
+      "url": "https://man7.org/linux/man-pages/man7/ip.7.html",
+      "tier": 0,
+      "supports": [
+        "IPv4 127.0.0.1 vs 0.0.0.0 and AF_INET address/port"
+      ],
+      "notes": [
+        "DESCRIPTION / Special and reserved addresses; bind and address format"
+      ]
+    },
+    {
+      "title": "Linux network_namespaces(7): isolated network resources",
+      "url": "https://man7.org/linux/man-pages/man7/network_namespaces.7.html",
+      "tier": 0,
+      "supports": [
+        "netns-specific loopback, interfaces, routing, sockets and virtual ethernet"
+      ],
+      "notes": [
+        "DESCRIPTION / resource isolation and veth pair"
+      ]
+    },
+    {
+      "title": "ip-netns(8): run commands in network namespaces",
+      "url": "https://man7.org/linux/man-pages/man8/ip-netns.8.html",
+      "tier": 0,
+      "supports": [
+        "create and exec a named network namespace"
+      ],
+      "notes": [
+        "DESCRIPTION / ip netns add, exec and delete"
+      ]
+    },
+    {
+      "title": "ip(8): interface and route inspection",
+      "url": "https://man7.org/linux/man-pages/man8/ip.8.html",
+      "tier": 0,
+      "supports": [
+        "ip address, route and namespace-selected interface operations"
+      ],
+      "notes": [
+        "NAME, OBJECT address/link/route, and -netns"
+      ]
+    },
+    {
+      "title": "ss(8): listening TCP socket inspection",
+      "url": "https://man7.org/linux/man-pages/man8/ss.8.html",
+      "tier": 0,
+      "supports": [
+        "inspect local listener address and port"
+      ],
+      "notes": [
+        "OPTIONS / -l, -t, -n, -p"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "ipv4-bind",
+      "statement": "127.0.0.1 is a local IPv4 loopback address and 0.0.0.0 is the INADDR_ANY wildcard for binding all local IPv4 addresses.",
+      "conceptIds": [
+        "binding",
+        "exposure"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man7/ip.7.html",
+      "locator": "Special and reserved addresses / INADDR_LOOPBACK, INADDR_ANY",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    },
+    {
+      "id": "socket-address",
+      "statement": "Linux IPv4 sockets are bound to a local address and port; choosing a specific local bind address constrains which destination addresses can be accepted.",
+      "conceptIds": [
+        "binding"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man7/ip.7.html",
+      "locator": "DESCRIPTION / socket bind and Address format",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    },
+    {
+      "id": "namespace-scope",
+      "statement": "Linux network namespaces isolate interfaces, routing tables, firewall rules, network sockets and the loopback interface from other namespaces.",
+      "conceptIds": [
+        "namespace",
+        "diagnostics"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man7/network_namespaces.7.html",
+      "locator": "DESCRIPTION / network resources",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    },
+    {
+      "id": "veth-link",
+      "statement": "A veth device pair supplies a virtual link between otherwise isolated network namespaces when each side receives suitable IP addressing.",
+      "conceptIds": [
+        "namespace"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man7/network_namespaces.7.html",
+      "locator": "DESCRIPTION / virtual ethernet pairs",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    },
+    {
+      "id": "netns-exec",
+      "statement": "The ip netns exec command runs a program within the selected named network namespace, with its own network configuration.",
+      "conceptIds": [
+        "namespace"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man8/ip-netns.8.html",
+      "locator": "DESCRIPTION / ip netns exec",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    },
+    {
+      "id": "ip-tools",
+      "statement": "The ip tool inspects addresses, network links and routes, with a -netns option for scoped execution in a named namespace.",
+      "conceptIds": [
+        "diagnostics"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man8/ip.8.html",
+      "locator": "NAME and -netns option",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    },
+    {
+      "id": "ss-listener",
+      "statement": "The ss tool can filter listening TCP sockets and display their local addresses and ports numerically.",
+      "conceptIds": [
+        "diagnostics",
+        "exposure"
+      ],
+      "sourceUrl": "https://man7.org/linux/man-pages/man8/ss.8.html",
+      "locator": "OPTIONS -l -t -n",
+      "rationale": "The cited Linux/iproute2 manual defines the stated interface, namespace, socket or command contract directly."
+    }
+  ]
+}

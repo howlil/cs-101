@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "OSX-029",
+  "curriculumFingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "bind-address-local",
+      "runtime": "node",
+      "file": "binding-mystery.mjs",
+      "fixtureSha256": "c188cef75cd4e6ff466e0a944d8c00905bfa976945bc6e57d335dd92a67af9fb",
+      "stdoutSha256": "32b57eb1de40309357069376988b169ad9729d3c28295171b45ddc6fbe871f5d",
+      "verified": true
+    }
+  ]
+}

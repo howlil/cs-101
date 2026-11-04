@@ -1,0 +1,195 @@
+---
+taskId: "OSX-029"
+title: "Binding Mystery — Linux networking & namespaces"
+description: "Debug service localhost-only dengan socket binding, interface, route, dan lab Linux network namespace."
+demo: false
+curriculumFingerprint: "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/OSX-029.json';
+import questionBank from '../../../review-banks/OSX-029.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Misi:** jelaskan mengapa host bisa memanggil `127.0.0.1:8080` tetapi peer namespace tidak dapat menjangkau API melalui IP veth host.
+
+**Mulai:** prediksi apakah server yang hanya listen `127.0.0.1` akan menerima koneksi ke target `127.0.0.2` dalam satu Linux namespace.
+
+<MentalModel title="Bind address, route, dan netns adalah batas yang berbeda">
+
+- **127.0.0.1**: satu alamat loopback IPv4 di namespace pemanggil.
+- **0.0.0.0**: wildcard untuk **binding** ke alamat IPv4 lokal, bukan tujuan koneksi client.
+- **ip addr / ip route**: alamat interface dan jalur dalam namespace yang sedang digunakan.
+- **ss -lntp**: socket yang benar-benar mendengarkan alamat dan port tertentu.
+- **Network namespace**: memisahkan loopback, interface, route, firewall rules, dan socket. Untuk koneksi antar-namespace diperlukan jalur seperti **veth**.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+Host namespace                          cs101-peer namespace
+127.0.0.1 (host lo)                     127.0.0.1 (peer lo)
+      |                                         |
+TCP 127.0.0.1:8080                    peer lo != host lo
+      |
+10.200.30.1 (veth host) <---veth---> 10.200.30.2 (veth peer)
+      ^
+TCP bind 10.200.30.1:8080 + firewall/route allow
+      |
+HTTP handler
+```
+
+</ConceptGraph>
+
+## Diagnostic sequence
+
+```sh
+ip -br addr
+ip route
+ip route get 10.200.30.2
+ss -lntp '( sport = :8080 )'
+curl --noproxy '*' --connect-timeout 2 http://127.0.0.1:8080/
+```
+
+`ip addr` bukan `ss`: interface dapat memiliki IP walaupun aplikasi hanya mendengarkan loopback. `0.0.0.0` memperluas permukaan jaringan; pilih bind ke alamat interface spesifik bila itu sudah cukup. IPv6 harus diperiksa terpisah dengan `ss -lnt4` dan `ss -lnt6`.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Referensi kernel dan iproute2
+
+<SourceList sources={[
+  {
+    "title": "Linux ip(7): IPv4 socket bind and reserved addresses",
+    "url": "https://man7.org/linux/man-pages/man7/ip.7.html"
+  },
+  {
+    "title": "Linux network_namespaces(7): isolated network resources",
+    "url": "https://man7.org/linux/man-pages/man7/network_namespaces.7.html"
+  },
+  {
+    "title": "ip-netns(8): run commands in network namespaces",
+    "url": "https://man7.org/linux/man-pages/man8/ip-netns.8.html"
+  },
+  {
+    "title": "ip(8): interface and route inspection",
+    "url": "https://man7.org/linux/man-pages/man8/ip.8.html"
+  },
+  {
+    "title": "ss(8): listening TCP socket inspection",
+    "url": "https://man7.org/linux/man-pages/man8/ss.8.html"
+  }
+] />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Fixture Linux: bind dalam satu namespace
+
+Jalankan pada Linux dengan Node 24:
+
+```sh
+node generation/fixtures/OSX-029/binding-mystery.mjs
+```
+
+Prediksi hasil:
+
+```text
+loopback-self=connected
+loopback-alias=ECONNREFUSED
+wildcard-alias=connected
+```
+
+Koneksi ke `127.0.0.2` **masih di network namespace yang sama**. Fixture ini membuktikan matching tujuan IPv4, bukan akses antar-namespace, firewall, atau HTTP responses.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Quiz: bind versus route
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Lab: Binding Mystery
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+### Manual netns lab — VM Linux disposable saja
+
+Perlu hak root/CAP_NET_ADMIN, iproute2, curl dan Node. Command berikut mengubah interface/namespace; **jangan jalankan pada server produksi**.
+
+```sh
+sudo ip netns add cs101-peer
+sudo ip link add cs101-host type veth peer name cs101-peer0
+sudo ip link set cs101-peer0 netns cs101-peer
+sudo ip addr add 10.200.30.1/30 dev cs101-host
+sudo ip link set cs101-host up
+sudo ip -n cs101-peer addr add 10.200.30.2/30 dev cs101-peer0
+sudo ip -n cs101-peer link set lo up
+sudo ip -n cs101-peer link set cs101-peer0 up
+ip -br addr
+sudo ip -n cs101-peer addr
+sudo ip -n cs101-peer route
+```
+
+Di host terminal pertama, buat server loopback:
+
+```sh
+node -e 'require("node:http").createServer((q,r)=>r.end("ok")).listen(8080,"127.0.0.1")'
+```
+
+Di terminal kedua, bandingkan:
+
+```sh
+ss -lntp '( sport = :8080 )'
+curl --noproxy '*' --connect-timeout 2 http://127.0.0.1:8080/
+sudo ip netns exec cs101-peer curl --noproxy '*' --connect-timeout 2 -v http://10.200.30.1:8080/
+```
+
+Hentikan server (Ctrl+C), kemudian coba bind **spesifik** ke host veth IP dan ulangi peer curl:
+
+```sh
+node -e 'require("node:http").createServer((q,r)=>r.end("ok")).listen(8080,"10.200.30.1")'
+```
+
+Jika masih gagal, telusuri routing, firewall dan state veth; jangan mengarang observasi. Setelah menghentikan server, bersihkan hanya resource lab:
+
+```sh
+sudo ip netns del cs101-peer
+sudo ip link del cs101-host 2>/dev/null || true
+```
+
+<Challenge
+  title="Binding Mystery — peer namespace reachability"
+  brief="Buktikan akses lokal ke API host dan kegagalan akses peer saat bind ke 127.0.0.1, lalu ulangi setelah bind aman ke IP host veth. Cantumkan hasil ip, ss, curl, serta pengaruh routing dan firewall."
+  acceptanceCriteria={[
+    'Tampilkan IP dan route host/peer dengan ip addr dan ip route, bukan berdasarkan dugaan.',
+    'Bandingkan socket 127.0.0.1:8080 vs 10.200.30.1:8080 menggunakan ss -lntp.',
+    'Bandingkan curl localhost host dengan curl peer ke host veth IP, bukan peer 127.0.0.1.',
+    'Jelaskan bahwa 0.0.0.0 wildcard memperluas alamat yang diterima, tidak membuka firewall atau routing.',
+    'Pastikan hasil fixture Linux dibedakan dari lab netns sungguhan; catat permission blocker secara jujur.',
+    'Hentikan server dan hapus named netns/veth lab setelah pengujian.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Bisa memisahkan masalah address binding, interface, route dan policy firewall.',
+  'Bisa menjelaskan 127.0.0.1 tidak dibagi antar-network-namespace.',
+  'Mempunyai bukti lokal fixture dan, jika punya akses, observasi manual netns veth.',
+  'Memilih bind address spesifik ketimbang wildcard ketika exposure harus dibatasi.'
+]} />
+
+</LessonStage>

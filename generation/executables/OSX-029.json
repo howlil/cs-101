@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "OSX-029",
+  "curriculumFingerprint": "sha256:7dbfe4c5f7f993c96bb875f409c776bd721a98c982b280f32364154ba9a80cca",
+  "examples": [
+    {
+      "id": "bind-address-local",
+      "runtime": "node",
+      "file": "binding-mystery.mjs",
+      "expectedStdout": "loopback-self=connected\nloopback-alias=ECONNREFUSED\nwildcard-alias=connected\n"
+    }
+  ]
+}
