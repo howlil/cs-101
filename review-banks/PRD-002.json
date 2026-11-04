@@ -1,0 +1,78 @@
+{
+  "itemId": "PRD-002",
+  "version": "lesson-spec-v1:sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "curriculumFingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Transfer DB gagal, tetapi proses masih sehat. Sinyal mana tepat?",
+      "options": [
+        "/live=503 dan /ready=503",
+        "/live=200 dan /ready=503 bila DB kritis",
+        "/live=200 dan /ready=200 selalu"
+      ],
+      "answer": 1,
+      "explanation": "Kegagalan dependency bukan bukti proses perlu restart; readiness dapat menolak trafik.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Untuk apa startupProbe pada aplikasi cold start lama?",
+      "options": [
+        "Melindungi initialization dari liveness restart terlalu cepat",
+        "Menggantikan semua readiness probes",
+        "Menjamin DB selalu hidup"
+      ],
+      "answer": 0,
+      "explanation": "startupProbe menunda liveness/readiness checks sampai startup berhasil.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Konfigurasi Spring Boot untuk alias /ready pada port aplikasi utama?",
+      "options": [
+        "management.endpoint.health.group.readiness.additional-path=server:/ready",
+        "management.endpoint.health.group.liveness.include=db",
+        "server.port=/ready"
+      ],
+      "answer": 0,
+      "explanation": "Health group dapat diberi additional-path dengan prefix server:.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Apakah Actuator readiness otomatis memasukkan semua cek external DB?",
+      "options": [
+        "Ya, selalu",
+        "Tidak, dipilih eksplisit jika benar-benar penting",
+        "Hanya untuk instance dengan IP publik"
+      ],
+      "answer": 1,
+      "explanation": "External health indicators tidak ditambahkan secara default.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Saat graceful drain, status mana paling sesuai?",
+      "options": [
+        "/live 503 supaya Pod selalu restart",
+        "/ready 503 sementara /live tetap sehat bila proses responsif",
+        "/ready 200 sampai semua request gagal"
+      ],
+      "answer": 1,
+      "explanation": "Readiness menutup admission normal; request in-flight diselesaikan dalam waktu grace.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

@@ -50,6 +50,11 @@ jobs:
           pnpm generation:validate OSX-029
           pnpm generation:promote OSX-029
           git diff --exit-code -- src/content/lessons/OSX-029.mdx generation/OSX-029.json review-banks/OSX-029.json generation/pedagogy/OSX-029.json generation/sources/OSX-029.json generation/proofs/OSX-029.json generation/executables/OSX-029.json generation/verified/OSX-029.json generation/fixtures/OSX-029/binding-mystery.mjs
+      - name: Verify PRD-002 reproducible authoring and HTTP health fixture
+        run: |
+          pnpm generation:validate PRD-002
+          pnpm generation:promote PRD-002
+          git diff --exit-code -- src/content/lessons/PRD-002.mdx generation/PRD-002.json review-banks/PRD-002.json generation/pedagogy/PRD-002.json generation/sources/PRD-002.json generation/proofs/PRD-002.json generation/executables/PRD-002.json generation/verified/PRD-002.json generation/fixtures/PRD-002/health-contract.mjs
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -127,6 +132,19 @@ jobs:
           grep -q 'PRD-002' /tmp/graph-g2.html
           grep -q 'Assessment blueprint' /tmp/graph-g2.html
           grep -q 'Explain how a database outage' /tmp/graph-g2.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&concept=http-request-lifecycle&level=G2' > /tmp/health-materi.html
+          grep -q 'Process alive' /tmp/health-materi.html
+          grep -q 'Spring Boot Actuator Endpoints' /tmp/health-materi.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=soal&concept=http-request-lifecycle&level=G2' > /tmp/health-soal.html
+          grep -q 'Lima soal health contract' /tmp/health-soal.html
+          grep -q 'Cek jawaban' /tmp/health-soal.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=http-request-lifecycle&level=G2' > /tmp/health-project.html
+          grep -q 'Health Contract — slow startup' /tmp/health-project.html
+          grep -q 'Assessment guide' /tmp/health-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=service-readiness&level=G1' > /tmp/health-g1.html
+          grep -q 'Assessment guide' /tmp/health-g1.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=service-readiness&level=G2' > /tmp/health-g2.html
+          grep -q 'Assessment guide' /tmp/health-g2.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=http-request-lifecycle&level=G2' > /tmp/rubric-project.html
           grep -q 'Assessment guide' /tmp/rubric-project.html
           grep -q 'readiness' /tmp/rubric-project.html

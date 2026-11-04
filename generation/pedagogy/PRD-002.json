@@ -1,0 +1,195 @@
+{
+  "unitId": "PRD-002",
+  "curriculumFingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "separate-health-signals",
+        "objective": "Define /live and /ready as different Spring Boot health contracts.",
+        "whyItMatters": "An HTTP process may be healthy while a required ledger database cannot serve money movements.",
+        "mentalModel": "Liveness is process health and restart eligibility; readiness is traffic admission. Neither proves transaction safety.",
+        "explanation": "Spring Boot Actuator exposes /actuator/health/liveness and /actuator/health/readiness, and can add main-port aliases /live and /ready. Kubernetes uses liveness failure for restarts and readiness failure to remove normal Service traffic. The liveness group must not check external systems. Adding a DB indicator to readiness is an explicit critical-dependency decision; a shared DB outage may make all replicas unready.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "An HTTP process may be healthy while a required ledger database cannot serve money movements.",
+          "steps": [
+            {
+              "action": "Expose liveness and readiness as independent health groups.",
+              "reason": "Their operators have different consequences.",
+              "expectedResult": "A health path exists for each decision."
+            },
+            {
+              "action": "Keep the shared DB outside liveness.",
+              "reason": "Restarting replicas cannot repair the remote database.",
+              "expectedResult": "/live stays healthy if the process still progresses."
+            },
+            {
+              "action": "Make critical DB readiness explicit and bounded.",
+              "reason": "Unavailable instance should not receive normal transfer traffic.",
+              "expectedResult": "/ready may return 503 during the outage."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "DB down but server responsive: which probe can fail without immediately restarting the container?",
+          "hints": [
+            "Think about what Kubernetes restarts.",
+            "Traffic admission is distinct from process restart."
+          ],
+          "explanation": "Readiness can fail for a critical DB. Liveness should not depend on that DB."
+        },
+        "independentChallenge": {
+          "prompt": "Design health contracts for a catalog whose optional recommendation API is down; justify whether readiness must fail.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Independent /live and /ready decisions with clearly justified critical dependencies."
+          ],
+          "variationFromExample": "A nonessential recommendation backend differs from the mandatory ledger DB."
+        },
+        "firstAction": "Predict both status codes when a healthy process loses DB connectivity.",
+        "misconceptionRepair": {
+          "likelyMistake": "Putting DB health in /live.",
+          "whyItFails": "An outage triggers synchronized restarts that cannot fix a shared dependency.",
+          "correctiveAction": "Restrict liveness to process health and scope readiness checks to truly critical dependencies."
+        },
+        "selfCheck": {
+          "expectedObservation": "During modeled DB outage, /live remains 200 but /ready becomes 503.",
+          "ifUnexpected": "Inspect health group membership and distinguish process failure from downstream failure."
+        },
+        "continueFromHere": {
+          "nextAction": "Budget the slow startup with startupProbe.",
+          "resumeCue": "Remember restart versus admission."
+        }
+      },
+      {
+        "id": "budget-slow-startup",
+        "objective": "Separate a startupProbe budget from readiness during warming.",
+        "whyItMatters": "A healthy process may take long to initialize before it can serve transfer operations.",
+        "mentalModel": "startupProbe defers regular liveness/readiness checks until it succeeds; readiness can still stay unready afterward.",
+        "explanation": "A startupProbe can protect slow cold boot. For example a 5-second period and failureThreshold of 24 give about 120 seconds of tolerated startup failures, not a precise timing guarantee. Once the HTTP listener is active, /live may return 200 while essential warmup continues and /ready returns 503. Probe settings must follow measured cold-start behavior, and the HTTP fixture does not implement actual kubelet scheduling.",
+        "prerequisiteConceptIds": [
+          "probe"
+        ],
+        "workedExample": {
+          "problem": "A healthy process may take long to initialize before it can serve transfer operations.",
+          "steps": [
+            {
+              "action": "During warmup, report /ready unavailable.",
+              "reason": "Serving new work is unsafe before mandatory setup finishes.",
+              "expectedResult": "readiness returns 503."
+            },
+            {
+              "action": "Configure bounded startup failure tolerance.",
+              "reason": "Avoid premature liveness restart of a process that is still booting.",
+              "expectedResult": "Sample budget is approximately 120 seconds."
+            },
+            {
+              "action": "After warmup, report ready.",
+              "reason": "A ready instance is eligible for routing.",
+              "expectedResult": "readiness returns 200 without a process restart."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "HTTP listener is alive during a lengthy cache warmup. Must /live remain 503?",
+          "hints": [
+            "The process is making progress.",
+            "Which probe controls new traffic?"
+          ],
+          "explanation": "No. Liveness can succeed while readiness remains unready until required warmup finishes."
+        },
+        "independentChallenge": {
+          "prompt": "An instance opens HTTP at 15 seconds but cannot serve requests until 95 seconds. Choose startup and readiness policies with testable thresholds.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Startup tolerance and traffic exclusion until full readiness."
+          ],
+          "variationFromExample": "An extended cold start with an early HTTP listener differs from a short example warmup."
+        },
+        "firstAction": "Calculate 5 multiplied by 24 and identify its limitation as a timing budget.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating liveness 200 as proof that all business initialization is complete.",
+          "whyItFails": "Startup and readiness control different lifecycle decisions.",
+          "correctiveAction": "Keep readiness unavailable until required initialization actually finishes."
+        },
+        "selfCheck": {
+          "expectedObservation": "Fixture boot-live=200, boot-ready=503 and warm-ready=200.",
+          "ifUnexpected": "Verify the real startup phase and which endpoint the startup probe checks."
+        },
+        "continueFromHere": {
+          "nextAction": "Simulate DB outage, recovery and graceful drain.",
+          "resumeCue": "Remember startupProbe protects boot; readiness protects admission."
+        }
+      },
+      {
+        "id": "recover-and-drain",
+        "objective": "Simulate DB outage and graceful shutdown without dependency-driven restart loops.",
+        "whyItMatters": "Shared DB failures and abrupt rollout termination can amplify incidents across replicas.",
+        "mentalModel": "A critical DB may affect readiness while a healthy process stays live. Draining stops new traffic while existing work completes within a bounded window.",
+        "explanation": "By default Spring Boot readiness does not include every external health indicator; operators must choose critical ones. When a required DB fails, readiness may report 503 and liveness should remain 200 if the process itself still progresses. DB recovery can restore readiness without restarting. On SIGTERM, graceful shutdown stops accepting new requests and gives in-flight requests a configured phase timeout; Kubernetes terminating endpoints are not eligible for regular Service traffic. An /live 200 is never permission to execute a financial operation.",
+        "prerequisiteConceptIds": [
+          "probe",
+          "startup"
+        ],
+        "workedExample": {
+          "problem": "Shared DB failures and abrupt rollout termination can amplify incidents across replicas.",
+          "steps": [
+            {
+              "action": "Simulate DB unavailable on a healthy process.",
+              "reason": "Availability of a shared dependency does not dictate local process death.",
+              "expectedResult": "live=200, ready=503."
+            },
+            {
+              "action": "Restore DB connectivity.",
+              "reason": "A healthy process can resume admission without restart.",
+              "expectedResult": "ready=200."
+            },
+            {
+              "action": "Begin bounded graceful drain.",
+              "reason": "Prevent new work while allowing existing requests to finish.",
+              "expectedResult": "ready=503 while liveness stays healthy in the local model."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Does failing readiness on all replicas require Kubernetes to restart all of them?",
+          "hints": [
+            "Which probe is tied to restart?",
+            "What happens to normal Service endpoints when readiness fails?"
+          ],
+          "explanation": "No. Readiness controls traffic; liveness may cause restart. Neither repairs a shared DB automatically."
+        },
+        "independentChallenge": {
+          "prompt": "Draw a two-replica DB-outage, recovery, and SIGTERM matrix and describe the real Kubernetes evidence needed for each transition.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Observable readiness/liveness matrix, drain timeout and explicit real-cluster validation boundary."
+          ],
+          "variationFromExample": "A two-replica shared-failure scenario differs from the one-process HTTP fixture."
+        },
+        "firstAction": "Write /live and /ready status for DB down and for a draining instance.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming process alive proves that a transfer is safe, or treating readiness failure as process death.",
+          "whyItFails": "Health does not prove authorization, idempotency, or ledger consistency; readiness does not by itself restart a process.",
+          "correctiveAction": "Retain business-level checks and separate the health groups' failure domains."
+        },
+        "selfCheck": {
+          "expectedObservation": "Local fixture returns ready=503 during DB down and drain, ready=200 on recovery, live=200 throughout.",
+          "ifUnexpected": "Separate simulated booleans from actual DB, Spring and Kubernetes state observations."
+        },
+        "continueFromHere": {
+          "nextAction": "Perform integration verification with Spring Boot and a disposable Kubernetes cluster.",
+          "resumeCue": "Restart broken processes; remove unready traffic; drain before stop."
+        }
+      }
+    ]
+  }
+}

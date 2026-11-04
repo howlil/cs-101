@@ -1,0 +1,181 @@
+---
+taskId: "PRD-002"
+title: "Health Contract — liveness, readiness & startup"
+description: "Spring Boot health probes untuk slow startup, DB outage, recovery, dan graceful drain tanpa restart loop."
+demo: false
+curriculumFingerprint: "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/PRD-002.json';
+import questionBank from '../../../review-banks/PRD-002.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Target:** implementasikan /live dan /ready pada Spring Boot sehingga startup lambat, database down, recovery, dan graceful drain tidak menyebabkan dependency-driven liveness restart loop.
+
+**Mulai:** tulis status /live dan /ready ketika proses responsif tetapi database yang wajib untuk transfer tidak tersedia.
+
+<MentalModel title="Process alive ≠ service ready">
+
+- **Liveness:** kesehatan proses dan kemungkinan restart jika tidak bisa membuat kemajuan.
+- **Readiness:** penerimaan trafik normal Kubernetes Service saat instance sanggup bekerja.
+- **Startup probe:** memberi ruang untuk cold start, menunda liveness/readiness probes sampai startup berhasil.
+- **Graceful shutdown:** berhenti menerima pekerjaan baru sambil menyelesaikan in-flight request dalam batas waktu.
+
+**Penting:** status /live 200 bukan bukti sebuah operasi transfer aman, sah, idempotent, atau tercatat di ledger.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+Cold start → startupProbe → process liveness
+                                |
+                                v
+                         /live (restart?)
+                                |
+              warmup + required DB + drain
+                                |
+                         /ready (traffic?)
+                                |
+                      Transfer API / Service
+                                |
+                    business-level safety
+```
+
+</ConceptGraph>
+
+## Contoh Spring Boot Actuator
+
+Tambahkan dependency `spring-boot-starter-actuator`. Spring Boot memiliki health groups `/actuator/health/liveness` dan `/actuator/health/readiness`. Ekspos alias ini pada **port HTTP utama**:
+
+```properties
+management.endpoint.health.probes.enabled=true
+management.endpoint.health.group.liveness.additional-path=server:/live
+management.endpoint.health.group.readiness.additional-path=server:/ready
+management.endpoint.health.show-details=never
+```
+
+Indikator eksternal **tidak otomatis** menjadi bagian readiness. Jika ledger DB wajib agar transfer dapat dilayani, implementasikan health indicator `transferDbHealthIndicator` dengan pemeriksaan berbiaya rendah dan timeout terbatasi, kemudian sertakan dalam readiness saja:
+
+```properties
+management.endpoint.health.group.readiness.include=readinessState,transferDb
+```
+
+Jangan memasukkan database ke liveness. Shared DB down bisa membuat semua replica menjadi unready: apakah itu benar harus diputuskan berdasarkan kebutuhan service dan risiko semua endpoint hilang.
+
+## Kubernetes probe policy (contoh, bukan bukti cluster)
+
+```yaml
+startupProbe:
+  httpGet: { path: /live, port: 8080 }
+  periodSeconds: 5
+  failureThreshold: 24
+livenessProbe:
+  httpGet: { path: /live, port: 8080 }
+  periodSeconds: 10
+  failureThreshold: 3
+readinessProbe:
+  httpGet: { path: /ready, port: 8080 }
+  periodSeconds: 5
+  failureThreshold: 2
+```
+
+Contoh startup budget sekitar `5 × 24 = 120` detik probe failures, bukan timing guarantee. Jika HTTP server sudah aktif tetapi mandatory warmup belum selesai, `/live` bisa 200 sementara `/ready` masih 503. Atur threshold berdasarkan startup yang benar-benar diukur.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Referensi teknis
+
+<SourceList sources={[
+  {title: 'Kubernetes Pod Probes', url: 'https://kubernetes.io/docs/concepts/workloads/pods/probes/'},
+  {title: 'Kubernetes Probe Configuration', url: 'https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/'},
+  {title: 'Spring Boot Actuator Endpoints', url: 'https://docs.spring.io/spring-boot/reference/actuator/endpoints.html'},
+  {title: 'Spring Boot Graceful Shutdown', url: 'https://docs.spring.io/spring-boot/reference/web/graceful-shutdown.html'},
+  {title: 'Kubernetes Pod Lifecycle', url: 'https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Local HTTP proof: status state machine
+
+Jalankan fixture Node 24:
+
+```sh
+node generation/fixtures/PRD-002/health-contract.mjs
+```
+
+Prediksi output berikut sebelum menjalankan:
+
+```text
+boot-live=200
+boot-ready=503
+warm-ready=200
+db-down-live=200
+db-down-ready=503
+db-recover-ready=200
+drain-live=200
+drain-ready=503
+```
+
+Ini adalah **HTTP simulation**, bukan database sungguhan, Spring Boot atau Kubernetes. Fixture hanya membuktikan status yang keluar dari boolean warmup, DB dan drain; tidak membuktikan Pod restart, Service traffic routing atau graceful completion.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal health contract
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Prove: Health Contract pada Spring Boot
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+Verifikasi pada aplikasi Spring Boot dan Kubernetes disposable, bukan cluster produksi. Uji startup lambat, DB down, recovery dan graceful SIGTERM; lihat HTTP probe dan kondisi Service endpoints:
+
+```sh
+curl -i http://127.0.0.1:8080/live
+curl -i http://127.0.0.1:8080/ready
+kubectl get pods -w
+kubectl get endpointslices
+```
+
+Readiness 503 membatasi trafik melalui Service yang dikonfigurasi; akses langsung ke Pod IP memerlukan perlindungan tambahan. Graceful shutdown Spring Boot harus menggunakan grace phase timeout yang cukup dan diintegrasikan dengan termination grace Kubernetes.
+
+<Challenge
+  title="Health Contract — slow startup, DB outage & graceful drain"
+  brief="Implementasikan /live dan /ready memakai Spring Boot Actuator. Simulasikan DB wajib gagal dan pulih, startup lambat dan SIGTERM. Buktikan readiness menolak trafik ketika tidak usable, tanpa memicu restart loop liveness akibat dependency yang down."
+  acceptanceCriteria={[
+    'Dua URL /live dan /ready tersedia di main HTTP port, statusnya terverifikasi dengan Spring Boot.',
+    'Saat DB wajib gagal, /ready 503 dan /live tetap sehat jika proses masih dapat membuat kemajuan; recovery tidak butuh restart.',
+    'Slow cold start tidak menyebabkan premature restart; startupProbe memberi budget, readiness tetap menolak traffic sampai siap.',
+    'Periksa Pod Ready dan EndpointSlice dari Kubernetes Service untuk membuktikan traffic admission, bukan hanya curl lokal.',
+    'Graceful drain menghentikan traffic baru dan memberi waktu terbatas untuk in-flight work.',
+    'Jelaskan risiko seluruh replica unready pada shared DB outage dan mengapa /live=200 tidak membuktikan money movement aman.',
+    'Pisahkan bukti simulasi Node dari Spring Boot dan Kubernetes integration test.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Dapat menjelaskan mengapa liveness failure dan readiness failure punya konsekuensi berbeda.',
+  'Dapat menghitung startup probe budget dan membedakan warmup yang masih unready.',
+  'Dapat memutuskan apakah dependency kritis perlu memengaruhi readiness, tanpa menambahkannya ke liveness.',
+  'Dapat menguji drain dan DB recovery dengan matriks observasi, tanpa mengarang restart atau traffic metrics.'
+]} />
+
+</LessonStage>

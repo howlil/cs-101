@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "PRD-002",
+  "curriculumFingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "probe-http-state",
+      "runtime": "node",
+      "file": "health-contract.mjs",
+      "fixtureSha256": "793048a8f433aeb45e7a2fec3bf1361c9148cc19f9f97ad8d939009a5d0b0a64",
+      "stdoutSha256": "a742504d6e2ad657294b10975b8bc64b73af59d6be8b90622881c8f7d8689c9d",
+      "verified": true
+    }
+  ]
+}

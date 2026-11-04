@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "PRD-002",
+  "curriculumFingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "hashes": {
+    "lesson": "50042408ddf4afd92113beef40a98fdf8fe4bcfd2d1ae4f33c4da764a3ad4560",
+    "pedagogy": "9fe91ae3f935715158a28ab9f0a4aa62f36f8e3a40c7a446ad6ce7039b66ebc9",
+    "questionBank": "30b21cb5fd744cb85f52febe39074df9ce6bb65cc5c7f31c439afcf33ee383c5",
+    "sourcePack": "a9a49db6605ace5fea891ae29da16956980f0dd76e507f17825e1529fa3bcddc",
+    "exampleProof": "25fffa4a239808a0ef15365872e483f879dacdf6a1382cf7b522589e248ccced",
+    "examplePlan": "2c802d88559fda211e283a819635456ab9695c2f942f784dd640262349f86ec7"
+  }
+}

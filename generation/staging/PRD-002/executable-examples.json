@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "PRD-002",
+  "curriculumFingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "examples": [
+    {
+      "id": "probe-http-state",
+      "runtime": "node",
+      "file": "health-contract.mjs",
+      "expectedStdout": "boot-live=200\nboot-ready=503\nwarm-ready=200\ndb-down-live=200\ndb-down-ready=503\ndb-recover-ready=200\ndrain-live=200\ndrain-ready=503\n"
+    }
+  ]
+}

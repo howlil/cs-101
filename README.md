@@ -2,7 +2,7 @@
 
 CS-101 is a **single-page content library** for engineering lessons, practice questions, and project ideas.
 
-**Current content status:** 8 tracks, 67 modules and 370 source-backed curriculum entries. NET-001 (Request Path), SPR-006 (Transfer API) and OSX-029 (Binding Mystery) are authored Pedagogy V3 lessons. All other unauthored units remain outlines.
+**Current content status:** 8 tracks, 67 modules and 370 source-backed curriculum entries. NET-001 (Request Path), SPR-006 (Transfer API), OSX-029 (Binding Mystery) and PRD-002 (Health Contract) are authored Pedagogy V3 lessons. All other unauthored units remain outlines.
 
 - One page: `/` with Library and Knowledge Graph modes.
 - Cross-domain pilot: `/?mode=graph&concept=http-request-lifecycle&level=G1` and `&level=G2` have distinct competency evidence and mapped units.
@@ -12,8 +12,8 @@ CS-101 is a **single-page content library** for engineering lessons, practice qu
 - Curated relations and competency outcomes are validated against canonical unit IDs; workbook imports are unchanged.
 - Each G1/G2 pilot outcome has a **proposed assessment blueprint** (task, observable checks, pass conditions, linked curriculum units). The graph shows the complete rubric, and a contextual Project view shows criteria for only its mapped unit. These are human-review guides, not published quizzes or automatically scored submissions.
 - Sidebar: domain selector, module accordion, and curriculum topics.
-- Content: NET-001 (HTTP/TCP/IP), SPR-006 (Spring MVC Transfer API), and OSX-029 (Linux bind, interface and veth namespace diagnosis) are authored with five self-check questions and bounded local executable proof each. Remaining units are explicit outlines.
-- SPR-006's Java fixture proves HTTP protocol behavior, not Spring integration. OSX-029's local Node fixture proves same-namespace binding, not real peer namespace connectivity; the privileged veth lab is a separate learner challenge.
+- Content: NET-001 (HTTP/TCP/IP), SPR-006 (Spring MVC Transfer API), OSX-029 (Linux bind and namespace) and PRD-002 (liveness, readiness, startup and DB outage) are authored with five self-check questions and bounded executable proof each. Remaining units are explicit outlines.
+- SPR-006's Java fixture proves HTTP protocol behavior, not Spring integration. OSX-029's Node fixture proves local bind only. PRD-002's Node HTTP fixture simulates state-driven /live and /ready statuses; actual database failure, Spring Boot Actuator wiring and Kubernetes routing/restart behaviors require separate integration verification.
 - Editorial competency rubrics remain proposed; published content does not imply assessment mastery.
 - Projects: project checkpoints and integration challenges from the curriculum manifest.
 - No learner account, progress, study sessions, evidence submission, spaced repetition, database reads or writes.

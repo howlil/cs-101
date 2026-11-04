@@ -1,0 +1,44 @@
+{
+  "itemId": "PRD-002",
+  "fingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "sources": [
+    {
+      "title": "Kubernetes Pod Probes",
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/probes/"
+    },
+    {
+      "title": "Kubernetes Probe Configuration",
+      "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/"
+    },
+    {
+      "title": "Spring Boot Actuator Endpoints",
+      "url": "https://docs.spring.io/spring-boot/reference/actuator/endpoints.html"
+    },
+    {
+      "title": "Spring Boot Graceful Shutdown",
+      "url": "https://docs.spring.io/spring-boot/reference/web/graceful-shutdown.html"
+    },
+    {
+      "title": "Kubernetes Pod Lifecycle",
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Independent liveness/readiness, startup, shared DB and drain segments",
+      "assessedAt": "Five questions, HTTP-state fixture, independent Spring Boot/Kubernetes exercise",
+      "evidenceExpected": "Both Spring Boot endpoints, DB down and slow startup tests, ready traffic exclusion and no dependency-driven liveness restarts."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Outage and graceful shutdown worked example",
+      "assessedAt": "Two-replica shared DB incident and SIGTERM integration challenge",
+      "evidenceExpected": "Separate HTTP probe state from observed Kubernetes EndpointSlice, restart, and drain evidence."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

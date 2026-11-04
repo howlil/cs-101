@@ -1,0 +1,156 @@
+{
+  "itemId": "PRD-002",
+  "curriculumFingerprint": "sha256:94fdf58a51e69cc2931db0a1d7833e7813808363c083fa4a3606be8589ce341a",
+  "sources": [
+    {
+      "title": "Kubernetes Pod Probes",
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/probes/",
+      "tier": 0,
+      "supports": [
+        "Official probe, availability or termination behavior"
+      ],
+      "notes": [
+        "Use the cited topic sections"
+      ]
+    },
+    {
+      "title": "Kubernetes Probe Configuration",
+      "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "tier": 0,
+      "supports": [
+        "Official probe, availability or termination behavior"
+      ],
+      "notes": [
+        "Use the cited topic sections"
+      ]
+    },
+    {
+      "title": "Spring Boot Actuator Endpoints",
+      "url": "https://docs.spring.io/spring-boot/reference/actuator/endpoints.html",
+      "tier": 0,
+      "supports": [
+        "Official probe, availability or termination behavior"
+      ],
+      "notes": [
+        "Use the cited topic sections"
+      ]
+    },
+    {
+      "title": "Spring Boot Graceful Shutdown",
+      "url": "https://docs.spring.io/spring-boot/reference/web/graceful-shutdown.html",
+      "tier": 0,
+      "supports": [
+        "Official probe, availability or termination behavior"
+      ],
+      "notes": [
+        "Use the cited topic sections"
+      ]
+    },
+    {
+      "title": "Kubernetes Pod Lifecycle",
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/",
+      "tier": 0,
+      "supports": [
+        "Official probe, availability or termination behavior"
+      ],
+      "notes": [
+        "Use the cited topic sections"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "liveness-restart",
+      "statement": "Kubernetes liveness probe failures may restart a container, rather than merely remove it from traffic.",
+      "conceptIds": [
+        "probe"
+      ],
+      "sourceUrl": "https://kubernetes.io/docs/concepts/workloads/pods/probes/",
+      "locator": "Liveness probe",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "readiness-admission",
+      "statement": "Kubernetes readiness probe failure removes the Pod from regular Service traffic without by itself restarting the container.",
+      "conceptIds": [
+        "probe"
+      ],
+      "sourceUrl": "https://kubernetes.io/docs/concepts/workloads/pods/probes/",
+      "locator": "Readiness probe",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "startup-gate",
+      "statement": "Kubernetes startup probes suppress liveness and readiness checks until the startup probe succeeds.",
+      "conceptIds": [
+        "startup",
+        "probe"
+      ],
+      "sourceUrl": "https://kubernetes.io/docs/concepts/workloads/pods/probes/",
+      "locator": "Startup probe",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "http-status-range",
+      "statement": "Kubernetes HTTP probes classify HTTP status 200 through 399 as success and 503 as failure.",
+      "conceptIds": [
+        "probe"
+      ],
+      "sourceUrl": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "locator": "HTTP liveness probe",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "actuator-groups",
+      "statement": "Spring Boot Actuator exposes liveness and readiness health groups with optional aliases on the main HTTP server port.",
+      "conceptIds": [
+        "actuator"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-boot/reference/actuator/endpoints.html",
+      "locator": "Kubernetes Probes, Health Groups",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "external-policy",
+      "statement": "Spring Boot does not automatically include external dependencies in readiness and advises that liveness must not depend on external systems.",
+      "conceptIds": [
+        "dependency",
+        "actuator"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-boot/reference/actuator/endpoints.html",
+      "locator": "Checking External State With Kubernetes Probes",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "health-codes",
+      "statement": "Spring Boot health states DOWN and OUT_OF_SERVICE map to HTTP 503 by default.",
+      "conceptIds": [
+        "actuator"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-boot/reference/actuator/endpoints.html",
+      "locator": "Health Status HTTP Mappings",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "draining",
+      "statement": "Spring Boot graceful shutdown rejects new work and permits bounded in-flight request completion.",
+      "conceptIds": [
+        "shutdown"
+      ],
+      "sourceUrl": "https://docs.spring.io/spring-boot/reference/web/graceful-shutdown.html",
+      "locator": "Graceful Shutdown",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    },
+    {
+      "id": "terminating-endpoint",
+      "statement": "Kubernetes terminating endpoints are not ready for ordinary Service traffic.",
+      "conceptIds": [
+        "shutdown"
+      ],
+      "sourceUrl": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/",
+      "locator": "Pod Termination",
+      "rationale": "The corresponding official documentation explicitly defines the operational contract."
+    }
+  ]
+}
