@@ -22,6 +22,7 @@ G6: Every assessment criterion ID is unique per outcome and references an item i
 G7: Authored content must retain exact V3 receipts and runnable proof; source provenance is checked against primary RFC, Spring and Linux manuals.
 G8: Local 127.0.0.2 probing in OSX-029 never claims cross-netns proof; only the explicit manual veth lab addresses peer isolation.
 G9: PRD-002 never drives liveness from shared DB failure and never treats HTTP fixture outcomes as Kubernetes orchestration evidence.
+G10: Each proposed assessment criterion declares a typed evidence kind, enforced at overlay validation, exposed in both rubric surfaces and never implied by fixture execution alone.
 DEC1: JSON overlay + in-memory adjacency preferred to changing generated manifest or adding graph DB.
 D1: Pilot proposed relationships require editorial review before promotion to reviewed.
 DEC2: A read-only, depth-specific path derives from concept-level reviewed requires and the existing proposed itemIds editorial ordering. Missing prerequisite outcomes are surfaced as gaps.
@@ -30,6 +31,7 @@ DEC4: NET-001 is the first authored cross-domain pilot; staged source/spec for N
 DEC5: The SPR-006 reference fixture executes JDK 21 local HTTP contract tests, not Spring application wiring; framework integration remains an explicit MockMvc learner challenge.
 DEC6: OSX-029 uses unprivileged local Node socket probes; root-required network namespace setup is a separate disposable-VM learner lab.
 DEC7: PRD-002 uses documented Actuator /live and /ready aliases; state-driven Node HTTP verification is separate from Spring/Kubernetes fault injection.
+DEC8: Editorial evidence precision is part of the proposed rubric schema; no speculative reviewed graph edge, runtime progress state or database is introduced.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -42,3 +44,4 @@ PF7 (P11,G7) [important] | NET-001 authoring receipt, proof and isolated Golden 
 PF8 (P12,G7) [important] | SPR-006 reproducible artifacts, Java HTTP proof and focused route smoke | merge | pnpm ci
 PF9 (P13,G8) [important] | OSX-029 reproducible authored content, local Linux socket proof and G1/G2 route smoke | merge | pnpm ci
 PF10 (P14,G9) [important] | PRD-002 verified receipt, local status-state proof and contextual G1/G2 smoke | merge | pnpm ci
+PF11 (P15,G10) [important] | evidence-kind schema failures, 15 rubric classifications, Golden and Project/Graph smoke | merge | pnpm ci

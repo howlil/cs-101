@@ -80,6 +80,7 @@ async function assertRenderedHtml() {
     assert.ok(graphPage.includes('Suggested study path'), 'Graph must render a deterministic suggested route.');
     assert.ok(graphPage.includes('Assessment blueprint'), 'Graph must expose proposed competency rubric.');
     assert.ok(graphPage.includes('Golden rubric criterion'), 'Graph must show fixture rubric requirement.');
+    assert.ok(graphPage.includes('Required evidence: Framework integration test'), 'Graph must show the evidence method.');
     assert.ok(graphPage.includes('concept=golden-fixture'), 'Graph units must retain route context.');
 
     const linked = await fetch('http://127.0.0.1:' + port +
@@ -94,8 +95,11 @@ async function assertRenderedHtml() {
     const linkedProject = await fetch('http://127.0.0.1:' + port +
       '/?item=' + GOLDEN_UNIT_ID + '&view=project&concept=golden-fixture&level=G1');
     assert.equal(linkedProject.status, 200);
-    assert.ok((await linkedProject.text()).includes('Golden rubric criterion'),
+    const linkedProjectHtml=await linkedProject.text();
+    assert.ok(linkedProjectHtml.includes('Golden rubric criterion'),
       'Selected Project view should expose criteria for its canonical unit only.');
+    assert.ok(linkedProjectHtml.includes('Required evidence: Framework integration test'),
+      'Project rubric must expose the actual evidence method.');
     const emptyDepth = await fetch('http://127.0.0.1:' + port + '/?mode=graph&level=G4');
     assert.equal(emptyDepth.status, 200);
     assert.ok((await emptyDepth.text()).includes('No curated G4 outcomes yet'), 'Missing depth must show real coverage gap.');
@@ -184,7 +188,7 @@ try {
         evidence:'Complete a local self-check.',itemIds:[GOLDEN_UNIT_ID],status:'proposed',
         assessment:{
           task:'Explain the authored Java golden lesson with a concrete example.',
-          criteria:[{id:'golden-rubric',itemId:GOLDEN_UNIT_ID,
+          criteria:[{id:'golden-rubric',itemId:GOLDEN_UNIT_ID,evidenceKind:'framework-test',
             check:'Golden rubric criterion: demonstrate reference identity.',
             passWhen:'The example distinguishes identity and value comparisons.'}],
         }}],

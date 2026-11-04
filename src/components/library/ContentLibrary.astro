@@ -2,7 +2,7 @@
 import type { CurriculumItem, ProjectCheckpoint } from '../../domain/curriculum-v2/schema';
 import { libraryHref, libraryViewHref, type LibraryView } from '../../domain/content-library';
 import { ArrowRight } from 'lucide-react';
-import { learningGraphHref, type ItemAssessment } from '../../domain/learning-graph';
+import { learningGraphHref, EVIDENCE_KIND_LABELS, type ItemAssessment } from '../../domain/learning-graph';
 import type { ItemPathContext } from '../../domain/learning-path';
 import { pathItemHref } from '../../domain/learning-path';
 interface Props {
@@ -124,6 +124,7 @@ const sectionHref = (id: string, section: LibraryView) => pathContext
         {assessmentContext.criteria.map(criterion=>(
           <li>
             <strong>{criterion.check}</strong>
+            <p>Required evidence: {EVIDENCE_KIND_LABELS[criterion.evidenceKind]}</p>
             <p>Pass condition: {criterion.passWhen}</p>
           </li>
         ))}

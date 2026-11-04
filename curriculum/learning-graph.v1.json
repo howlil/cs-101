@@ -23,19 +23,22 @@
                 "id": "trace-http-path",
                 "itemId": "NET-001",
                 "check": "Identify the request sequence across client, DNS/TCP transport and HTTP application.",
-                "passWhen": "The trace names the responsible boundary for each hop and does not treat a network failure as an HTTP status."
+                "passWhen": "The trace names the responsible boundary for each hop and does not treat a network failure as an HTTP status.",
+                "evidenceKind": "design-review"
               },
               {
                 "id": "controller-contract",
                 "itemId": "SPR-006",
                 "check": "Explain what the controller validates and which HTTP response it returns.",
-                "passWhen": "The proposed contract separates request validation/response mapping from business logic."
+                "passWhen": "Spring MVC code and a controller-slice test show request validation, HTTP response mapping and service delegation; the standalone JDK fixture alone does not test Spring wiring.",
+                "evidenceKind": "framework-test"
               },
               {
                 "id": "binding-failure",
                 "itemId": "OSX-029",
                 "check": "Reproduce a localhost-only service unreachable from another namespace.",
-                "passWhen": "A listener/bind-address observation demonstrates the root cause, not a guessed HTTP failure."
+                "passWhen": "Actual peer-netns curl and host ss/ip observations identify the loopback-only binding; a same-namespace 127.0.0.2 fixture is not sufficient.",
+                "evidenceKind": "network-lab"
               }
             ]
           }
@@ -56,13 +59,15 @@
                 "id": "remote-reachability",
                 "itemId": "OSX-029",
                 "check": "Distinguish interface-binding failure from a process crash.",
-                "passWhen": "Listener address and remote test evidence identify the boundary and justify the remediation."
+                "passWhen": "Listener address, host/peer route state and curl evidence from a separate namespace distinguish binding failure from process crash, then verify the scoped rebind.",
+                "evidenceKind": "network-lab"
               },
               {
                 "id": "readiness-dependency",
                 "itemId": "PRD-002",
                 "check": "Explain how a database outage changes readiness without changing liveness.",
-                "passWhen": "An outage experiment shows traffic admission is rejected while the live process remains observable."
+                "passWhen": "A real Spring Boot plus Kubernetes outage test shows /ready failing and regular Service endpoints excluded while liveness remains healthy; the Node status fixture alone cannot prove traffic routing.",
+                "evidenceKind": "cluster-test"
               }
             ]
           }
@@ -89,13 +94,15 @@
                 "id": "tcp-handshake",
                 "itemId": "NET-006",
                 "check": "Identify SYN, SYN-ACK and ACK from a connection trace.",
-                "passWhen": "Packet sequence and participating endpoints are correct and ordered."
+                "passWhen": "An actual TCP packet trace shows SYN, SYN-ACK and ACK with correct endpoints and sequence.",
+                "evidenceKind": "packet-trace"
               },
               {
                 "id": "tcp-retry",
                 "itemId": "NET-006",
                 "check": "Distinguish a transport retransmission/timeout from a completed HTTP error response.",
-                "passWhen": "Evidence identifies transport behavior rather than inventing an application status."
+                "passWhen": "A real trace identifies transport retransmission or timeout before any HTTP response; the learner does not invent an HTTP status.",
+                "evidenceKind": "packet-trace"
               }
             ]
           }
@@ -116,19 +123,21 @@
           ],
           "status": "proposed",
           "assessment": {
-            "task": "Demonstrate the difference between a loopback-only listener and an externally reachable listener.",
+            "task": "Demonstrate loopback-only versus peer-accessible listening across a real Linux network namespace with veth, routes and access policy. A local alias probe alone is insufficient.",
             "criteria": [
               {
                 "id": "listener-interface",
                 "itemId": "OSX-029",
                 "check": "Report address, interface and port for each listener configuration.",
-                "passWhen": "The observation distinguishes loopback binding from an all-interface or explicitly routable binding."
+                "passWhen": "Observed ss, ip addr and bound interface/port distinguish loopback-only from veth-specific and wildcard IPv4 listeners.",
+                "evidenceKind": "network-lab"
               },
               {
                 "id": "namespace-reachability",
                 "itemId": "OSX-029",
                 "check": "Test connectivity from a separate network namespace.",
-                "passWhen": "The result and observed listening address explain why the request succeeds or fails."
+                "passWhen": "Command output from ip netns exec curl in a genuine peer namespace and host ss shows failed and recovered connectivity; same-namespace aliases do not count.",
+                "evidenceKind": "network-lab"
               }
             ]
           }
@@ -155,13 +164,15 @@
                 "id": "http-contract",
                 "itemId": "SPR-006",
                 "check": "Define POST/GET routes and their success/error response mapping.",
-                "passWhen": "A contract test or reproducible request shows correct methods, route and response statuses."
+                "passWhen": "A real Spring MVC MockMvc/controller test proves POST 201/Location, GET 200/404 and input validation 400; the JDK fixture tests only HTTP status design.",
+                "evidenceKind": "framework-test"
               },
               {
                 "id": "boundary-separation",
                 "itemId": "SPR-006",
                 "check": "Explain which work belongs in the controller versus the service layer.",
-                "passWhen": "A code example or call flow locates validation and HTTP mapping at the edge while business logic remains separate."
+                "passWhen": "A code example or call flow locates validation and HTTP mapping at the edge while business logic remains separate.",
+                "evidenceKind": "design-review"
               }
             ]
           }
@@ -188,13 +199,15 @@
                 "id": "startup-liveness",
                 "itemId": "PRD-002",
                 "check": "State what liveness reports while the process is running.",
-                "passWhen": "The expected signal does not depend on unrelated downstream service health."
+                "passWhen": "A Spring Boot probe or availability-state test demonstrates liveness after process startup without coupling it to an unrelated downstream health failure; the HTTP listener may be unavailable before startup.",
+                "evidenceKind": "framework-test"
               },
               {
                 "id": "startup-readiness",
                 "itemId": "PRD-002",
                 "check": "State when the service should be admitted to receive traffic.",
-                "passWhen": "The expected signal remains unready until essential startup conditions are satisfied."
+                "passWhen": "The Spring Boot readiness group remains unready until essential initialization is complete; health-state observations are distinguished from the separate Node simulation.",
+                "evidenceKind": "framework-test"
               }
             ]
           }
@@ -214,13 +227,15 @@
                 "id": "dependency-outage",
                 "itemId": "PRD-002",
                 "check": "Demonstrate readiness response during and after a database outage.",
-                "passWhen": "Evidence shows requests are not admitted while the critical dependency is unavailable and recover when it returns."
+                "passWhen": "A real Spring Boot DB fault injection plus Kubernetes Service/EndpointSlice observation verifies that readiness blocks regular traffic during outage and recovers afterwards.",
+                "evidenceKind": "cluster-test"
               },
               {
                 "id": "restart-isolation",
                 "itemId": "PRD-002",
                 "check": "Explain why liveness must not repeatedly restart a healthy process during a downstream outage.",
-                "passWhen": "The simulated scenario distinguishes an unready dependency from a process that needs restarting."
+                "passWhen": "A real cluster observation shows the shared DB outage alone does not cause liveness-driven container restarts; a local 200/503 fixture cannot establish restart counts.",
+                "evidenceKind": "cluster-test"
               }
             ]
           }

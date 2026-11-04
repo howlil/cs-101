@@ -21,7 +21,8 @@ test('all seven pilot outcomes have nonempty proposed, source-mapped rubrics',()
     assert.ok(outcome.assessment.criteria.length>=2);
     assert.equal(new Set(outcome.assessment.criteria.map(c=>c.id)).size,outcome.assessment.criteria.length);
     assert.ok(outcome.assessment.criteria.every(c=>
-      outcome.itemIds.includes(c.itemId) && !!c.check.trim() && !!c.passWhen.trim()));
+      outcome.itemIds.includes(c.itemId) && !!c.check.trim() && !!c.passWhen.trim()
+      && ['design-review','framework-test','network-lab','packet-trace','cluster-test'].includes(c.evidenceKind)));
   }
 });
 
@@ -54,4 +55,31 @@ test('validation rejects duplicated criteria and unrelated or malformed unit IDs
   assert.throws(()=>buildLearningGraph(item([{
     ...base.assessment.criteria[0],passWhen:'',
   }]),curriculum));
+});
+
+test('editorial proof boundary: critical rubrics demand the actual environment, not local fixture output',()=>{
+  const entries=graph.concepts.flatMap(c=>c.outcomes.flatMap(o=>
+    o.assessment.criteria.map(criterion=>[criterion.id,criterion] as const)));
+  const byId=new Map(entries);
+  for(const id of ['binding-failure','remote-reachability','namespace-reachability']){
+    assert.equal(byId.get(id)?.evidenceKind,'network-lab');
+    assert.match(byId.get(id)!.passWhen,/namespace|netns/i);
+  }
+  for(const id of ['readiness-dependency','dependency-outage','restart-isolation']){
+    assert.equal(byId.get(id)?.evidenceKind,'cluster-test');
+    assert.match(byId.get(id)!.passWhen,/Kubernetes|cluster/i);
+  }
+  assert.equal(byId.get('http-contract')?.evidenceKind,'framework-test');
+  assert.match(byId.get('http-contract')!.passWhen,/MockMvc/);
+  assert.ok(graph.relations.every(relation=>relation.type==='related'&&relation.status==='proposed'));
+});
+
+test('missing or invalid proof method is rejected rather than silently treated as demonstrated',()=>{
+  const first=overlay.concepts[0].outcomes[0].assessment.criteria[0];
+  const item=(entry:any)=>customize('http-request-lifecycle','G1',o=>({
+    ...o,assessment:{...o.assessment,criteria:[entry,...o.assessment.criteria.slice(1)]},
+  }));
+  const {evidenceKind:_omitted,...withoutKind}=first;
+  assert.throws(()=>buildLearningGraph(item(withoutKind),curriculum));
+  assert.throws(()=>buildLearningGraph(item({...first,evidenceKind:'fixture-means-mastered'}),curriculum));
 });

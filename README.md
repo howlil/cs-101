@@ -10,11 +10,11 @@ CS-101 is a **single-page content library** for engineering lessons, practice qu
 - Suggested cross-domain study paths: `/?mode=graph&concept=http-request-lifecycle&level=G1` → `/?item=NET-001&concept=http-request-lifecycle&level=G1` → Materi/Soal (when authored)/Project → next unit. URL context is not learner progress.
 - Path traversal uses only reviewed `requires` relations as prerequisites. Current pilot has none; ordered units are editorial suggestions.
 - Curated relations and competency outcomes are validated against canonical unit IDs; workbook imports are unchanged.
-- Each G1/G2 pilot outcome has a **proposed assessment blueprint** (task, observable checks, pass conditions, linked curriculum units). The graph shows the complete rubric, and a contextual Project view shows criteria for only its mapped unit. These are human-review guides, not published quizzes or automatically scored submissions.
+- Each G1/G2 pilot outcome has a **proposed assessment blueprint** (task, checks, pass conditions, required evidence kind and linked curriculum unit). Graph and contextual Project views show whether a criterion needs design review, a real framework test, a peer-network lab, a packet trace or a Kubernetes test. Local runnable fixtures alone do not satisfy lab/cluster criteria. Rubrics are not automatically scored.
 - Sidebar: domain selector, module accordion, and curriculum topics.
 - Content: NET-001 (HTTP/TCP/IP), SPR-006 (Spring MVC Transfer API), OSX-029 (Linux bind and namespace) and PRD-002 (liveness, readiness, startup and DB outage) are authored with five self-check questions and bounded executable proof each. Remaining units are explicit outlines.
 - SPR-006's Java fixture proves HTTP protocol behavior, not Spring integration. OSX-029's Node fixture proves local bind only. PRD-002's Node HTTP fixture simulates state-driven /live and /ready statuses; actual database failure, Spring Boot Actuator wiring and Kubernetes routing/restart behaviors require separate integration verification.
-- Editorial competency rubrics remain proposed; published content does not imply assessment mastery.
+- Editorial competency rubrics and graph relations remain proposed; published content does not imply assessment mastery. Spring Boot can reject new probe connections during graceful shutdown even while the local PRD-002 fixture returns HTTP 503 for drain.
 - Projects: project checkpoints and integration challenges from the curriculum manifest.
 - No learner account, progress, study sessions, evidence submission, spaced repetition, database reads or writes.
 - Existing Cloudflare D1 data is **not deleted** by this refactor. The application simply stops using the binding.

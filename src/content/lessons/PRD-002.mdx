@@ -155,7 +155,7 @@ kubectl get pods -w
 kubectl get endpointslices
 ```
 
-Readiness 503 membatasi trafik melalui Service yang dikonfigurasi; akses langsung ke Pod IP memerlukan perlindungan tambahan. Graceful shutdown Spring Boot harus menggunakan grace phase timeout yang cukup dan diintegrasikan dengan termination grace Kubernetes.
+Readiness 503 pada instance yang masih melayani probe membatasi trafik melalui Service yang dikonfigurasi; akses langsung ke Pod IP memerlukan perlindungan tambahan. Pada **Spring Boot graceful shutdown**, availability berubah menjadi `REFUSING_TRAFFIC`, tetapi HTTP connector dapat berhenti menerima koneksi baru, **termasuk probe `/ready`**. Karena itu, respons 503 tidak dijamin masih bisa diamati selama seluruh proses shutdown. Verifikasi EndpointSlice/Pod state serta penyelesaian in-flight request; gunakan graceful phase timeout yang sesuai dengan termination grace Kubernetes.
 
 <Challenge
   title="Health Contract — slow startup, DB outage & graceful drain"

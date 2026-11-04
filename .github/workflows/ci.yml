@@ -111,6 +111,7 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&view=project&concept=http-request-lifecycle&level=G1' > /tmp/spring-project.html
           grep -q 'Transfer API — POST 201' /tmp/spring-project.html
           grep -q 'Assessment guide' /tmp/spring-project.html
+          grep -q 'Required evidence: Framework integration test' /tmp/spring-project.html
           grep -q 'Step 2 of 3' /tmp/spring-project.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=OSX-029&concept=http-request-lifecycle&level=G1' > /tmp/linux-lesson.html
           grep -q 'Bind address, route, dan netns' /tmp/linux-lesson.html
@@ -121,6 +122,7 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=OSX-029&view=project&concept=http-request-lifecycle&level=G1' > /tmp/linux-project.html
           grep -q 'Binding Mystery — peer namespace reachability' /tmp/linux-project.html
           grep -q 'Assessment guide' /tmp/linux-project.html
+          grep -q 'Required evidence: Real Linux network lab' /tmp/linux-project.html
           grep -q 'Step 3 of 3' /tmp/linux-project.html
           if grep -q 'Next unit' /tmp/linux-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=OSX-029&view=project&concept=http-request-lifecycle&level=G2' > /tmp/linux-g2.html
@@ -131,6 +133,7 @@ jobs:
           grep -q 'Assessment guide' /tmp/net-project.html
           grep -q 'PRD-002' /tmp/graph-g2.html
           grep -q 'Assessment blueprint' /tmp/graph-g2.html
+          grep -q 'Required evidence: Live dependency / Kubernetes test' /tmp/graph-g2.html
           grep -q 'Explain how a database outage' /tmp/graph-g2.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&concept=http-request-lifecycle&level=G2' > /tmp/health-materi.html
           grep -q 'Process alive' /tmp/health-materi.html
@@ -141,6 +144,7 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=http-request-lifecycle&level=G2' > /tmp/health-project.html
           grep -q 'Health Contract — slow startup' /tmp/health-project.html
           grep -q 'Assessment guide' /tmp/health-project.html
+          grep -q 'Required evidence: Live dependency / Kubernetes test' /tmp/health-project.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=service-readiness&level=G1' > /tmp/health-g1.html
           grep -q 'Assessment guide' /tmp/health-g1.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=service-readiness&level=G2' > /tmp/health-g2.html

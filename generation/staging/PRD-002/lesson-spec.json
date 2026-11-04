@@ -206,7 +206,7 @@
         "objective": "Simulate DB outage and graceful shutdown without dependency-driven restart loops.",
         "whyItMatters": "Shared DB failures and abrupt rollout termination can amplify incidents across replicas.",
         "mentalModel": "A critical DB may affect readiness while a healthy process stays live. Draining stops new traffic while existing work completes within a bounded window.",
-        "explanation": "By default Spring Boot readiness does not include every external health indicator; operators must choose critical ones. When a required DB fails, readiness may report 503 and liveness should remain 200 if the process itself still progresses. DB recovery can restore readiness without restarting. On SIGTERM, graceful shutdown stops accepting new requests and gives in-flight requests a configured phase timeout; Kubernetes terminating endpoints are not eligible for regular Service traffic. An /live 200 is never permission to execute a financial operation.",
+        "explanation": "By default Spring Boot readiness does not include every external health indicator; operators must choose critical ones. When a required DB fails, readiness may report 503 and liveness should remain 200 if the process itself still progresses. DB recovery can restore readiness without restarting. On SIGTERM, graceful shutdown stops accepting new requests and gives in-flight requests a configured phase timeout; Kubernetes terminating endpoints are not eligible for regular Service traffic. An /live 200 is never permission to execute a financial operation. During actual Spring Boot graceful shutdown, readiness availability changes to REFUSING_TRAFFIC, but HTTP connectors may stop accepting new connections, including probe requests. Do not require an observable /ready 503 during the shutdown window; verify drain and EndpointSlice state instead. The local fixture's drain-ready=503 is only a state-model output.",
         "prerequisiteConceptIds": [
           "probe",
           "startup"
@@ -227,7 +227,7 @@
             {
               "action": "Begin bounded graceful drain.",
               "reason": "Prevent new work while allowing existing requests to finish.",
-              "expectedResult": "ready=503 while liveness stays healthy in the local model."
+              "expectedResult": "In the local model /ready returns 503 and /live remains 200; in actual Spring shutdown the probe HTTP connector may reject new connections instead."
             }
           ]
         },
@@ -246,7 +246,8 @@
             "challenge"
           ],
           "expectedEvidence": [
-            "Observable readiness/liveness matrix, drain timeout and explicit real-cluster validation boundary."
+            "Observable readiness/liveness matrix, drain timeout and explicit real-cluster validation boundary.",
+            "Record actual termination state and in-flight completion even when the probe endpoint stops accepting connections; do not equate the local fixture's drain 503 with guaranteed HTTP visibility."
           ],
           "variationFromExample": "A two-replica shared-failure scenario differs from the one-process HTTP fixture."
         },
@@ -257,7 +258,7 @@
           "correctiveAction": "Retain business-level checks and separate the health groups' failure domains."
         },
         "selfCheck": {
-          "expectedObservation": "Local fixture returns ready=503 during DB down and drain, ready=200 on recovery, live=200 throughout.",
+          "expectedObservation": "Local fixture returns ready=503 during DB down and drain, ready=200 on recovery, live=200 throughout. In a real Spring Boot shutdown, the probe endpoint might not accept new HTTP connections; do not expect an always-observable 503.",
           "ifUnexpected": "Separate simulated booleans from actual DB, Spring and Kubernetes state observations."
         },
         "continueFromHere": {
@@ -326,14 +327,14 @@
     },
     {
       "id": "q5",
-      "prompt": "Saat graceful drain, status mana paling sesuai?",
+      "prompt": "Saat Spring Boot graceful shutdown, apa yang harus dibuktikan tentang readiness dan probe HTTP?",
       "options": [
-        "/live 503 supaya Pod selalu restart",
-        "/ready 503 sementara /live tetap sehat bila proses responsif",
-        "/ready 200 sampai semua request gagal"
+        "/live harus 503 agar kubelet segera restart",
+        "Readiness state REFUSING_TRAFFIC; HTTP probe mungkin tidak lagi menerima koneksi ketika server melakukan graceful shutdown",
+        "/ready pasti terus membalas HTTP 503 sampai proses mati"
       ],
       "answer": 1,
-      "explanation": "Readiness menutup admission normal; request in-flight diselesaikan dalam waktu grace.",
+      "explanation": "Spring Boot mengubah readiness availability ketika shutdown, tetapi HTTP connector bisa berhenti menerima request probe. Buktikan drain dan Service endpoint behavior, bukan janjikan status 503 selalu teramati.",
       "criterionIds": [
         "source-task",
         "challenge"

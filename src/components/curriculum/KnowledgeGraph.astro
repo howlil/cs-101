@@ -1,6 +1,6 @@
 ---
 import type { Concept, FocusedConcept, LearningLevel } from '../../domain/learning-graph';
-import { learningGraphHref } from '../../domain/learning-graph';
+import { learningGraphHref, EVIDENCE_KIND_LABELS } from '../../domain/learning-graph';
 import type { LearningPath } from '../../domain/learning-path';
 import { pathItemHref } from '../../domain/learning-path';
 interface Props {view:FocusedConcept;path:LearningPath;concepts:Concept[];publishedLessonIds:string[]}
@@ -148,6 +148,7 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
                 <span class="knowledge-criterion-index">{index+1}</span>
                 <div class="knowledge-criterion-body">
                   <strong>{criterion.check}</strong>
+                  <p>Required evidence: {EVIDENCE_KIND_LABELS[criterion.evidenceKind]}</p>
                   <p>Pass condition: {criterion.passWhen}</p>
                   <a href={pathItemHref(criterion.itemId,view.concept.id,view.level,'project')}>
                     {criterion.itemId} · Project view {published.has(criterion.itemId)?'':'(outline)'}
