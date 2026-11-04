@@ -8,7 +8,6 @@
         "id": "map-the-layers",
         "objective": "Explain the role of each boundary in an HTTP request without mistaking an OSI diagram for a wire trace.",
         "whyItMatters": "When POST /transfers fails, a status code exists only if some HTTP component replies. The first task is to locate the boundary of failure.",
-        "firstAction": "Draw four boxes in order: HTTP application, TCP transport, IP internet, and Ethernet link; add one arrow for outgoing data.",
         "mentalModel": "The layers are a reasoning map: HTTP supplies request meaning; TCP supplies a byte-stream connection in this example; IP selects packet delivery toward a destination; a local link carries frames toward the next hop.",
         "explanation": "RFC 1122 describes link, internet and transport layers, with application protocols above them. The model is useful but not an implementation mandate. This lesson uses HTTP/1.1 over TCP/IPv4/Ethernet as a bounded example. HTTPS adds security and HTTP/3 uses a different transport; therefore this stack must not be universalized.",
         "prerequisiteConceptIds": [],
@@ -40,6 +39,17 @@
           ],
           "explanation": "Internet-layer routing uses IP addressing. HTTP defines request semantics after a transport path is available."
         },
+        "independentChallenge": {
+          "prompt": "For an HTTP/1.1 GET /health call over a local wired link, draw the same stack and say where a TCP setup failure would occur.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "A correctly labelled stack and a transport-level failure, not an invented 500 status."
+          ],
+          "variationFromExample": "A different method and endpoint with an explicit connection-setup failure."
+        },
+        "firstAction": "Draw four boxes in order: HTTP application, TCP transport, IP internet, and Ethernet link; add one arrow for outgoing data.",
         "misconceptionRepair": {
           "likelyMistake": "Assuming every request uses HTTP over TCP and every network precisely implements a seven-layer OSI stack.",
           "whyItFails": "OSI is a reference model; real stacks combine responsibilities. HTTP/3, for example, is not HTTP/1.1 over TCP.",
@@ -48,16 +58,6 @@
         "selfCheck": {
           "expectedObservation": "Your drawing has HTTP→TCP→IP→Ethernet for outbound encapsulation and the inverse on the receiver.",
           "ifUnexpected": "Check whether you are mixing the direction of sending with how inbound frames are decapsulated."
-        },
-        "independentChallenge": {
-          "prompt": "For an HTTP/1.1 GET /health call over a local wired link, draw the same stack and say where a TCP setup failure would occur.",
-          "variationFromExample": "A different method and endpoint with an explicit connection-setup failure.",
-          "criterionIds": [
-            "source-task"
-          ],
-          "expectedEvidence": [
-            "A correctly labelled stack and a transport-level failure, not an invented 500 status."
-          ]
         },
         "continueFromHere": {
           "nextAction": "Trace how the IP packet traverses a router without assuming the Ethernet frame remains unchanged.",
@@ -68,7 +68,6 @@
         "id": "trace-encapsulation",
         "objective": "Trace the client, router and server roles for POST /transfers and explain what changes at a hop.",
         "whyItMatters": "A transfer request can fail before it arrives at the backend. Looking only at the controller hides the router or TCP boundary.",
-        "firstAction": "Write Client → Router → Server and mark the destination IP that each routing decision concerns.",
         "mentalModel": "A router forwards IPv4 datagrams using IP addressing; the frame that carries an IP packet is scoped to a link. A TCP session is maintained by communicating endpoints, not by every intermediate router.",
         "explanation": "RFC 791 describes IP datagrams, addresses and routing through gateways. RFC 9293 defines connection state and data transport at the endpoints. In common Ethernet routing, a frame is replaced on each hop even though the routed packet continues toward its IP destination; NAT or gateways can also transform headers. A packet may be dropped before any HTTP code runs.",
         "prerequisiteConceptIds": [
@@ -102,6 +101,17 @@
           ],
           "explanation": "IP forwarding uses addressing and routing; HTTP path selection belongs to HTTP endpoints or L7 intermediaries."
         },
+        "independentChallenge": {
+          "prompt": "Add an L7 reverse proxy before the backend and explain which component may now read HTTP /transfers.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Router versus HTTP proxy responsibilities are distinguished in the drawing."
+          ],
+          "variationFromExample": "A proxy is introduced between the client and origin rather than pure IP forwarding."
+        },
+        "firstAction": "Write Client → Router → Server and mark the destination IP that each routing decision concerns.",
         "misconceptionRepair": {
           "likelyMistake": "Assuming the destination MAC address stays constant from client to remote backend.",
           "whyItFails": "Ethernet addresses are scoped to one link; routers rewrite link framing for the next interface.",
@@ -110,16 +120,6 @@
         "selfCheck": {
           "expectedObservation": "Your path labels client, router and server with IP forwarding and per-hop Ethernet framing.",
           "ifUnexpected": "Verify that you did not place HTTP request parsing on a normal IP router."
-        },
-        "independentChallenge": {
-          "prompt": "Add an L7 reverse proxy before the backend and explain which component may now read HTTP /transfers.",
-          "variationFromExample": "A proxy is introduced between the client and origin rather than pure IP forwarding.",
-          "criterionIds": [
-            "source-task"
-          ],
-          "expectedEvidence": [
-            "Router versus HTTP proxy responsibilities are distinguished in the drawing."
-          ]
         },
         "continueFromHere": {
           "nextAction": "Classify failures by whether a full HTTP response was received or no connection could be established.",
@@ -130,7 +130,6 @@
         "id": "localize-six-failures",
         "objective": "Classify six request failures by boundary and produce an observable diagnostic for each.",
         "whyItMatters": "A remote API can be broken in several ways. Treating all failures as HTTP 500 wastes incident-response time and may hide network exposure or readiness issues.",
-        "firstAction": "Label a 503 HTTP response separately from ECONNREFUSED and write what each one proves.",
         "mentalModel": "An HTTP status is an application-protocol message received from an origin or intermediary. A DNS, link, routing or TCP setup failure can stop the exchange before any HTTP response exists.",
         "explanation": "A practical six-case taxonomy is: (1) name lookup fails, (2) link/neighbor reachability fails, (3) IP route unavailable, (4) firewall policy blocks the flow, (5) TCP listener refuses the connection, and (6) an HTTP component returns a 5xx response. Cases 1–5 are not automatically HTTP responses; a gateway might generate an HTTP error on behalf of a failed upstream, so record who emitted the status. Use DNS tools, route/interface inspection, firewall policy/logs, listener checks and HTTP response inspection as distinct evidence. The bundled Node fixture verifies only locally generated 201/503 responses versus a refused TCP connection; it does not emulate DNS, routing, or network firewalls.",
         "prerequisiteConceptIds": [
@@ -165,6 +164,19 @@
           ],
           "explanation": "Connection refusal means no accepting listener at that address/port, or an active reject; there is no HTTP status to inspect yet."
         },
+        "independentChallenge": {
+          "prompt": "Diagram six failures on a POST /transfers journey, adding one diagnostic observation and owning boundary for each. Include a reverse proxy that emits 502 when its upstream fails.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Six distinct scenarios, appropriate investigation layer, and a clear distinction between an HTTP 502 and a transport refusal.",
+            "A cross-domain POST /transfers diagram showing client, router, firewall, proxy or LB, and server."
+          ],
+          "variationFromExample": "Go beyond the loopback fixture to separate name resolution, a routed network, an intermediary and a backend failure."
+        },
+        "firstAction": "Label a 503 HTTP response separately from ECONNREFUSED and write what each one proves.",
         "misconceptionRepair": {
           "likelyMistake": "Reporting a 503 when the TCP connection was refused.",
           "whyItFails": "503 requires an HTTP response from an HTTP origin or intermediary. A failed transport connection has no HTTP response.",
@@ -173,18 +185,6 @@
         "selfCheck": {
           "expectedObservation": "The fixture prints two HTTP status lines and one ECONNREFUSED transport error.",
           "ifUnexpected": "Check that Node supports the built-in http module and that the script is run without modifying its server lifecycle."
-        },
-        "independentChallenge": {
-          "prompt": "Diagram six failures on a POST /transfers journey, adding one diagnostic observation and owning boundary for each. Include a reverse proxy that emits 502 when its upstream fails.",
-          "variationFromExample": "Go beyond the loopback fixture to separate name resolution, a routed network, an intermediary and a backend failure.",
-          "criterionIds": [
-            "source-task",
-            "challenge"
-          ],
-          "expectedEvidence": [
-            "Six distinct scenarios, appropriate investigation layer, and a clear distinction between an HTTP 502 and a transport refusal.",
-            "A cross-domain POST /transfers diagram showing client, router, firewall, proxy or LB, and server."
-          ]
         },
         "continueFromHere": {
           "nextAction": "Visit the Transfer API unit (SPR-006) to implement the POST controller contract and map statuses.",
