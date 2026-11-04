@@ -131,6 +131,33 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
           </ol>
         </section>
       )}
+      {view.outcome&&(
+        <section class="knowledge-rubric" aria-label="Competency assessment rubric">
+          <div class="knowledge-section-heading">
+            <h2>Assessment blueprint · {view.level}</h2>
+            <span>{view.outcome.assessment.criteria.length} review criteria</span>
+          </div>
+          <p class="knowledge-path-note">
+            Proposed rubric for human review, not an automatically graded test.
+            The mapped materials may still be curriculum outlines.
+          </p>
+          <p class="knowledge-assessment-task">{view.outcome.assessment.task}</p>
+          <ol class="knowledge-criteria">
+            {view.outcome.assessment.criteria.map((criterion,index)=>(
+              <li>
+                <span class="knowledge-criterion-index">{index+1}</span>
+                <div class="knowledge-criterion-body">
+                  <strong>{criterion.check}</strong>
+                  <p>Pass condition: {criterion.passWhen}</p>
+                  <a href={pathItemHref(criterion.itemId,view.concept.id,view.level,'project')}>
+                    {criterion.itemId} · Project view {published.has(criterion.itemId)?'':'(outline)'}
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
     </>
   )}
 </section>

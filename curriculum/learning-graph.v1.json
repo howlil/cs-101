@@ -15,7 +15,30 @@
             "SPR-006",
             "OSX-029"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Trace POST /transfers across a client, transport boundary, server and controller. Explain what fails at each boundary.",
+            "criteria": [
+              {
+                "id": "trace-http-path",
+                "itemId": "NET-001",
+                "check": "Identify the request sequence across client, DNS/TCP transport and HTTP application.",
+                "passWhen": "The trace names the responsible boundary for each hop and does not treat a network failure as an HTTP status."
+              },
+              {
+                "id": "controller-contract",
+                "itemId": "SPR-006",
+                "check": "Explain what the controller validates and which HTTP response it returns.",
+                "passWhen": "The proposed contract separates request validation/response mapping from business logic."
+              },
+              {
+                "id": "binding-failure",
+                "itemId": "OSX-029",
+                "check": "Reproduce a localhost-only service unreachable from another namespace.",
+                "passWhen": "A listener/bind-address observation demonstrates the root cause, not a guessed HTTP failure."
+              }
+            ]
+          }
         },
         {
           "level": "G2",
@@ -25,7 +48,24 @@
             "OSX-029",
             "PRD-002"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Investigate a running service that cannot receive remote traffic, then diagnose an unhealthy dependency.",
+            "criteria": [
+              {
+                "id": "remote-reachability",
+                "itemId": "OSX-029",
+                "check": "Distinguish interface-binding failure from a process crash.",
+                "passWhen": "Listener address and remote test evidence identify the boundary and justify the remediation."
+              },
+              {
+                "id": "readiness-dependency",
+                "itemId": "PRD-002",
+                "check": "Explain how a database outage changes readiness without changing liveness.",
+                "passWhen": "An outage experiment shows traffic admission is rejected while the live process remains observable."
+              }
+            ]
+          }
         }
       ]
     },
@@ -41,7 +81,24 @@
           "itemIds": [
             "NET-006"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Capture one TCP session and explain how connection setup or retransmission affects HTTP reachability.",
+            "criteria": [
+              {
+                "id": "tcp-handshake",
+                "itemId": "NET-006",
+                "check": "Identify SYN, SYN-ACK and ACK from a connection trace.",
+                "passWhen": "Packet sequence and participating endpoints are correct and ordered."
+              },
+              {
+                "id": "tcp-retry",
+                "itemId": "NET-006",
+                "check": "Distinguish a transport retransmission/timeout from a completed HTTP error response.",
+                "passWhen": "Evidence identifies transport behavior rather than inventing an application status."
+              }
+            ]
+          }
         }
       ]
     },
@@ -57,7 +114,24 @@
           "itemIds": [
             "OSX-029"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Demonstrate the difference between a loopback-only listener and an externally reachable listener.",
+            "criteria": [
+              {
+                "id": "listener-interface",
+                "itemId": "OSX-029",
+                "check": "Report address, interface and port for each listener configuration.",
+                "passWhen": "The observation distinguishes loopback binding from an all-interface or explicitly routable binding."
+              },
+              {
+                "id": "namespace-reachability",
+                "itemId": "OSX-029",
+                "check": "Test connectivity from a separate network namespace.",
+                "passWhen": "The result and observed listening address explain why the request succeeds or fails."
+              }
+            ]
+          }
         }
       ]
     },
@@ -73,7 +147,24 @@
           "itemIds": [
             "SPR-006"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Specify and implement a small HTTP controller contract without moving business rules into the controller.",
+            "criteria": [
+              {
+                "id": "http-contract",
+                "itemId": "SPR-006",
+                "check": "Define POST/GET routes and their success/error response mapping.",
+                "passWhen": "A contract test or reproducible request shows correct methods, route and response statuses."
+              },
+              {
+                "id": "boundary-separation",
+                "itemId": "SPR-006",
+                "check": "Explain which work belongs in the controller versus the service layer.",
+                "passWhen": "A code example or call flow locates validation and HTTP mapping at the edge while business logic remains separate."
+              }
+            ]
+          }
         }
       ]
     },
@@ -89,7 +180,24 @@
           "itemIds": [
             "PRD-002"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Define and demonstrate distinct liveness and readiness behavior during service startup.",
+            "criteria": [
+              {
+                "id": "startup-liveness",
+                "itemId": "PRD-002",
+                "check": "State what liveness reports while the process is running.",
+                "passWhen": "The expected signal does not depend on unrelated downstream service health."
+              },
+              {
+                "id": "startup-readiness",
+                "itemId": "PRD-002",
+                "check": "State when the service should be admitted to receive traffic.",
+                "passWhen": "The expected signal remains unready until essential startup conditions are satisfied."
+              }
+            ]
+          }
         },
         {
           "level": "G2",
@@ -98,7 +206,24 @@
           "itemIds": [
             "PRD-002"
           ],
-          "status": "proposed"
+          "status": "proposed",
+          "assessment": {
+            "task": "Run a controlled downstream outage and explain safe readiness and recovery decisions.",
+            "criteria": [
+              {
+                "id": "dependency-outage",
+                "itemId": "PRD-002",
+                "check": "Demonstrate readiness response during and after a database outage.",
+                "passWhen": "Evidence shows requests are not admitted while the critical dependency is unavailable and recover when it returns."
+              },
+              {
+                "id": "restart-isolation",
+                "itemId": "PRD-002",
+                "check": "Explain why liveness must not repeatedly restart a healthy process during a downstream outage.",
+                "passWhen": "The simulated scenario distinguishes an unready dependency from a process that needs restarting."
+              }
+            ]
+          }
         }
       ]
     }

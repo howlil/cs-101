@@ -77,9 +77,14 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
-          grep -q 'Recommended units for G2' /tmp/graph-g2.html
-          grep -q 'PRD-002' /tmp/graph-g2.html
           grep -q 'Suggested study path' /tmp/graph-g2.html
+          grep -q 'PRD-002' /tmp/graph-g2.html
+          grep -q 'Assessment blueprint' /tmp/graph-g2.html
+          grep -q 'Explain how a database outage' /tmp/graph-g2.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=PRD-002&view=project&concept=http-request-lifecycle&level=G2' > /tmp/rubric-project.html
+          grep -q 'Assessment guide' /tmp/rubric-project.html
+          grep -q 'readiness' /tmp/rubric-project.html
+          if grep -q 'Assessment guide' /tmp/catalog-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&concept=http-request-lifecycle&level=G1' > /tmp/path-first.html
           grep -q 'Step 1 of 3' /tmp/path-first.html
           grep -q 'Back to concept graph' /tmp/path-first.html

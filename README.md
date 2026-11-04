@@ -10,6 +10,7 @@ CS-101 is a **single-page content library** for engineering lessons, practice qu
 - Suggested cross-domain study paths: `/?mode=graph&concept=http-request-lifecycle&level=G1` → `/?item=NET-001&concept=http-request-lifecycle&level=G1` → Materi/Soal (when authored)/Project → next unit. URL context is not learner progress.
 - Path traversal uses only reviewed `requires` relations as prerequisites. Current pilot has none; ordered units are editorial suggestions.
 - Curated relations and competency outcomes are validated against canonical unit IDs; workbook imports are unchanged.
+- Each G1/G2 pilot outcome has a **proposed assessment blueprint** (task, observable checks, pass conditions, linked curriculum units). The graph shows the complete rubric, and a contextual Project view shows criteria for only its mapped unit. These are human-review guides, not published quizzes or automatically scored submissions.
 - Sidebar: domain selector, module accordion, and curriculum topics.
 - Content: authored MDX lessons with interactive self-check quizzes, or an explicit curriculum outline when content is not yet authored.
 - Projects: project checkpoints and integration challenges from the curriculum manifest.

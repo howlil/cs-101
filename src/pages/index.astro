@@ -5,7 +5,7 @@ import ContentLibrary from '../components/library/ContentLibrary.astro';
 import EmptyCurriculum from '../components/library/EmptyCurriculum.astro';
 import KnowledgeGraph from '../components/curriculum/KnowledgeGraph.astro';
 import graphOverlay from '../../curriculum/learning-graph.v1.json';
-import { buildLearningGraph, getFocusedConcept, conceptsForItem } from '../domain/learning-graph';
+import { buildLearningGraph, getFocusedConcept, conceptsForItem, assessmentForItem } from '../domain/learning-graph';
 import { curriculumGraph } from '../server/curriculum';
 import { getLearningPath, getItemPathContext } from '../domain/learning-path';
 import { projectIdeaFor, selectLibraryItem, resolveLibraryView } from '../domain/content-library';
@@ -24,6 +24,9 @@ const selection = selectLibraryItem(
 );
 const item = selection.item;
 const pathContext = item ? getItemPathContext(learningGraph, Astro.url.searchParams.get('concept'), Astro.url.searchParams.get('level'), item.id) : undefined;
+const assessmentContext = pathContext && item
+  ? assessmentForItem(learningGraph, pathContext.conceptId, pathContext.level, item.id)
+  : undefined;
 const view = item ? resolveLibraryView(Astro.url.searchParams.get('view'), item.kind) : 'materi';
 const location = item ? getItemLocation(curriculumGraph, item.id) : undefined;
 // Published status is derived from reviewed MDX, never from curriculum metadata alone.
@@ -52,6 +55,7 @@ const prerequisites = item?.prerequisites.map((id) => {
       view={view}
       project={projectIdeaFor(curriculumGraph, item)}
       pathContext={pathContext}
+      assessmentContext={assessmentContext}
       prerequisites={prerequisites}
       conceptLinks={conceptsForItem(learningGraph, item.id).map(({ id, title }) => ({ id, title }))}
     >

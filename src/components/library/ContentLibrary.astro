@@ -2,7 +2,7 @@
 import type { CurriculumItem, ProjectCheckpoint } from '../../domain/curriculum-v2/schema';
 import { libraryHref, libraryViewHref, type LibraryView } from '../../domain/content-library';
 import { ArrowRight } from 'lucide-react';
-import { learningGraphHref } from '../../domain/learning-graph';
+import { learningGraphHref, type ItemAssessment } from '../../domain/learning-graph';
 import type { ItemPathContext } from '../../domain/learning-path';
 import { pathItemHref } from '../../domain/learning-path';
 interface Props {
@@ -16,8 +16,9 @@ interface Props {
   prerequisites: Array<{ id: string; title: string }>;
   conceptLinks: Array<{ id: string; title: string }>;
   pathContext?: ItemPathContext;
+  assessmentContext?: ItemAssessment;
 }
-const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks, pathContext } = Astro.props;
+const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks, pathContext, assessmentContext } = Astro.props;
 const isUnit = item.kind === 'unit';
 const isCheckpoint = item.kind === 'checkpoint';
 const scope = item.kind === 'checkpoint' ? [] : item.scope;
@@ -112,6 +113,23 @@ const sectionHref = (id: string, section: LibraryView) => pathContext
       </section>
     )}
   </div>
+
+  {isUnit && view === 'project' && assessmentContext && (
+    <section class="library-assessment" aria-label="Competency assessment guide">
+      <h2>Assessment guide · {assessmentContext.level}</h2>
+      <p class="library-muted">Proposed review criteria, not automatically scored.
+        The curriculum project may be an outline rather than a completed exercise.</p>
+      <p class="library-assessment-task">{assessmentContext.task}</p>
+      <ol>
+        {assessmentContext.criteria.map(criterion=>(
+          <li>
+            <strong>{criterion.check}</strong>
+            <p>Pass condition: {criterion.passWhen}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
 
   {isUnit && nextView && (
     <nav class="library-next" aria-label="Lanjut ke bagian berikutnya">

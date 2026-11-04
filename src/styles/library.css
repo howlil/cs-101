@@ -69,3 +69,10 @@
 .library-path-controls a:focus-visible {outline:2px solid var(--focus-ring);outline-offset:2px;}
 .library-path-controls .library-path-next {background:var(--foreground);color:var(--background);border-color:var(--foreground);}
 .library-path-controls .library-path-next:hover {opacity:.82;background:var(--foreground);}
+
+.library-assessment{margin-top:24px;padding-top:17px;border-top:1px solid var(--border);}
+.library-assessment h2{font-size:17px;margin:0 0 10px;}
+.library-assessment-task{font-size:13px;line-height:1.7;color:var(--foreground);margin:10px 0 14px;}
+.library-assessment ol{padding-left:22px;margin:0;display:grid;gap:13px;}
+.library-assessment li{font-size:12px;line-height:1.7;color:var(--foreground);}
+.library-assessment li p{color:var(--text-secondary);margin:4px 0;}

@@ -70,3 +70,14 @@
 .knowledge-path-gap ul {margin:8px 0 0;padding-left:18px;}
 .knowledge-path-gap li {margin:4px 0;}
 .knowledge-path-gap a {margin-left:12px;color:var(--foreground);text-decoration:underline;}
+
+/* Rubric is editorial reference, never an interactive grade or progress panel. */
+.knowledge-rubric{margin-top:34px;}
+.knowledge-assessment-task{margin:0 0 14px;font-size:13px;line-height:1.75;color:var(--foreground);}
+.knowledge-criteria{list-style:none;padding:0;margin:0;display:grid;gap:1px;}
+.knowledge-criteria li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:13px 0;border-top:1px solid var(--border);}
+.knowledge-criterion-index{font-size:11px;color:var(--text-muted);padding-top:2px;font-variant-numeric:tabular-nums;}
+.knowledge-criterion-body{display:grid;gap:6px;min-width:0;}
+.knowledge-criterion-body strong{font-size:12px;font-weight:650;line-height:1.6;}
+.knowledge-criterion-body p{margin:0;color:var(--text-secondary);font-size:12px;line-height:1.7;}
+.knowledge-criterion-body a{width:fit-content;color:var(--foreground);font-size:11px;text-decoration:underline;text-underline-offset:3px;}

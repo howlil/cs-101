@@ -78,6 +78,8 @@ async function assertRenderedHtml() {
     assert.ok(graphPage.includes('JAV-009'), 'Graph must link to its canonical unit.');
     assert.ok(graphPage.includes('Competency target'), 'Level outcome must render.');
     assert.ok(graphPage.includes('Suggested study path'), 'Graph must render a deterministic suggested route.');
+    assert.ok(graphPage.includes('Assessment blueprint'), 'Graph must expose proposed competency rubric.');
+    assert.ok(graphPage.includes('Golden rubric criterion'), 'Graph must show fixture rubric requirement.');
     assert.ok(graphPage.includes('concept=golden-fixture'), 'Graph units must retain route context.');
 
     const linked = await fetch('http://127.0.0.1:' + port +
@@ -88,6 +90,12 @@ async function assertRenderedHtml() {
     assert.ok(linkedHtml.includes('Back to concept graph'), 'Linked unit must offer a route back.');
     assert.ok(linkedHtml.includes('view=soal') && linkedHtml.includes('concept=golden-fixture'),
       'Lesson views must keep the selected learning-path context.');
+    assert.ok(!linkedHtml.includes('Assessment guide'), 'Rubric must not appear in the Materi view.');
+    const linkedProject = await fetch('http://127.0.0.1:' + port +
+      '/?item=' + GOLDEN_UNIT_ID + '&view=project&concept=golden-fixture&level=G1');
+    assert.equal(linkedProject.status, 200);
+    assert.ok((await linkedProject.text()).includes('Golden rubric criterion'),
+      'Selected Project view should expose criteria for its canonical unit only.');
     const emptyDepth = await fetch('http://127.0.0.1:' + port + '/?mode=graph&level=G4');
     assert.equal(emptyDepth.status, 200);
     assert.ok((await emptyDepth.text()).includes('No curated G4 outcomes yet'), 'Missing depth must show real coverage gap.');
@@ -161,7 +169,13 @@ try {
       title:'Golden lesson concept',
       description:'Fixture-local concept for validating a published lesson.',
       outcomes:[{level:'G1',competency:'Explain the authored golden lesson.',
-        evidence:'Complete a local self-check.',itemIds:[GOLDEN_UNIT_ID],status:'proposed'}],
+        evidence:'Complete a local self-check.',itemIds:[GOLDEN_UNIT_ID],status:'proposed',
+        assessment:{
+          task:'Explain the authored Java golden lesson with a concrete example.',
+          criteria:[{id:'golden-rubric',itemId:GOLDEN_UNIT_ID,
+            check:'Golden rubric criterion: demonstrate reference identity.',
+            passWhen:'The example distinguishes identity and value comparisons.'}],
+        }}],
     }],
     applications:[{conceptId:'golden-fixture',itemId:GOLDEN_UNIT_ID,role:'application'}],
     relations:[],
