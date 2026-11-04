@@ -7,6 +7,7 @@ import KnowledgeGraph from '../components/curriculum/KnowledgeGraph.astro';
 import graphOverlay from '../../curriculum/learning-graph.v1.json';
 import { buildLearningGraph, getFocusedConcept, conceptsForItem } from '../domain/learning-graph';
 import { curriculumGraph } from '../server/curriculum';
+import { getLearningPath, getItemPathContext } from '../domain/learning-path';
 import { projectIdeaFor, selectLibraryItem, resolveLibraryView } from '../domain/content-library';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 import '../styles/library.css';
@@ -15,12 +16,14 @@ import '../styles/knowledge-graph.css';
 const learningGraph = buildLearningGraph(graphOverlay, curriculumGraph);
 const isGraph = Astro.url.searchParams.get('mode') === 'graph';
 const focusedConcept = getFocusedConcept(learningGraph, Astro.url.searchParams.get('concept'), Astro.url.searchParams.get('level'));
+const learningPath = getLearningPath(learningGraph, focusedConcept);
 const selection = selectLibraryItem(
   curriculumGraph,
   Astro.url.searchParams.get('track'),
   Astro.url.searchParams.get('item'),
 );
 const item = selection.item;
+const pathContext = item ? getItemPathContext(learningGraph, Astro.url.searchParams.get('concept'), Astro.url.searchParams.get('level'), item.id) : undefined;
 const view = item ? resolveLibraryView(Astro.url.searchParams.get('view'), item.kind) : 'materi';
 const location = item ? getItemLocation(curriculumGraph, item.id) : undefined;
 // Published status is derived from reviewed MDX, never from curriculum metadata alone.
@@ -38,7 +41,7 @@ const prerequisites = item?.prerequisites.map((id) => {
 ---
 <AppLayout title={isGraph ? 'Knowledge Graph' : item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101." publishedLessonIds={publishedLessonIds}>
   {isGraph ? (
-    <KnowledgeGraph view={focusedConcept} concepts={learningGraph.concepts} publishedLessonIds={publishedLessonIds} />
+    <KnowledgeGraph view={focusedConcept} path={learningPath} concepts={learningGraph.concepts} publishedLessonIds={publishedLessonIds} />
   ) : item ? (
     <ContentLibrary
       item={item}
@@ -48,6 +51,7 @@ const prerequisites = item?.prerequisites.map((id) => {
       stale={Boolean(lesson && lesson.data.curriculumFingerprint !== item.fingerprint)}
       view={view}
       project={projectIdeaFor(curriculumGraph, item)}
+      pathContext={pathContext}
       prerequisites={prerequisites}
       conceptLinks={conceptsForItem(learningGraph, item.id).map(({ id, title }) => ({ id, title }))}
     >

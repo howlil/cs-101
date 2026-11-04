@@ -4,7 +4,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 
 ## Product invariant
 
-- `/` is the only content page; `?item=ID` selects material, `?track=ID` selects a domain, and `?mode=graph&concept=ID&level=G1` selects a read-only level-specific concept neighborhood.
+- `/` is the only content page; `?item=ID` selects material, `?track=ID` selects a domain, and `?mode=graph&concept=ID&level=G1` selects a read-only level-specific concept neighborhood; optional `?item=ID&concept=ID&level=G1` carries validated study-path context.
 - Sidebar reuses the domain selector and module accordion. No search field, global search button or command palette. Never add Today, progress, study sessions, reviews, evidence forms, or mandatory reflection UI.
 - Authored content is MDX at `src/content/lessons`. Quiz feedback is local/ephemeral and never persisted.
 - Unauthored items must say they are outlines and **must not fabricate explanations or generated questions**.
@@ -14,7 +14,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 ## Source of truth and authoring
 
 - `curriculum/manifest.v2.json`: domains, modules, topics, prerequisites, checkpoint ideas.
-- `curriculum/learning-graph.v1.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only. Competency outcomes must reference canonical mapped unit IDs; missing levels remain explicit gaps.
+- `curriculum/learning-graph.v1.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only. Competency outcomes must reference canonical mapped unit IDs; missing levels remain explicit gaps. Suggested item order is not a hard prerequisite; only reviewed `requires` edges are traversed as prerequisites.
 - `.agents/skill/course-generator/SKILL.md`: generate one unit at a time.
 - `generation/`: metadata and authoring provenance.
 - `review-banks/`: authored self-check question sets; there is no scheduling backend.

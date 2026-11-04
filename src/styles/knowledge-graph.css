@@ -58,3 +58,15 @@
 .knowledge-gap h2{margin:0 0 9px;font-size:18px;}
 .knowledge-gap p{font-size:13px;color:var(--text-secondary);}
 @media(max-width:600px){.knowledge-level-link{padding:9px 11px;}.knowledge-level-link span{display:none;}}
+
+/* Suggested sequence: an ordered route with accessible native links, no learner state. */
+.knowledge-path-note {color:var(--text-secondary);font-size:12px;line-height:1.75;margin:0 0 14px;max-width:80ch;}
+.knowledge-path-list {list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.knowledge-path-step {display:grid;grid-template-columns:24px minmax(0,1fr);align-items:start;gap:10px;min-width:0;}
+.knowledge-path-number {display:grid;place-items:center;width:24px;height:24px;margin-top:13px;border:1px solid var(--border-strong);border-radius:999px;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+.knowledge-path-step .knowledge-unit {min-height:80px;}
+.knowledge-path-gap {padding:13px 16px;margin:0 0 14px;background:var(--surface-muted);border-radius:var(--radius-panel);font-size:12px;}
+.knowledge-path-gap p {color:var(--text-secondary);margin:5px 0;line-height:1.65;}
+.knowledge-path-gap ul {margin:8px 0 0;padding-left:18px;}
+.knowledge-path-gap li {margin:4px 0;}
+.knowledge-path-gap a {margin-left:12px;color:var(--foreground);text-decoration:underline;}

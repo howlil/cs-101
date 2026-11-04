@@ -1,9 +1,10 @@
 ---
 import type { Concept, FocusedConcept, LearningLevel } from '../../domain/learning-graph';
 import { learningGraphHref } from '../../domain/learning-graph';
-import { libraryHref } from '../../domain/content-library';
-interface Props {view:FocusedConcept;concepts:Concept[];publishedLessonIds:string[]}
-const {view,concepts,publishedLessonIds}=Astro.props;
+import type { LearningPath } from '../../domain/learning-path';
+import { pathItemHref } from '../../domain/learning-path';
+interface Props {view:FocusedConcept;path:LearningPath;concepts:Concept[];publishedLessonIds:string[]}
+const {view,path,concepts,publishedLessonIds}=Astro.props;
 const published=new Set(publishedLessonIds);
 const activeConcepts=concepts.filter(c=>c.outcomes.some(o=>o.level===view.level));
 const depths:Array<{id:LearningLevel;title:string}>=[
@@ -86,20 +87,48 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
         )}
       </section>
       {view.outcome&&(
-        <section class="knowledge-applications" aria-label="Learning material for selected depth">
+        <section class="knowledge-applications" aria-label="Suggested learning path">
           <div class="knowledge-section-heading">
-            <h2>Recommended units for {view.level}</h2>
-            <span>{view.applications.length} curriculum {view.applications.length===1?'unit':'units'}</span>
+            <h2>Suggested study path · {view.level}</h2>
+            <span>{path.steps.length} {path.steps.length===1?'unit':'units'}</span>
           </div>
-          <div class="knowledge-unit-list">
-            {view.applications.map(app=>(
-              <a class="knowledge-unit" href={libraryHref(app.itemId)}>
-                <span class="knowledge-unit-meta">{app.trackTitle} · {applicationLabel[app.role]}</span>
-                <strong>{app.title}</strong>
-                <span class="knowledge-unit-foot">{app.itemId} · {published.has(app.itemId)?'Full lesson available':'Curriculum outline only'}</span>
-              </a>
+          <p class="knowledge-path-note">
+            {path.reviewedPrerequisiteCount>0
+              ? 'Reviewed concept prerequisites come first; units within a concept follow proposed editorial order.'
+              : 'Proposed editorial order only. No reviewed hard prerequisites exist for this concept.'}
+            Outlines are not completed lessons.
+          </p>
+          {path.missingPrerequisites.length>0&&(
+            <div class="knowledge-path-gap" role="status">
+              <strong>Prerequisite coverage gaps at {view.level}</strong>
+              <p>These reviewed prerequisite concepts have no outcome at the selected depth; the route is incomplete.</p>
+              <ul>
+                {path.missingPrerequisites.map(missing=>(
+                  <li>
+                    {missing.title}
+                    {missing.availableLevels.map(level=>(
+                      <a href={learningGraphHref(missing.id,level)}>View {level}</a>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <ol class="knowledge-path-list">
+            {path.steps.map((step,index)=>(
+              <li class="knowledge-path-step">
+                <span class="knowledge-path-number" aria-hidden="true">{index+1}</span>
+                <a class="knowledge-unit" href={pathItemHref(step.itemId,path.conceptId,path.level)}>
+                  <span class="knowledge-unit-meta">
+                    {step.trackTitle} · {applicationLabel[step.role]}
+                    {step.reviewedPrerequisite?' · Reviewed concept prerequisite':''}
+                  </span>
+                  <strong>{step.title}</strong>
+                  <span class="knowledge-unit-foot">{step.itemId} · {published.has(step.itemId)?'Full lesson available':'Curriculum outline only'}</span>
+                </a>
+              </li>
             ))}
-          </div>
+          </ol>
         </section>
       )}
     </>

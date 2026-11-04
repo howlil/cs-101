@@ -3,6 +3,8 @@ import type { CurriculumItem, ProjectCheckpoint } from '../../domain/curriculum-
 import { libraryHref, libraryViewHref, type LibraryView } from '../../domain/content-library';
 import { ArrowRight } from 'lucide-react';
 import { learningGraphHref } from '../../domain/learning-graph';
+import type { ItemPathContext } from '../../domain/learning-path';
+import { pathItemHref } from '../../domain/learning-path';
 interface Props {
   item: CurriculumItem;
   trackTitle?: string;
@@ -13,8 +15,9 @@ interface Props {
   project?: ProjectCheckpoint;
   prerequisites: Array<{ id: string; title: string }>;
   conceptLinks: Array<{ id: string; title: string }>;
+  pathContext?: ItemPathContext;
 }
-const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks } = Astro.props;
+const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks, pathContext } = Astro.props;
 const isUnit = item.kind === 'unit';
 const isCheckpoint = item.kind === 'checkpoint';
 const scope = item.kind === 'checkpoint' ? [] : item.scope;
@@ -31,10 +34,14 @@ const nextView = !isUnit ? undefined
   : view === 'materi' ? (authored ? 'soal' : projectAvailable ? 'project' : undefined)
   : view === 'soal' && projectAvailable ? 'project'
   : undefined;
+const sectionHref = (id: string, section: LibraryView) => pathContext
+  ? pathItemHref(id, pathContext.conceptId, pathContext.level, section)
+  : libraryViewHref(id, section);
 ---
 <article class="library-content" aria-label="Konten kurikulum" data-active-view={view}>
   <header class="library-heading">
     <p class="library-location">{[trackTitle ?? 'Integrasi', moduleTitle, item.id].filter(Boolean).join(' / ')}</p>
+    {pathContext && <p class="library-path-context">Suggested study path · Step {pathContext.index} of {pathContext.total} · {pathContext.level}</p>}
     <h1>{item.title}</h1>
     {isUnit && !authored && view === 'materi' && <p class="library-availability" role="status">Outline kurikulum — materi lengkap dan bank soal belum tersedia.</p>}
     {stale && <p class="library-availability" role="status">Materi tersedia, tetapi perlu peninjauan karena kurikulum sudah berubah.</p>}
@@ -43,7 +50,7 @@ const nextView = !isUnit ? undefined
         {views.map((tab) => (
           <a
             class:list={['library-view-link', { 'is-current': view === tab.id }]}
-            href={libraryViewHref(item.id, tab.id)}
+            href={sectionHref(item.id, tab.id)}
             aria-current={view === tab.id ? 'page' : undefined}
           >{tab.label}</a>
         ))}
@@ -108,10 +115,27 @@ const nextView = !isUnit ? undefined
 
   {isUnit && nextView && (
     <nav class="library-next" aria-label="Lanjut ke bagian berikutnya">
-      <a href={libraryViewHref(item.id, nextView)}>
+      <a href={sectionHref(item.id, nextView)}>
         {nextView === 'soal' ? 'Lanjut ke latihan soal' : 'Lanjut ke project'}
         <ArrowRight size={15} strokeWidth={1.8} aria-hidden="true" />
       </a>
+    </nav>
+  )}
+
+  {isUnit && pathContext && (
+    <nav class="library-path-controls" aria-label="Suggested study route navigation">
+      <span>Step {pathContext.index} of {pathContext.total} · {pathContext.conceptTitle}</span>
+      {pathContext.previous && (
+        <a href={pathItemHref(pathContext.previous.itemId,pathContext.conceptId,pathContext.level)}>
+          Previous unit · {pathContext.previous.itemId}
+        </a>
+      )}
+      <a href={learningGraphHref(pathContext.conceptId,pathContext.level)}>Back to concept graph</a>
+      {view === 'project' && pathContext.next && (
+        <a class="library-path-next" href={pathItemHref(pathContext.next.itemId,pathContext.conceptId,pathContext.level)}>
+          Next unit · {pathContext.next.itemId}
+        </a>
+      )}
     </nav>
   )}
 
@@ -128,7 +152,9 @@ const nextView = !isUnit ? undefined
       {conceptLinks.length > 0 && (
         <section class="library-graph-return" aria-label="Knowledge graph connections">
           <h2>Explore this concept across domains</h2>
-          {conceptLinks.map(({ id, title }) => <a href={learningGraphHref(id)}>{title}</a>)}
+          {conceptLinks.map(({ id, title }) => (
+            <a href={learningGraphHref(id, pathContext?.conceptId === id ? pathContext.level : undefined)}>{title}</a>
+          ))}
         </section>
       )}
       {source.url && <p>Sumber: <a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></p>}

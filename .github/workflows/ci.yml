@@ -79,6 +79,13 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
           grep -q 'Recommended units for G2' /tmp/graph-g2.html
           grep -q 'PRD-002' /tmp/graph-g2.html
+          grep -q 'Suggested study path' /tmp/graph-g2.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&concept=http-request-lifecycle&level=G1' > /tmp/path-first.html
+          grep -q 'Step 1 of 3' /tmp/path-first.html
+          grep -q 'Back to concept graph' /tmp/path-first.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=project&concept=http-request-lifecycle&level=G1' > /tmp/path-project.html
+          grep -q 'Next unit' /tmp/path-project.html
+          grep -q 'SPR-006' /tmp/path-project.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&level=G3' > /tmp/graph-g3.html
           grep -q 'No curated G3 outcomes yet' /tmp/graph-g3.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?track=networking' > /tmp/catalog-networking.html

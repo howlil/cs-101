@@ -77,6 +77,17 @@ async function assertRenderedHtml() {
     assert.ok(graphPage.includes('Golden lesson concept'), 'Concept graph must render the selected concept.');
     assert.ok(graphPage.includes('JAV-009'), 'Graph must link to its canonical unit.');
     assert.ok(graphPage.includes('Competency target'), 'Level outcome must render.');
+    assert.ok(graphPage.includes('Suggested study path'), 'Graph must render a deterministic suggested route.');
+    assert.ok(graphPage.includes('concept=golden-fixture'), 'Graph units must retain route context.');
+
+    const linked = await fetch('http://127.0.0.1:' + port +
+      '/?item=' + GOLDEN_UNIT_ID + '&concept=golden-fixture&level=G1');
+    assert.equal(linked.status, 200);
+    const linkedHtml = await linked.text();
+    assert.ok(linkedHtml.includes('Step 1 of 1'), 'Linked unit must show route position.');
+    assert.ok(linkedHtml.includes('Back to concept graph'), 'Linked unit must offer a route back.');
+    assert.ok(linkedHtml.includes('view=soal') && linkedHtml.includes('concept=golden-fixture'),
+      'Lesson views must keep the selected learning-path context.');
     const emptyDepth = await fetch('http://127.0.0.1:' + port + '/?mode=graph&level=G4');
     assert.equal(emptyDepth.status, 200);
     assert.ok((await emptyDepth.text()).includes('No curated G4 outcomes yet'), 'Missing depth must show real coverage gap.');
