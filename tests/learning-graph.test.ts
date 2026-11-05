@@ -16,7 +16,7 @@ test('pilot retains four canonical domain mappings across competency levels', ()
   assert.equal(new Set([...focus.applications, ...depthTwo.applications].map((a) => a.trackTitle)).size, 4);
   assert.equal(focus.neighbors.length, 4);
   assert.ok(graph.relations.every((r) => r.type === 'related' && r.status === 'proposed'));
-  assert.deepEqual(conceptsForItem(graph, 'SPR-006').map((c) => c.id), ['http-request-lifecycle', 'http-controller']);
+  assert.deepEqual(conceptsForItem(graph, 'SPR-006').map((c) => c.id), ['http-request-lifecycle', 'http-controller', 'api-design-contract']);
 });
 
 test('unknown deep links recover to a valid concept', () => {
