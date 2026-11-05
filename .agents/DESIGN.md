@@ -15,6 +15,7 @@ No shadows, invented lessons, progress badges, new persistence, or duplicate sid
 ## State
 Mode, selected concept, G0–G4 depth and optional lesson path context belong to URL query params.
 ## Patterns
+In mapped lessons, show one reusable compact-context canvas after the article, never over the first reading paragraph. Unmapped units link to Graph without suggesting missing edges.
 Canvas nodes are native SVG links; pointer drag pans empty space, buttons zoom/reset, arrow keys pan the focused viewport, and the existing text links are always available as fallback. The URL owns selected concept/depth; viewport controls are local and reset on navigation. Show only curated one-hop edges at the active level; dashed edges mean proposed, never prerequisites. Study route and rubric remain readable lists. On mobile, horizontal canvas scroll and text links preserve access; missing depths are explicit.
 ## Accessibility
 Keyboard, visible focus, semantic labels and readable text alternatives are mandatory.

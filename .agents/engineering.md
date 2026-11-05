@@ -33,6 +33,7 @@ DEC6: OSX-029 uses unprivileged local Node socket probes; root-required network 
 DEC7: PRD-002 uses documented Actuator /live and /ready aliases; state-driven Node HTTP verification is separate from Spring/Kubernetes fault injection.
 DEC8: Editorial evidence precision is part of the proposed rubric schema; no speculative reviewed graph edge, runtime progress state or database is introduced.
 DEC9: Graph viewport owns local pan/zoom only; concept and depth remain URL-owned and native links are retained outside the canvas.
+DEC10: Lesson graph previews derive from validated concept application mappings, preferring explicit path context over the first curated G1 outcome; no inferred links for unmapped units.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -47,3 +48,4 @@ PF9 (P13,G8) [important] | OSX-029 reproducible authored content, local Linux so
 PF10 (P14,G9) [important] | PRD-002 verified receipt, local status-state proof and contextual G1/G2 smoke | merge | pnpm ci
 PF11 (P15,G10) [important] | evidence-kind schema failures, 15 rubric classifications, Golden and Project/Graph smoke | merge | pnpm ci
 PF12 (P16,G1) [important] | deterministic scene and real one-hop edges, SSR links and no fabricated graph on missing depth | iter/merge | pnpm test; pnpm ci
+PF13 (P17,G5) [important] | mapped/unmapped lesson fallback, level context, and Materi-only map | merge | pnpm ci

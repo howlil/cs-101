@@ -76,3 +76,13 @@
 .library-assessment ol{padding-left:22px;margin:0;display:grid;gap:13px;}
 .library-assessment li{font-size:12px;line-height:1.7;color:var(--foreground);}
 .library-assessment li p{color:var(--text-secondary);margin:4px 0;}
+
+/* In-context concept graph keeps the existing reading-first flow and URL navigation. */
+.library-graph-jump{display:inline-flex;align-items:center;gap:7px;width:fit-content;margin:10px 0 2px;padding:7px 11px;border:1px solid var(--border);border-radius:999px;font-size:11px;font-weight:650;color:var(--foreground);text-decoration:none}
+.library-graph-jump:hover{background:var(--surface-muted)}
+.library-graph-jump:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.library-graph-preview{margin:32px 0 22px;border-top:1px solid var(--border);padding-top:22px}
+.library-graph-preview-heading h2{margin:0 0 5px;font-size:16px;letter-spacing:-.02em}
+.library-graph-preview-heading p{max-width:70ch;margin:0;color:var(--text-secondary);font-size:12px;line-height:1.7}
+.library-graph-preview .concept-canvas{margin:14px 0 0}
+.library-unmapped-notice{max-width:66ch;font-size:11px;line-height:1.7;color:var(--text-secondary)}

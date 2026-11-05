@@ -83,6 +83,8 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:4321/ > /tmp/catalog-root.html
           grep -q 'Build Doctor' /tmp/catalog-root.html
           grep -q 'Outline kurikulum' /tmp/catalog-root.html
+          grep -q 'Explore Knowledge Graph' /tmp/catalog-root.html
+          if grep -q 'Concept graph for this lesson' /tmp/catalog-root.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/catalog-database.html
           grep -q 'SQL Workbench' /tmp/catalog-database.html
           grep -q 'Outline kurikulum' /tmp/catalog-database.html
@@ -103,6 +105,9 @@ jobs:
           grep -q 'concept=service-readiness&amp;level=G2' /tmp/graph-g2.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001' > /tmp/net-lesson.html
           grep -q 'Mental model: boundary sebelum HTTP' /tmp/net-lesson.html
+          grep -q 'Cross-domain connections' /tmp/net-lesson.html
+          grep -q 'Concept graph for this lesson' /tmp/net-lesson.html
+          grep -q 'Explore concept graph' /tmp/net-lesson.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=soal' > /tmp/net-quiz.html
           grep -q 'Lima pertanyaan pembeda' /tmp/net-quiz.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&concept=http-request-lifecycle&level=G1' > /tmp/spring-lesson.html
@@ -111,6 +116,7 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&view=soal&concept=http-request-lifecycle&level=G1' > /tmp/spring-quiz.html
           grep -q 'Cek kontrak Spring MVC' /tmp/spring-quiz.html
           grep -q 'Cek jawaban' /tmp/spring-quiz.html
+          if grep -q 'Concept graph for this lesson' /tmp/spring-quiz.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SPR-006&view=project&concept=http-request-lifecycle&level=G1' > /tmp/spring-project.html
           grep -q 'Transfer API — POST 201' /tmp/spring-project.html
           grep -q 'Assessment guide' /tmp/spring-project.html

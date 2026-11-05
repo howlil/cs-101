@@ -5,6 +5,8 @@ import { ArrowRight } from 'lucide-react';
 import { learningGraphHref, EVIDENCE_KIND_LABELS, type ItemAssessment } from '../../domain/learning-graph';
 import type { ItemPathContext } from '../../domain/learning-path';
 import { pathItemHref } from '../../domain/learning-path';
+import type { CanvasNeighbor } from '../../domain/graph-canvas-layout';
+import ConceptCanvas from '../curriculum/ConceptCanvas';
 interface Props {
   item: CurriculumItem;
   trackTitle?: string;
@@ -17,8 +19,9 @@ interface Props {
   conceptLinks: Array<{ id: string; title: string }>;
   pathContext?: ItemPathContext;
   assessmentContext?: ItemAssessment;
+  graphPreview?: { focus: { id: string; title: string; href: string }; neighbors: CanvasNeighbor[]; level: string };
 }
-const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks, pathContext, assessmentContext } = Astro.props;
+const { item, trackTitle, moduleTitle, authored, stale, view, project, prerequisites, conceptLinks, pathContext, assessmentContext, graphPreview } = Astro.props;
 const isUnit = item.kind === 'unit';
 const isCheckpoint = item.kind === 'checkpoint';
 const scope = item.kind === 'checkpoint' ? [] : item.scope;
@@ -44,6 +47,12 @@ const sectionHref = (id: string, section: LibraryView) => pathContext
     <p class="library-location">{[trackTitle ?? 'Integrasi', moduleTitle, item.id].filter(Boolean).join(' / ')}</p>
     {pathContext && <p class="library-path-context">Suggested study path · Step {pathContext.index} of {pathContext.total} · {pathContext.level}</p>}
     <h1>{item.title}</h1>
+    {isUnit && (
+      <a class="library-graph-jump" href={graphPreview?.focus.href ?? '/?mode=graph'}>
+        {graphPreview ? 'Explore concept graph' : 'Explore Knowledge Graph'}
+        <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
+      </a>
+    )}
     {isUnit && !authored && view === 'materi' && <p class="library-availability" role="status">Outline kurikulum — materi lengkap dan bank soal belum tersedia.</p>}
     {stale && <p class="library-availability" role="status">Materi tersedia, tetapi perlu peninjauan karena kurikulum sudah berubah.</p>}
     {isUnit && (
@@ -158,6 +167,16 @@ const sectionHref = (id: string, section: LibraryView) => pathContext
     </nav>
   )}
 
+  {view === 'materi' && graphPreview && (
+    <section class="library-graph-preview" aria-label="Concept graph for this lesson">
+      <div class="library-graph-preview-heading">
+        <h2>Cross-domain connections</h2>
+        <p>Curated relationships for this unit at {graphPreview.level}. Proposed edges are suggestions, not prerequisites.</p>
+      </div>
+      <ConceptCanvas client:visible focus={graphPreview.focus} neighbors={graphPreview.neighbors} level={graphPreview.level} />
+    </section>
+  )}
+
   {view === 'materi' && (
     <footer class="library-footer">
       {prerequisites.length > 0 && (
@@ -167,6 +186,9 @@ const sectionHref = (id: string, section: LibraryView) => pathContext
             <li><a href={libraryHref(prerequisite.id)}>{prerequisite.id} · {prerequisite.title}</a></li>
           ))}</ul>
         </section>
+      )}
+      {conceptLinks.length === 0 && isUnit && (
+        <p class="library-unmapped-notice">This unit has no reviewed concept mapping yet. The Knowledge Graph shows only the curated pilot, not invented links.</p>
       )}
       {conceptLinks.length > 0 && (
         <section class="library-graph-return" aria-label="Knowledge graph connections">

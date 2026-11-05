@@ -37,6 +37,26 @@ const lesson = item?.kind === 'unit'
   : undefined;
 const rendered = lesson ? await render(lesson) : null;
 const Content = rendered?.Content;
+const itemConcepts = item ? conceptsForItem(learningGraph, item.id) : [];
+// Preserve a valid explicit path first; otherwise choose the first mapped G1 outcome.
+const previewConcept = pathContext
+  ? itemConcepts.find(concept => concept.id === pathContext.conceptId)
+  : itemConcepts.find(concept => concept.outcomes.some(outcome => outcome.level === 'G1')) ?? itemConcepts[0];
+const previewLevel = pathContext?.level ?? previewConcept?.outcomes.find(outcome => outcome.level === 'G1')?.level
+  ?? previewConcept?.outcomes[0]?.level;
+const preview = previewConcept && previewLevel
+  ? getFocusedConcept(learningGraph, previewConcept.id, previewLevel)
+  : undefined;
+const graphPreview = preview?.outcome ? {
+  focus: { id: preview.concept.id, title: preview.concept.title,
+    href: '/?mode=graph&concept=' + encodeURIComponent(preview.concept.id) + '&level=' + preview.level },
+  neighbors: preview.neighbors.map(({concept,relation,direction}) => ({
+    id:concept.id,title:concept.title,
+    href:'/?mode=graph&concept=' + encodeURIComponent(concept.id) + '&level=' + preview.level,
+    relationType:relation.type,status:relation.status,direction,
+  })),
+  level:preview.level,
+} : undefined;
 const prerequisites = item?.prerequisites.map((id) => {
   const previous = curriculumGraph.itemsById.get(id);
   return { id, title: previous?.title ?? id };
@@ -57,7 +77,8 @@ const prerequisites = item?.prerequisites.map((id) => {
       pathContext={pathContext}
       assessmentContext={assessmentContext}
       prerequisites={prerequisites}
-      conceptLinks={conceptsForItem(learningGraph, item.id).map(({ id, title }) => ({ id, title }))}
+      conceptLinks={itemConcepts.map(({ id, title }) => ({ id, title }))}
+      graphPreview={graphPreview}
     >
       {Content && <Content />}
     </ContentLibrary>

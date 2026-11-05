@@ -18,6 +18,7 @@ B10: A user opens an authored OSX-029 G1/G2 lesson with five self-check question
 B11: A learner opens PRD-002 with source-backed startup/liveness/readiness distinctions, five local quiz questions, a health-state fixture, and a Spring/Kubernetes readiness challenge.
 B12: Each proposed competency criterion identifies the actual kind of evidence required in the Knowledge Graph and contextual Project view, without mistaking local fixtures for integration proof.
 B13: A learner sees a genuine curated node-edge neighborhood on the Graph page, pans/zooms the viewport, selects a linked concept and keeps the same URL/depth semantics and nonvisual navigation.
+B14: A mapped unit displays its level-specific one-hop graph in the Materi view and links back to the full Graph; unmapped units show a global Graph entry without fabricated local edges.
 X1: Unknown concept IDs recover to the first valid focus.
 X2: Unauthored items are labeled outline-only.
 X3: Unmapped levels or concept-depth pairs show explicit gaps.
@@ -57,3 +58,4 @@ P13 (B10,C9): OSX-029 generation and local fixture are byte-reproducible; G1/G2 
 P14 (B11,C10): PRD-002 generated V3 artifacts and local HTTP status fixture reproduce exactly; Materi/Soal/Project are tested for G2 HTTP and G1/G2 readiness contexts.
 P15 (B12,C11): Every curated rubric criterion declares a validated evidence kind; unit and Golden tests reject missing/invalid kinds, with visible labels on Graph and Project, no promoted prerequisite edges.
 P16 (B13,X6,C3): Deterministic scene matches only reviewed-overlay relations for the active level, renders linked SVG nodes, and retains link-list fallback, with no canvas on an uncurated level.
+P17 (B14,X2,X5): Mapped Materi shows a matching Graph neighborhood and deep link; other units state the unmapped gap, and no graph canvas appears in Soal/Project views.
