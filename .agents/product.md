@@ -21,6 +21,7 @@ B13: A learner sees a genuine curated node-edge neighborhood on the Graph page, 
 B14: A mapped unit displays its level-specific one-hop graph in the Materi view and links back to the full Graph; unmapped units show a global Graph entry without fabricated local edges.
 B15: A learner opens JAV-001 Build Doctor as a source-backed V3 lesson with real Java 21 toolchain, compile/runtime diagnosis, Maven scope reasoning, five questions and an independent reproducible CLI/JAR challenge.
 B16: A learner navigates curated G1 cross-domain concept neighborhoods linking Java/Spring, PostgreSQL schema, API contract tests, and system-level transfer API design to existing HTTP concepts and canonical units.
+B17: A learner opens NET-006 as a source-backed V3 TCP handshake/sequence/retransmission/close lesson, completes five questions and follows an independent packet capture challenge.
 X1: Unknown concept IDs recover to the first valid focus.
 X2: Unauthored items are labeled outline-only.
 X3: Unmapped levels or concept-depth pairs show explicit gaps.
@@ -40,9 +41,10 @@ C10: PRD-002 fixture proves HTTP status under simulated state transitions, not r
 C11: Assessment evidence kinds are mandatory and explicitly distinguish design review, framework testing, peer-network labs, packet traces and cluster experiments. All concept relations remain proposed, without inferred prerequisites.
 C12: JAV-001 JDK fixture tests compiler and runtime class-loading only; it cannot be presented as proof of Maven clean verify, dependency scope correction or executable JAR success.
 C13: New G1 cross-domain links and assessment rubrics remain proposed; outline units must not be shown as published lessons or as proven competencies. Java CLI and PostgreSQL criteria require real target environments.
+C14: NET-006 local Node fixture checks socket-level connect/EOF/refusal only; no fake packet capture, SYN/ACK flags, retransmission or timeout proof is allowed.
 
 ## Scope
-In: HTTP pilot, depth-specific paths/rubrics, and five authored V3 units (NET-001, SPR-006, OSX-029, PRD-002, JAV-001) with bounded executable proofs.
+In: HTTP pilot, depth-specific paths/rubrics, and six authored V3 units (NET-001, NET-006, SPR-006, OSX-029, PRD-002, JAV-001) with bounded executable proofs.
 Out: learner tracking, adaptive mastery, inferred graph edges, bulk lesson generation.
 
 ## Proof
@@ -65,3 +67,4 @@ P16 (B13,X6,C3): Deterministic scene matches only reviewed-overlay relations for
 P17 (B14,X2,X5): Mapped Materi shows a matching Graph neighborhood and deep link; other units state the unmapped gap, and no graph canvas appears in Soal/Project views.
 P18 (B15,C12): JAV-001 generation and JDK 21 compile/runtime fixture reproduce byte-identically; the first Java unit renders distinct Materi/Soal/Project pages while its graph mapping remains explicitly absent at that slice.
 P19 (B16,C13): Four G1 cross-domain concepts add only explicit source-mapped canonical units, validated rubric evidence and proposed related edges; G2 remains an honest gap on newly added concepts.
+P20 (B17,C14): NET-006 V3 bundle promotes byte-identically with a real Node 24 stream fixture, five questions and separate Materi/Soal/Project URL smoke; packet capture remains manual.

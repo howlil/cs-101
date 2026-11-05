@@ -1,0 +1,78 @@
+{
+  "itemId": "NET-006",
+  "version": "lesson-spec-v1:sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "curriculumFingerprint": "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Pada SYN client dengan seq=100, server membalas SYN+ACK dengan ack=101. Apa artinya ACK itu?",
+      "options": [
+        "Server mengharapkan byte client berikutnya mulai dari 101",
+        "Server telah mengirim payload HTTP 101 byte",
+        "Client harus selalu mengganti source port ke 101"
+      ],
+      "answer": 0,
+      "explanation": "SYN memakan satu posisi sequence; ACK mengumumkan next expected byte/sequence.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Server SYN+ACK berisi seq=300. ACK client untuk SYN server seharusnya?",
+      "options": [
+        "300",
+        "301",
+        "101"
+      ],
+      "answer": 1,
+      "explanation": "Client mengakui SYN server dengan sequence berikutnya, 301; empty ACK sendiri tidak memakan sequence space.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Client menulis dua buffer melalui socket.write(). Apa yang dijamin TCP pada aplikasi penerima?",
+      "options": [
+        "Tepat dua peristiwa data yang cocok dengan dua write",
+        "Byte diterima berurutan jika transfer berhasil; batas write bukan batas paket",
+        "Dua HTTP request otomatis dihasilkan"
+      ],
+      "answer": 1,
+      "explanation": "TCP adalah ordered byte stream, bukan message transport yang mempertahankan boundary write.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dalam capture terlihat SYN berulang tanpa SYN-ACK dan tidak ada respons HTTP. Klasifikasi benar?",
+      "options": [
+        "HTTP 500 pasti terjadi",
+        "HTTP 503 sudah dipastikan",
+        "Transport connection setup bermasalah; periksa listener, routing, filtering dan capture"
+      ],
+      "answer": 2,
+      "explanation": "Tanpa HTTP response, tidak ada status HTTP yang dapat disimpulkan. Retransmission harus diverifikasi dari trace nyata.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Node client mendapat end, lalu koneksi baru setelah server.close() menghasilkan ECONNREFUSED. Bukti yang benar?",
+      "options": [
+        "Node telah merekam FIN, ACK dan TIME-WAIT di wire",
+        "Stream-level EOF dan koneksi baru ditolak; bukti FIN/ACK memerlukan packet capture terpisah",
+        "HTTP 404 dari server yang sudah mati"
+      ],
+      "answer": 1,
+      "explanation": "Socket event tidak menampilkan flag TCP; ECONNREFUSED terjadi sebelum ada respons HTTP. Periksa capture untuk FIN/RST.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

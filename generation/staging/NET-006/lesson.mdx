@@ -1,0 +1,155 @@
+---
+taskId: "NET-006"
+title: "TCP Handshake Capture"
+description: "Baca SYN, SYN-ACK, ACK, sequence numbers, retransmission, FIN/RST, dan bedakan bukti socket dari packet capture."
+demo: false
+curriculumFingerprint: "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/NET-006.json';
+import questionBank from '../../../review-banks/NET-006.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** API tidak menerima request meskipun proses backend berjalan. Apakah TCP tidak terbentuk, data harus dikirim ulang, atau koneksinya justru sudah ditutup?
+
+**Langkah pertama:** gambar `SYN → SYN-ACK → ACK`. Labeli client, server, source/destination IP dan port. Handshake ini terjadi pada TCP sebelum payload aplikasi dapat diterima sebagai stream terhubung.
+
+<MentalModel title="TCP adalah byte stream dengan state, bukan rangkaian HTTP status">
+
+- **Handshake:** SYN mengumumkan *initial sequence number* (ISN), SYN-ACK mengakui ISN client dan mengumumkan ISN server, ACK client mengakui ISN server.
+- **Acknowledgment:** ACK berisi nomor *byte berikutnya yang diharapkan*. SYN dan FIN masing-masing mengonsumsi satu posisi sequence space, sedangkan ACK tanpa data tidak.
+- **Data:** TCP memberikan byte berurutan; satu pemanggilan `socket.write()` tidak harus menjadi satu paket ataupun satu callback `data`.
+- **Retransmission:** data yang belum diakui dapat dikirim ulang melalui mekanisme RTO; apakah retransmission benar-benar terjadi harus dibuktikan pada capture.
+- **Close:** FIN menutup satu arah pengiriman, RST membatalkan koneksi; listener yang sudah berhenti dapat menolak koneksi baru.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+Client                                      Server
+CLOSED                                      LISTEN
+SYN seq=x                  ───────────────>
+                         <───────────────   SYN+ACK seq=y ack=x+1
+ACK ack=y+1                ───────────────>
+ESTABLISHED                                 ESTABLISHED
+data: bytes m..n           ───────────────>
+                         <───────────────   ACK: next expected byte
+   [when needed: timeout / retransmission of unACKed data]
+FIN                        ───────────────>
+                         <───────────────   ACK
+                         <───────────────   FIN (when peer closes)
+ACK                        ───────────────>
+```
+
+</ConceptGraph>
+
+## Membaca sequence dan ACK
+
+Jika client memulai `SYN seq=100` dan server merespons `SYN+ACK seq=300 ack=101`, ACK client untuk SYN server adalah `ack=301`. Wireshark sering menggunakan **relative sequence numbers**, jadi nilai awal dapat tampil sebagai `0` dan ACK berikutnya `1`. Selalu jelaskan apakah tampilan memakai relative atau absolute sequence numbers.
+
+Packet loss dan congestion dapat menyebabkan retransmission, tetapi *tidak otomatis terjadi* saat eksperimen lokal. RFC 6298 mengatur retransmission timeout dan backoff; repeated SYN atau data tidak membuktikan HTTP 503 tanpa respons HTTP yang benar-benar diterima.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Batas bukti
+
+Fixture Node dalam materi ini membuktikan **connected TCP stream, echo payload, peer EOF, dan koneksi baru ditolak setelah listener tutup**. Fixture **tidak** menangkap SYN, ACK, FIN, RST, retransmission, atau TIME-WAIT. Untuk itu gunakan Wireshark/tcpdump di VM/disposable namespace dengan izin akses yang sesuai.
+
+## Sumber
+
+<SourceList sources={[
+  {title: 'RFC 9293 — TCP Functional Specification', url: 'https://www.rfc-editor.org/rfc/rfc9293.html'},
+  {title: "RFC 6298 — Computing TCP's Retransmission Timer", url: 'https://www.rfc-editor.org/rfc/rfc6298.html'},
+  {title: 'Node.js Net TCP API', url: 'https://nodejs.org/api/net.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Eksperimen TCP lokal — tanpa packet capture
+
+Jalankan pada Node 24:
+
+```sh
+node generation/fixtures/NET-006/tcp-lifecycle.mjs
+```
+
+Output yang seharusnya sama pada loopback yang berfungsi:
+
+```text
+tcp-connect=ok
+tcp-payload=ACK:hello
+tcp-peer-end=true
+tcp-refusal=ECONNREFUSED
+```
+
+**Interpretasi:** `connect` menandakan stream berhasil tersambung; `end` berarti peer menyelesaikan arah pengirimannya. `ECONNREFUSED` pada percobaan baru terjadi setelah listener dihentikan. Node tidak mengeluarkan packet-level TCP flags.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal diagnosis TCP
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Project — TCP Handshake Capture
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+Gunakan hanya VM lokal atau network namespace yang kamu miliki. Pada terminal pertama, jalankan listener berikut dan biarkan aktif:
+
+```sh
+node -e "require('node:net').createServer(s=>s.end('ack')).listen(4040,'127.0.0.1')"
+```
+
+Pada terminal kedua, mulailah capture **sebelum client connect** (Linux, antarmuka loopback `lo`):
+
+```sh
+sudo tcpdump -i lo -nn -s 0 -w /tmp/tcp-handshake.pcap 'tcp port 4040'
+```
+
+Pada terminal ketiga, buat koneksi singkat:
+
+```sh
+nc 127.0.0.1 4040
+```
+
+Hentikan capture setelah koneksi berakhir, lalu analisis pcap di Wireshark atau baca ulang menggunakan `tcpdump -nn -S -r /tmp/tcp-handshake.pcap`. **Jangan mengasumsikan retransmission ada** pada loopback. Jika tidak terjadi, dokumentasikan bahwa capture tersebut tidak mengandung retransmission dan jelaskan satu skenario retransmission berdasarkan RFC 6298 secara terpisah. Modifikasi packet loss hanya pada VM atau namespace disposable, bukan jaringan production.
+
+<Challenge
+  title="TCP Handshake Capture — SYN, ACK, retransmission, close"
+  brief="Hubungkan client ke listener localhost, identifikasi handshake SYN/SYN-ACK/ACK dan connection close dari packet capture nyata; jelaskan nomor sequence/ACK dan satu skenario retransmission. Bedakan trace dari Node stream fixture."
+  acceptanceCriteria={[
+    'Tunjukkan capture nyata berisi SYN, SYN+ACK, ACK untuk koneksi yang sama, lengkap dengan 4-tuple endpoint serta arah paket.',
+    'Jelaskan progression ISN/ACK dan apakah Wireshark memakai relative sequence numbers.',
+    'Identifikasi peristiwa FIN/ACK atau RST yang memang muncul pada capture; jangan merekayasa flag yang tidak diamati.',
+    'Jelaskan satu skenario retransmission yang konsisten dengan RTO dan ACK; bila tidak terjadi pada capture, tulis bahwa itu skenario hipotetis, bukan bukti packet loss.',
+    'Jalankan fixture Node lokal, catat empat baris output, dan bedakan stream EOF/ECONNREFUSED dari packet evidence.',
+    'Jangan mengarang HTTP 5xx ketika capture hanya menunjukkan kegagalan atau penundaan transport.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Mampu membaca handshake dan menjelaskan nomor sequence/ACK dari capture nyata.',
+  'Memahami stream bytes dan bahwa batas write tidak sama dengan batas TCP packet.',
+  'Membedakan retransmission transport dan timeout dari respons HTTP.',
+  'Membedakan FIN, RST, dan koneksi baru yang ditolak berdasarkan sumber bukti yang sesuai.'
+]} />
+
+</LessonStage>

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "NET-006",
+  "curriculumFingerprint": "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "local-tcp-stream-close",
+      "runtime": "node",
+      "file": "tcp-lifecycle.mjs",
+      "fixtureSha256": "dd6fa32a78f0c4677ed28a63e82b8e71b711ba235fc01dfab788d5ea8b3a494c",
+      "stdoutSha256": "7f20c6b49b7009bdeca1e6f762a2b37cd03918b1a21f55b5a2128725969f3c36",
+      "verified": true
+    }
+  ]
+}

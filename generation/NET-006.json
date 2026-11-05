@@ -1,0 +1,36 @@
+{
+  "itemId": "NET-006",
+  "fingerprint": "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "sources": [
+    {
+      "title": "RFC 9293 — TCP Functional Specification",
+      "url": "https://www.rfc-editor.org/rfc/rfc9293.html"
+    },
+    {
+      "title": "RFC 6298 — Computing TCP's Retransmission Timer",
+      "url": "https://www.rfc-editor.org/rfc/rfc6298.html"
+    },
+    {
+      "title": "Node.js — Net TCP API",
+      "url": "https://nodejs.org/api/net.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments: handshake, retransmission and close/refusal",
+      "assessedAt": "Five diagnostic review questions, local Node stream fixture and manual Wireshark/tcpdump VM challenge",
+      "evidenceExpected": "Observed SYN/SYN-ACK/ACK and connection close in a genuine packet capture, with sequence/ACK explanation and one real or explicitly hypothetical retransmission scenario."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent capture tasks and failure/close interpretation",
+      "assessedAt": "Peer-reviewable packet trace from disposable VM plus documented fixture/proof boundary",
+      "evidenceExpected": "Actual loopback capture and interpretation of handshake/close flags, honest retransmission evidence or absence, and separate Node stream-level fixture output."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

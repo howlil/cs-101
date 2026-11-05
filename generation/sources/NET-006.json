@@ -1,0 +1,120 @@
+{
+  "itemId": "NET-006",
+  "curriculumFingerprint": "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "sources": [
+    {
+      "title": "RFC 9293 — TCP Functional Specification",
+      "url": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "tier": 0,
+      "supports": [
+        "three-way handshake and SYN sequence/ACK semantics",
+        "byte-stream in-order delivery and retransmission",
+        "FIN/close, half-close, RST/abort and TIME-WAIT"
+      ],
+      "notes": [
+        "Sections 3.3.2, 3.5, 3.6 and 3.8"
+      ]
+    },
+    {
+      "title": "RFC 6298 — Computing TCP's Retransmission Timer",
+      "url": "https://www.rfc-editor.org/rfc/rfc6298.html",
+      "tier": 0,
+      "supports": [
+        "RTO based on observed RTT/variance",
+        "retransmit earliest unacknowledged segment after RTO",
+        "exponential backoff on RTO expiration"
+      ],
+      "notes": [
+        "Sections 2 and 5; actual on-wire retransmissions are environment-dependent"
+      ]
+    },
+    {
+      "title": "Node.js — Net TCP API",
+      "url": "https://nodejs.org/api/net.html",
+      "tier": 1,
+      "supports": [
+        "socket connect/data/end/error events",
+        "net.createServer and closing listener",
+        "local stream-level fixture is not a packet trace"
+      ],
+      "notes": [
+        "Net Server and Socket events, Socket.end"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "tcp-three-way",
+      "statement": "A normal TCP active open synchronizes endpoint sequence spaces with SYN, SYN-ACK and ACK before the connection enters ESTABLISHED.",
+      "conceptIds": [
+        "handshake"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "locator": "Section 3.5 Establishing a Connection",
+      "rationale": "RFC 9293 explicitly illustrates a basic three-way connection handshake with segment flags."
+    },
+    {
+      "id": "tcp-sequence-ack",
+      "statement": "SYN consumes a sequence number, while an empty ACK does not advance its sender's TCP sequence space.",
+      "conceptIds": [
+        "handshake",
+        "stream"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "locator": "Section 3.5 Figure 6 Basic Three-Way Handshake",
+      "rationale": "RFC 9293 annotates SYN and subsequent ACK sequence/acknowledgment numbers."
+    },
+    {
+      "id": "tcp-byte-stream",
+      "statement": "TCP provides a reliable, ordered byte stream; a single application write does not establish a one-to-one on-wire segment boundary.",
+      "conceptIds": [
+        "stream"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "locator": "Sections 2.1 and 3.8 Data Communication",
+      "rationale": "RFC 9293 defines ordered sequence-number-based data delivery rather than application message framing."
+    },
+    {
+      "id": "tcp-retransmission",
+      "statement": "TCP sender retransmissions can recover unacknowledged data; timeouts are not HTTP response status codes.",
+      "conceptIds": [
+        "retransmission"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "locator": "Section 3.8 Data Communication and Section 3.8.3 TCP Connection Failures",
+      "rationale": "RFC 9293 specifies retransmission and separate transport failure diagnostics."
+    },
+    {
+      "id": "tcp-rto-backoff",
+      "statement": "On retransmission-timeout expiration the recommended RFC 6298 algorithm retransmits earliest unacknowledged data and doubles its RTO.",
+      "conceptIds": [
+        "retransmission"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc6298.html",
+      "locator": "Section 5 Managing the RTO Timer (5.4–5.6)",
+      "rationale": "RFC 6298 explicitly specifies RTO retransmission and exponential backoff."
+    },
+    {
+      "id": "tcp-graceful-close",
+      "statement": "TCP normal close uses FIN acknowledgments and supports half-closed directions; an abort can use RST instead.",
+      "conceptIds": [
+        "close"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "locator": "Section 3.6 Closing a Connection and Section 3.6.1 Half-Closed Connections",
+      "rationale": "RFC 9293 defines normal FIN close and abort/reset as distinct transitions."
+    },
+    {
+      "id": "node-socket-events",
+      "statement": "Node net Socket connect, data, end and error events expose application-level stream outcomes rather than decoded SYN/FIN/retransmitted packets.",
+      "conceptIds": [
+        "close",
+        "stream"
+      ],
+      "sourceUrl": "https://nodejs.org/api/net.html",
+      "locator": "net.Socket Events connect/data/end/error",
+      "rationale": "The official Node API defines these events and does not expose raw packet-flag evidence."
+    }
+  ]
+}

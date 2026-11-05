@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "NET-006",
+  "curriculumFingerprint": "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "examples": [
+    {
+      "id": "local-tcp-stream-close",
+      "runtime": "node",
+      "file": "tcp-lifecycle.mjs",
+      "expectedStdout": "tcp-connect=ok\ntcp-payload=ACK:hello\ntcp-peer-end=true\ntcp-refusal=ECONNREFUSED\n"
+    }
+  ]
+}

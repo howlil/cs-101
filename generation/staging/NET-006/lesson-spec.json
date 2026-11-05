@@ -1,0 +1,339 @@
+{
+  "itemId": "NET-006",
+  "curriculumFingerprint": "sha256:575f5d73f66b7af82b6092c7656dcd429b4c09f161f5f9dfc27f77d91dd70864",
+  "payoff": "Read TCP handshake/ACK behavior, recognize retransmission evidence and distinguish FIN/stream EOF from connection refusal.",
+  "learningOutcomes": [
+    "akses server localhost dari client lalu identifikasi SYN/SYN-ACK/ACK dan connection close dalam Wireshark/tcpdump pada VM; jelaskan 1 retransmission scenario."
+  ],
+  "mentalModel": "TCP first synchronizes two endpoint sequence spaces (SYN/SYN-ACK/ACK), then delivers an ordered byte stream with acknowledgments/retransmission, and finally closes directions (FIN) or aborts (RST). Node stream callbacks are not packet captures.",
+  "relationshipGraph": "client SYN → server SYN+ACK → client ACK → ESTABLISHED → ordered bytes/ACK → optional retransmission/RTO → FIN/ACK normal close or RST abort; local server stops → new connection refused.",
+  "concepts": [
+    {
+      "id": "handshake",
+      "title": "SYN, SYN-ACK and ACK",
+      "mechanism": "The three-way handshake synchronizes initial sequence numbers for both endpoints; SYN advances sequence space.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9293.html"
+      ]
+    },
+    {
+      "id": "stream",
+      "title": "Ordered byte stream and acknowledgments",
+      "mechanism": "TCP orders bytes using sequence/ACK numbers rather than promising application-message or packet boundaries.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9293.html",
+        "https://nodejs.org/api/net.html"
+      ]
+    },
+    {
+      "id": "retransmission",
+      "title": "RTO and retransmission diagnosis",
+      "mechanism": "Missing ACKs can trigger retransmission and backoff, requiring real sequence/ACK trace evidence to diagnose.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9293.html",
+        "https://www.rfc-editor.org/rfc/rfc6298.html"
+      ]
+    },
+    {
+      "id": "close",
+      "title": "Graceful FIN, abort RST, and refusal",
+      "mechanism": "Closing an established stream differs from aborting state or refusing a new connection; stream events are not decoded packets.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9293.html",
+        "https://nodejs.org/api/net.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "Node connect does not expose a visible SYN/SYN-ACK/ACK capture.",
+    "A TCP data callback is not necessarily one wire segment or one HTTP message.",
+    "Retransmission is conditional and cannot be assumed to occur on a short localhost experiment.",
+    "FIN represents normal one-way close while RST aborts; absence of a listener is a different connect failure.",
+    "ECONNREFUSED is not an HTTP response status."
+  ],
+  "practice": [
+    "Identify SYN/SYN-ACK/ACK and ACK increments from a trace.",
+    "Classify transport retransmission or timeout without inventing an HTTP status.",
+    "Observe local TCP stream close/refusal and state its proof limitations."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments: handshake, retransmission and close/refusal",
+      "assessedAt": "Five diagnostic review questions, local Node stream fixture and manual Wireshark/tcpdump VM challenge",
+      "evidenceExpected": "Observed SYN/SYN-ACK/ACK and connection close in a genuine packet capture, with sequence/ACK explanation and one real or explicitly hypothetical retransmission scenario."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent capture tasks and failure/close interpretation",
+      "assessedAt": "Peer-reviewable packet trace from disposable VM plus documented fixture/proof boundary",
+      "evidenceExpected": "Actual loopback capture and interpretation of handshake/close flags, honest retransmission evidence or absence, and separate Node stream-level fixture output."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "read-a-three-way-handshake",
+        "objective": "Read SYN, SYN-ACK and ACK sequence and acknowledgement fields from a real TCP connection trace.",
+        "whyItMatters": "A successful socket connect means the transport is established, but without packet evidence the engineer cannot explain why earlier SYN attempts failed.",
+        "mentalModel": "Client SYN carries ISN=x; server SYN-ACK acknowledges x+1 and announces ISN=y; client ACK acknowledges y+1. The application byte stream is delivered after establishment.",
+        "explanation": "RFC 9293 Figure 6 shows SYN, SYN+ACK and ACK. The SYN itself uses one sequence-space position. An ACK-only segment does not consume sequence space. Capture direction, source/destination IP and ports, flag bits, seq and ACK values; Wireshark usually shows relative sequence numbers so x and y may appear as 0. A SYN without SYN-ACK is not itself proof of a specific firewall rule: routing, drops and remote host availability must be investigated with corroborating evidence. Node's connect event occurs after a successful connection setup but does not reveal the three packets.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A local client connects to a TCP listener while a packet capture is active on the loopback interface.",
+          "steps": [
+            {
+              "action": "Start a listener and capture the appropriate local interface before the client connects.",
+              "reason": "A trace must include the first handshake packets, not just the application payload.",
+              "expectedResult": "The first connection can be identified by its 4-tuple of IP addresses and ports."
+            },
+            {
+              "action": "Locate SYN from client, SYN+ACK from server, and final ACK from client.",
+              "reason": "The three messages synchronize TCP sequence spaces.",
+              "expectedResult": "Flag and relative sequence/ack values form an internally consistent handshake."
+            },
+            {
+              "action": "Check the subsequent data or stream event separately.",
+              "reason": "TCP connection success is not proof an HTTP request was successfully parsed.",
+              "expectedResult": "The capture shows transport establishment; application handling is a different boundary."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A capture shows client SYN seq=100, then server SYN+ACK ack=101 and seq=300. What ACK number should the client send for the server's SYN?",
+          "hints": [
+            "SYN occupies one sequence number.",
+            "Add one to the server ISN, not to the client's ISN."
+          ],
+          "explanation": "The client acknowledges server sequence 301. With relative numbering in Wireshark these values are often shown as 0 and 1."
+        },
+        "independentChallenge": {
+          "prompt": "Record a handshake for a *new* listener on a different ephemeral port, identify both ISNs and the ACK values, and explain how the two endpoint ports establish one 4-tuple.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Real Wireshark/tcpdump trace showing SYN, SYN-ACK, ACK, endpoint addresses/ports and seq/ack fields."
+          ],
+          "variationFromExample": "A new port and separately captured connection, rather than repeating the numeric example."
+        },
+        "firstAction": "Draw SYN → SYN+ACK → ACK and label who sends each packet.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating a TCP connect callback as an actual packet-level SYN trace.",
+          "whyItFails": "The callback reports a stream API state; it cannot show packet flags, sequence numbers or dropped SYN attempts.",
+          "correctiveAction": "Capture traffic on the correct network interface and identify the actual 4-tuple before interpreting TCP flags."
+        },
+        "selfCheck": {
+          "expectedObservation": "In a real capture, the three matching packets have consistent source/destination ports and SYN acknowledgment progression.",
+          "ifUnexpected": "If packets are missing, check capture timing, interface (lo vs external), privileges and whether the client reused an existing connection."
+        },
+        "continueFromHere": {
+          "nextAction": "Inspect how TCP delivers bytes and detects missing acknowledged data.",
+          "resumeCue": "Find the initial client SYN first, then verify the response and client confirmation."
+        }
+      },
+      {
+        "id": "classify-retransmission",
+        "objective": "Explain TCP stream ordering and distinguish retransmitted segments or transport timeouts from HTTP error responses.",
+        "whyItMatters": "A service may have working application code yet appear slow because transport data requires retransmission before the HTTP request can arrive.",
+        "mentalModel": "TCP acknowledges byte sequence space, buffers out-of-order data and retransmits unacknowledged bytes; applications receive an ordered byte stream without preserved write/message boundaries.",
+        "explanation": "RFC 9293 describes in-order byte-stream delivery and retransmission. TCP data segments carry sequence ranges; ACK advertises the next expected byte, and duplicate/reordered packets are not new HTTP requests merely because they exist on the wire. RFC 6298 defines RTO from RTT samples and exponential backoff on timeout; packet loss need not trigger an observable retransmission during a short local loopback capture. A transport timeout without a received HTTP response is not an HTTP 408/500. Do not fake a retransmitted packet with an application-level timer or by printing a guessed status.",
+        "prerequisiteConceptIds": [
+          "handshake"
+        ],
+        "workedExample": {
+          "problem": "One packet capture shows an in-order transfer, then a later segment with a previously sent sequence range.",
+          "steps": [
+            {
+              "action": "Compare source/destination 4-tuples and TCP sequence ranges.",
+              "reason": "A retransmission repeats data sequence space on the same connection.",
+              "expectedResult": "Match repeated sequence numbers and TCP analysis flags, not only elapsed milliseconds."
+            },
+            {
+              "action": "Look for ACK progression and gaps.",
+              "reason": "Cumulative ACKs identify next expected bytes and can show the consequence of loss/reordering.",
+              "expectedResult": "Explain whether a new ACK advances after the repeated data is accepted."
+            },
+            {
+              "action": "Record whether any HTTP response actually arrived.",
+              "reason": "Transport delay or timeout is distinct from an application-generated HTTP status.",
+              "expectedResult": "No HTTP status is claimed if there is no HTTP response message in the trace."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "An HTTP/1.1 client cannot connect and logs a timeout, but captures show repeated SYN packets without SYN-ACK. Can you conclude the backend returned HTTP 503?",
+          "hints": [
+            "No completed TCP connection means there may be no HTTP exchange.",
+            "A status code requires a received HTTP response."
+          ],
+          "explanation": "No. Repeated SYN and no SYN-ACK suggest transport establishment trouble; investigate route, filter and listener before claiming application errors."
+        },
+        "independentChallenge": {
+          "prompt": "In a disposable VM or namespace, collect a different capture containing one genuine TCP retransmission or document that none occurs in the controlled attempt; classify any observed loss using sequence/ACK evidence without manufacturing it.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "A timestamped packet trace or explicit no-retransmission observation; if retransmission occurs, show repeat sequence range and related ACKs.",
+            "A paragraph distinguishing connection timeout or retransmission from HTTP error status."
+          ],
+          "variationFromExample": "Real packet-loss evidence or a truthful no-loss observation instead of repeating the worked capture interpretation."
+        },
+        "firstAction": "Write why TCP's data sequence number counts bytes rather than HTTP requests.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming TCP packet boundaries match application writes or that retransmission proves the application received duplicate requests.",
+          "whyItFails": "TCP exposes a stream, and retransmissions repair transport data; application framing and retries operate at other layers.",
+          "correctiveAction": "Follow byte sequence/ACK ranges, then inspect HTTP framing and actual application request logs separately."
+        },
+        "selfCheck": {
+          "expectedObservation": "ACK progression corresponds to data received in sequence; a real retransmission may be absent on clean loopback.",
+          "ifUnexpected": "If a trace shows no retransmissions, do not fabricate one. Use a controlled disposable network impairment lab only when permitted."
+        },
+        "continueFromHere": {
+          "nextAction": "Observe how graceful close differs from a stopped listener or abort.",
+          "resumeCue": "First ask whether you are observing a TCP segment, a stream callback, or an HTTP response."
+        }
+      },
+      {
+        "id": "separate-close-and-refusal",
+        "objective": "Differentiate a normal TCP stream EOF, an abort/reset and connection refusal after a listener stops.",
+        "whyItMatters": "Closing an established stream gracefully and failing to connect at all require different diagnoses and recovery strategies.",
+        "mentalModel": "TCP FIN closes one sending direction; RST aborts connection state. A listener that no longer accepts a new connection can produce ECONNREFUSED without an HTTP response.",
+        "explanation": "RFC 9293 §3.6 models normal FIN closing, half-close and RST abort. TIME-WAIT may appear on the active-closer side depending on transition. Node socket.end() and end events expose the stream boundary; they are not proof of a specific FIN/ACK exchange unless correlated with a packet capture. A refused connection after a local server.close() is a failure before application request handling. The fixture verifies connect, payload, peer EOF and subsequent ECONNREFUSED on one loopback port, but never captures on-wire flags, retransmissions or TIME-WAIT. A server close or timeout does not guarantee one exact OS error in every networking environment.",
+        "prerequisiteConceptIds": [
+          "handshake",
+          "retransmission"
+        ],
+        "workedExample": {
+          "problem": "A Node client receives ACK:hello, observes EOF and then cannot reconnect after the listener closes.",
+          "steps": [
+            {
+              "action": "Start a local 127.0.0.1 listener on an ephemeral port.",
+              "reason": "Avoid external exposure and port collision.",
+              "expectedResult": "Node connect event reports a successful loopback stream connection."
+            },
+            {
+              "action": "Send hello, read ACK:hello and observe stream end.",
+              "reason": "Payload and EOF are higher-level observations of a connection that carried bytes.",
+              "expectedResult": "The client sees ACK:hello and end, but no raw FIN flag is exposed by Node."
+            },
+            {
+              "action": "Stop the listener and connect to the same local port again.",
+              "reason": "Contrast a completed connection's close with a new connection refused.",
+              "expectedResult": "A local ECONNREFUSED is reported after shutdown, not an HTTP 503."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "After a successful TCP echo session, the server calls socket.end(). Does Node's end event alone prove you captured both FIN packets and the TIME-WAIT duration?",
+          "hints": [
+            "Application stream events do not expose packet flags.",
+            "Use Wireshark/tcpdump to prove FIN/ACK and host socket state to inspect TIME-WAIT."
+          ],
+          "explanation": "No. The callback proves stream-level EOF; packet flags and TIME-WAIT must be observed separately in the OS/network trace."
+        },
+        "independentChallenge": {
+          "prompt": "Capture an independent TCP connection close in a disposable VM and identify FIN, ACK or a reset where applicable; compare the trace with a fresh connection attempt after stopping its listener.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Real SYN/SYN-ACK/ACK plus close packet trace with source/destination ports and plausible FIN/ACK or RST interpretation.",
+            "Runnable Node local fixture output, clearly marked stream-level rather than packet-level."
+          ],
+          "variationFromExample": "A different port and real close capture, unlike the local Node stream-level demonstration."
+        },
+        "firstAction": "Predict whether ECONNREFUSED after listener shutdown is a TCP or HTTP observation.",
+        "misconceptionRepair": {
+          "likelyMistake": "Equating an EOF callback with a proven FIN packet capture or equating connection refusal with HTTP 5xx.",
+          "whyItFails": "A stream API event is not raw packet evidence and a refused connection cannot carry an HTTP response from that listener.",
+          "correctiveAction": "Keep stream logs, TCP packet capture and HTTP response observations as three separate evidence sources."
+        },
+        "selfCheck": {
+          "expectedObservation": "The fixture prints tcp-connect=ok, tcp-payload=ACK:hello, tcp-peer-end=true and tcp-refusal=ECONNREFUSED.",
+          "ifUnexpected": "If local refusal is not observed, verify the exact port/listener lifecycle; if no FIN capture exists, report only stream EOF."
+        },
+        "continueFromHere": {
+          "nextAction": "Relate the trace to server binding and HTTP request reachability without treating proposed related edges as hard prerequisites.",
+          "resumeCue": "Distinguish first: a connected stream ending versus an attempted connection never established."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Pada SYN client dengan seq=100, server membalas SYN+ACK dengan ack=101. Apa artinya ACK itu?",
+      "options": [
+        "Server mengharapkan byte client berikutnya mulai dari 101",
+        "Server telah mengirim payload HTTP 101 byte",
+        "Client harus selalu mengganti source port ke 101"
+      ],
+      "answer": 0,
+      "explanation": "SYN memakan satu posisi sequence; ACK mengumumkan next expected byte/sequence.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Server SYN+ACK berisi seq=300. ACK client untuk SYN server seharusnya?",
+      "options": [
+        "300",
+        "301",
+        "101"
+      ],
+      "answer": 1,
+      "explanation": "Client mengakui SYN server dengan sequence berikutnya, 301; empty ACK sendiri tidak memakan sequence space.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Client menulis dua buffer melalui socket.write(). Apa yang dijamin TCP pada aplikasi penerima?",
+      "options": [
+        "Tepat dua peristiwa data yang cocok dengan dua write",
+        "Byte diterima berurutan jika transfer berhasil; batas write bukan batas paket",
+        "Dua HTTP request otomatis dihasilkan"
+      ],
+      "answer": 1,
+      "explanation": "TCP adalah ordered byte stream, bukan message transport yang mempertahankan boundary write.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dalam capture terlihat SYN berulang tanpa SYN-ACK dan tidak ada respons HTTP. Klasifikasi benar?",
+      "options": [
+        "HTTP 500 pasti terjadi",
+        "HTTP 503 sudah dipastikan",
+        "Transport connection setup bermasalah; periksa listener, routing, filtering dan capture"
+      ],
+      "answer": 2,
+      "explanation": "Tanpa HTTP response, tidak ada status HTTP yang dapat disimpulkan. Retransmission harus diverifikasi dari trace nyata.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Node client mendapat end, lalu koneksi baru setelah server.close() menghasilkan ECONNREFUSED. Bukti yang benar?",
+      "options": [
+        "Node telah merekam FIN, ACK dan TIME-WAIT di wire",
+        "Stream-level EOF dan koneksi baru ditolak; bukti FIN/ACK memerlukan packet capture terpisah",
+        "HTTP 404 dari server yang sudah mati"
+      ],
+      "answer": 1,
+      "explanation": "Socket event tidak menampilkan flag TCP; ECONNREFUSED terjadi sebelum ada respons HTTP. Periksa capture untuk FIN/RST.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}
