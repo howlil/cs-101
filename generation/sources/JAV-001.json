@@ -1,0 +1,137 @@
+{
+  "itemId": "JAV-001",
+  "curriculumFingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "sources": [
+    {
+      "title": "Maven dependency mechanism",
+      "url": "https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html",
+      "tier": 0,
+      "supports": [
+        "Maven compile, runtime, test and provided classpath"
+      ],
+      "notes": [
+        "Use the named feature in the official documentation"
+      ]
+    },
+    {
+      "title": "Maven build lifecycle",
+      "url": "https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html",
+      "tier": 0,
+      "supports": [
+        "ordered clean, compile, test, package and verify phases"
+      ],
+      "notes": [
+        "Use the named feature in the official documentation"
+      ]
+    },
+    {
+      "title": "Maven compiler release",
+      "url": "https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-release.html",
+      "tier": 0,
+      "supports": [
+        "maven.compiler.release selects Java platform"
+      ],
+      "notes": [
+        "Use the named feature in the official documentation"
+      ]
+    },
+    {
+      "title": "Java 21 javac reference",
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/javac.html",
+      "tier": 0,
+      "supports": [
+        "javac compiles Java source to JVM class files"
+      ],
+      "notes": [
+        "Use the named feature in the official documentation"
+      ]
+    },
+    {
+      "title": "Maven Archiver executable JAR",
+      "url": "https://maven.apache.org/shared/maven-archiver/examples/classpath.html",
+      "tier": 0,
+      "supports": [
+        "Main-Class JAR manifest and runtime classpath"
+      ],
+      "notes": [
+        "Use the named feature in the official documentation"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "jdk-compiler",
+      "statement": "The Java 21 javac compiler reads Java source declarations and generates class files for the Java virtual machine.",
+      "conceptIds": [
+        "toolchain",
+        "error-boundaries"
+      ],
+      "sourceUrl": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/javac.html",
+      "locator": "Description and command synopsis",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    },
+    {
+      "id": "compile-symbols",
+      "statement": "An unresolved symbol in main Java source prevents successful compilation rather than causing the JVM to run an incomplete class.",
+      "conceptIds": [
+        "error-boundaries"
+      ],
+      "sourceUrl": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/javac.html",
+      "locator": "Description and classpath options",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    },
+    {
+      "id": "maven-order",
+      "statement": "Maven clean is a separate lifecycle, and default verify executes earlier phases such as compile, test and package.",
+      "conceptIds": [
+        "lifecycle"
+      ],
+      "sourceUrl": "https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html",
+      "locator": "Default lifecycle and clean lifecycle",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    },
+    {
+      "id": "scopes-compile-test",
+      "statement": "Maven compile scope participates in main compilation and runtime, while test scope is absent from main compile and runtime classpaths.",
+      "conceptIds": [
+        "scopes"
+      ],
+      "sourceUrl": "https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html",
+      "locator": "Dependency Scope / compile and test",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    },
+    {
+      "id": "scopes-runtime-provided",
+      "statement": "Maven runtime scope is not available for main compilation, while provided scope assumes a runtime container or JDK supplies that dependency.",
+      "conceptIds": [
+        "scopes",
+        "error-boundaries"
+      ],
+      "sourceUrl": "https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html",
+      "locator": "Dependency Scope / runtime and provided",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    },
+    {
+      "id": "maven-release",
+      "statement": "Maven compiler release sets the Java language and platform API level used to compile classes, including the target release.",
+      "conceptIds": [
+        "release"
+      ],
+      "sourceUrl": "https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-release.html",
+      "locator": "Setting the --release of the Java Compiler",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    },
+    {
+      "id": "jar-classpath",
+      "statement": "An executable JAR needs Main-Class metadata; runtime dependencies must also be available through the configured runtime classpath.",
+      "conceptIds": [
+        "release",
+        "error-boundaries"
+      ],
+      "sourceUrl": "https://maven.apache.org/shared/maven-archiver/examples/classpath.html",
+      "locator": "Make The Jar Executable and classpath example",
+      "rationale": "The cited official Java or Maven documentation directly states the relevant compiler, lifecycle, classpath or manifest contract."
+    }
+  ]
+}

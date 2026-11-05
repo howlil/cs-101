@@ -23,6 +23,7 @@ G7: Authored content must retain exact V3 receipts and runnable proof; source pr
 G8: Local 127.0.0.2 probing in OSX-029 never claims cross-netns proof; only the explicit manual veth lab addresses peer isolation.
 G9: PRD-002 never drives liveness from shared DB failure and never treats HTTP fixture outcomes as Kubernetes orchestration evidence.
 G10: Each proposed assessment criterion declares a typed evidence kind, enforced at overlay validation, exposed in both rubric surfaces and never implied by fixture execution alone.
+G11: JAV-001 distinguishes JDK fixture's compile/loading evidence from actual Maven build/manifest verification, which remains a learner challenge.
 DEC1: JSON overlay + in-memory adjacency preferred to changing generated manifest or adding graph DB.
 D1: Pilot proposed relationships require editorial review before promotion to reviewed.
 DEC2: A read-only, depth-specific path derives from concept-level reviewed requires and the existing proposed itemIds editorial ordering. Missing prerequisite outcomes are surfaced as gaps.
@@ -34,6 +35,7 @@ DEC7: PRD-002 uses documented Actuator /live and /ready aliases; state-driven No
 DEC8: Editorial evidence precision is part of the proposed rubric schema; no speculative reviewed graph edge, runtime progress state or database is introduced.
 DEC9: Graph viewport owns local pan/zoom only; concept and depth remain URL-owned and native links are retained outside the canvas.
 DEC10: Lesson graph previews derive from validated concept application mappings, preferring explicit path context over the first curated G1 outcome; no inferred links for unmapped units.
+DEC11: JAV-001 uses a self-contained JDK 21 compiler/runtime fixture with no Maven downloads or new build dependencies; actual Maven JAR verification is a distinct project exercise.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -49,3 +51,4 @@ PF10 (P14,G9) [important] | PRD-002 verified receipt, local status-state proof a
 PF11 (P15,G10) [important] | evidence-kind schema failures, 15 rubric classifications, Golden and Project/Graph smoke | merge | pnpm ci
 PF12 (P16,G1) [important] | deterministic scene and real one-hop edges, SSR links and no fabricated graph on missing depth | iter/merge | pnpm test; pnpm ci
 PF13 (P17,G5) [important] | mapped/unmapped lesson fallback, level context, and Materi-only map | merge | pnpm ci
+PF14 (P18,G11) [important] | JAV-001 V3 artifacts, real JDK 21 compile/runtime proof and view-specific smoke | merge | pnpm ci

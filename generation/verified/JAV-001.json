@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "JAV-001",
+  "curriculumFingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "hashes": {
+    "lesson": "d92c8cfcc0ded34c01afecb8c7687c977c47452060ea28e5a0e0ad2ac0bda17e",
+    "pedagogy": "0f45a6bc45b88fbd1eb5bf12de6b89f0eac40ca824654b79a375daf9cb3264d5",
+    "questionBank": "e4a6467426c510153a115cf7464068dfaea4e7df558ebce6ef86afb1cb739d73",
+    "sourcePack": "697f75cc58dcbbc6b1b1b33bd5233b35f27cd43d6cdd34e42adeef6d47faf87f",
+    "exampleProof": "2a15e8d78527c6e9bdfabba8793ff730fa40b9dfbfc725f8eb32d70a50cc2182",
+    "examplePlan": "3718f2728b2cf5061a564012d18090f79bc366fe063d98777b1054fdff2cc6cf"
+  }
+}

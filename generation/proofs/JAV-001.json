@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "JAV-001",
+  "curriculumFingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "java21-build-boundary",
+      "runtime": "java",
+      "file": "BuildDoctorFixture.java",
+      "fixtureSha256": "6d55ba27b06084d6474fc766db428883985fb1af7cd7ab31f8f6a838cacf7ed5",
+      "stdoutSha256": "f2650df36d54279ae31800ccb03722255c1f4d2b55c87a67538c551b5bd46702",
+      "verified": true
+    }
+  ]
+}

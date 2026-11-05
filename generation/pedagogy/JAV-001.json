@@ -1,0 +1,196 @@
+{
+  "unitId": "JAV-001",
+  "curriculumFingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "toolchain-and-errors",
+        "objective": "Identify the Java 21 JDK, javac and java runtime and distinguish a compile-time missing symbol from runtime class loading.",
+        "whyItMatters": "An IDE can use a different Java installation from Maven CLI, causing reproducible builds to fail on CI.",
+        "mentalModel": "The JDK contains javac and the java launcher. javac resolves names and emits .class files; the JVM loads available classes during execution.",
+        "explanation": "Run java -version, javac -version and mvn -version together. Maven reports its own active JDK, which may differ from the shell PATH and IDE. A missing type at compile time is diagnosed by javac before an executable exists. NoClassDefFoundError can occur later when a compiled class references another class missing from the runtime classpath. Fix the phase where the failure actually occurs.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "An IDE build works but Maven CLI reports incompatible Java or cannot find a type.",
+          "steps": [
+            {
+              "action": "Compare java -version, javac -version and mvn -version.",
+              "reason": "The three commands reveal which runtime/compiler Maven actually uses.",
+              "expectedResult": "Record compatible Java 21 versions and Maven's JDK path."
+            },
+            {
+              "action": "Read the first error from mvn clean verify.",
+              "reason": "A missing compile-time type differs from runtime class-loading failure.",
+              "expectedResult": "An unresolved type blocks compilation before the program starts."
+            },
+            {
+              "action": "Repair JAVA_HOME or the declared compile dependency and rerun from a clean terminal.",
+              "reason": "Remove hidden IDE classpath differences.",
+              "expectedResult": "The same error does not recur from an independently invoked Maven build."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "mvn -version uses Java 17, but your IDE is set to Java 21. What should you check before editing application logic?",
+          "hints": [
+            "The IDE target does not define Maven's running JDK.",
+            "Inspect JAVA_HOME and shell PATH."
+          ],
+          "explanation": "Align Maven's JDK to Java 21, then run the exact CLI build again."
+        },
+        "independentChallenge": {
+          "prompt": "In a second shell with a deliberately inconsistent JAVA_HOME, diagnose and repair the JDK mismatch without modifying the Java program.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Before/after CLI JDK and Maven version outputs with a clean compile proof."
+          ],
+          "variationFromExample": "Switch between two shell environments rather than diagnosing the IDE configuration of the example."
+        },
+        "firstAction": "Run java -version, javac -version and mvn -version in one terminal.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming IDE project SDK automatically controls the Maven process.",
+          "whyItFails": "Maven can resolve another java executable and cannot compile Java 21 code with an older JDK.",
+          "correctiveAction": "Compare Maven's reported Java home and the compiler release configured in pom.xml."
+        },
+        "selfCheck": {
+          "expectedObservation": "Maven and javac report Java 21 or a compatible compiler target for the intended release.",
+          "ifUnexpected": "Inspect PATH, JAVA_HOME and the first compiler diagnostic rather than guessing from a green IDE."
+        },
+        "continueFromHere": {
+          "nextAction": "Inspect dependency scopes and compare main compilation classpath to runtime classpath.",
+          "resumeCue": "Start by identifying exactly which JDK runs Maven and which JVM runs the artifact."
+        }
+      },
+      {
+        "id": "scope-classpath-diagnosis",
+        "objective": "Explain compile, runtime, test and provided Maven dependency scope using failure evidence.",
+        "whyItMatters": "A dependency with the wrong scope can make source fail compilation or let a successful compile fail at runtime.",
+        "mentalModel": "Maven scopes choose which classpath contains a library; compilation and execution need different sets of classes.",
+        "explanation": "compile is available to main compilation and runtime. test is available for tests, but not main compilation. runtime is present at execution and tests but absent from main compilation. provided supports compilation but assumes the container/JDK supplies the class at runtime. An ordinary JAR does not automatically bundle all resolved Maven dependencies. Use an error message, the effective POM and mvn dependency:tree to reason about what is missing.",
+        "prerequisiteConceptIds": [
+          "toolchain"
+        ],
+        "workedExample": {
+          "problem": "The application imports a class in src/main/java but its Maven dependency is marked test.",
+          "steps": [
+            {
+              "action": "Examine the dependency's scope in pom.xml.",
+              "reason": "Main code cannot compile against a test-only dependency.",
+              "expectedResult": "Compile-time symbol resolution fails if the class is not otherwise available."
+            },
+            {
+              "action": "Change the scope to compile only when main production code needs that class.",
+              "reason": "Place the library on the right classpath.",
+              "expectedResult": "mvn clean verify now compiles."
+            },
+            {
+              "action": "Run the packaged application and check runtime libraries separately.",
+              "reason": "Compilation does not prove JAR packaging or runtime classpath.",
+              "expectedResult": "An absent runtime dependency can cause a class-loading error after a green build."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A library directly imported from src/main/java is marked runtime in pom.xml. Why might javac fail?",
+          "hints": [
+            "runtime scope is not on the main compile classpath.",
+            "Direct imports must be resolvable to compile Java source."
+          ],
+          "explanation": "The library is unavailable to main compilation; a direct main source dependency normally requires compile scope."
+        },
+        "independentChallenge": {
+          "prompt": "Change a different library from compile to provided; demonstrate why its production code can compile yet fail when no runtime container supplies it.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "POM diff and clearly separated main compile and runtime execution results."
+          ],
+          "variationFromExample": "Test the provided-scope runtime boundary rather than the example's test-scope compile failure."
+        },
+        "firstAction": "Write down whether a test-scoped dependency is available when compiling src/main/java.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating compile, runtime, provided and test scopes as interchangeable labels.",
+          "whyItFails": "Maven deliberately builds distinct classpaths for compilation, tests and execution.",
+          "correctiveAction": "Choose scope based on where the class is required and inspect packaged runtime dependencies separately."
+        },
+        "selfCheck": {
+          "expectedObservation": "Main code compiles only when required types are available on its compilation classpath.",
+          "ifUnexpected": "Read the first javac error, Maven effective POM and dependency tree before changing versions blindly."
+        },
+        "continueFromHere": {
+          "nextAction": "Make Java release, Maven verify and executable JAR agree.",
+          "resumeCue": "Ask whether the missing class is needed to compile code, run code or only test it."
+        }
+      },
+      {
+        "id": "reproducible-cli-jar",
+        "objective": "Verify a Java 21 Maven build and a runnable executable JAR without relying on IDE state.",
+        "whyItMatters": "A green Maven build is not yet proof that java -jar can launch a distributable application.",
+        "mentalModel": "mvn clean verify proves lifecycle checks; java -jar separately proves manifest Main-Class and runtime class accessibility.",
+        "explanation": "Pin Maven build plugin versions and configure maven.compiler.release=21. A standard executable JAR requires Main-Class in its manifest. Run mvn clean verify from a clean shell, then execute the resulting artifact with java -jar. The regular JAR plugin does not automatically include all external runtime dependencies; choose a JDK-only first lab or explicitly package/resolve external classes. The included Java 21 fixture proves a native compiler failure, a missing runtime class, then recovery, but does not execute Maven or java -jar.",
+        "prerequisiteConceptIds": [
+          "toolchain",
+          "scopes"
+        ],
+        "workedExample": {
+          "problem": "mvn clean verify succeeds but java -jar says no main manifest attribute or fails to load a runtime library.",
+          "steps": [
+            {
+              "action": "Set maven.compiler.release=21 and configure the JAR Main-Class.",
+              "reason": "The class format and executable entrypoint are independent contracts.",
+              "expectedResult": "pom.xml points to the intended Java release and actual main class."
+            },
+            {
+              "action": "Run mvn clean verify twice without IDE.",
+              "reason": "A clean build should not rely on stale output or IDE launch configuration.",
+              "expectedResult": "Both runs produce the same expected runnable artifact."
+            },
+            {
+              "action": "Run java -jar target/your-artifact.jar and record stdout.",
+              "reason": "A successful package step alone does not check the runtime.",
+              "expectedResult": "The app starts, or the exact error points to manifest or runtime classpath."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "mvn clean verify succeeds, but java -jar reports 'no main manifest attribute'. Do you fix dependency scope first?",
+          "hints": [
+            "The message refers to the JAR manifest.",
+            "Check META-INF/MANIFEST.MF for Main-Class."
+          ],
+          "explanation": "Configure a proper Main-Class, rebuild and rerun. Missing external classes are a separate runtime classpath issue."
+        },
+        "independentChallenge": {
+          "prompt": "Break a second CLI-only Java 21 project in two ways: incorrect dependency scope and missing JAR Main-Class. Repair it, demonstrate two clean mvn clean verify runs, then execute the JAR.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Broken/fixed POM and first failure diagnostic, repeated Maven verification output and successful java -jar startup.",
+            "Explicit distinction between Java fixture evidence and real Maven/JAR evidence."
+          ],
+          "variationFromExample": "A combined two-defect Maven application rather than the isolated Java compiler/runtime fixture."
+        },
+        "firstAction": "Explain why a compiled class may exist while java -jar cannot start an application.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming Maven compilation automatically produces an executable self-contained JAR.",
+          "whyItFails": "Main-Class manifest and third-party runtime libraries are separate from successful compilation.",
+          "correctiveAction": "Inspect the manifest, runtime classpath and release property, then rerun the packaged artifact."
+        },
+        "selfCheck": {
+          "expectedObservation": "The Java 21 fixture reports missing-symbol compile failure, missing runtime class and successful restored execution.",
+          "ifUnexpected": "Inspect the first actual compile failure, Main-Class metadata and runtime classpath independently."
+        },
+        "continueFromHere": {
+          "nextAction": "Use the same diagnosis pattern in Spring Boot startup, test pipelines and CI releases.",
+          "resumeCue": "Prove two things separately: clean Maven verify and executable JAR launch."
+        }
+      }
+    ]
+  }
+}

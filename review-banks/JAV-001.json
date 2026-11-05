@@ -1,0 +1,78 @@
+{
+  "itemId": "JAV-001",
+  "version": "lesson-spec-v1:sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "curriculumFingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "javac gagal dengan 'cannot find symbol: MissingLibrary'. Apa tahap kegagalannya?",
+      "options": [
+        "Kompilasi, sebelum class file valid dihasilkan",
+        "Runtime setelah JVM menjalankan Main",
+        "JAR telah diluncurkan sukses"
+      ],
+      "answer": 0,
+      "explanation": "Missing symbol adalah kesalahan resolusi tipe oleh javac sebelum eksekusi.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Main.class berhasil dikompilasi tetapi java -cp gagal dengan NoClassDefFoundError. Apa tersangka awal?",
+      "options": [
+        "Maven verify selalu belum jalan",
+        "Runtime classpath tidak memuat kelas yang dibutuhkan",
+        "Compiler tidak mengenal syntax Java"
+      ],
+      "answer": 1,
+      "explanation": "Runtime class loading berbeda dari kesalahan simbol ketika kompilasi.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Library dipakai oleh src/main/java tetapi Maven scope test. Akibat yang paling mungkin?",
+      "options": [
+        "Main compile gagal mengakses kelas tersebut",
+        "Library otomatis dibundel menjadi executable JAR",
+        "Library ada pada semua classpath"
+      ],
+      "answer": 0,
+      "explanation": "Maven test scope tidak termasuk main source compilation.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Mengapa main source yang mengimpor dependency dengan scope runtime dapat gagal compile?",
+      "options": [
+        "Scope runtime selalu ada saat javac",
+        "Scope runtime tidak masuk main compilation classpath",
+        "Scope runtime menjamin JAR executable"
+      ],
+      "answer": 1,
+      "explanation": "Scope runtime ditujukan untuk eksekusi dan testing, bukan kompilasi main source.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "mvn clean verify sukses tetapi java -jar gagal: no main manifest attribute. Tindakan tepat?",
+      "options": [
+        "Hapus tes Maven",
+        "Paksa semua dependency menjadi test",
+        "Tambahkan Main-Class ke manifest lalu rebuild dan jalankan artefak"
+      ],
+      "answer": 2,
+      "explanation": "JAR executable perlu metadata Main-Class; Maven verify tidak otomatis membuktikan entrypoint dan classpath runtime.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

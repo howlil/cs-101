@@ -1,0 +1,186 @@
+---
+taskId: "JAV-001"
+title: "Build Doctor — Java 21 & Maven"
+description: "Diagnose JDK mismatch, Maven dependency scopes, compile-time versus runtime errors, and reproducible executable JARs."
+demo: false
+curriculumFingerprint: "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/JAV-001.json';
+import questionBank from '../../../review-banks/JAV-001.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Problem:** aplikasi Java berjalan di IDE, tetapi gagal saat `mvn clean verify` atau `java -jar` di terminal. Kita perlu membuktikan penyebabnya, bukan sekadar mengganti versi dependency secara acak.
+
+**Mulai:** jalankan ketiga perintah berikut pada terminal **yang sama**.
+
+```sh
+java -version
+javac -version
+mvn -version
+```
+
+Bandingkan JDK yang menjalankan Maven dengan `javac`. Jika berbeda, periksa `JAVA_HOME`, `PATH`, dan Maven toolchains sebelum menyentuh program.
+
+<MentalModel title="Compile, build, dan launch adalah tiga kontrak berbeda">
+
+- **JDK** menyediakan `javac` dan `java`; **JVM** mengeksekusi bytecode yang berhasil dikompilasi.
+- **Compile-time:** `javac` harus dapat menemukan setiap deklarasi tipe yang dipakai source Java.
+- **Maven lifecycle:** `clean` menghapus hasil build lama; `verify` menjalankan fase default sebelumnya seperti compile, test dan package.
+- **Runtime:** `java` harus dapat memuat semua class yang diperlukan ketika aplikasi berjalan.
+- **Executable JAR:** perlu entrypoint `Main-Class` dan runtime classpath yang sesuai; JAR biasa tidak otomatis memuat seluruh dependency pihak ketiga.
+
+</MentalModel>
+
+<ConceptGraph>
+
+```text
+JAVA_HOME + JDK 21
+       |
+       v
+Maven + dependency scopes ----> compile classpath
+       |                               |
+  clean / verify                    javac --release 21
+       |                               |
+       +---- compile -> test -> package -> verify
+                                  |
+                              .class + JAR
+                                  |
+                 Main-Class + runtime classpath
+                                  |
+                              java -jar
+                                  |
+                         observable application
+```
+
+</ConceptGraph>
+
+## Error pertama menentukan lapisan
+
+| Observasi | Fase | Pemeriksaan pertama |
+| --- | --- | --- |
+| `cannot find symbol` | Compile | Source/import dan compile classpath |
+| `invalid target release: 21` | Compile/toolchain | JDK yang digunakan oleh Maven |
+| `no main manifest attribute` | JAR launch | `META-INF/MANIFEST.MF` dan Main-Class |
+| `NoClassDefFoundError` | Runtime class loading | JAR dan runtime classpath |
+| `mvn clean verify` sukses, `java -jar` gagal | Build vs distribution | Verifikasi executable secara terpisah |
+
+Contoh konfigurasi `pom.xml` **untuk proyek Java 21 sederhana**, menggunakan main class `dev.cs101.Main` yang benar-benar ada:
+
+```xml
+<properties>
+  <maven.compiler.release>21</maven.compiler.release>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.16.0</version>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.4.2</version>
+      <configuration>
+        <archive><manifest><mainClass>dev.cs101.Main</mainClass></manifest></archive>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+```
+
+Itu adalah **fragmen** yang harus berada di dalam elemen `<project>` POM lengkap. Pastikan nama kelas, groupId, artifactId dan versi sesuai proyek. Plugin JAR ini tidak otomatis menghasilkan fat JAR dengan semua library; jangan mengasumsikan dependency eksternal sudah tertanam.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber dokumentasi utama
+
+<SourceList sources={[
+  {title: 'Maven dependency mechanism', url: 'https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html'},
+  {title: 'Maven build lifecycle', url: 'https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html'},
+  {title: 'Maven compiler release', url: 'https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-release.html'},
+  {title: 'Java 21 javac reference', url: 'https://docs.oracle.com/en/java/javase/21/docs/specs/man/javac.html'},
+  {title: 'Maven Archiver executable JAR', url: 'https://maven.apache.org/shared/maven-archiver/examples/classpath.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Proof lokal: compile vs runtime
+
+Fixture kecil berikut dieksekusi pada **JDK 21**, tanpa Maven atau dependency eksternal.
+
+```sh
+java generation/fixtures/JAV-001/BuildDoctorFixture.java
+```
+
+Ia memanggil JavaCompiler untuk menghasilkan kegagalan simbol yang disengaja, membuat class valid, menghapus satu class runtime, lalu memulihkannya. Output yang diharapkan:
+
+```text
+java-version=21
+compile-missing-symbol=failed
+runtime-missing-class=NoClassDefFoundError
+restored-run=ready
+```
+
+**Batas proof:** output tersebut membuktikan Java 21 compiler dan JVM class-loading behavior, **bukan** bahwa Maven `clean verify`, dependency scopes, atau distribusi `java -jar` sudah diuji. Praktik Maven sungguhan berada di Project.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal debugging
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Project: Build Doctor
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+Buat proyek Maven Java 21 kecil dengan `src/main/java/dev/cs101/Main.java`. Gunakan satu library ketika benar-benar diperlukan (misalnya untuk formatter) dan uji scope salah secara sengaja. Catat **error pertama** dan akar masalahnya, bukan hanya pesan akhir dari Maven.
+
+```sh
+mvn -version
+mvn clean verify
+java -jar target/build-doctor-1.0.0.jar
+```
+
+Nama JAR contoh mengikuti artifactId dan versi POM milik lab; sesuaikan bila berbeda. Untuk setiap kegagalan, bedakan salah target release, symbol hilang saat compile, `Main-Class` hilang, dan kelas runtime yang tidak tersedia. Ulangi dari clean workspace, tanpa memakai IDE.
+
+<Challenge
+  title="Build Doctor — Maven 21 CLI recovery"
+  brief="Sengaja rusak dependency scope dan konfigurasi Java atau JAR entrypoint, diagnosis compile versus runtime secara terpisah, perbaiki, lalu buktikan mvn clean verify dan executable JAR berhasil konsisten tanpa IDE."
+  acceptanceCriteria={[
+    'Catat java -version, javac -version, dan mvn -version serta alasan kesesuaian toolchain Java 21.',
+    'Reproduksi setidaknya satu kegagalan compile atau scope yang nyata dan dokumentasikan error pertama serta koreksi POM.',
+    'Buktikan mvn clean verify berhasil dua kali dari clean CLI, bukan hanya dari tombol Run IDE.',
+    'Pastikan JAR memiliki Main-Class yang benar dan tunjukkan output java -jar yang berhasil.',
+    'Jika dependency eksternal dipakai, jelaskan cara runtime classpath tersedia; jangan menganggap JAR biasa adalah fat JAR.',
+    'Pisahkan bukti fixture JDK lokal dari bukti Maven dan executable JAR yang dijalankan sungguhan.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Bisa menjelaskan peran JDK, JVM, javac, Maven dan --release 21.',
+  'Dapat membedakan compile-time missing symbol dari runtime NoClassDefFoundError.',
+  'Bisa menentukan compile, test, runtime atau provided berdasarkan kelas yang dibutuhkan.',
+  'Mampu membuktikan mvn clean verify dan java -jar melalui terminal yang sama dengan output nyata.'
+]} />
+
+</LessonStage>

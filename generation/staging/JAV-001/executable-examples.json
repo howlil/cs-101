@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "JAV-001",
+  "curriculumFingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "examples": [
+    {
+      "id": "java21-build-boundary",
+      "runtime": "java",
+      "file": "BuildDoctorFixture.java",
+      "expectedStdout": "java-version=21\ncompile-missing-symbol=failed\nruntime-missing-class=NoClassDefFoundError\nrestored-run=ready\n"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "itemId": "JAV-001",
+  "fingerprint": "sha256:af1aa9ab8cf4746748095a6ace8cb5f7a01e724141a724077746b0389b287dbc",
+  "sources": [
+    {
+      "title": "Maven dependency mechanism",
+      "url": "https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html"
+    },
+    {
+      "title": "Maven build lifecycle",
+      "url": "https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html"
+    },
+    {
+      "title": "Maven compiler release",
+      "url": "https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-release.html"
+    },
+    {
+      "title": "Java 21 javac reference",
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/specs/man/javac.html"
+    },
+    {
+      "title": "Maven Archiver executable JAR",
+      "url": "https://maven.apache.org/shared/maven-archiver/examples/classpath.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "JDK toolchain, dependency scopes and JAR lifecycle V3 segments",
+      "assessedAt": "Five diagnostic questions and independent Maven repair exercise",
+      "evidenceExpected": "Actual Java 21 CLI version and error diagnosis, corrected dependency scope and a working mvn clean verify plus executable JAR without IDE."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Reproducible CLI/JAR evidence segment",
+      "assessedAt": "Independent Java 21 Maven build repair and local JDK fixture",
+      "evidenceExpected": "Broken/fixed POM, two clean Maven runs and java -jar success; JDK fixture alone is not Maven/JAR integration proof."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

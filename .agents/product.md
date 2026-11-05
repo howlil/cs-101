@@ -19,6 +19,7 @@ B11: A learner opens PRD-002 with source-backed startup/liveness/readiness disti
 B12: Each proposed competency criterion identifies the actual kind of evidence required in the Knowledge Graph and contextual Project view, without mistaking local fixtures for integration proof.
 B13: A learner sees a genuine curated node-edge neighborhood on the Graph page, pans/zooms the viewport, selects a linked concept and keeps the same URL/depth semantics and nonvisual navigation.
 B14: A mapped unit displays its level-specific one-hop graph in the Materi view and links back to the full Graph; unmapped units show a global Graph entry without fabricated local edges.
+B15: A learner opens JAV-001 Build Doctor as a source-backed V3 lesson with real Java 21 toolchain, compile/runtime diagnosis, Maven scope reasoning, five questions and an independent reproducible CLI/JAR challenge.
 X1: Unknown concept IDs recover to the first valid focus.
 X2: Unauthored items are labeled outline-only.
 X3: Unmapped levels or concept-depth pairs show explicit gaps.
@@ -36,9 +37,10 @@ C8: SPR-006's JDK HTTP fixture proves protocol status/header behavior, not Sprin
 C9: OSX-029's CI fixture proves local Linux IPv4 socket bind behavior, not cross-namespace networking, firewall or external exposure; those are a manual challenge.
 C10: PRD-002 fixture proves HTTP status under simulated state transitions, not real database, Actuator, Kubernetes Service routing, or container restart behavior.
 C11: Assessment evidence kinds are mandatory and explicitly distinguish design review, framework testing, peer-network labs, packet traces and cluster experiments. All concept relations remain proposed, without inferred prerequisites.
+C12: JAV-001 JDK fixture tests compiler and runtime class-loading only; it cannot be presented as proof of Maven clean verify, dependency scope correction or executable JAR success.
 
 ## Scope
-In: HTTP pilot, depth-specific paths/rubrics, and four authored V3 units (NET-001, SPR-006, OSX-029, PRD-002) with bounded executable proofs.
+In: HTTP pilot, depth-specific paths/rubrics, and five authored V3 units (NET-001, SPR-006, OSX-029, PRD-002, JAV-001) with bounded executable proofs.
 Out: learner tracking, adaptive mastery, inferred graph edges, bulk lesson generation.
 
 ## Proof
@@ -59,3 +61,4 @@ P14 (B11,C10): PRD-002 generated V3 artifacts and local HTTP status fixture repr
 P15 (B12,C11): Every curated rubric criterion declares a validated evidence kind; unit and Golden tests reject missing/invalid kinds, with visible labels on Graph and Project, no promoted prerequisite edges.
 P16 (B13,X6,C3): Deterministic scene matches only reviewed-overlay relations for the active level, renders linked SVG nodes, and retains link-list fallback, with no canvas on an uncurated level.
 P17 (B14,X2,X5): Mapped Materi shows a matching Graph neighborhood and deep link; other units state the unmapped gap, and no graph canvas appears in Soal/Project views.
+P18 (B15,C12): JAV-001 generation and JDK 21 compile/runtime fixture reproduce byte-identically; the first Java unit renders distinct Materi/Soal/Project pages while its graph mapping remains explicitly absent.

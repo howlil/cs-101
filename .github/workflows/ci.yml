@@ -55,6 +55,11 @@ jobs:
           pnpm generation:validate PRD-002
           pnpm generation:promote PRD-002
           git diff --exit-code -- src/content/lessons/PRD-002.mdx generation/PRD-002.json review-banks/PRD-002.json generation/pedagogy/PRD-002.json generation/sources/PRD-002.json generation/proofs/PRD-002.json generation/executables/PRD-002.json generation/verified/PRD-002.json generation/fixtures/PRD-002/health-contract.mjs
+      - name: Verify JAV-001 reproducible authoring and Java 21 build fixture
+        run: |
+          pnpm generation:validate JAV-001
+          pnpm generation:promote JAV-001
+          git diff --exit-code -- src/content/lessons/JAV-001.mdx generation/JAV-001.json review-banks/JAV-001.json generation/pedagogy/JAV-001.json generation/sources/JAV-001.json generation/proofs/JAV-001.json generation/executables/JAV-001.json generation/verified/JAV-001.json generation/fixtures/JAV-001/BuildDoctorFixture.java
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -82,7 +87,9 @@ jobs:
           if [ "$ready" -ne 1 ]; then cat /tmp/cs101-smoke.log; exit 1; fi
           curl --fail --silent --show-error http://127.0.0.1:4321/ > /tmp/catalog-root.html
           grep -q 'Build Doctor' /tmp/catalog-root.html
-          grep -q 'Outline kurikulum' /tmp/catalog-root.html
+          grep -q 'Compile, build, dan launch' /tmp/catalog-root.html
+          grep -q 'Maven dependency mechanism' /tmp/catalog-root.html
+          if grep -q 'Outline kurikulum' /tmp/catalog-root.html; then exit 1; fi
           grep -q 'Explore Knowledge Graph' /tmp/catalog-root.html
           if grep -q 'Concept graph for this lesson' /tmp/catalog-root.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/catalog-database.html
@@ -98,6 +105,14 @@ jobs:
           if grep -q 'Soal dan pembahasan belum diterbitkan' /tmp/catalog-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=soal' > /tmp/java-build-quiz.html
+          grep -q 'Lima soal debugging' /tmp/java-build-quiz.html
+          grep -q 'Cek jawaban' /tmp/java-build-quiz.html
+          if grep -q 'Concept graph for this lesson' /tmp/java-build-quiz.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=project' > /tmp/java-build-project.html
+          grep -q 'Build Doctor — Maven 21 CLI recovery' /tmp/java-build-project.html
+          grep -q 'mvn clean verify' /tmp/java-build-project.html
+          if grep -q 'Concept graph for this lesson' /tmp/java-build-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
           grep -q 'Suggested study path' /tmp/graph-g2.html
           grep -q 'Interactive concept graph' /tmp/graph-g2.html
