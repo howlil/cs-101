@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
+import { Button } from '../arc/button/button';
 import { buildCanvasScene, CANVAS_WIDTH, CANVAS_HEIGHT, type CanvasNeighbor } from '../../domain/graph-canvas-layout';
 
 interface Props { focus: { id: string; title: string; href: string }; neighbors: CanvasNeighbor[]; level: string }
@@ -68,10 +69,10 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
         <span>{level} · {neighbors.length} reviewed-source links shown as proposed unless reviewed</span>
       </div>
       <div className="concept-canvas-tools" aria-label="Graph viewport controls">
-        <button type="button" aria-label="Zoom out" title="Zoom out" onClick={() => setZoom(z => clamp(Math.round((z - 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom <= 0.8}><Minus size={15}/></button>
+        <Button type="button" variant="ghost" size="sm" aria-label="Zoom out" title="Zoom out" onClick={() => setZoom(z => clamp(Math.round((z - 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom <= 0.8}><Minus size={15}/></Button>
         <output aria-label="Current zoom" aria-live="polite">{Math.round(zoom * 100)}%</output>
-        <button type="button" aria-label="Zoom in" title="Zoom in" onClick={() => setZoom(z => clamp(Math.round((z + 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom >= 1.8}><Plus size={15}/></button>
-        <button type="button" aria-label="Reset graph view" title="Reset graph view" onClick={() => { setZoom(1); setOffset({x:0,y:0}); }}><RotateCcw size={14}/></button>
+        <Button type="button" variant="ghost" size="sm" aria-label="Zoom in" title="Zoom in" onClick={() => setZoom(z => clamp(Math.round((z + 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom >= 1.8}><Plus size={15}/></Button>
+        <Button type="button" variant="ghost" size="sm" aria-label="Reset graph view" title="Reset graph view" onClick={() => { setZoom(1); setOffset({x:0,y:0}); }}><RotateCcw size={14}/></Button>
       </div>
     </div>
     <div className="concept-canvas-scroll">
