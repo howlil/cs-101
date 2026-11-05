@@ -41,3 +41,14 @@ test('scene order and reverse edges are deterministic, duplicates rejected',()=>
   const n={id:'x',title:'X',href:'/?mode=graph&concept=x',relationType:'related' as const,status:'proposed' as const,direction:'out' as const};
   assert.throws(()=>buildCanvasScene({id:'root',title:'Root',href:'/'},[n,n]),/Duplicate canvas neighbor/);
 });
+
+test('new concept neighborhoods expose only authored proposed relations at G1',()=>{
+  assert.deepEqual(scene('java-build-toolchain','G1').nodes.map(n=>n.id),
+    ['java-build-toolchain','http-controller','api-contract-testing']);
+  assert.deepEqual(scene('api-design-contract','G1').nodes.map(n=>n.id),
+    ['api-design-contract','http-controller','api-contract-testing','relational-schema']);
+  assert.deepEqual(scene('relational-schema','G1').nodes.map(n=>n.id),
+    ['relational-schema','api-design-contract']);
+  assert.deepEqual(scene('api-contract-testing','G2').nodes.map(n=>n.id),['api-contract-testing']);
+  assert.equal(scene('api-contract-testing','G2').edges.length,0);
+});

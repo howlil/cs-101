@@ -13,16 +13,16 @@ const customize=(conceptId:string,level:string,modify:(outcome:any)=>any)=>({
     :concept),
 });
 
-test('all seven pilot outcomes have nonempty proposed, source-mapped rubrics',()=>{
+test('all eleven curated outcomes have nonempty proposed, source-mapped rubrics',()=>{
   const outcomes=graph.concepts.flatMap(concept=>concept.outcomes);
-  assert.equal(outcomes.length,7);
+  assert.equal(outcomes.length,11);
   assert.ok(outcomes.every(o=>o.status==='proposed'&&o.assessment.task.trim()!==''));
   for(const outcome of outcomes){
     assert.ok(outcome.assessment.criteria.length>=2);
     assert.equal(new Set(outcome.assessment.criteria.map(c=>c.id)).size,outcome.assessment.criteria.length);
     assert.ok(outcome.assessment.criteria.every(c=>
       outcome.itemIds.includes(c.itemId) && !!c.check.trim() && !!c.passWhen.trim()
-      && ['design-review','framework-test','network-lab','packet-trace','cluster-test'].includes(c.evidenceKind)));
+      && ['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test'].includes(c.evidenceKind)));
   }
 });
 
@@ -82,4 +82,16 @@ test('missing or invalid proof method is rejected rather than silently treated a
   const {evidenceKind:_omitted,...withoutKind}=first;
   assert.throws(()=>buildLearningGraph(item(withoutKind),curriculum));
   assert.throws(()=>buildLearningGraph(item({...first,evidenceKind:'fixture-means-mastered'}),curriculum));
+});
+
+test('Java and PostgreSQL rubric requirements demand real CLI and DB experiments',()=>{
+  const byId=new Map(graph.concepts.flatMap(c=>c.outcomes.flatMap(o=>
+    o.assessment.criteria.map(k=>[k.id,k] as const))));
+  assert.equal(byId.get('jdk-21-cli-build')?.evidenceKind,'cli-build');
+  assert.match(byId.get('jdk-21-cli-build')!.passWhen,/Maven clean verify/);
+  for(const id of ['sql-replayable-init','sql-ownership-model']){
+    assert.equal(byId.get(id)?.evidenceKind,'database-test');
+    assert.match(byId.get(id)!.passWhen,/PostgreSQL/);
+  }
+  assert.ok(graph.relations.every(r=>r.type==='related'&&r.status==='proposed'));
 });

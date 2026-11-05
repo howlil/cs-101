@@ -241,6 +241,158 @@
           }
         }
       ]
+    },
+    {
+      "id": "java-build-toolchain",
+      "title": "Java Build & Spring Boot Startup",
+      "description": "Java 21 compiler/runtime, Maven scope and packaging are separate contracts from whether a Spring Boot HTTP service starts and responds.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Reproduce Java 21 CLI builds and distinguish toolchain, compile, packaging and Spring service-start failures.",
+          "evidence": "Demonstrate a Java 21 Maven clean build and executable artifact, then start a Spring Boot /ping endpoint from the CLI.",
+          "itemIds": [
+            "JAV-001",
+            "SPR-001"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Diagnose a broken Java 21 CLI build, then separately verify Spring Boot can start and serve /ping without an IDE.",
+            "criteria": [
+              {
+                "id": "jdk-21-cli-build",
+                "itemId": "JAV-001",
+                "check": "Identify build-time versus runtime failure and correct the JDK/dependency scope.",
+                "passWhen": "A real Java 21 command transcript shows JDK versions, Maven clean verify and java -jar execution after the repair; the standalone compiler fixture is insufficient.",
+                "evidenceKind": "cli-build"
+              },
+              {
+                "id": "spring-boot-startup",
+                "itemId": "SPR-001",
+                "check": "Start a real Java 21 Spring Boot application and confirm the request path.",
+                "passWhen": "A Spring Boot process started via Maven or its executable JAR responds HTTP 200 to /ping and the CLI test/package steps succeed; no simulated response is accepted.",
+                "evidenceKind": "framework-test"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "relational-schema",
+      "title": "Relational Schema & SQL",
+      "description": "SQL relations, primary/foreign keys, ownership and repeatable schema initialization turn transfer/account data requirements into explicit PostgreSQL constraints.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Create a repeatable PostgreSQL sandbox for accounts and transfers and validate relational ownership and key constraints.",
+          "evidence": "Run init.sql and inspection queries against a disposable PostgreSQL database; verify declared relationships using real database results.",
+          "itemIds": [
+            "SQL-001",
+            "SQL-006"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Define account/transfer tables and test the specified customer-account ownership model against an actual PostgreSQL instance, not a diagram alone.",
+            "criteria": [
+              {
+                "id": "sql-replayable-init",
+                "itemId": "SQL-001",
+                "check": "Initialize accounts/transfers schema and explain relational keys using SQL.",
+                "passWhen": "An actual disposable PostgreSQL session runs the repeatable init.sql in a fresh database and six inspection queries return the expected schema and sample rows.",
+                "evidenceKind": "database-test"
+              },
+              {
+                "id": "sql-ownership-model",
+                "itemId": "SQL-006",
+                "check": "Model customer/account/transfer cardinality, including invalid ownership under the chosen policy.",
+                "passWhen": "A PostgreSQL-backed DDL/fixture demonstrates the chosen customer ownership and FK/PK constraints, rejecting invalid ownership cases per the explicitly documented policy.",
+                "evidenceKind": "database-test"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "api-contract-testing",
+      "title": "API Contract Testing",
+      "description": "A documented transfer HTTP contract is checked at the API boundary: response statuses, request/response shapes and backward-compatible schema evolution.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Test the externally observable transfer API contract and detect incompatible changes without conflating tests with implementation details.",
+          "evidence": "Execute real API contract cases and a deliberate breaking-schema mutation; distinguish success, client and server response families.",
+          "itemIds": [
+            "SPR-011",
+            "TST-019",
+            "TST-020"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Build a small contract matrix from the transfer OpenAPI document; run tests against a real HTTP implementation and prove the suite catches contract drift.",
+            "criteria": [
+              {
+                "id": "openapi-contract-suite",
+                "itemId": "SPR-011",
+                "check": "Specify OpenAPI schemas and stable transfer response/error behavior.",
+                "passWhen": "A published OpenAPI document, runnable HTTP contract tests and a documented backward-compatible change agree on request/response shapes, repeat keys and error semantics.",
+                "evidenceKind": "framework-test"
+              },
+              {
+                "id": "api-status-matrix",
+                "itemId": "TST-019",
+                "check": "Run happy-path and negative HTTP boundary cases for transfers/accounts.",
+                "passWhen": "API tests execute real endpoints and assert each contractually applicable status, content type, headers and stable error body; unsupported responses are not invented.",
+                "evidenceKind": "framework-test"
+              },
+              {
+                "id": "contract-breaking-drift",
+                "itemId": "TST-020",
+                "check": "Detect a removed required field or changed field type while accepting an optional extension.",
+                "passWhen": "A spec-driven test suite fails for an intentionally breaking required-field/type mutation and passes for a compatible optional-field addition.",
+                "evidenceKind": "framework-test"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "api-design-contract",
+      "title": "Transfer API Design Contract",
+      "description": "System design defines HTTP resources, status semantics and client compatibility; the Spring controller implements that externally observable contract.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Specify transfer/account API resources and check that a Spring HTTP controller preserves the designed request and response contracts.",
+          "evidence": "Produce a concrete transfer API specification and independently verify selected POST/GET response mappings against a real Spring controller.",
+          "itemIds": [
+            "SYS-008",
+            "SPR-006"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Define the transfer API contract, explain client-visible error semantics and compare a Spring controller's behavior against the spec.",
+            "criteria": [
+              {
+                "id": "transfer-api-specification",
+                "itemId": "SYS-008",
+                "check": "Specify POST /transfers, GET /transfers/{id} and GET /accounts/{id} with payloads and failure cases.",
+                "passWhen": "A written contract supplies example request/response bodies, reasons for 201/400/401/403/409/500 choices and one backward-compatible evolution; it does not claim implementation proof.",
+                "evidenceKind": "design-review"
+              },
+              {
+                "id": "spring-controller-conformance",
+                "itemId": "SPR-006",
+                "check": "Compare controller POST/GET status and validation behavior against the API design.",
+                "passWhen": "An actual Spring MVC test proves agreed POST 201/Location, GET 200/404 and invalid input 400 without moving business rules into controller code; the JDK fixture alone is insufficient.",
+                "evidenceKind": "framework-test"
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "applications": [
@@ -283,6 +435,51 @@
       "conceptId": "service-readiness",
       "itemId": "PRD-002",
       "role": "operation"
+    },
+    {
+      "conceptId": "java-build-toolchain",
+      "itemId": "JAV-001",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "java-build-toolchain",
+      "itemId": "SPR-001",
+      "role": "application"
+    },
+    {
+      "conceptId": "relational-schema",
+      "itemId": "SQL-001",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "relational-schema",
+      "itemId": "SQL-006",
+      "role": "application"
+    },
+    {
+      "conceptId": "api-contract-testing",
+      "itemId": "SPR-011",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "api-contract-testing",
+      "itemId": "TST-019",
+      "role": "application"
+    },
+    {
+      "conceptId": "api-contract-testing",
+      "itemId": "TST-020",
+      "role": "diagnostic"
+    },
+    {
+      "conceptId": "api-design-contract",
+      "itemId": "SYS-008",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "api-design-contract",
+      "itemId": "SPR-006",
+      "role": "application"
     }
   ],
   "relations": [
@@ -313,6 +510,41 @@
       "type": "related",
       "status": "proposed",
       "rationale": "Operational health determines whether a service should receive traffic."
+    },
+    {
+      "from": "java-build-toolchain",
+      "to": "http-controller",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "A Spring MVC controller runs within a Java application; build and runtime failures must be distinguished from HTTP routing."
+    },
+    {
+      "from": "http-controller",
+      "to": "api-design-contract",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "The Spring controller implements the interface contract defined for client-visible transfer resources and errors."
+    },
+    {
+      "from": "api-design-contract",
+      "to": "api-contract-testing",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Contract tests check whether an implementation preserves the documented response schema and status semantics."
+    },
+    {
+      "from": "api-design-contract",
+      "to": "relational-schema",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Transfer/account resource boundaries relate to relational data modeling, but an API resource is not automatically a database table."
+    },
+    {
+      "from": "java-build-toolchain",
+      "to": "api-contract-testing",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Maven test and Java toolchain behavior affect reproducibility of Java-based API contract suites."
     }
   ]
 }

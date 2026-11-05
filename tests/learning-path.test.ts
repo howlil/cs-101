@@ -79,3 +79,23 @@ test('missing prerequisite at selected depth stays visible, not silently inherit
   assert.deepEqual(path.missingPrerequisites.map((c) => [c.id, ...c.availableLevels]),
     [['tcp-connection', 'G1']]);
 });
+
+test('cross-domain study path preserves authored and outline identities without inferred dependencies',()=>{
+  const boot=getLearningPath(graph,getFocusedConcept(graph,'java-build-toolchain','G1'));
+  const sql=getLearningPath(graph,getFocusedConcept(graph,'relational-schema','G1'));
+  const testing=getLearningPath(graph,getFocusedConcept(graph,'api-contract-testing','G1'));
+  const design=getLearningPath(graph,getFocusedConcept(graph,'api-design-contract','G1'));
+  assert.deepEqual(boot.steps.map(s=>s.itemId),['JAV-001','SPR-001']);
+  assert.deepEqual(sql.steps.map(s=>s.itemId),['SQL-001','SQL-006']);
+  assert.deepEqual(testing.steps.map(s=>s.itemId),['SPR-011','TST-019','TST-020']);
+  assert.deepEqual(design.steps.map(s=>s.itemId),['SYS-008','SPR-006']);
+  for(const path of [boot,sql,testing,design]){
+    assert.equal(path.reviewedPrerequisiteCount,0);
+    assert.deepEqual(path.missingPrerequisites,[]);
+    assert.ok(path.steps.every(s=>s.reviewedPrerequisite===false));
+  }
+  assert.equal(getItemPathContext(graph,'java-build-toolchain','G1','JAV-001')?.next?.itemId,'SPR-001');
+  assert.equal(getItemPathContext(graph,'api-design-contract','G1','SPR-006')?.previous?.itemId,'SYS-008');
+  assert.equal(getItemPathContext(graph,'api-design-contract','G2','SPR-006'),undefined);
+  assert.equal(getItemPathContext(graph,'relational-schema','G1','SPR-006'),undefined);
+});

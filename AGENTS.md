@@ -14,7 +14,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 ## Source of truth and authoring
 
 - `curriculum/manifest.v2.json`: domains, modules, topics, prerequisites, checkpoint ideas.
-- `curriculum/learning-graph.v1.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only. Competency outcomes must reference canonical mapped unit IDs; missing levels remain explicit gaps. Suggested item order is not a hard prerequisite; only reviewed `requires` edges are traversed as prerequisites. Rubric criteria must link to their outcome's source units and declare the actual evidence kind (design review, framework test, network lab, packet trace or cluster test); they are proposed human-review guides, never quizzes or proof of mastery.
+- `curriculum/learning-graph.v1.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only. Competency outcomes must reference canonical mapped unit IDs; missing levels remain explicit gaps. Suggested item order is not a hard prerequisite; only reviewed `requires` edges are traversed as prerequisites. Rubric criteria must link to their outcome's source units and declare the actual evidence kind (design review, framework test, network lab, packet trace, cluster test, reproducible CLI build or live PostgreSQL test); they are proposed human-review guides, never quizzes or proof of mastery.
 - `.agents/skill/course-generator/SKILL.md`: generate one unit at a time.
 - `generation/`: metadata and authoring provenance.
 - `review-banks/`: authored self-check question sets; there is no scheduling backend.

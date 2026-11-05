@@ -112,6 +112,34 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=project' > /tmp/java-build-project.html
           grep -q 'Build Doctor — Maven 21 CLI recovery' /tmp/java-build-project.html
           grep -q 'mvn clean verify' /tmp/java-build-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=java-build-toolchain&level=G1' > /tmp/graph-java-g1.html
+          grep -q 'Java Build &amp; Spring Boot Startup' /tmp/graph-java-g1.html
+          grep -q 'JAV-001' /tmp/graph-java-g1.html
+          grep -q 'SPR-001' /tmp/graph-java-g1.html
+          grep -q 'Required evidence: Reproducible Java / Maven CLI build' /tmp/graph-java-g1.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&concept=java-build-toolchain&level=G1' > /tmp/java-graph-lesson.html
+          grep -q 'Step 1 of 2' /tmp/java-graph-lesson.html
+          grep -q 'Cross-domain connections' /tmp/java-graph-lesson.html
+          grep -q 'concept=java-build-toolchain' /tmp/java-graph-lesson.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=project&concept=java-build-toolchain&level=G1' > /tmp/java-graph-project.html
+          grep -q 'Required evidence: Reproducible Java / Maven CLI build' /tmp/java-graph-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=relational-schema&level=G1' > /tmp/graph-sql-g1.html
+          grep -q 'Live PostgreSQL integration test' /tmp/graph-sql-g1.html
+          grep -q 'SQL-001' /tmp/graph-sql-g1.html
+          grep -q 'Curriculum outline only' /tmp/graph-sql-g1.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001&view=project&concept=relational-schema&level=G1' > /tmp/sql-graph-project.html
+          grep -q 'Project ini adalah ide dari workbook' /tmp/sql-graph-project.html
+          grep -q 'Required evidence: Live PostgreSQL integration test' /tmp/sql-graph-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=api-design-contract&level=G1' > /tmp/graph-design-g1.html
+          grep -q 'SYS-008' /tmp/graph-design-g1.html
+          grep -q 'SPR-006' /tmp/graph-design-g1.html
+          grep -q 'api-contract-testing' /tmp/graph-design-g1.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=api-contract-testing&level=G1' > /tmp/graph-testing-g1.html
+          grep -q 'TST-019' /tmp/graph-testing-g1.html
+          grep -q 'TST-020' /tmp/graph-testing-g1.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=java-build-toolchain&level=G2' > /tmp/graph-java-gap.html
+          grep -q 'No G2 outcome mapped for this concept' /tmp/graph-java-gap.html
+          if grep -q 'Concept connections' /tmp/graph-java-gap.html; then exit 1; fi
           if grep -q 'Concept graph for this lesson' /tmp/java-build-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
           grep -q 'Suggested study path' /tmp/graph-g2.html
