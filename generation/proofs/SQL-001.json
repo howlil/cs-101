@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "itemId": "SQL-001",
+  "curriculumFingerprint": "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "status": "not-executable",
+  "noExecutableReason": "The V3 single-file fixture runner supports only Node and Java with an eight-second local limit; SQL-001 is verified in a separate CI step against an isolated disposable PostgreSQL 16 container executing init.sql and six SELECT queries twice plus a fresh database.",
+  "examples": []
+}

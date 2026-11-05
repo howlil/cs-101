@@ -1,0 +1,44 @@
+{
+  "itemId": "SQL-001",
+  "fingerprint": "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "sources": [
+    {
+      "title": "PostgreSQL 16 — The SQL Language Tutorial",
+      "url": "https://www.postgresql.org/docs/16/tutorial-sql.html"
+    },
+    {
+      "title": "PostgreSQL 16 — Schemas",
+      "url": "https://www.postgresql.org/docs/16/ddl-schemas.html"
+    },
+    {
+      "title": "PostgreSQL 16 — Constraints",
+      "url": "https://www.postgresql.org/docs/16/ddl-constraints.html"
+    },
+    {
+      "title": "PostgreSQL 16 — INSERT",
+      "url": "https://www.postgresql.org/docs/16/sql-insert.html"
+    },
+    {
+      "title": "PostgreSQL 16 — psql",
+      "url": "https://www.postgresql.org/docs/16/app-psql.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 relational keys, repeatable sandbox initialization and six inspection queries",
+      "assessedAt": "Five local diagnostic questions and real PostgreSQL Docker integration plus independent sandbox practice",
+      "evidenceExpected": "Six actual psql inspection outputs and repeatable init.sql from a clean PostgreSQL database, showing correct keys, two sample accounts/transfers and the expected amount total."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Fresh/replayed PostgreSQL validation with explicit proof boundary",
+      "assessedAt": "Independent altered dataset and six-query evidence review",
+      "evidenceExpected": "True PostgreSQL query outputs against a fresh, changed sandbox, not just text fixtures or an unexecuted SQL sample."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

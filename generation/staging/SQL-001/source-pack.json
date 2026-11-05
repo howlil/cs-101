@@ -1,0 +1,128 @@
+{
+  "itemId": "SQL-001",
+  "curriculumFingerprint": "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "sources": [
+    {
+      "title": "PostgreSQL 16 — The SQL Language Tutorial",
+      "url": "https://www.postgresql.org/docs/16/tutorial-sql.html",
+      "tier": 0,
+      "supports": [
+        "relational tables, rows and SQL inspection",
+        "creating, inserting, querying, transaction basics"
+      ],
+      "notes": [
+        "Part I, Chapter 2: The SQL Language"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — Schemas",
+      "url": "https://www.postgresql.org/docs/16/ddl-schemas.html",
+      "tier": 0,
+      "supports": [
+        "schema names, object qualification and search_path"
+      ],
+      "notes": [
+        "Section 5.9 Schemas"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — Constraints",
+      "url": "https://www.postgresql.org/docs/16/ddl-constraints.html",
+      "tier": 0,
+      "supports": [
+        "primary/foreign keys, CHECK and NOT NULL row integrity"
+      ],
+      "notes": [
+        "Section 5.4 Constraints"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — INSERT",
+      "url": "https://www.postgresql.org/docs/16/sql-insert.html",
+      "tier": 0,
+      "supports": [
+        "INSERT rows and ON CONFLICT DO NOTHING for safe repeatable seed"
+      ],
+      "notes": [
+        "INSERT / ON CONFLICT"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — psql",
+      "url": "https://www.postgresql.org/docs/16/app-psql.html",
+      "tier": 0,
+      "supports": [
+        "-f file execution, ON_ERROR_STOP and controlled CLI SQL output"
+      ],
+      "notes": [
+        "Options / Variables / Error handling"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "sql-relations",
+      "statement": "Relational tables organize rows in named columns; a SELECT query returns rows from matching relations and a WHERE clause filters them.",
+      "conceptIds": [
+        "relation-basics",
+        "inspection-query"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/tutorial-sql.html",
+      "locator": "Chapter 2.2 Concepts; 2.5 Querying a Table",
+      "rationale": "PostgreSQL tutorial explains table row structure and SELECT query filters."
+    },
+    {
+      "id": "schema-namespace",
+      "statement": "Schema names qualify database objects, and the current search_path determines resolution of otherwise unqualified table names.",
+      "conceptIds": [
+        "schema-search-path"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/ddl-schemas.html",
+      "locator": "Section 5.9 Schemas / Search Path",
+      "rationale": "Official schema documentation defines qualification and search path behavior."
+    },
+    {
+      "id": "sql-foreign-keys",
+      "statement": "A foreign key restricts referenced values to compatible keys in the referenced table, while primary keys uniquely identify rows.",
+      "conceptIds": [
+        "relation-basics",
+        "repeatable-init"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/ddl-constraints.html",
+      "locator": "Sections 5.4.4 Primary Keys, 5.4.5 Foreign Keys",
+      "rationale": "PostgreSQL constraints documentation describes relational key enforcement."
+    },
+    {
+      "id": "sql-seed-conflicts",
+      "statement": "An INSERT with ON CONFLICT DO NOTHING avoids inserting another row when a unique conflict is detected, but does not establish migration correctness.",
+      "conceptIds": [
+        "repeatable-init"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/sql-insert.html",
+      "locator": "INSERT / ON CONFLICT Clause",
+      "rationale": "PostgreSQL INSERT documentation specifies conflict handling and the no-op action."
+    },
+    {
+      "id": "sql-psql-script",
+      "statement": "psql can execute SQL from files using -f, and ON_ERROR_STOP makes a script fail upon an SQL command error.",
+      "conceptIds": [
+        "inspection-query",
+        "repeatable-init"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/app-psql.html",
+      "locator": "psql Options -f / Variables ON_ERROR_STOP",
+      "rationale": "psql reference documents non-interactive script execution and error handling."
+    },
+    {
+      "id": "sql-transaction",
+      "statement": "BEGIN and COMMIT delimit a transaction, so the schema and seed statements can be grouped into one unit of database work.",
+      "conceptIds": [
+        "repeatable-init"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/tutorial-sql.html",
+      "locator": "Chapter 3.4 Transactions",
+      "rationale": "PostgreSQL tutorial explains BEGIN, COMMIT and atomicity."
+    }
+  ]
+}

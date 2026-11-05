@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "SQL-001",
+  "curriculumFingerprint": "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "hashes": {
+    "lesson": "9f7ee13ca37c96bf552bd19fe6a2cb5a1ad611ee2e9dc2c5a6bcd0af39f7ed49",
+    "pedagogy": "cb9266fdd56c42ee7fc159d63c26014e207e7863cb6116f95d65712b51c124a5",
+    "questionBank": "7fb460fc4873560526963ba47ab66ee457667e8021cc79d6d11b073157d585c8",
+    "sourcePack": "31ad2d1410feb66d6403c839721d9a4971fcedcbbe2c78f20fd4a48a3f95a2c1",
+    "exampleProof": "ea96b336a55f4c792794cfbb1a059ebd592016e9e5cccc5756d9ea4a53303544",
+    "examplePlan": "7d6a71b925f80a90b28f7ad5f74164f90b90d268ae63387e2323a5e9a696d2e4"
+  }
+}

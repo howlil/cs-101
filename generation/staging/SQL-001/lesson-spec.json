@@ -1,0 +1,340 @@
+{
+  "itemId": "SQL-001",
+  "curriculumFingerprint": "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "payoff": "Initialize and inspect a reproducible PostgreSQL accounts/transfers sandbox from the CLI, not a GUI.",
+  "learningOutcomes": [
+    "buat DB sandbox dengan accounts dan transfers; tulis 6 query inspeksi + satu init.sql yang bisa dijalankan ulang dari database kosong tanpa GUI. BUKTI: schema dan sample rows terdeteksi benar."
+  ],
+  "mentalModel": "SQL tables store rows with typed keys; a schema/search_path defines names, DDL creates structure, DML seeds records, TCL groups them and DQL queries the result.",
+  "relationshipGraph": "sandbox database → schema cs101_sql001 → accounts(account_id PK) ← transfers(source_account_id FK, destination_account_id FK) → SELECT six inspections → verified row counts and key metadata",
+  "concepts": [
+    {
+      "id": "relation-basics",
+      "title": "Tables, primary keys and foreign keys",
+      "mechanism": "Rows hold account and transfer facts; PKs identify records and FKs link transfer endpoints to existing accounts.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/16/tutorial-sql.html",
+        "https://www.postgresql.org/docs/16/ddl-constraints.html"
+      ]
+    },
+    {
+      "id": "schema-search-path",
+      "title": "PostgreSQL schema and search_path",
+      "mechanism": "A schema namespaces database objects and session search_path determines resolution of unqualified table names.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/16/ddl-schemas.html"
+      ]
+    },
+    {
+      "id": "repeatable-init",
+      "title": "DDL, DML and transaction initialization",
+      "mechanism": "BEGIN/COMMIT wrap schema and seed SQL; IF NOT EXISTS and ON CONFLICT guard repeatable fixtures but not migrations.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/16/tutorial-sql.html",
+        "https://www.postgresql.org/docs/16/sql-insert.html",
+        "https://www.postgresql.org/docs/16/ddl-constraints.html"
+      ]
+    },
+    {
+      "id": "inspection-query",
+      "title": "psql and six SQL SELECT inspections",
+      "mechanism": "psql executes files with ON_ERROR_STOP, while SELECT inspects actual schema, keys and rows.",
+      "sourceUrls": [
+        "https://www.postgresql.org/docs/16/tutorial-sql.html",
+        "https://www.postgresql.org/docs/16/app-psql.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "CREATE TABLE IF NOT EXISTS does not validate an existing table's shape.",
+    "ON CONFLICT DO NOTHING does not update conflicting payloads.",
+    "A foreign key is not created simply by naming a column account_id.",
+    "SQL script source code is not evidence that PostgreSQL executed it.",
+    "search_path can change which unqualified table is queried.",
+    "This small fixture is not a production money ledger or durable transaction engine."
+  ],
+  "practice": [
+    "Identify PK and two FK relationships in accounts/transfers.",
+    "Initialize deterministic PostgreSQL schema/data without GUI and repeat the same init.",
+    "Run six SELECT inspections including schema, metadata and exact IDR aggregate."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 relational keys, repeatable sandbox initialization and six inspection queries",
+      "assessedAt": "Five local diagnostic questions and real PostgreSQL Docker integration plus independent sandbox practice",
+      "evidenceExpected": "Six actual psql inspection outputs and repeatable init.sql from a clean PostgreSQL database, showing correct keys, two sample accounts/transfers and the expected amount total."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Fresh/replayed PostgreSQL validation with explicit proof boundary",
+      "assessedAt": "Independent altered dataset and six-query evidence review",
+      "evidenceExpected": "True PostgreSQL query outputs against a fresh, changed sandbox, not just text fixtures or an unexecuted SQL sample."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "model-accounts-and-transfers",
+        "objective": "Recognize relational tables, rows, primary keys and foreign keys before issuing queries.",
+        "whyItMatters": "A transfer record without a known source and destination account cannot support reproducible reporting or data integrity.",
+        "mentalModel": "Accounts are rows identified by account_id; transfers reference two account IDs and preserve amount/currency as separate typed values.",
+        "explanation": "A relation is a named table of rows. For the starter sandbox, accounts(account_id PK, owner_label) and transfers(transfer_id PK, source_account_id FK, destination_account_id FK, amount NUMERIC, currency, created_at TIMESTAMPTZ) are distinct relations. The two foreign keys link transfer endpoints to existing accounts. This is a teaching schema, not a banking ledger, and it does not enforce balance conservation or transfer authorization. Read each column and constraint as a contract before using SELECT. A CHECK on amount > 0 validates a single row, not total balances across transfers.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A transfer T-100 from account A-01 to A-02 must reference real accounts and store an exact nominal amount.",
+          "steps": [
+            {
+              "action": "Draw accounts and transfers as two tables and label every key.",
+              "reason": "Separating entities prevents duplicated mutable account facts.",
+              "expectedResult": "transfers references accounts twice by account_id."
+            },
+            {
+              "action": "Mark the primary keys and both foreign keys.",
+              "reason": "Every transfer endpoint must identify an existing account.",
+              "expectedResult": "Two declared FK relationships and unique transfer/account identifiers."
+            },
+            {
+              "action": "Assign NUMERIC(12,2), CHAR(3) and TIMESTAMPTZ to amount, currency and time.",
+              "reason": "Type selection documents decimal precision, currency identity and time representation.",
+              "expectedResult": "An IDR transfer can be inspected without using a binary float."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A transfer row stores source_account_id='A-99' but no account with this ID exists. Which database constraint rejects it?",
+          "hints": [
+            "A primary key identifies a row in its own table.",
+            "A foreign key requires a referenced value to exist in another table."
+          ],
+          "explanation": "The foreign key on source_account_id references accounts(account_id) and rejects the orphan transfer."
+        },
+        "independentChallenge": {
+          "prompt": "Model a distinct transfer T-202 with two new accounts and explain which columns must be keys, foreign keys and exact decimal values.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "A schema diagram plus DDL showing two FKs and a clearly bounded numeric transfer amount."
+          ],
+          "variationFromExample": "Use two different accounts and a different transfer identifier instead of T-100."
+        },
+        "firstAction": "Draw two boxes labeled accounts and transfers, then connect source_account_id to accounts.account_id.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming a text column named account_id automatically enforces referential integrity.",
+          "whyItFails": "Names alone do not declare a constraint; the database will accept orphan references unless a foreign key exists.",
+          "correctiveAction": "Declare explicit PRIMARY KEY and REFERENCES constraints, then inspect schema metadata."
+        },
+        "selfCheck": {
+          "expectedObservation": "Both transfer account IDs point to rows in accounts, and the database metadata shows two foreign keys.",
+          "ifUnexpected": "Query information_schema.table_constraints for the schema and inspect the exact DDL rather than relying on diagram notation."
+        },
+        "continueFromHere": {
+          "nextAction": "Build the schema and seed rows deterministically in a fresh PostgreSQL database.",
+          "resumeCue": "Start with primary keys that identify rows, then foreign keys that link rows."
+        }
+      },
+      {
+        "id": "initialize-sandbox-repeatably",
+        "objective": "Run a bounded DDL/DML/TCL script via psql twice without duplicating sample data.",
+        "whyItMatters": "Manual GUI setup can conceal dependencies, leave stale rows, and make examples irreproducible for teammates or CI.",
+        "mentalModel": "DDL defines schema and tables, DML inserts seed rows, BEGIN/COMMIT group the operation, and a schema-qualified name or search_path chooses the namespace.",
+        "explanation": "The authored init.sql creates a dedicated cs101_sql001 schema, two tables, sample account/transfer rows and a fixed transaction around DDL and seed DML. CREATE TABLE IF NOT EXISTS is useful for re-execution, but it does NOT guarantee an existing table has the expected columns; it is not a migration system. INSERT ... ON CONFLICT DO NOTHING prevents duplicate fixture IDs on repeated runs, but a conflicting payload could be silently ignored. Use the script only on a disposable sandbox database. SQL statement categories here: DDL (CREATE), DML (INSERT), DQL (SELECT), TCL (BEGIN/COMMIT). Run psql -X -v ON_ERROR_STOP=1 -f labs/SQL-001/init.sql against your test database, then repeat and inspect. Avoid running these commands on production.",
+        "prerequisiteConceptIds": [
+          "relation-basics"
+        ],
+        "workedExample": {
+          "problem": "A fresh PostgreSQL database needs two known accounts and two deterministic transfers from versioned SQL.",
+          "steps": [
+            {
+              "action": "Create the dedicated cs101_sql001 schema, followed by accounts then transfers.",
+              "reason": "The referenced table must exist before its foreign keys can be defined.",
+              "expectedResult": "The second table references the first without dependency errors."
+            },
+            {
+              "action": "Insert account rows before transfer rows with stable IDs.",
+              "reason": "Foreign-key constraints enforce the relationship at insert time.",
+              "expectedResult": "Both transfers link to existing accounts."
+            },
+            {
+              "action": "Run init.sql twice against the same database.",
+              "reason": "ON CONFLICT DO NOTHING and table existence guards avoid duplicate sample rows.",
+              "expectedResult": "Both executions leave exactly two accounts and two transfers."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why is CREATE TABLE IF NOT EXISTS insufficient to prove a previously created accounts table has the intended columns?",
+          "hints": [
+            "It tests whether a relation with that name already exists.",
+            "It does not check all DDL attributes of that existing relation."
+          ],
+          "explanation": "IF NOT EXISTS is a name/existence guard, not schema verification. Inspect columns/constraints and use migrations for real schema evolution."
+        },
+        "independentChallenge": {
+          "prompt": "In a separate fresh database, add a third valid transfer ID with fixed nominal amount, rerun the modified init script twice and prove the original two fixture IDs were not duplicated.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "psql execution output from an empty database and a second run; inspection counts and schema metadata."
+          ],
+          "variationFromExample": "A new seed record and fresh database rather than the provided two-transfer example."
+        },
+        "firstAction": "Locate labs/SQL-001/init.sql and identify which SQL statements create structure versus rows.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating ON CONFLICT DO NOTHING as a general-purpose update or correct schema migration.",
+          "whyItFails": "It can silently retain old payloads and does not validate column definitions when an existing table is reused.",
+          "correctiveAction": "Use deterministic fixture IDs and assert exact row/schema outputs; reserve real migrations for later units."
+        },
+        "selfCheck": {
+          "expectedObservation": "After replaying init.sql, the sandbox still contains exactly two accounts and two transfers.",
+          "ifUnexpected": "Inspect schema/search_path and error output; use -v ON_ERROR_STOP=1 so a failed statement aborts the script."
+        },
+        "continueFromHere": {
+          "nextAction": "Write six SELECT queries and verify the expected schema and rows.",
+          "resumeCue": "Check the target database first, then create tables, seed rows and prove repeatability."
+        }
+      },
+      {
+        "id": "inspect-postgres-six-queries",
+        "objective": "Run six bounded SQL inspection queries and classify the observed schema/data results.",
+        "whyItMatters": "A successful CREATE command does not prove the correct tables, keys, rows or aggregate values were created in the intended schema.",
+        "mentalModel": "DQL SELECT observes metadata and business rows; search_path or schema qualification ensures queries target the sandbox instead of some similarly named table.",
+        "explanation": "Run labs/SQL-001/inspect.sql using psql -X -v ON_ERROR_STOP=1 -At -f labs/SQL-001/inspect.sql. Its six SELECT queries report current_schema, table names, account count, transfer count, two FK constraints and IDR total. Fixture expects two accounts, two transfers, two foreign keys and IDR 155000.00. The six queries return inspectable observations, not a generic test pass. The CI integration runs on a disposable PostgreSQL 16 container with no published host port and checks replay and fresh database behavior. psql -At emits parseable tuples-only unaligned lines; this is for fixture assertions, not general CSV exports.",
+        "prerequisiteConceptIds": [
+          "relation-basics",
+          "repeatable-init"
+        ],
+        "workedExample": {
+          "problem": "You receive init.sql but must determine whether the script put correct rows and keys in the expected schema.",
+          "steps": [
+            {
+              "action": "Run the inspection queries after a successful init.sql.",
+              "reason": "Avoid reasoning from the mere existence of a SQL file.",
+              "expectedResult": "The first two SELECTs show the active schema and the exact table names."
+            },
+            {
+              "action": "Read the counts, foreign-key metadata and amount sum.",
+              "reason": "Check both structure and content of the fixture.",
+              "expectedResult": "Counts 2/2, two foreign keys and IDR 155000.00 match the expected contract."
+            },
+            {
+              "action": "Repeat from a new clean database and compare all six results.",
+              "reason": "Detect dependence on stale state or a particular database setup.",
+              "expectedResult": "The six observations remain stable across clean and replayed databases."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "The two table names are correct, but transfer count is four after rerunning init.sql. Which property has failed?",
+          "hints": [
+            "Re-running seed data should not duplicate stable transfer IDs.",
+            "Inspect uniqueness constraints and INSERT conflict handling."
+          ],
+          "explanation": "Fixture replay is not idempotent. Check stable transfer_id primary keys and ON CONFLICT behavior, then inspect the duplicated rows."
+        },
+        "independentChallenge": {
+          "prompt": "Run the queries against a different isolated PostgreSQL database initialized with an extra valid transfer, predict the changed transfer count and IDR aggregate, and explain which outputs must remain constant.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Six actual psql SELECT outputs for the new database, prediction and observed difference from the original fixture.",
+            "Proof that table/key structure stays correct when a valid additional row is inserted."
+          ],
+          "variationFromExample": "A changed but valid test dataset requiring updated count/amount expectations instead of rereading the unchanged fixture."
+        },
+        "firstAction": "Write SELECT count(*) FROM cs101_sql001.accounts; before reading its expected result.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming six query strings by themselves are enough evidence of populated data.",
+          "whyItFails": "A textual query does not establish a PostgreSQL result; the DB instance, schema, and target data matter.",
+          "correctiveAction": "Execute with psql against a disposable database and capture the returned values."
+        },
+        "selfCheck": {
+          "expectedObservation": "The unmodified fixture produces schema, tables, accounts, transfers, FK count and exact IDR total observations.",
+          "ifUnexpected": "Check current_schema(), schema-qualified table names and psql error status; ensure you are connected to the intended database."
+        },
+        "continueFromHere": {
+          "nextAction": "Use these observed relational facts before learning filtering, joins, aggregates and transaction isolation in subsequent SQL units.",
+          "resumeCue": "Verify the target schema and table names, then inspect rows, constraints and totals."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Di schema sandbox, transfer.source_account_id harus menunjuk ke accounts.account_id yang ada. Constraint yang tepat?",
+      "options": [
+        "FOREIGN KEY REFERENCES accounts(account_id)",
+        "Kolom TEXT bernama account_id tanpa constraint",
+        "ORDER BY transfer_id"
+      ],
+      "answer": 0,
+      "explanation": "Foreign key menjaga referensi transfer ke akun yang ada; nama kolom saja tidak mengaktifkan referential integrity.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Query SELECT * FROM accounts menjalankan tabel mana ketika ada sandbox.accounts dan public.accounts?",
+      "options": [
+        "Selalu public.accounts",
+        "Tergantung resolusi search_path pada sesi psql",
+        "Selalu tabel terbaru yang dibuat"
+      ],
+      "answer": 1,
+      "explanation": "PostgreSQL menyelesaikan nama tanpa schema berdasarkan search_path. Untuk menghindari ambiguitas, gunakan qualification schema.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Apa batas CREATE TABLE IF NOT EXISTS untuk fixture yang bisa dijalankan ulang?",
+      "options": [
+        "Menjamin skema existing identik dengan definisi SQL",
+        "Memigrasikan semua kolom otomatis",
+        "Hanya mencegah error saat nama relation sudah ada, tidak memvalidasi shape"
+      ],
+      "answer": 2,
+      "explanation": "IF NOT EXISTS bukan schema migration atau pemeriksaan struktur yang sudah ada.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Saat menyisipkan transfer dengan transfer_id duplikat menggunakan ON CONFLICT (transfer_id) DO NOTHING, apa yang terjadi?",
+      "options": [
+        "Baris existing dipertahankan tanpa update payload",
+        "Baris existing selalu diganti dengan data terbaru",
+        "Constraint PRIMARY KEY dihapus"
+      ],
+      "answer": 0,
+      "explanation": "DO NOTHING melewati insert yang bentrok. Ia tidak memperbarui data lama dan tidak menjamin payload sama.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Enam query inspeksi sudah ditulis, tetapi belum pernah dijalankan ke PostgreSQL. Klaim bukti yang tepat?",
+      "options": [
+        "Data pasti sudah terverifikasi karena SQL valid secara visual",
+        "Masih rancangan; harus jalankan psql dan cocokkan hasil aktual di DB terisolasi",
+        "SELECT dengan SUM selalu mengembalikan IDR 155000.00"
+      ],
+      "answer": 1,
+      "explanation": "Bukti memerlukan observasi hasil PostgreSQL nyata, termasuk schema, row counts, FK metadata dan agregat sesuai fixture.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

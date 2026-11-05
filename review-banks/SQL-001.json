@@ -1,0 +1,78 @@
+{
+  "itemId": "SQL-001",
+  "version": "lesson-spec-v1:sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "curriculumFingerprint": "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Di schema sandbox, transfer.source_account_id harus menunjuk ke accounts.account_id yang ada. Constraint yang tepat?",
+      "options": [
+        "FOREIGN KEY REFERENCES accounts(account_id)",
+        "Kolom TEXT bernama account_id tanpa constraint",
+        "ORDER BY transfer_id"
+      ],
+      "answer": 0,
+      "explanation": "Foreign key menjaga referensi transfer ke akun yang ada; nama kolom saja tidak mengaktifkan referential integrity.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Query SELECT * FROM accounts menjalankan tabel mana ketika ada sandbox.accounts dan public.accounts?",
+      "options": [
+        "Selalu public.accounts",
+        "Tergantung resolusi search_path pada sesi psql",
+        "Selalu tabel terbaru yang dibuat"
+      ],
+      "answer": 1,
+      "explanation": "PostgreSQL menyelesaikan nama tanpa schema berdasarkan search_path. Untuk menghindari ambiguitas, gunakan qualification schema.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Apa batas CREATE TABLE IF NOT EXISTS untuk fixture yang bisa dijalankan ulang?",
+      "options": [
+        "Menjamin skema existing identik dengan definisi SQL",
+        "Memigrasikan semua kolom otomatis",
+        "Hanya mencegah error saat nama relation sudah ada, tidak memvalidasi shape"
+      ],
+      "answer": 2,
+      "explanation": "IF NOT EXISTS bukan schema migration atau pemeriksaan struktur yang sudah ada.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Saat menyisipkan transfer dengan transfer_id duplikat menggunakan ON CONFLICT (transfer_id) DO NOTHING, apa yang terjadi?",
+      "options": [
+        "Baris existing dipertahankan tanpa update payload",
+        "Baris existing selalu diganti dengan data terbaru",
+        "Constraint PRIMARY KEY dihapus"
+      ],
+      "answer": 0,
+      "explanation": "DO NOTHING melewati insert yang bentrok. Ia tidak memperbarui data lama dan tidak menjamin payload sama.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Enam query inspeksi sudah ditulis, tetapi belum pernah dijalankan ke PostgreSQL. Klaim bukti yang tepat?",
+      "options": [
+        "Data pasti sudah terverifikasi karena SQL valid secara visual",
+        "Masih rancangan; harus jalankan psql dan cocokkan hasil aktual di DB terisolasi",
+        "SELECT dengan SUM selalu mengembalikan IDR 155000.00"
+      ],
+      "answer": 1,
+      "explanation": "Bukti memerlukan observasi hasil PostgreSQL nyata, termasuk schema, row counts, FK metadata dan agregat sesuai fixture.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

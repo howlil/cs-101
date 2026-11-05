@@ -1,0 +1,156 @@
+---
+taskId: "SQL-001"
+title: "SQL Workbench — Relational Sandbox"
+description: "Buat tabel accounts dan transfers, jalankan init.sql berulang, dan buktikan hasil enam query inspeksi pada PostgreSQL."
+demo: false
+curriculumFingerprint: "sha256:6e7adba75efc75dbbb0850792906b825be34b010534e2416f4ec1ea144da03ac"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/SQL-001.json';
+import questionBank from '../../../review-banks/SQL-001.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Problem:** database untuk accounts dan transfers harus bisa dibuat ulang dari workspace kosong, tidak bergantung pada GUI, dan hasilnya harus dapat diperiksa lewat enam query yang benar-benar dijalankan.
+
+**Mulai:** gambar dua tabel: accounts dengan account_id sebagai **PRIMARY KEY**, dan transfers dengan transfer_id sebagai **PRIMARY KEY** serta source_account_id dan destination_account_id sebagai dua **FOREIGN KEY**.
+
+<MentalModel title="Data SQL = struktur + aturan + observasi">
+
+- **Table / row / column:** satu row menyimpan fakta dengan kolom bertipe; PRIMARY KEY mengidentifikasi satu baris unik.
+- **Foreign key:** sebuah transfer menunjuk akun yang sudah ada. Nama kolom saja tidak menciptakan referential integrity.
+- **Schema / search_path:** cs101_sql001 adalah namespace. Nama tabel tanpa kualifikasi dicari melalui search_path sesi.
+- **DDL (CREATE):** mendefinisikan schema dan tabel. **DML (INSERT):** menambahkan data. **DQL (SELECT):** mengambil observasi. **TCL (BEGIN/COMMIT):** membatasi transaksi.
+- **Repeatability:** CREATE TABLE IF NOT EXISTS dan INSERT ON CONFLICT DO NOTHING mendukung replay fixture, tetapi **bukan** pengganti schema migration dan tidak membuktikan bentuk tabel existing.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+Disposable PostgreSQL database
+  └── schema cs101_sql001
+       ├── accounts
+       │    ├── account_id PRIMARY KEY
+       │    └── owner_label NOT NULL
+       └── transfers
+            ├── transfer_id PRIMARY KEY
+            ├── source_account_id ──FK──> accounts.account_id
+            ├── destination_account_id ──FK──> accounts.account_id
+            ├── amount NUMERIC(12,2) CHECK(amount > 0)
+            ├── currency CHAR(3)
+            └── created_at TIMESTAMPTZ
+
+init.sql (DDL + DML + transaction)
+           ↓
+inspect.sql (6 SELECT queries)
+           ↓
+actual schema + tables + counts + keys + IDR total
+~~~
+
+</ConceptGraph>
+
+## Struktur dan enam query yang harus dapat kamu buktikan
+
+| Inspeksi | Objek yang diuji | Hasil dataset contoh |
+| --- | --- | --- |
+| 1. current_schema() | Schema aktif | cs101_sql001 |
+| 2. pg_tables | Tabel yang ada | accounts,transfers |
+| 3. COUNT(accounts) | Baris akun | 2 |
+| 4. COUNT(transfers) | Baris transfer | 2 |
+| 5. information_schema foreign keys | Relasi yang benar-benar dibuat | 2 |
+| 6. SUM(amount) WHERE currency='IDR' | Jumlah nominal dengan tipe NUMERIC | 155000.00 |
+
+Gunakan seed transfer **125000.00 IDR** dan **30000.00 IDR**. Jangan menggabungkan nominal dari currency berbeda. Ini sandbox latihan, **bukan** double-entry ledger atau bukti transaksi finansial yang aman.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber resmi PostgreSQL 16
+
+<SourceList sources={[
+  {title:'PostgreSQL 16 — SQL Language Tutorial', url:'https://www.postgresql.org/docs/16/tutorial-sql.html'},
+  {title:'PostgreSQL 16 — Schemas and search_path', url:'https://www.postgresql.org/docs/16/ddl-schemas.html'},
+  {title:'PostgreSQL 16 — Constraints', url:'https://www.postgresql.org/docs/16/ddl-constraints.html'},
+  {title:'PostgreSQL 16 — INSERT and ON CONFLICT', url:'https://www.postgresql.org/docs/16/sql-insert.html'},
+  {title:'PostgreSQL 16 — psql', url:'https://www.postgresql.org/docs/16/app-psql.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Latihan langsung dengan psql
+
+File yang bisa dijalankan tersedia di repositori:
+
+- labs/SQL-001/init.sql — DDL + DML + transaksi dalam schema cs101_sql001.
+- labs/SQL-001/inspect.sql — enam SELECT query untuk memeriksa data dan metadata.
+- labs/SQL-001/verify-postgres.sh — integration proof terhadap disposable PostgreSQL 16.
+
+Dengan database **sandbox** yang kamu kontrol dan PostgreSQL client terpasang:
+
+~~~sh
+psql -X -v ON_ERROR_STOP=1 -d your_sandbox_db -f labs/SQL-001/init.sql
+psql -X -v ON_ERROR_STOP=1 -At -d your_sandbox_db -f labs/SQL-001/inspect.sql
+~~~
+
+Jalankan init.sql dua kali. Periksa bahwa kedua run menghasilkan jumlah row dan foreign key yang sama. Perintah di atas bergantung pada koneksi/akun PostgreSQL milik environment kamu; jangan arahkan ke database production.
+
+Untuk menjalankan proof end-to-end menggunakan **Docker lokal**:
+
+~~~sh
+bash labs/SQL-001/verify-postgres.sh
+~~~
+
+Script CI tersebut membuat container PostgreSQL 16 terisolasi tanpa port yang dipublikasikan, menjalankan query, mengulang init, memeriksa fresh database kedua, dan menghapus container setelah selesai.
+
+**Batas generator:** SQL belum didukung oleh runner executable V3 Node/Java. Bundle SQL-001 memakai alasan *not executable in generator* yang eksplisit. Hasil SQL hanya dinyatakan teruji oleh **PostgreSQL integration test terpisah**, bukan oleh validator authoring atau fixture palsu.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal inspeksi SQL
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Project — SQL Workbench
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+Buat database disposable baru; jalankan init.sql dari nol, lalu enam query inspeksi. Laporkan nilai aktual, schema/search_path dan apakah FK benar-benar terpasang. Jalankan ulang init.sql dan bandingkan hasil.
+
+<Challenge
+  title="SQL Workbench — six queries and repeatable init.sql"
+  brief="Buat PostgreSQL sandbox dengan accounts dan transfers, jalankan satu init.sql dari database kosong tanpa GUI, tulis dan eksekusi enam query inspeksi, lalu buktikan struktur serta sample rows tetap benar setelah replay."
+  acceptanceCriteria={[
+    'Sertakan DDL untuk schema cs101_sql001, accounts dan transfers dengan PK dan dua FK yang benar-benar enforced.',
+    'Run init.sql dari database baru menggunakan psql; catat status sukses dan nama database target.',
+    'Jalankan enam SELECT terpisah dan catat output aktual: schema, nama tabel, jumlah accounts/transfers, jumlah FK dan total IDR.',
+    'Jalankan init.sql ulang lalu tunjukkan tidak ada duplikasi row dan keenam hasil tetap identik.',
+    'Ulang pada database disposable kedua yang kosong untuk membuktikan tidak ada ketergantungan stale state.',
+    'Jelaskan mengapa IF NOT EXISTS dan ON CONFLICT DO NOTHING bukan jaminan schema migration ataupun payload reconciliation.',
+    'Bedakan bukti integration PostgreSQL yang sungguhan dari source-check/generator receipt. Jangan memakai koneksi production.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Dapat menjelaskan tabel, row, PK/FK dan representasi nominal NUMERIC yang sesuai.',
+  'Memahami schema qualification/search_path serta kategorisasi DDL, DML, DQL dan TCL.',
+  'Dapat menjalankan init.sql berulang pada database kosong tanpa GUI dan tanpa row duplikat.',
+  'Menyediakan enam query beserta hasil nyata dari PostgreSQL, bukan prediksi yang tidak dieksekusi.'
+]} />
+
+</LessonStage>
