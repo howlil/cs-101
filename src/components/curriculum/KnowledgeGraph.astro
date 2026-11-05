@@ -3,6 +3,7 @@ import type { Concept, FocusedConcept, LearningLevel } from '../../domain/learni
 import { learningGraphHref, EVIDENCE_KIND_LABELS } from '../../domain/learning-graph';
 import type { LearningPath } from '../../domain/learning-path';
 import { pathItemHref } from '../../domain/learning-path';
+import ConceptCanvas from './ConceptCanvas';
 interface Props {view:FocusedConcept;path:LearningPath;concepts:Concept[];publishedLessonIds:string[]}
 const {view,path,concepts,publishedLessonIds}=Astro.props;
 const published=new Set(publishedLessonIds);
@@ -44,6 +45,12 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
              class:list={['knowledge-chip',{'is-active':c.id===view.concept.id}]}>{c.title}</a>
         ))}
       </nav>
+      {view.outcome && <ConceptCanvas client:load
+        focus={{id:view.concept.id,title:view.concept.title,href:learningGraphHref(view.concept.id,view.level)}}
+        neighbors={view.neighbors.map(({concept,relation,direction})=>({
+          id:concept.id,title:concept.title,href:learningGraphHref(concept.id,view.level),
+          relationType:relation.type,status:relation.status,direction,
+        }))} level={view.level}/>}
       <section class="knowledge-map" aria-label="Focused concept and connections">
         <article class="knowledge-focus">
           <p class="knowledge-eyebrow">{view.level} · Focused concept</p>

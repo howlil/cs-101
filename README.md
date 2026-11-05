@@ -4,7 +4,7 @@ CS-101 is a **single-page content library** for engineering lessons, practice qu
 
 **Current content status:** 8 tracks, 67 modules and 370 source-backed curriculum entries. NET-001 (Request Path), SPR-006 (Transfer API), OSX-029 (Binding Mystery) and PRD-002 (Health Contract) are authored Pedagogy V3 lessons. All other unauthored units remain outlines.
 
-- One page: `/` with Library and Knowledge Graph modes.
+- One page: `/` with Library and Knowledge Graph modes. Knowledge Graph has an interactive deterministic one-hop SVG node–edge canvas with pan/zoom, selected concept deep links and an accessible text-link alternative; dashed edges are proposed relationships, not prerequisites.
 - Cross-domain pilot: `/?mode=graph&concept=http-request-lifecycle&level=G1` and `&level=G2` have distinct competency evidence and mapped units.
 - G0, G3 and G4 remain visible as uncurated depth gaps, not fabricated lessons.
 - Suggested cross-domain study paths: `/?mode=graph&concept=http-request-lifecycle&level=G1` → `/?item=NET-001&concept=http-request-lifecycle&level=G1` → Materi/Soal (when authored)/Project → next unit. URL context is not learner progress.

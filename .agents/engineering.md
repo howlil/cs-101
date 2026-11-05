@@ -6,7 +6,7 @@ R2: The curated overlay adds semantic links, depth-specific outcomes and propose
 R3: Astro composes immutable graph data and renders server-selected URL views.
 S1: Overlay JSON immutable; URL query params own mode, selected concept and G0–G4 depth.
 K1: src/domain/learning-graph.ts validates and indexes the overlay.
-K2: src/components/curriculum/KnowledgeGraph.astro renders accessible concept neighborhoods.
+K2: src/components/curriculum/KnowledgeGraph.astro renders accessible concept neighborhoods with a React SVG canvas; graph-canvas-layout.ts derives positions from validated one-hop edges without persistence.
 K3: src/pages/index.astro selects mode; no new routes, databases or runtime dependencies.
 K4: src/domain/learning-path.ts owns deterministic depth-aware prerequisite traversal, contextual URLs and validation of route membership.
 
@@ -32,6 +32,7 @@ DEC5: The SPR-006 reference fixture executes JDK 21 local HTTP contract tests, n
 DEC6: OSX-029 uses unprivileged local Node socket probes; root-required network namespace setup is a separate disposable-VM learner lab.
 DEC7: PRD-002 uses documented Actuator /live and /ready aliases; state-driven Node HTTP verification is separate from Spring/Kubernetes fault injection.
 DEC8: Editorial evidence precision is part of the proposed rubric schema; no speculative reviewed graph edge, runtime progress state or database is introduced.
+DEC9: Graph viewport owns local pan/zoom only; concept and depth remain URL-owned and native links are retained outside the canvas.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -45,3 +46,4 @@ PF8 (P12,G7) [important] | SPR-006 reproducible artifacts, Java HTTP proof and f
 PF9 (P13,G8) [important] | OSX-029 reproducible authored content, local Linux socket proof and G1/G2 route smoke | merge | pnpm ci
 PF10 (P14,G9) [important] | PRD-002 verified receipt, local status-state proof and contextual G1/G2 smoke | merge | pnpm ci
 PF11 (P15,G10) [important] | evidence-kind schema failures, 15 rubric classifications, Golden and Project/Graph smoke | merge | pnpm ci
+PF12 (P16,G1) [important] | deterministic scene and real one-hop edges, SSR links and no fabricated graph on missing depth | iter/merge | pnpm test; pnpm ci

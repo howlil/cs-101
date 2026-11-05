@@ -98,6 +98,9 @@ jobs:
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?mode=graph&concept=http-request-lifecycle&level=G2' > /tmp/graph-g2.html
           grep -q 'Suggested study path' /tmp/graph-g2.html
+          grep -q 'Interactive concept graph' /tmp/graph-g2.html
+          grep -q 'concept-canvas-svg' /tmp/graph-g2.html
+          grep -q 'concept=service-readiness&amp;level=G2' /tmp/graph-g2.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001' > /tmp/net-lesson.html
           grep -q 'Mental model: boundary sebelum HTTP' /tmp/net-lesson.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=NET-001&view=soal' > /tmp/net-quiz.html

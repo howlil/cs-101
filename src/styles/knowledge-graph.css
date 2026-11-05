@@ -1,4 +1,4 @@
-/* One focused node with linked neighbors, not an all-node canvas. */
+/* Interactive one-hop concept map + accessible semantic links and evidence list. */
 .library-mode-switch { display:flex; gap:4px; align-items:center; }
 .library-mode-switch a { padding:6px 11px; border-radius:999px; color:var(--text-secondary); font-size:12px; font-weight:600; text-decoration:none; }
 .library-mode-switch a[aria-current="page"],.library-mode-switch a:hover { background:var(--surface-muted); color:var(--foreground); }
@@ -81,3 +81,34 @@
 .knowledge-criterion-body strong{font-size:12px;font-weight:650;line-height:1.6;}
 .knowledge-criterion-body p{margin:0;color:var(--text-secondary);font-size:12px;line-height:1.7;}
 .knowledge-criterion-body a{width:fit-content;color:var(--foreground);font-size:11px;text-decoration:underline;text-underline-offset:3px;}
+
+/* Deterministic SVG viewport: a visual index, never a replacement for accessible links. */
+.concept-canvas{border:1px solid var(--border);border-radius:var(--radius-surface);overflow:hidden;margin:18px 0 26px;background:var(--surface)}
+.concept-canvas-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.concept-canvas-heading{min-width:0;display:grid;gap:3px}
+.concept-canvas-heading strong{font-size:13px;font-weight:650}
+.concept-canvas-heading span{font-size:11px;color:var(--text-secondary);line-height:1.4}
+.concept-canvas-tools{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.concept-canvas-tools button{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--border);border-radius:999px;color:var(--foreground);background:var(--surface);cursor:pointer}
+.concept-canvas-tools button:hover:not(:disabled){background:var(--surface-muted)}
+.concept-canvas-tools button:disabled{cursor:default;opacity:.35}
+.concept-canvas-tools output{min-width:39px;text-align:center;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.concept-canvas-scroll{overflow-x:auto;overflow-y:hidden}
+.concept-canvas-svg{width:100%;height:auto;min-width:760px;display:block;touch-action:pan-x}
+.concept-canvas-svg:focus-visible,.concept-canvas-tools button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-3px}
+.concept-canvas-drag{cursor:grab;touch-action:none}
+.concept-canvas-drag:active{cursor:grabbing}
+.concept-canvas-link{stroke:var(--border-strong);stroke-width:2;pointer-events:none}
+.concept-canvas-link.is-proposed{stroke-dasharray:7 6}
+.concept-canvas-node{cursor:pointer;outline:none}
+.concept-canvas-node rect{fill:var(--surface);stroke:var(--border-strong);stroke-width:1.6}
+.concept-canvas-node:hover rect,.concept-canvas-node:focus-visible rect{stroke:var(--foreground);stroke-width:2.5}
+.concept-canvas-node text{pointer-events:none;font-family:var(--font-body);font-size:15px;font-weight:650;fill:var(--foreground)}
+.concept-canvas-node .concept-canvas-node-subtitle{font-size:10px;font-weight:550;fill:var(--text-secondary)}
+.concept-canvas-node.is-focus rect{fill:var(--foreground);stroke:var(--foreground)}
+.concept-canvas-node.is-focus text{fill:var(--background)}
+.concept-canvas-node.is-focus .concept-canvas-node-subtitle{fill:var(--background);opacity:.8}
+.concept-canvas-node.is-focus:focus-visible rect{stroke:var(--focus-ring);stroke-width:4}
+.concept-canvas-footnote{border-top:1px solid var(--border);padding:10px 14px;margin:0;color:var(--text-secondary);font-size:11px;line-height:1.7}
+@media(max-width:720px){.concept-canvas-bar{flex-wrap:wrap}.concept-canvas-tools{margin-left:auto}.concept-canvas-svg{min-width:760px}}
+@media(prefers-reduced-motion:reduce){.concept-canvas *{scroll-behavior:auto;transition:none!important}}
