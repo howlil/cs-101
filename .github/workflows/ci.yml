@@ -90,8 +90,9 @@ jobs:
           grep -q 'Compile, build, dan launch' /tmp/catalog-root.html
           grep -q 'Maven dependency mechanism' /tmp/catalog-root.html
           if grep -q 'Outline kurikulum' /tmp/catalog-root.html; then exit 1; fi
-          grep -q 'Explore Knowledge Graph' /tmp/catalog-root.html
-          if grep -q 'Concept graph for this lesson' /tmp/catalog-root.html; then exit 1; fi
+          grep -q 'Explore concept graph' /tmp/catalog-root.html
+          grep -q 'Concept graph for this lesson' /tmp/catalog-root.html
+          grep -q 'Cross-domain connections' /tmp/catalog-root.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001' > /tmp/catalog-database.html
           grep -q 'SQL Workbench' /tmp/catalog-database.html
           grep -q 'Outline kurikulum' /tmp/catalog-database.html
