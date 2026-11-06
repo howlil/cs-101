@@ -1,0 +1,147 @@
+---
+taskId: "TST-023"
+title: "Adversarial API Inputs — Safe Validation and Idempotency"
+description: "Reject unsafe pagination, forbidden JSON, oversized bodies and conflicting idempotency keys before mutating transfer state."
+demo: false
+curriculumFingerprint: "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-023.json';
+import questionBank from '../../../review-banks/TST-023.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** klien mengirim page=-1, limit=1000000, isAdmin=true atau Idempotency-Key yang sama dengan amount berbeda. Bahkan error response yang benar tidak cukup jika database sudah berubah.
+
+**Langkah pertama:** definisikan input yang sah dan validasi semuanya sebelum memasuki operasi penyimpanan.
+
+<MentalModel title="Validate first, mutate once">
+
+- GET: page integer positif, limit 1–50; filter/sort wajib allowlisted dan query duplikat ditolak.
+- POST: application/json dengan maksimum 1024 byte; hanya lima field transfer yang diizinkan.
+- Same key dan same payload: replay 201 yang pertama tanpa transfer baru.
+- Same key tetapi different payload: 409 IDEMPOTENCY_KEY_CONFLICT tanpa mutasi.
+- Semua input error menggunakan application/problem+json RFC 9457 dengan type/title/status/code stabil.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+HTTP input
+   |
+ Query / raw-body constraints
+   +-- invalid ---------------------> 400 / 413 / 415
+   |
+ Typed DTO and allowed fields
+   +-- invalid ---------------------> 400
+   |
+ Idempotency key + fingerprint
+   +-- same payload / existing key -> replay original 201
+   +-- different payload / key ----> 409
+   +-- valid new operation --------> one 201 + one write
+~~~
+
+</ConceptGraph>
+
+## Fault matrix
+
+| Input | Response | Additional writes |
+| --- | --- | --- |
+| Negative page, enormous limit, unsupported sort/filter | 400 | 0 |
+| Unknown or repeated query parameter | 400 | 0 |
+| JSON larger than 1024 bytes | 413 | 0 |
+| Wrong media type | 415 | 0 |
+| Missing field, malformed JSON, forbidden property | 400 | 0 |
+| Existing key with new amount | 409 | 0 |
+| Same key and same body | Cached 201 | 0 |
+| First valid POST | 201 | 1 |
+
+The 1024-byte cap and the limit of 50 are explicit lab policies, not universal HTTP or OpenAPI defaults. The example is a sequential Node in-memory API; real concurrent idempotency requires durable transactional enforcement.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber primer
+
+<SourceList sources={[
+ {title:'OpenAPI Specification 3.1.1',url:'https://spec.openapis.org/oas/v3.1.1.html'},
+ {title:'RFC 9110 — HTTP Semantics',url:'https://www.rfc-editor.org/rfc/rfc9110.html'},
+ {title:'RFC 9457 — Problem Details',url:'https://www.rfc-editor.org/rfc/rfc9457.html'},
+ {title:'Stripe Engineering — Idempotency',url:'https://stripe.com/blog/idempotency'},
+ {title:'JSON Schema Validation 2020-12',url:'https://json-schema.org/draft/2020-12/json-schema-validation'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Real HTTP adversarial lab
+
+Dari root repository dengan Node 24:
+
+~~~sh
+node generation/fixtures/TST-023/adversarial-api.mjs
+~~~
+
+Expected stdout:
+
+~~~text
+invalid-requests=21
+stable-problem-details=verified
+same-key-replay=201
+different-payload-conflict=409
+created-transfers=1
+idempotency-records=1
+unauthorized-mutations=0
+runtime=local-node-http-only
+~~~
+
+Fixture menjalankan 13 kasus query GET invalid, 8 kasus POST invalid, first successful transfer, idempotent replay, key conflict dan inspeksi data GET. Tidak ada permintaan ke bank atau layanan produksi. Semua rejected request memiliki Problem Details yang diperiksa dan tidak membuat transfer.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal input adversarial
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent Project — No Unauthorized Mutation
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Adversarial API Inputs — stable errors and no unintended writes"
+ brief="Uji API transfer lokal dengan pagination negatif, limit ekstrem, key berulang, oversized JSON dan forbidden field. Buktikan setiap penolakan tidak mengubah state."
+ acceptanceCriteria={[
+  'Page negatif, limit terlalu besar, query duplikat dan sort/filter tak dikenal menghasilkan 400.',
+  'JSON terlalu besar menghasilkan 413; media type tak dikenal menghasilkan 415.',
+  'Malformed JSON, unknown properties dan invalid transfer fields menghasilkan 400 sebelum write.',
+  'Semua error memakai RFC 9457 type/title/status dan code yang konsisten.',
+  'Valid POST menghasilkan tepat satu transfer; same key/body memberi original 201 tanpa write baru.',
+  'Same key tetapi amount berbeda menghasilkan 409 tanpa mengubah transfer awal.',
+  'Buat variasi independen: forbidden nested field dan changed currency under same key.',
+  'Dokumentasikan bahwa Node in-memory single-process bukan bukti DB durability, concurrency safety atau settlement.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Mampu menegakkan batas query dan request body sebelum mutasi.',
+ 'Mampu memverifikasi stable Problem Details untuk negative tests.',
+ 'Membedakan idempotency replay dan payload conflict.',
+ 'Tidak mengklaim in-memory fixture sebagai production bank behavior.'
+]} />
+
+</LessonStage>

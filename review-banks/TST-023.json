@@ -1,0 +1,80 @@
+{
+  "itemId": "TST-023",
+  "version": "lesson-spec-v1:sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "curriculumFingerprint": "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "GET /transfers?page=-1 padahal page minimal satu. Apa hasil yang benar?",
+      "options": [
+        "Otomatis gunakan page satu",
+        "HTTP 400 INVALID_PAGE tanpa mutasi",
+        "HTTP 201 Created"
+      ],
+      "answer": 1,
+      "explanation": "Halaman negatif melanggar query contract; server menolak sebelum membaca atau menulis state.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "POST /transfers dengan JSON 2 KB ketika body cap lab hanya 1024 byte harus menghasilkan?",
+      "options": [
+        "HTTP 413 dan tanpa transfer",
+        "HTTP 200 dengan payload dipotong",
+        "HTTP 503"
+      ],
+      "answer": 0,
+      "explanation": "413 Content Too Large berlaku untuk body yang melampaui batas penerimaan server.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Request JSON berisi isAdmin:true yang tidak diperbolehkan oleh CreateTransfer. Apa yang aman?",
+      "options": [
+        "Copy semua field langsung ke storage",
+        "Simpan lalu buang isAdmin",
+        "HTTP 400 FORBIDDEN_FIELD sebelum write"
+      ],
+      "answer": 2,
+      "explanation": "Allowlist DTO mencegah mass-assignment data yang tidak dideklarasikan.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "POST yang sama dikirim lagi memakai idempotency key yang sama setelah HTTP 201. Hasil lab?",
+      "options": [
+        "Transfer baru setiap kali",
+        "Replay 201 dengan transferId sama, tanpa write kedua",
+        "HTTP 500"
+      ],
+      "answer": 1,
+      "explanation": "Replay identik mengambil hasil pertama tanpa duplikasi operasi.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Key idempotency sama tetapi amount berubah pada request kedua. Apa hasil yang benar?",
+      "options": [
+        "HTTP 409 tanpa mengubah transfer pertama",
+        "Mutasi transfer pertama dengan nilai baru",
+        "HTTP 201 dan transfer baru"
+      ],
+      "answer": 0,
+      "explanation": "Key tidak boleh digunakan untuk operasi berbeda; mismatch harus menolak sebelum mutasi.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

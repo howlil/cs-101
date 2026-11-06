@@ -28,6 +28,7 @@ G12: New Java and PostgreSQL rubric evidence must cite actual CLI/DB runs, while
 G13: NET-006 code-level connect/EOF/refusal evidence must not be promoted into packet-level TCP handshake or retransmission claims without actual capture.
 G14: SQL-001 V3 receipt asserts authorship and explicitly not-executable SQL runtime, while a separate Docker-isolated PostgreSQL 16 integration step proves schema/data and repeatability. No application database binding is introduced.
 G15: TST-007 distinguishes generator's no-executable Maven/JUnit status from actual Surefire execution; the dedicated pure Java lab tests observable fee results, fixed decimal policy and errors without Spring context.
+G21: TST-023 checks query, body size/media/DTO and idempotency keys before mutation; an exact request replay preserves the original 201, different body with same key rejects 409.
 G20: The TST-022 HTTP fixture observes definite versus ambiguous outcomes and proves each simulated debit is sent exactly once; response loss after stub-side applied flag must remain caller UNKNOWN.
 G19: TST-021's Pact V4 contract must be authored by running a consumer client against Pact mock and independently replayed against local HTTP provider. Positive and deliberate amount type mutation verdicts are separately asserted; the generator's not-executable status is not Pact proof.
 G18: TST-020 detects selected SYS-008 response schema and payload drift on cloned candidates, distinguishes tolerant from strict consumer behavior and never claims complete OpenAPI or deployed consumer verification.
@@ -49,6 +50,7 @@ DEC12: Cross-domain expansion is a small editorial overlay addition with two typ
 DEC13: NET-006 uses ephemeral loopback Node sockets with local stream-level proof only; privileged network capture belongs to a disposable VM learner lab.
 DEC14: PostgreSQL SQL runner remains outside the eight-second Node/Java V3 authoring fixture: a disposable Docker container with no external network runs lab SQL and six inspections in CI; authoring plan keeps an explicit not-executable reason.
 DEC15: Use a separate Maven project with JUnit Jupiter 5.14.4 and Surefire 3.5.4 to prove TST-007 instead of adding plugin execution to the bounded authoring runner or starting Spring; assert test count from Surefire XML.
+DEC21: TST-023 uses one dependency-free Node 24 loopback fixture; no DB, concurrent request atomicity or real payment authorization is proved.
 DEC20: TST-022 injects HTTP faults via a bounded dependency-free Node 24 local stub, not a WireMock process. Retry pacing is recorded but never triggers a new debit POST.
 DEC19: TST-021 keeps Pact 17.1.4 in isolated labs/TST-021/package.json, outside Astro dependencies; CI uses the existing verification workflow and a temporary Pact contract file without a broker or deployed bank integration.
 DEC18: TST-020 uses one bounded Node 24 source fixture against tracked SYS-008 OpenAPI; no new runtime dependencies or changes to the canonical contract.
@@ -73,6 +75,7 @@ PF15 (P19,G12) [important] | G1 path/rubric validation, graph canvas neighborhoo
 PF16 (P20,G13) [important] | NET-006 V3 receipt, Node loopback fixture and Materi/Soal/Project route smoke | merge | pnpm ci
 PF17 (P21,G14) [important] | SQL-001 reproducible bundle, isolated real PostgreSQL run, six-query expected data and focused route smoke | merge | pnpm ci
 PF18 (P22,G15) [important] | TST-007 authoring V3 receipt, real Maven Surefire 20-case report and Materi/Soal/Project smoke | merge | pnpm ci
+PF24 (P28,G21) [important] | 21 real adversarial HTTP checks, unchanged state for rejected inputs, RFC 9457 stable errors, key replay/409, V3 and three-view smoke | merge | pnpm ci
 PF23 (P27,G20) [important] | V3 SHA receipts, 11 real HTTP fault cases and no blind retries, focused Materi/Soal/Project smoke | merge | pnpm ci
 PF22 (P26,G19) [important] | TST-021 V3 reproducibility and actual Pact consumer mock, provider replay, negative type mutation, 3-view smoke | merge | pnpm ci and dedicated Pact step
 PF21 (P25,G18) [important] | TST-020 V3 reproducibility, required/type/enum negative checks and additive conditional consumer tests with 3-view smoke | merge | pnpm ci

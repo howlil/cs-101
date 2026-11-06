@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "TST-023",
+  "curriculumFingerprint": "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "examples": [
+    {
+      "id": "adversarial-inputs-http",
+      "runtime": "node",
+      "file": "adversarial-api.mjs",
+      "expectedStdout": "invalid-requests=21\nstable-problem-details=verified\nsame-key-replay=201\ndifferent-payload-conflict=409\ncreated-transfers=1\nidempotency-records=1\nunauthorized-mutations=0\nruntime=local-node-http-only\n"
+    }
+  ]
+}

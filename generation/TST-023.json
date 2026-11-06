@@ -1,0 +1,44 @@
+{
+  "itemId": "TST-023",
+  "fingerprint": "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "sources": [
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html"
+    },
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html"
+    },
+    {
+      "title": "Stripe Engineering — Designing robust and predictable APIs with idempotency",
+      "url": "https://stripe.com/blog/idempotency"
+    },
+    {
+      "title": "JSON Schema Validation Draft 2020-12",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-validation"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments on bounded query, body and idempotency validation",
+      "assessedAt": "Five local quiz questions plus real Node HTTP fixture with 21 invalid requests and replay/conflict proofs",
+      "evidenceExpected": "Invalid pagination, huge limit, oversized JSON, forbidden fields produce stable errors without writes; identical key/body replays 201, different payload gets 409."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent sort, forbidden nested input and currency-mismatch cases",
+      "assessedAt": "Independent Project and exact state-counter proof",
+      "evidenceExpected": "New adversarial input is rejected with a stable Problem Details response and no mutation."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "itemId": "TST-023",
+  "curriculumFingerprint": "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "sources": [
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html",
+      "tier": 0,
+      "supports": [
+        "Query parameter and request-body schema contracts"
+      ],
+      "notes": [
+        "Parameter Object and Schema Object"
+      ]
+    },
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "tier": 0,
+      "supports": [
+        "400, 409, 413 and 415 status semantics"
+      ],
+      "notes": [
+        "Sections 15.5.1, 15.5.10, 15.5.14 and 15.5.16"
+      ]
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "tier": 0,
+      "supports": [
+        "Stable application/problem+json type, title and status"
+      ],
+      "notes": [
+        "Section 3.1"
+      ]
+    },
+    {
+      "title": "Stripe Engineering — Designing robust and predictable APIs with idempotency",
+      "url": "https://stripe.com/blog/idempotency",
+      "tier": 0,
+      "supports": [
+        "Idempotency keys and cached original operation results"
+      ],
+      "notes": [
+        "Guaranteeing exactly once semantics; local lab policy is illustrative"
+      ]
+    },
+    {
+      "title": "JSON Schema Validation Draft 2020-12",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "tier": 0,
+      "supports": [
+        "Required fields, string types and schema limits"
+      ],
+      "notes": [
+        "Sections 6.1, 6.3, 6.5"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "parameter-contract",
+      "statement": "OpenAPI describes API query and body parameter contracts, while specific bounds are defined by the API.",
+      "conceptIds": [
+        "query-bounds"
+      ],
+      "sourceUrl": "https://spec.openapis.org/oas/v3.1.1.html",
+      "locator": "Parameter Object and Schema Object",
+      "rationale": "OpenAPI defines the API contract vocabulary."
+    },
+    {
+      "id": "http-error-codes",
+      "statement": "HTTP semantics distinguish bad requests, conflicts, oversized content and unsupported media types.",
+      "conceptIds": [
+        "query-bounds",
+        "body-boundary"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 15.5.1, 15.5.10, 15.5.14 and 15.5.16",
+      "rationale": "RFC 9110 specifies 400/409/413/415."
+    },
+    {
+      "id": "stable-problem",
+      "statement": "Problem Details describes machine-readable HTTP errors using type, title, status and extensible members.",
+      "conceptIds": [
+        "error-contract"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "locator": "Section 3.1",
+      "rationale": "RFC 9457 defines application/problem+json."
+    },
+    {
+      "id": "deduplicated-write",
+      "statement": "Idempotency keys identify one logical mutation so an identical replay can recover the prior result without duplicating effects.",
+      "conceptIds": [
+        "idempotency"
+      ],
+      "sourceUrl": "https://stripe.com/blog/idempotency",
+      "locator": "Guaranteeing exactly once semantics",
+      "rationale": "Stripe engineering explains deduplication and cached responses."
+    },
+    {
+      "id": "schema-required",
+      "statement": "JSON Schema validation supports required properties and primitive type constraints.",
+      "conceptIds": [
+        "body-boundary"
+      ],
+      "sourceUrl": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "locator": "Sections 6.1 and 6.5.3",
+      "rationale": "The JSON Schema standard defines relevant input checks."
+    }
+  ]
+}

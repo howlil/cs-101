@@ -1,0 +1,177 @@
+{
+  "unitId": "TST-023",
+  "curriculumFingerprint": "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "bounded-query",
+        "objective": "Reject negative pagination, huge limits, repeated keys and unsupported sort/filter before reading data.",
+        "whyItMatters": "Untrusted pagination and sort keys can trigger unbounded work or invalid reads.",
+        "mentalModel": "Validate the entire query value and enforce a fixed allowlist.",
+        "explanation": "This lab requires positive page in 1..10000, limit in 1..50, sort=createdAt, and filter all or currency:IDR/USD; duplicate and unknown parameters fail with stable 400 Problem Details. These bounds are an educational policy, not universal OpenAPI defaults.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "GET /transfers?page=-1&limit=1000000 would bypass a weak parseInt-based handler.",
+          "steps": [
+            {
+              "action": "Inspect raw query parameters, including duplicated page.",
+              "reason": "A multi-value parameter is ambiguous and should fail closed.",
+              "expectedResult": "Unknown/duplicate values receive HTTP 400."
+            },
+            {
+              "action": "Require full-string positive safe integer and bounded limit.",
+              "reason": "parseInt('2x') would otherwise accept malformed input.",
+              "expectedResult": "Negative, huge and fractional values receive INVALID_PAGE or INVALID_LIMIT."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Can limit=9999999 be silently clamped under this lab contract?",
+          "hints": [
+            "The contract explicitly allows 1 through 50.",
+            "An invalid query should not masquerade as success."
+          ],
+          "explanation": "No. Reject it as INVALID_LIMIT with HTTP 400; clamping would require a separately documented API policy."
+        },
+        "independentChallenge": {
+          "prompt": "Add sort=transferId as an approved mode but keep sort=balance rejected.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "The added valid sort works while unknown sort gives the same stable error, without modifying records."
+          ],
+          "variationFromExample": "A new valid sort allowlist, rather than a page-range invalid input."
+        },
+        "firstAction": "Write the allowed query names and page/limit bounds.",
+        "misconceptionRepair": {
+          "likelyMistake": "Using parseInt on untrusted pagination strings.",
+          "whyItFails": "Trailing junk or unsafe numbers can be silently truncated.",
+          "correctiveAction": "Validate the entire string, Number.isSafeInteger and range."
+        },
+        "selfCheck": {
+          "expectedObservation": "Every invalid query is HTTP 400 and no storage mutation occurs.",
+          "ifUnexpected": "Inspect duplicate getAll values and full-number regex."
+        },
+        "continueFromHere": {
+          "nextAction": "Validate raw bytes and DTO allowlist for POST.",
+          "resumeCue": "Start with page>=1 and limit 1..50."
+        }
+      },
+      {
+        "id": "bounded-body",
+        "objective": "Reject oversized, malformed or forbidden JSON and wrong content types before any write.",
+        "whyItMatters": "Input mass-assignment and unbounded request bodies can create unintended state effects.",
+        "mentalModel": "Raw byte cap -> media type -> parse -> DTO allowlist -> mutation.",
+        "explanation": "The Node fixture accepts five CreateTransfer fields and a 1024-byte maximum. It returns 413 for oversized body, 415 for unsupported media, and 400 for malformed JSON, forbidden fields or invalid values. Validation occurs before the in-memory write. It is a reviewed subset, not a complete JSON Schema engine or authorization system.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A transfer POST supplies a valid amount and a forged isAdmin:true property.",
+          "steps": [
+            {
+              "action": "Consume body with a strict 1024-byte cap.",
+              "reason": "No unbounded JSON allocation is permitted.",
+              "expectedResult": "Oversized request yields 413 without mutation."
+            },
+            {
+              "action": "Reject additional properties and construct a stored record from only five approved fields.",
+              "reason": "Untrusted privilege properties must never propagate to state.",
+              "expectedResult": "isAdmin and balanceAdjustment yield 400 FORBIDDEN_FIELD."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Can a handler write all JSON fields and remove bad keys afterward?",
+          "hints": [
+            "A later rejection does not undo an earlier side effect.",
+            "Validate before entering the mutation branch."
+          ],
+          "explanation": "No. Reject forbidden properties first and copy only approved fields after validation."
+        },
+        "independentChallenge": {
+          "prompt": "Add an unexpected nested privileges object and invalid decimal amount; assert both are rejected without a transfer.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A stable problem response plus zero new transfer and idempotency entries."
+          ],
+          "variationFromExample": "Nested forbidden input rather than top-level isAdmin."
+        },
+        "firstAction": "Define the exact allowed field names and body cap.",
+        "misconceptionRepair": {
+          "likelyMistake": "Persisting raw request JSON directly.",
+          "whyItFails": "Mass-assigned properties can contaminate state.",
+          "correctiveAction": "Validate and project a safe DTO before any write."
+        },
+        "selfCheck": {
+          "expectedObservation": "400/413/415 responses have stable Problem Details and zero inserts.",
+          "ifUnexpected": "Inspect when storage push and idempotency record insertion occur."
+        },
+        "continueFromHere": {
+          "nextAction": "Test key replay and same-key payload conflict.",
+          "resumeCue": "Return to raw body -> safe DTO."
+        }
+      },
+      {
+        "id": "idempotency-conflict",
+        "objective": "Prove same-key exact replay preserves one record and same-key changed payload conflicts.",
+        "whyItMatters": "A repeated POST after a lost response must not duplicate an effect or overwrite an existing operation.",
+        "mentalModel": "One validated payload fingerprint per idempotency key; identical replay shares result, conflicting data gets 409.",
+        "explanation": "The fixture uses an 8..64 character alphanumeric/hyphen Idempotency-Key. The first valid POST returns 201 and stores one PENDING transfer. Repeating the same body/key returns the original 201 without a second mutation; altering amount with the same key returns 409. This only proves sequential in-memory behavior, not durable, concurrent, bank-authenticated or settled transfers.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A client repeats its accepted transfer with the original key after losing a response.",
+          "steps": [
+            {
+              "action": "Submit a valid payload and record its 201 transferId.",
+              "reason": "The first operation creates one state entry.",
+              "expectedResult": "One transfer and one key record."
+            },
+            {
+              "action": "Replay the same key/body, then change amount under that same key.",
+              "reason": "Identical replay and misuse must be distinguished.",
+              "expectedResult": "201 replay with same transferId, then 409 conflict; still one transfer."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Should changing amount under the same key return another 201?",
+          "hints": [
+            "The key represents one logical operation.",
+            "Different validated payload means a different operation."
+          ],
+          "explanation": "No. Return 409 IDEMPOTENCY_KEY_CONFLICT without changing the original record."
+        },
+        "independentChallenge": {
+          "prompt": "Use a different currency with the same key and assert 409 and unchanged original storage.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Changed-currency replay fails with 409 and no second write."
+          ],
+          "variationFromExample": "Currency mismatch rather than amount mismatch."
+        },
+        "firstAction": "Use one key with identical payload for two POSTs.",
+        "misconceptionRepair": {
+          "likelyMistake": "Creating another record for every POST despite a repeated key.",
+          "whyItFails": "Lost network responses may trigger duplicate mutations.",
+          "correctiveAction": "Store key and validated body fingerprint before allowing replay."
+        },
+        "selfCheck": {
+          "expectedObservation": "First 201 creates one record, repeated 201 creates none, changed body gets 409.",
+          "ifUnexpected": "Check fingerprint comparison before the write branch."
+        },
+        "continueFromHere": {
+          "nextAction": "Study persistent atomicity and concurrent races in service-boundary testing.",
+          "resumeCue": "One key, one logical operation."
+        }
+      }
+    ]
+  }
+}

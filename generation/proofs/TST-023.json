@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "TST-023",
+  "curriculumFingerprint": "sha256:9805a9941f82b1b3db2bb35194672724c6097158c7e38a8fc61e88d5c80cc480",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "adversarial-inputs-http",
+      "runtime": "node",
+      "file": "adversarial-api.mjs",
+      "fixtureSha256": "2822b808ce49f663d69c1fd2c1155e581a8ea8bfccf3e88aed53bf38a882669b",
+      "stdoutSha256": "bbc010e5451721c969435e7b4411acac5394cc1540b878350c970996b6f5bbe5",
+      "verified": true
+    }
+  ]
+}
