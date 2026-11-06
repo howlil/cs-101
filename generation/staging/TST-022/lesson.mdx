@@ -1,0 +1,144 @@
+---
+taskId: "TST-022"
+title: "Provider Fault Matrix — Unknown Debit Outcomes"
+description: "Map eleven real provider HTTP fault scenarios to safe client outcomes, without blind debit retries."
+demo: false
+curriculumFingerprint: "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-022.json';
+import questionBank from '../../../review-banks/TST-022.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** bank mungkin menerapkan debit sebelum koneksi timeout. Menganggap gagal lalu mengirim ulang bisa membuat debit duplikat.
+
+**Langkah pertama:** bedakan definitive accepted, known rejection, temporary HTTP condition dan UNKNOWN outcome.
+
+<MentalModel title="Timeout bukan penolakan debit">
+
+- SUCCESS: hanya 200 dengan ACCEPTED, providerReference, amount decimal string dan currency valid; accepted bukan settlement.
+- REJECTED: 400 dengan business code INVALID_ACCOUNT yang dikenal.
+- RETRYABLE: 429 atau 503 menunjukkan kondisi sementara, bukan izin mengulang POST debit.
+- UNKNOWN: timeout, reset, JSON rusak, invalid amount, 200 PENDING atau 400 dengan error yang tidak dikenal.
+- Untuk retry debit nyata, lakukan pengecekan status dan pastikan provider idempotency contract terlebih dahulu.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+POST /bank/debits
+      |
+  status and payload
+      +-- 200 valid ACCEPTED -> SUCCESS (not settled)
+      +-- 400 known rejection -> REJECTED
+      +-- 429 / 503 ----------> RETRYABLE
+      +-- timeout / reset ----> UNKNOWN
+      +-- invalid JSON -------> UNKNOWN
+                                  |
+                            reconcile status
+                                  |
+                             no blind retry
+~~~
+
+</ConceptGraph>
+
+## HTTP fault matrix
+
+| Fault | Mapping | Safe action |
+| --- | --- | --- |
+| 200 accepted with valid JSON | SUCCESS | Store provider reference |
+| 400 INVALID_ACCOUNT | REJECTED | Do not retry |
+| 429 rate limit / 503 unavailable | RETRYABLE | Check status before retry |
+| Delayed response beyond timeout | UNKNOWN | Query provider status |
+| Socket reset after receiving request | UNKNOWN | Query provider status |
+| Malformed JSON or unexpected amount type | UNKNOWN | Query provider status |
+| Unknown rejection body or PENDING | UNKNOWN | Query provider status |
+
+**Penting:** label RETRYABLE hanya untuk keadaan HTTP sementara. Header Retry-After adalah informasi pacing dan tidak membuktikan debit belum terjadi. Client fixture tidak pernah menjalankan request debit kedua.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber primer
+
+<SourceList sources={[
+ {title:'WireMock — Simulating Faults',url:'https://wiremock.org/docs/simulating-faults/'},
+ {title:'RFC 9110 — HTTP Semantics',url:'https://www.rfc-editor.org/rfc/rfc9110.html'},
+ {title:'RFC 6585 — 429 Too Many Requests',url:'https://www.rfc-editor.org/rfc/rfc6585.html'},
+ {title:'NAB Gateway — Transaction Timeout Guidance',url:'https://nabgateway-developer.nab.com.au/docs/nab/en-us/payments/developer/ctv/rest/payments/payments-intro/timeouts-intro.html'},
+ {title:'Node.js — HTTP API',url:'https://nodejs.org/api/http.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Run real HTTP fault fixture
+
+Dengan Node 24 dari repository root:
+
+~~~sh
+node generation/fixtures/TST-022/provider-fault-matrix.mjs
+~~~
+
+Expected output:
+
+~~~text
+wire-cases=11
+success=1;rejected=1;retryable=3;unknown=6
+timeout-and-reset=remote-may-have-applied
+blind-debit-retries=0
+target=local-node-fault-stub-not-wiremock
+~~~
+
+Node HTTP server menjalankan sebelas fault di 127.0.0.1 dengan port ephemeral. Pada timeout dan reset, stub mencatat efek debit **sebelum** respons hilang, sedangkan caller tetap UNKNOWN. Semua skenario memiliki satu request; tidak ada retry otomatis.
+
+**Batas bukti:** simulasi memakai Node native, bukan WireMock process. Tidak ada API bank eksternal, database, Spring MVC, JWT, ledger atau pembayaran sungguhan.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal Provider Fault Matrix
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent Project — Safe Provider Failure Handling
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Provider Fault Matrix — failure-safe debit client"
+ brief="Bangun stub bank terisolasi, inject 200/400/429/503, delay, invalid JSON dan reset; petakan semua outcome tanpa otomatis mengulang POST debit."
+ acceptanceCriteria={[
+  'Stub lokal benar-benar mengirim 200, 400, 429, 503, delayed response, invalid JSON dan socket reset.',
+  'Valid 200 menjadi accepted SUCCESS, known 400 menjadi REJECTED, 429/503 RETRYABLE condition dan fault ambigu UNKNOWN.',
+  'Pahami Retry-After tanpa membuat jadwal debit kedua secara otomatis.',
+  'Tunjukkan provider dapat mencatat applied sebelum timeout atau reset, tetapi caller tetap UNKNOWN.',
+  'Pastikan setiap skenario menghasilkan tepat satu POST dan tidak pernah blind debit retry.',
+  'Uji satu kasus independen: 503 tanpa Retry-After atau partial JSON stream yang terputus.',
+  'Jelaskan bahwa status lookup dan jaminan idempotency provider wajib sebelum retry transaksi nyata.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Membedakan definitive rejection, transient HTTP condition, dan unknown outcome.',
+ 'Tidak menganggap SUCCESS dari stub sebagai settlement uang nyata.',
+ 'Tidak mengulangi debit secara otomatis hanya karena 429/503 atau timeout.',
+ 'Memahami batas Node fault stub dibanding WireMock dan provider produksi.'
+]} />
+
+</LessonStage>

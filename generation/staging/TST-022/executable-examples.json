@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "TST-022",
+  "curriculumFingerprint": "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "examples": [
+    {
+      "id": "bank-http-fault-matrix",
+      "runtime": "node",
+      "file": "provider-fault-matrix.mjs",
+      "expectedStdout": "wire-cases=11\nsuccess=1;rejected=1;retryable=3;unknown=6\ntimeout-and-reset=remote-may-have-applied\nblind-debit-retries=0\ntarget=local-node-fault-stub-not-wiremock\n"
+    }
+  ]
+}
