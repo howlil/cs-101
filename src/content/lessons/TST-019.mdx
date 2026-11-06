@@ -62,8 +62,8 @@ SYS-008 OpenAPI
 | Method/path | Success | Declared errors |
 | --- | --- | --- |
 | POST /transfers | 201 plus Location | 400, 401, 403, 409, 500 |
-| GET /transfers/{id} | 200 | 401, 403, 404, 500 |
-| GET /accounts/{id} | 200 | 401, 403, 404, 500 |
+| `GET /transfers/{id}` | 200 | 401, 403, 404, 500 |
+| `GET /accounts/{id}` | 200 | 401, 403, 404, 500 |
 
 **422 Unprocessable Content:** disebut dalam kriteria kurikulum dan RFC 9110, tetapi **belum ada di SYS-008 OpenAPI**. Status ini adalah *contract gap*, bukan bukti pengujian lulus. Perlu revisi kontrak dan implementasi yang disengaja jika 422 akan didukung.
 
