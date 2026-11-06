@@ -1,0 +1,177 @@
+{
+  "unitId": "TST-022",
+  "curriculumFingerprint": "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "definite-business-result",
+        "objective": "Differentiate accepted and explicitly rejected debits from malformed provider success and rejection bodies.",
+        "whyItMatters": "An HTTP status alone cannot establish the provider's business result.",
+        "mentalModel": "Validated status plus stable business JSON gives a definite response; inconsistent JSON leaves UNKNOWN.",
+        "explanation": "This lab defines 200 with result ACCEPTED, matching amount/currency and providerReference as SUCCESS meaning accepted by the educational stub, not settled funds. Only 400 with the known INVALID_ACCOUNT rejection is REJECTED. Malformed 200, 400 with unknown body and 200 PENDING map UNKNOWN.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A local bank returns 200 but serializes amount as JSON number.",
+          "steps": [
+            {
+              "action": "Compare the 200 body with expected decimal-string amount and provider reference.",
+              "reason": "Status 200 does not validate representation.",
+              "expectedResult": "A correct ACCEPTED response maps SUCCESS."
+            },
+            {
+              "action": "Mutate amount to number, then inspect the classification.",
+              "reason": "The caller must fail closed on invalid provider data.",
+              "expectedResult": "An invalid 200 maps UNKNOWN."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Would 200 without providerReference be a successful settlement?",
+          "hints": [
+            "Check response fields, not status alone.",
+            "ACCEPTED in a stub is not proof of final settlement."
+          ],
+          "explanation": "This lab defines 200 with result ACCEPTED, matching amount/currency and providerReference as SUCCESS meaning accepted by the educational stub, not settled funds. Only 400 with the known INVALID_ACCOUNT rejection is REJECTED. Malformed 200, 400 with unknown body and 200 PENDING map UNKNOWN."
+        },
+        "independentChallenge": {
+          "prompt": "Model a different response with result PENDING and explain why it is not definite SUCCESS.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "An independent pending scenario maps UNKNOWN."
+          ],
+          "variationFromExample": "Pending business outcome rather than invalid amount type."
+        },
+        "firstAction": "List required accepted response fields.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating all 200 results as settled payments.",
+          "whyItFails": "Acceptance status and ledger settlement are distinct business events.",
+          "correctiveAction": "Validate the provider response and preserve explicit acceptance-only wording."
+        },
+        "selfCheck": {
+          "expectedObservation": "Valid 200 maps SUCCESS, valid 400 maps REJECTED, inconsistent body maps UNKNOWN.",
+          "ifUnexpected": "Recheck exact JSON properties and value types."
+        },
+        "continueFromHere": {
+          "nextAction": "Inspect transient HTTP status without sending a second debit.",
+          "resumeCue": "Start from the accepted response contract."
+        }
+      },
+      {
+        "id": "transient-status-guard",
+        "objective": "Treat 429 and 503 as temporary provider conditions without automatically resending debit.",
+        "whyItMatters": "Blind payment retry can create duplicate debit effects when prior outcome is unknown.",
+        "mentalModel": "RETRYABLE describes recoverable HTTP conditions, not permission to replay a non-idempotent mutation.",
+        "explanation": "429 Too Many Requests and 503 Service Unavailable may include Retry-After. The lab reads bounded numeric delay values for 429/503 and maps them RETRYABLE with action CHECK_STATUS_BEFORE_RETRY, without issuing another POST. An invalid delay is omitted instead of invented.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A bank returns HTTP 429 Retry-After: 3 to a debit submission.",
+          "steps": [
+            {
+              "action": "Send exactly one request to the 429 stub and inspect the header.",
+              "reason": "Observe real HTTP status and pacing metadata.",
+              "expectedResult": "RETRYABLE with retryAfterSeconds=3."
+            },
+            {
+              "action": "Inspect the request counter and next action.",
+              "reason": "Temporary status is not deduplication proof.",
+              "expectedResult": "Action checks status and no repeated debit is emitted."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "May a client repeat the same debit automatically after a 503 Retry-After timer?",
+          "hints": [
+            "The header concerns HTTP pacing.",
+            "It does not prove the previous debit was not applied."
+          ],
+          "explanation": "429 Too Many Requests and 503 Service Unavailable may include Retry-After. The lab reads bounded numeric delay values for 429/503 and maps them RETRYABLE with action CHECK_STATUS_BEFORE_RETRY, without issuing another POST. An invalid delay is omitted instead of invented."
+        },
+        "independentChallenge": {
+          "prompt": "Inject 503 without Retry-After and prove no fabricated delay and no blind retry.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "One POST, RETRYABLE condition and absent delay."
+          ],
+          "variationFromExample": "503 without a delay rather than worked 429 with a delay."
+        },
+        "firstAction": "Write action CHECK_STATUS_BEFORE_RETRY for 429 and 503.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating a RETRYABLE label as an automatic retry instruction.",
+          "whyItFails": "Duplicate financial writes may occur absent a proved idempotency contract.",
+          "correctiveAction": "Separate transport classification from an explicitly gated replay operation."
+        },
+        "selfCheck": {
+          "expectedObservation": "429/503 classified as transient, with one POST per scenario.",
+          "ifUnexpected": "Inspect the client for hidden fetch loops."
+        },
+        "continueFromHere": {
+          "nextAction": "Test ambiguous timeout, reset and malformed responses.",
+          "resumeCue": "RETRYABLE is a condition, never debit replay permission."
+        }
+      },
+      {
+        "id": "ambiguous-provider-transport",
+        "objective": "Classify timeout, socket reset and malformed JSON as UNKNOWN while guarding against duplicate debit.",
+        "whyItMatters": "A provider may apply a debit before its reply is lost, leaving the client without final evidence.",
+        "mentalModel": "The provider's actual internal state can differ from the client's last observed HTTP result.",
+        "explanation": "In the Node lab the server records an applied flag before delaying the HTTP reply beyond the timeout or resetting its socket. The client sees UNKNOWN and uses QUERY_PROVIDER_STATUS. Malformed JSON and invalid/missing business results are also UNKNOWN. The entire fixture sends each debit once, with no real bank, WireMock process, or ledger.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The provider records a debit, destroys the socket, and the caller receives a transport failure.",
+          "steps": [
+            {
+              "action": "Record stub-side applied before closing the connection.",
+              "reason": "This models the danger of post-dispatch failure.",
+              "expectedResult": "The stub records an applied debit even though the client receives no success body."
+            },
+            {
+              "action": "Assert UNKNOWN and a single outbound request.",
+              "reason": "No definite outcome can justify an automatic duplicate debit.",
+              "expectedResult": "One request, UNKNOWN response, zero blind retry."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Does a timeout prove the bank rejected a debit?",
+          "hints": [
+            "The timeout tells you about communication, not bank ledger state.",
+            "The provider could apply work before its reply is lost."
+          ],
+          "explanation": "In the Node lab the server records an applied flag before delaying the HTTP reply beyond the timeout or resetting its socket. The client sees UNKNOWN and uses QUERY_PROVIDER_STATUS. Malformed JSON and invalid/missing business results are also UNKNOWN. The entire fixture sends each debit once, with no real bank, WireMock process, or ledger."
+        },
+        "independentChallenge": {
+          "prompt": "Send partial JSON then close the stream, preserving the UNKNOWN result and one-request limit.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A partial-response case remains UNKNOWN and never resends a debit."
+          ],
+          "variationFromExample": "Partial response truncation instead of reset before response."
+        },
+        "firstAction": "Write the rule that post-dispatch transport failure implies UNKNOWN.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming network failure means rejected payment.",
+          "whyItFails": "Work may have been committed on the remote side before the connection failed.",
+          "correctiveAction": "Record UNKNOWN and reconcile with provider status before any future action."
+        },
+        "selfCheck": {
+          "expectedObservation": "Both simulated applied timeout and reset remain UNKNOWN at the caller.",
+          "ifUnexpected": "Inspect whether the stub applied before losing the response."
+        },
+        "continueFromHere": {
+          "nextAction": "Apply this matrix to a service plus persistence boundary in a later curriculum slice.",
+          "resumeCue": "Remember remote apply and observed reply are different facts."
+        }
+      }
+    ]
+  }
+}

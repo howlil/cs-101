@@ -1,0 +1,44 @@
+{
+  "itemId": "TST-022",
+  "fingerprint": "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "sources": [
+    {
+      "title": "WireMock — Simulating Faults",
+      "url": "https://wiremock.org/docs/simulating-faults/"
+    },
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+    },
+    {
+      "title": "RFC 6585 — Additional HTTP Status Codes",
+      "url": "https://www.rfc-editor.org/rfc/rfc6585.html"
+    },
+    {
+      "title": "NAB Gateway — Transaction Timeout Guidance",
+      "url": "https://nabgateway-developer.nab.com.au/docs/nab/en-us/payments/developer/ctv/rest/payments/payments-intro/timeouts-intro.html"
+    },
+    {
+      "title": "Node.js — HTTP API",
+      "url": "https://nodejs.org/api/http.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments on definitive outcomes, transient status and UNKNOWN transport failures",
+      "assessedAt": "Eleven real HTTP cases and five guided quiz questions",
+      "evidenceExpected": "200/400/429/503/timeout/invalid JSON/socket reset mapped to SUCCESS, REJECTED, RETRYABLE, UNKNOWN with no blind retry."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent pending and partial-response cases",
+      "assessedAt": "Node test simulates provider applied before connection loss; project requests an independent fault",
+      "evidenceExpected": "Remote applied flag true despite caller UNKNOWN; exactly one POST and no blind retry."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

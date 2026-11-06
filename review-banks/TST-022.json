@@ -1,0 +1,80 @@
+{
+  "itemId": "TST-022",
+  "version": "lesson-spec-v1:sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "curriculumFingerprint": "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "HTTP 200 dengan amount JSON number padahal kontrak mensyaratkan decimal string menghasilkan?",
+      "options": [
+        "SUCCESS karena status 200",
+        "UNKNOWN karena body tidak valid",
+        "REJECTED definitif"
+      ],
+      "answer": 1,
+      "explanation": "HTTP status tanpa response contract yang sah tidak membuktikan provider menerima operasi dengan benar.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "HTTP 400 dengan result REJECTED dan code INVALID_ACCOUNT dikenal menghasilkan?",
+      "options": [
+        "REJECTED sesuai kontrak lab",
+        "SUCCESS dengan warning",
+        "Semua 400 pasti UNKNOWN"
+      ],
+      "answer": 0,
+      "explanation": "Lab mengenali explicit business rejection; 400 dengan body yang tidak dikenal tetap UNKNOWN.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "HTTP 429 Retry-After: 3 artinya untuk debit?",
+      "options": [
+        "Debit harus dikirim ulang tepat 3 detik",
+        "Provider pasti tidak mengaplikasikan debit",
+        "Kondisi RETRYABLE, tetapi cek outcome dahulu sebelum mempertimbangkan retry"
+      ],
+      "answer": 2,
+      "explanation": "Retry-After adalah pacing HTTP, bukan jaminan tidak terjadi efek finansial.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Remote stub menerapkan debit lalu reset socket sebelum balasan. Caller seharusnya?",
+      "options": [
+        "UNKNOWN dan rekonsiliasi provider status",
+        "REJECTED otomatis",
+        "SUCCESS karena koneksi reset"
+      ],
+      "answer": 0,
+      "explanation": "Caller kehilangan observasi definitif; mengulang debit membabi buta berisiko duplikasi.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa batas bukti sebelas skenario local HTTP?",
+      "options": [
+        "Sudah membuktikan pembayaran sungguhan berhasil",
+        "Node fault stub teruji, bukan WireMock atau settlement bank",
+        "Sudah menguji semua perilaku Spring MVC"
+      ],
+      "answer": 1,
+      "explanation": "Fixture membuat server Node lokal tanpa integrasi bank eksternal atau ledger.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

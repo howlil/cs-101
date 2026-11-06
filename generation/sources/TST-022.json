@@ -1,0 +1,116 @@
+{
+  "itemId": "TST-022",
+  "curriculumFingerprint": "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "sources": [
+    {
+      "title": "WireMock — Simulating Faults",
+      "url": "https://wiremock.org/docs/simulating-faults/",
+      "tier": 0,
+      "supports": [
+        "delayed responses, connection reset, malformed replies"
+      ],
+      "notes": [
+        "Fixed delays and Bad responses, lab uses native Node analogue"
+      ]
+    },
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "tier": 0,
+      "supports": [
+        "400, 503 and Retry-After semantics"
+      ],
+      "notes": [
+        "Sections 10.2.3, 15.5.1, 15.6.4"
+      ]
+    },
+    {
+      "title": "RFC 6585 — Additional HTTP Status Codes",
+      "url": "https://www.rfc-editor.org/rfc/rfc6585.html",
+      "tier": 0,
+      "supports": [
+        "429 Too Many Requests and optional Retry-After"
+      ],
+      "notes": [
+        "Section 4"
+      ]
+    },
+    {
+      "title": "NAB Gateway — Transaction Timeout Guidance",
+      "url": "https://nabgateway-developer.nab.com.au/docs/nab/en-us/payments/developer/ctv/rest/payments/payments-intro/timeouts-intro.html",
+      "tier": 0,
+      "supports": [
+        "timeout unknown outcome and duplicate payment prevention"
+      ],
+      "notes": [
+        "Timeout Guidance and Retry/Duplicate Transaction Prevention"
+      ]
+    },
+    {
+      "title": "Node.js — HTTP API",
+      "url": "https://nodejs.org/api/http.html",
+      "tier": 0,
+      "supports": [
+        "ephemeral HTTP server and socket termination"
+      ],
+      "notes": [
+        "http.createServer and server.listen"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "wire-faults",
+      "statement": "WireMock documents delayed responses and abrupt connection faults for isolated API testing.",
+      "conceptIds": [
+        "wire-fault",
+        "unknown-debit"
+      ],
+      "sourceUrl": "https://wiremock.org/docs/simulating-faults/",
+      "locator": "Per-stub fixed delays and Bad responses",
+      "rationale": "WireMock documents fault injection models applied in the Node lab."
+    },
+    {
+      "id": "http-503",
+      "statement": "HTTP 503 is a temporary service-unavailable response and may include Retry-After.",
+      "conceptIds": [
+        "transient-status"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 15.6.4 and 10.2.3",
+      "rationale": "RFC 9110 defines 503 and retry pacing semantics."
+    },
+    {
+      "id": "http-429",
+      "statement": "HTTP 429 indicates rate limiting and may carry Retry-After.",
+      "conceptIds": [
+        "transient-status"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc6585.html",
+      "locator": "Section 4, 429 Too Many Requests",
+      "rationale": "RFC 6585 specifies rate-limiting semantics."
+    },
+    {
+      "id": "payment-timeout",
+      "statement": "A payment timeout may hide a processed transaction and blind resubmission risks duplicates.",
+      "conceptIds": [
+        "definite-outcome",
+        "unknown-debit"
+      ],
+      "sourceUrl": "https://nabgateway-developer.nab.com.au/docs/nab/en-us/payments/developer/ctv/rest/payments/payments-intro/timeouts-intro.html",
+      "locator": "Transaction Timeout Guidance and Retry/Duplicate Transaction Prevention",
+      "rationale": "Payment processor guidelines recommend outcome lookup before retry."
+    },
+    {
+      "id": "node-server",
+      "statement": "Node HTTP can create a local listening server and destroy a transport socket.",
+      "conceptIds": [
+        "wire-fault"
+      ],
+      "sourceUrl": "https://nodejs.org/api/http.html",
+      "locator": "http.createServer and IncomingMessage.socket",
+      "rationale": "Native runtime supports observable local HTTP fault injection."
+    }
+  ]
+}

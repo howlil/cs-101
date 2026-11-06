@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "TST-022",
+  "curriculumFingerprint": "sha256:a1a1018e10551695854cc89ecf5a22d00bc2aa22caf6ef6b7245427636ecc3ef",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "bank-http-fault-matrix",
+      "runtime": "node",
+      "file": "provider-fault-matrix.mjs",
+      "fixtureSha256": "b5b4d89b47363e7367792c73187ac64d00125876d4acc25628ebb1253a93b730",
+      "stdoutSha256": "529f3620af320ddd6bb9551653094f404e949d36e1f1696d43f5b081a352d3e9",
+      "verified": true
+    }
+  ]
+}
