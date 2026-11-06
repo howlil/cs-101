@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "itemId": "TST-007",
+  "curriculumFingerprint": "sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1",
+  "examples": [],
+  "noExecutableReason": "The V3 source-file fixture runner only executes standalone Node/Java files; TST-007's Jupiter tests require a Maven-managed JUnit dependency and Surefire discovery. A separate CI gate executes the real Java 21 Maven laboratory and checks a nonzero clean JUnit report. No generator-executed fixture claims to prove JUnit."
+}

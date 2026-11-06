@@ -23,6 +23,7 @@ B15: A learner opens JAV-001 Build Doctor as a source-backed V3 lesson with real
 B16: A learner navigates curated G1 cross-domain concept neighborhoods linking Java/Spring, PostgreSQL schema, API contract tests, and system-level transfer API design to existing HTTP concepts and canonical units.
 B17: A learner opens NET-006 as a source-backed V3 TCP handshake/sequence/retransmission/close lesson, completes five questions and follows an independent packet capture challenge.
 B18: A learner opens SQL-001 as a complete source-backed V3 SQL Workbench, runs a repeatable init.sql on isolated PostgreSQL and compares six real database query results, with the evidence scope clearly marked.
+B19: A learner opens TST-007 as a complete V3 Money Unit Tests lesson with 20 runnable JUnit Jupiter cases for the explicitly educational FeeCalculator policy, then proves results via Maven without Spring context.
 X1: Unknown concept IDs recover to the first valid focus.
 X2: Unauthored items are labeled outline-only.
 X3: Unmapped levels or concept-depth pairs show explicit gaps.
@@ -44,9 +45,10 @@ C12: JAV-001 JDK fixture tests compiler and runtime class-loading only; it canno
 C13: New G1 cross-domain links and assessment rubrics remain proposed; outline units must not be shown as published lessons or as proven competencies. Java CLI and PostgreSQL criteria require real target environments.
 C14: NET-006 local Node fixture checks socket-level connect/EOF/refusal only; no fake packet capture, SYN/ACK flags, retransmission or timeout proof is allowed.
 C15: SQL-001 must not imply PostgreSQL proof from an empty executable plan; independent PostgreSQL 16 CI creates fresh and replayed sandbox data and checks actual query/constraint behavior, without a production DB binding.
+C16: TST-007 V3 generator cannot prove Maven/JUnit behavior via the single-file runner; its not-executable status is paired with a real Maven JUnit/Surefire gate verifying 20 tests with zero failures and no Spring context. Fee parameters are lab policy, not real financial tariffs.
 
 ## Scope
-In: HTTP pilot, depth-specific paths/rubrics, and seven authored V3 units (NET-001, NET-006, SPR-006, OSX-029, PRD-002, JAV-001, SQL-001); SQL-001 uses separate PostgreSQL integration proof.
+In: HTTP pilot, depth-specific paths/rubrics, and eight authored V3 units (NET-001, NET-006, SPR-006, OSX-029, PRD-002, JAV-001, SQL-001, TST-007); SQL-001 and TST-007 use separate PostgreSQL/Maven integration proof.
 Out: learner tracking, adaptive mastery, inferred graph edges, bulk lesson generation.
 
 ## Proof
@@ -71,3 +73,4 @@ P18 (B15,C12): JAV-001 generation and JDK 21 compile/runtime fixture reproduce b
 P19 (B16,C13): Four G1 cross-domain concepts add only explicit source-mapped canonical units, validated rubric evidence and proposed related edges; G2 remains an honest gap on newly added concepts.
 P20 (B17,C14): NET-006 V3 bundle promotes byte-identically with a real Node 24 stream fixture, five questions and separate Materi/Soal/Project URL smoke; packet capture remains manual.
 P21 (B18,C15): SQL-001 publishes repeatable V3 artifacts and three views; Docker-isolated PostgreSQL 16 executes init.sql, six SELECT queries, replay, fresh second DB and FK negative case in merge CI.
+P22 (B19,C16): TST-007 V3 authoring reproduces byte-identically; JDK 21 Maven Surefire discovers exactly 20 Jupiter tests with zero errors/failures/skips; Materi/Soal/Project smoke is green without Spring context.

@@ -1,0 +1,78 @@
+{
+  "itemId": "TST-007",
+  "version": "lesson-spec-v1:sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1",
+  "curriculumFingerprint": "sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "FeeCalculator mengembalikan IDR 150 untuk principal IDR 10000. Assertion mana yang benar-benar menguji perilaku?",
+      "options": [
+        "assertNotNull(calculator)",
+        "assertEquals(new BigDecimal(\"150\"), calculator.calculateFee(new BigDecimal(\"10000\"), \"IDR\"))",
+        "assertTrue(true)"
+      ],
+      "answer": 1,
+      "explanation": "Unit test harus menguji nilai fee observable, bukan hanya keberadaan objek atau test dummy.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Untuk batas maksimum inclusive 1.000.000, kombinasi test mana paling kuat?",
+      "options": [
+        "Satu test 1.000.001 saja",
+        "Satu test 1.000.000 saja",
+        "Test 1.000.000 berhasil dan 1.000.001 memicu IllegalArgumentException"
+      ],
+      "answer": 2,
+      "explanation": "Pisahkan exact maximum yang valid dari input yang melewati batas dan ditolak.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "USD principal 0.34 pada rate 1.5% menghasilkan fee mentah 0.00510. Dengan HALF_UP skala dua hasilnya?",
+      "options": [
+        "USD 0.01",
+        "USD 0.00",
+        "USD 0.0051"
+      ],
+      "answer": 0,
+      "explanation": "HALF_UP membulatkan 0.00510 menjadi 0.01 saat target memiliki dua desimal.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dengan kebijakan lab, apa hasil input IDR 1.50 atau USD 1.001?",
+      "options": [
+        "Dibulatkan diam-diam menjadi IDR 2 atau USD 1.00",
+        "Ditolak karena principal tidak bisa direpresentasikan tepat dalam skala currency",
+        "Dikonversi menggunakan FX rate"
+      ],
+      "answer": 1,
+      "explanation": "RoundingMode.UNNECESSARY memaksa presisi input valid; kalkulator tidak membulatkan principal yang melanggar skala.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "JUnit test bisa berjalan di IDE, tetapi Maven report belum ada. Mana bukti yang tepat untuk TST-007?",
+      "options": [
+        "Satu screenshot IDE cukup",
+        "Jalankan unit test dengan @SpringBootTest walaupun tanpa Spring dependency",
+        "Maven Surefire benar-benar menemukan dan menjalankan test, report berisi nonzero tests dan zero failures"
+      ],
+      "answer": 2,
+      "explanation": "Kriteria unit ini meminta Maven menjalankan JUnit tanpa Spring context. Report dari Maven membuktikan test discovery, bukan hanya source code test.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

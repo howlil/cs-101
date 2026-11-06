@@ -1,0 +1,175 @@
+---
+taskId: "TST-007"
+title: "Money Unit Tests — JUnit 5"
+description: "Uji FeeCalculator dengan 20 Jupiter tests untuk normal, zero, negative, max, rounding, dan USD/IDR tanpa Spring context."
+demo: false
+curriculumFingerprint: "sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-007.json';
+import questionBank from '../../../review-banks/TST-007.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Problem:** kalkulasi fee tampak benar untuk input normal, tetapi salah ketika nominal nol, negatif, maksimum, atau tepat di ambang pembulatan. Bagaimana membuat regression tests yang benar-benar mendeteksi perubahan aturan fee?
+
+**Langkah pertama:** buat satu test JUnit Jupiter dengan tiga tahap **Arrange → Act → Assert**, yang membandingkan hasil publik `calculateFee` dengan `BigDecimal` yang tepat.
+
+<MentalModel title="Satu test = satu kontrak perilaku yang terobservasi">
+
+- **Arrange:** buat `FeeCalculator`, principal `BigDecimal` dari string, dan currency code.
+- **Act:** panggil `calculateFee(amount, currency)` sekali untuk satu kasus.
+- **Assert:** periksa hasil tepat dengan `assertEquals` atau exception tertentu dengan `assertThrows`.
+- **Jupiter lifecycle:** `@Test` menandai test; `@BeforeEach` membuat fixture baru sebelum setiap test. Tidak perlu `@SpringBootTest` untuk fungsi Java murni.
+- **Maven proof:** `mvn clean verify` menjalankan JUnit lewat Surefire dan menghasilkan laporan test independen dari IDE.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+                  Java 21 + BigDecimal
+                           |
+         +-----------------+-----------------+
+         |                                   |
+    fee policy                           input contract
+    rate = 1.5%                        IDR 0 decimals
+    max = 1,000,000                    USD 2 decimals
+         |                                   |
+         +-----------------+-----------------+
+                           |
+                   FeeCalculator
+                           |
+                      JUnit Jupiter
+             Arrange -> Act -> Assert
+             @Test  /  @BeforeEach
+                           |
+               [normal, zero, negative,
+                maximum, rounding, currency]
+                           |
+                     Maven Surefire
+                       clean verify
+                           |
+                tests > 0, failures = 0
+~~~
+
+</ConceptGraph>
+
+## Kontrak FeeCalculator untuk lab
+
+Ini adalah **kebijakan contoh untuk latihan**, bukan tarif perusahaan finansial atau FX conversion. Tarif fee kedua mata uang adalah **1,5%**, jumlah principal valid dari **0 sampai 1.000.000 unit mata uang**, dan rounding fee memakai `HALF_UP`.
+
+| Input | Expected behavior |
+| --- | --- |
+| IDR 10.000 | fee IDR 150 |
+| USD 100.00 | fee USD 1.50 |
+| IDR 0 / USD 0.00 | fee nol dengan scale masing-masing |
+| IDR -1 / USD -0.01 | `IllegalArgumentException` |
+| IDR 1.000.000 / USD 1,000,000.00 | fee valid 15.000 / 15,000.00 |
+| Nilai di atas maksimum | `IllegalArgumentException` |
+| IDR 33 dan 34 | fee 0 dan 1 |
+| USD 0.33 dan 0.34 | fee 0.00 dan 0.01 |
+| IDR 1.50 / USD 1.001 | `ArithmeticException` karena principal scale invalid |
+| Currency EUR | `IllegalArgumentException`; tidak ada konversi |
+
+Perhitungan memakai `new BigDecimal("0.015")`, bukan `double`. `RoundingMode.UNNECESSARY` memvalidasi jumlah desimal **input principal**; `RoundingMode.HALF_UP` hanya digunakan saat membulatkan fee yang dihitung. `BigDecimal.compareTo` digunakan untuk batas numerik, sedangkan `assertEquals` atas hasil fee juga memeriksa scale output yang menjadi bagian kontrak.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Referensi resmi
+
+<SourceList sources={[
+  {title:'JUnit 5.14.4 — Annotations (@Test, @BeforeEach)', url:'https://docs.junit.org/5.14.4/writing-tests/annotations.html'},
+  {title:'JUnit 5.14.4 — Assertions (assertEquals, assertThrows)', url:'https://docs.junit.org/5.14.4/writing-tests/assertions.html'},
+  {title:'Apache Maven Surefire — JUnit Platform', url:'https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html'},
+  {title:'Java 21 — BigDecimal API', url:'https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html'},
+  {title:'Java 21 — RoundingMode', url:'https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Jalankan lab unit test tanpa Spring
+
+Repository menyediakan lab Maven mandiri, lengkap dengan `FeeCalculator.java`, `FeeCalculatorTest.java` dan `pom.xml`. Lab menggunakan **Java 21, JUnit Jupiter 5.14.4, dan Maven Surefire 3.5.4**, tidak membutuhkan Spring Boot ataupun database.
+
+~~~sh
+java -version
+mvn -version
+mvn -B -ntp -f labs/TST-007/pom.xml clean verify
+~~~
+
+Lihat laporan Maven di `labs/TST-007/target/surefire-reports/`. Jangan menyimpulkan test berjalan hanya dari pesan `BUILD SUCCESS`: periksa nilai **Tests run** dan pastikan jumlahnya nonzero serta tidak ada failures/errors/skipped. CI akan memvalidasi jumlah tepat **20 test** secara independen dari log terminal.
+
+Contoh satu test behavior:
+
+~~~java
+@Test
+void normalIdrReturnsExactlyOneHundredFifty() {
+    assertEquals(new BigDecimal("150"),
+        calculator.calculateFee(new BigDecimal("10000"), "IDR"));
+}
+~~~
+
+Untuk skenario yang wajib ditolak:
+
+~~~java
+@Test
+void negativeIdrPrincipalIsRejected() {
+    assertThrows(IllegalArgumentException.class,
+        () -> calculator.calculateFee(new BigDecimal("-1"), "IDR"));
+}
+~~~
+
+**Batas bukti:** generator V3 hanya mendukung fixture satu berkas Node/Java. Ia menandai JUnit sebagai `not-executable` untuk runner tersebut. **Maven JUnit integration gate** yang terpisah menjalankan test yang sebenarnya; ini bukan simulasi, dan tidak membuktikan akurasi tarif bank nyata.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal diagnosis unit test
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Project — Money Unit Tests
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+Tinjau source Java murni dan tulis pengujian tambahan yang mengamati **perilaku fee**, bukan urutan pemanggilan internal, konteks Spring, atau representasi UI. Pertahankan dua assertion terpisah di sekitar batas rounding, batas maksimum, dan error input.
+
+<Challenge
+  title="Money Unit Tests — JUnit 5 behavior matrix"
+  brief="Buktikan FeeCalculator untuk normal, zero, negative, max, rounding dan USD/IDR dengan JUnit Jupiter, termasuk expected exception, kemudian jalankan semuanya via Maven tanpa Spring context."
+  acceptanceCriteria={[
+    'Test normal IDR dan USD dengan BigDecimal dari string serta assertion nilai dan scale output.',
+    'Test zero, negative dengan expected exception, batas maksimum yang valid, dan nominal di atas maksimum.',
+    'Test HALF_UP pada sisi bawah/atas ambang pembulatan untuk IDR 33/34 dan USD 0.33/0.34.',
+    'Test principal precision yang tidak valid, unsupported currency dan null input dengan tipe exception yang sesuai.',
+    'Jalankan mvn clean verify dan lampirkan Surefire report berisi 20 test, zero failures/errors/skipped, bukan screenshot IDE saja.',
+    'Buktikan satu mutation test manual: ubah sementara HALF_UP menjadi DOWN, tunjukkan test rounding gagal, lalu kembalikan source sebelum akhir.',
+    'Tegaskan tidak ada Spring ApplicationContext, database, API call, FX conversion atau tarif bank production dalam scope lab.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Bisa menjelaskan @Test, @BeforeEach dan Arrange–Act–Assert secara konkret.',
+  'Bisa menggunakan assertEquals dan assertThrows untuk nominal uang dan error.',
+  'Dapat membedakan input max yang valid dari nilai over-max yang ditolak.',
+  'Memahami BigDecimal, skala IDR/USD, dan pembulatan HALF_UP.',
+  'Dapat menjalankan 20 JUnit tests melalui Maven Surefire tanpa Spring context.'
+]} />
+
+</LessonStage>

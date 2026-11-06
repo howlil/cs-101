@@ -1,0 +1,349 @@
+{
+  "itemId": "TST-007",
+  "curriculumFingerprint": "sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1",
+  "payoff": "Write independently runnable JUnit 5 tests for FeeCalculator normal, zero, negative, maximum, rounding and USD/IDR cases without Spring context.",
+  "learningOutcomes": [
+    "uji FeeCalculator (normal, zero, negative, max, rounding, USD/IDR), termasuk expected exception; semua test jalan lewat Maven tanpa Spring context."
+  ],
+  "mentalModel": "A money unit test pins one observable output or exception for one exact decimal input; Arrange–Act–Assert separates setup from behavior, and Maven Surefire proves JUnit discovery without Spring.",
+  "relationshipGraph": "Java 21 BigDecimal + explicit currency scale → pure FeeCalculator rate/limit validation → @BeforeEach + @Test Arrange–Act–Assert → assertEquals/assertThrows boundary matrix → Maven Surefire report (not Spring context).",
+  "concepts": [
+    {
+      "id": "junit-lifecycle",
+      "title": "JUnit Jupiter @Test and @BeforeEach",
+      "mechanism": "JUnit Jupiter discovers test methods and runs setup before each test; neither requires a Spring application context.",
+      "sourceUrls": [
+        "https://docs.junit.org/5.14.4/writing-tests/annotations.html",
+        "https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html"
+      ]
+    },
+    {
+      "id": "test-aaa",
+      "title": "Arrange–Act–Assert and descriptive behavior checks",
+      "mechanism": "Independent test methods compare public results and exceptions instead of private implementation calls.",
+      "sourceUrls": [
+        "https://docs.junit.org/5.14.4/writing-tests/assertions.html"
+      ]
+    },
+    {
+      "id": "money-decimals",
+      "title": "BigDecimal decimal scale and rounding",
+      "mechanism": "Exact decimal multiplication and explicit HALF_UP currency scaling avoid unintended binary floating-point monetary behavior.",
+      "sourceUrls": [
+        "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html",
+        "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html"
+      ]
+    },
+    {
+      "id": "boundary-matrix",
+      "title": "Zero, negative, inclusive max and currency precision",
+      "mechanism": "Separate normal, boundary and invalid-value assertions guard the fee contract across IDR/USD and exception types.",
+      "sourceUrls": [
+        "https://docs.junit.org/5.14.4/writing-tests/assertions.html",
+        "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html",
+        "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html"
+      ]
+    },
+    {
+      "id": "maven-proof",
+      "title": "Maven Surefire JUnit integration",
+      "mechanism": "Surefire discovers and runs Jupiter engine tests from a dedicated, Spring-free Maven project.",
+      "sourceUrls": [
+        "https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "An IDE passing run is not proof Maven JUnit discovery works.",
+    "Checking object existence is not checking fee calculation behavior.",
+    "The exact maximum boundary and above-maximum invalid input require separate tests.",
+    "BigDecimal(double) may carry binary floating-point surprises.",
+    "IDR requires zero fee decimal places, USD two in this lab; the rate is not FX conversion.",
+    "Using a SpringBootTest context in a pure FeeCalculator unit test adds unnecessary integration scope.",
+    "The selected fee tariff/maximum is an educational lab policy, not a bank's real pricing."
+  ],
+  "practice": [
+    "Write one independent JUnit Jupiter test with @BeforeEach and descriptive naming.",
+    "Cover positive/zero/negative/max/above-max cases and expected exception types.",
+    "Test HALF_UP thresholds in IDR/USD and execute Maven clean verify."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 JUnit Jupiter, input-boundary and currency-precision segments",
+      "assessedAt": "Five self-check questions, a real JUnit 5/Maven lab with positive and negative cases, and a deliberate mutation challenge",
+      "evidenceExpected": "JUnit Surefire outputs prove normal, zero, negative, at/max, over/max, rounding and USD/IDR behavior including expected exception types, with no Spring context."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "V3 independent lab exercise on corrected and deliberately broken fee behavior",
+      "assessedAt": "JUnit/Maven laboratory proof plus distinct USD rounding variation",
+      "evidenceExpected": "Maven clean verify report with nonzero tests and zero failures; exact decimal assertions and evidence a changed rounding rule would fail an existing test."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "junit-aaa-lifecycle",
+        "objective": "Write a JUnit Jupiter unit test using Arrange–Act–Assert, @Test and @BeforeEach without Spring context.",
+        "whyItMatters": "Fee rules should be verified in milliseconds with deterministic inputs instead of starting a database or HTTP server for every case.",
+        "mentalModel": "Arrange the money input and calculator, Act once by computing the fee, Assert the returned BigDecimal or expected exception; @BeforeEach prepares fresh test state.",
+        "explanation": "JUnit Jupiter discovers @Test methods through the Jupiter engine; @BeforeEach runs before each test. In this sandbox, a plain Java FeeCalculator has no framework dependency or IO. Use descriptive test names and assert visible behavior, not the implementation's private branch structure. Tests are executed via Maven Surefire using junit-jupiter test scope. The lab's example fee policy is explicitly invented for education, not a bank product fee schedule: 1.5% rate, IDR scale 0, USD scale 2, maximum principal 1,000,000 currency units.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A fee for IDR 10000 must be exactly IDR 150, and a test should independently report that result.",
+          "steps": [
+            {
+              "action": "Arrange a FeeCalculator instance and new BigDecimal(\"10000\") with currency code IDR.",
+              "reason": "String decimal input avoids surprises from binary double constructors.",
+              "expectedResult": "Test inputs are exact integers and a declared currency."
+            },
+            {
+              "action": "Act with calculator.calculateFee(amount, \"IDR\").",
+              "reason": "The public method is the observable business contract.",
+              "expectedResult": "A BigDecimal result is produced without Spring application context."
+            },
+            {
+              "action": "Assert a BigDecimal result of 150, and rerun through Maven.",
+              "reason": "The test should prove the calculation, not whether a specific internal multiplication is used.",
+              "expectedResult": "One descriptive Jupiter @Test passes under Maven Surefire."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "JUnit test returns the correct fee but only asserts calculator is not null. What should you change?",
+          "hints": [
+            "The behavior is the returned fee, not the class instance.",
+            "Assert a specific BigDecimal value for a concrete currency/amount."
+          ],
+          "explanation": "Use assertEquals(new BigDecimal(\"150\"), calculator.calculateFee(new BigDecimal(\"10000\"), \"IDR\")) to verify the observable contract."
+        },
+        "independentChallenge": {
+          "prompt": "Write an independent test for USD 200.00 and verify USD 3.00 using a descriptive name and @Test. Do not inspect implementation internals.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "A real Jupiter @Test method that runs through Maven and asserts the public returned BigDecimal without Spring."
+          ],
+          "variationFromExample": "USD 200.00 instead of the worked IDR 10000 example, with a different currency precision."
+        },
+        "firstAction": "Create a descriptive @Test named normalIdrAmountReturnsFee and prepare a new FeeCalculator.",
+        "misconceptionRepair": {
+          "likelyMistake": "Testing the class wiring rather than a fee result.",
+          "whyItFails": "An instance-creation assertion can pass even when rate, rounding or validation behavior is wrong.",
+          "correctiveAction": "Assert the exact returned monetary amount, using decimal-string BigDecimal values and a public method call."
+        },
+        "selfCheck": {
+          "expectedObservation": "Maven Surefire discovers and reports the test as passed, with no Spring dependencies or context startup.",
+          "ifUnexpected": "Inspect test class naming, junit-jupiter dependency, Surefire plugin and the first assertion failure rather than adding @SpringBootTest."
+        },
+        "continueFromHere": {
+          "nextAction": "Expand the example into a table of normal, zero, negative and maximum boundary cases.",
+          "resumeCue": "Resume by writing one Arrange–Act–Assert assertion for a specific money amount."
+        }
+      },
+      {
+        "id": "negative-zero-maximum",
+        "objective": "Check zero/negative amounts, exactly-at-cap and above-cap values, and expected exceptions as separate observable outcomes.",
+        "whyItMatters": "An apparently correct normal-case test can miss invalid fees for negative payments or unexpected overflow in maximum-sized transfers.",
+        "mentalModel": "Partition inputs by behavior: zero is allowed, negative is rejected, in-range values calculate, exact maximum is valid, and above maximum is rejected.",
+        "explanation": "The lab contract chooses 1,000,000 units as maximum input principal per currency. It accepts zero as a zero fee but rejects negative principal, amounts above maximum, unsupported currency codes and non-representable currency scales. Both IDR and USD share the same numerical rate, not an exchange rate. JUnit assertThrows checks expected IllegalArgumentException and ArithmeticException, while assertEquals checks valid boundary outputs. Test the maximum itself and a value above it separately; they are not equivalent cases. Null is rejected by explicit validation.",
+        "prerequisiteConceptIds": [
+          "junit-lifecycle"
+        ],
+        "workedExample": {
+          "problem": "Calculator returns correct fee for 10000 IDR but must also protect its input boundaries.",
+          "steps": [
+            {
+              "action": "Test IDR zero and USD zero separately.",
+              "reason": "Different currency scales must produce 0 versus 0.00.",
+              "expectedResult": "Both return a zero-valued BigDecimal with the declared currency scale."
+            },
+            {
+              "action": "Test IDR -1 and USD -0.01 with assertThrows.",
+              "reason": "A failed validation should be an expected observable exception, not an uncaught test failure.",
+              "expectedResult": "Both invalid amounts reject before a fee is calculated."
+            },
+            {
+              "action": "Test principal 1000000 and 1000001 in IDR.",
+              "reason": "The maximum boundary has two distinct expected branches.",
+              "expectedResult": "At-limit returns IDR 15000, above-limit raises IllegalArgumentException."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Would a test for amount=1000001 alone prove that amount=1000000 is accepted?",
+          "hints": [
+            "The maximum is inclusive in this lab.",
+            "Each side of the boundary needs a separate assertion."
+          ],
+          "explanation": "No. Write one successful exact-limit case and one assertThrows above-limit case to prove the boundary itself."
+        },
+        "independentChallenge": {
+          "prompt": "Add USD 1000000.00 and USD 1000000.01 cases, asserting USD 15000.00 versus an exception with no Spring context.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Passing JUnit test outputs for valid max and above-max USD with explicit expected exception."
+          ],
+          "variationFromExample": "Test two-decimal USD boundary rather than IDR integer max shown in the worked example."
+        },
+        "firstAction": "List expected outcomes for 0, -1, 1000000 and 1000001 before writing test code.",
+        "misconceptionRepair": {
+          "likelyMistake": "Using one test for a value above max and assuming the inclusive max case is automatically proven.",
+          "whyItFails": "The code might incorrectly reject the exact valid limit or accept an amount just above it.",
+          "correctiveAction": "Test both sides and identify expected exceptions as assertions rather than test failures."
+        },
+        "selfCheck": {
+          "expectedObservation": "Both zero and exact-limit cases pass, while negative and over-limit cases throw the expected exception types.",
+          "ifUnexpected": "Inspect the declared fee policy and BigDecimal compareTo semantics; use failure messages rather than loosening assertions."
+        },
+        "continueFromHere": {
+          "nextAction": "Test decimal rounding and two different currency scales without floating-point conversions.",
+          "resumeCue": "Choose one boundary and write its expected return or exception first."
+        }
+      },
+      {
+        "id": "currency-rounding-and-proof",
+        "objective": "Test rounding near thresholds and enforce IDR/USD minor-unit precision with a reproducible Maven run.",
+        "whyItMatters": "Using binary floating-point or inconsistent rounding can change financial amounts silently, and the passing IDE button does not prove build reproducibility.",
+        "mentalModel": "BigDecimal carries exact decimal value and scale; the fee is exact principal × 0.015, then HALF_UP to 0 IDR decimals or 2 USD decimals.",
+        "explanation": "For the lab, IDR 33 × 0.015 = 0.495 rounds to IDR 0; IDR 34 × 0.015 = 0.510 rounds to IDR 1. USD 0.33 × 0.015 = 0.00495 rounds to USD 0.00; USD 0.34 yields 0.00510 and rounds to USD 0.01. Rounding happens once after exact multiplication. Reject IDR 1.50 and USD 1.001 rather than silently modifying invalid principal precision. BigDecimal.compareTo can consider 2.0 and 2.00 numerically equal while equals considers scale, so use exact expected scale when that is part of the public output contract. Maven clean verify runs independent Jupiter unit tests without Spring context; a V3 single-file Java fixture cannot prove Maven/JUnit dependencies, so that integration evidence is in a separate CI gate.",
+        "prerequisiteConceptIds": [
+          "junit-lifecycle",
+          "boundary-matrix"
+        ],
+        "workedExample": {
+          "problem": "A cent-scale fee just below a rounding threshold incorrectly returns one cent.",
+          "steps": [
+            {
+              "action": "Compute fee for USD 0.33 and 0.34 with decimal-string inputs.",
+              "reason": "These amounts straddle a HALF_UP rounding threshold.",
+              "expectedResult": "Expected USD fees are 0.00 and 0.01, respectively."
+            },
+            {
+              "action": "Compare IDR 33 and 34 fees and reject malformed principal scale.",
+              "reason": "IDR has no minor unit, while USD has two decimals.",
+              "expectedResult": "IDR 0 versus 1 at the threshold; IDR 1.50 and USD 1.001 are invalid."
+            },
+            {
+              "action": "Run mvn -B -ntp -f labs/TST-007/pom.xml clean verify.",
+              "reason": "A real Maven run validates Jupiter discovery and the pure Java money contract.",
+              "expectedResult": "Surefire reports all tests passed without a Spring context."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A programmer uses new BigDecimal(0.34) and compares the rounded fee to the expected result. What makes this fragile?",
+          "hints": [
+            "0.34 is not exactly representable in a binary double.",
+            "Use new BigDecimal(\"0.34\") and an explicit RoundingMode."
+          ],
+          "explanation": "Binary-floating conversion can change the exact decimal representation. Use string-based BigDecimal values and specify HALF_UP for fee output."
+        },
+        "independentChallenge": {
+          "prompt": "Implement a different threshold test for USD 0.67 and prove USD 0.01, then mutate HALF_UP to DOWN locally to show an existing boundary test fails; restore the implementation before committing.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Maven Surefire report with explicit currency rounding assertions and a documented local mutation that was caught by a failing test, restored to green.",
+            "No Spring context dependencies or classes in the lab."
+          ],
+          "variationFromExample": "A different USD threshold input and deliberate rounding-policy mutation instead of replaying the 0.33/0.34 example."
+        },
+        "firstAction": "Calculate the exact product of USD 0.34 and 0.015 before applying the two-decimal rounding rule.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming BigDecimal is safe even when constructed from a binary double and rounded implicitly.",
+          "whyItFails": "Binary double construction can embed an unintended approximation; implicit scale decisions hide the expected monetary rule.",
+          "correctiveAction": "Use BigDecimal from exact strings, setScale with explicit HALF_UP once, and test values on both sides of the rounding threshold."
+        },
+        "selfCheck": {
+          "expectedObservation": "Surefire reports passed assertions for IDR/USD scale, rounding, invalid precision and independent exception cases.",
+          "ifUnexpected": "If Maven finds zero tests, check Surefire reports and Jupiter engine; if a value differs, inspect the exact decimal intermediate result and rounding policy."
+        },
+        "continueFromHere": {
+          "nextAction": "Connect unit-test evidence to API contract tests later, without conflating pure fee logic with database, Spring MVC or transfer authorization.",
+          "resumeCue": "Resume from a small rounding matrix: expected raw fee, target currency scale and expected rounded fee."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "FeeCalculator mengembalikan IDR 150 untuk principal IDR 10000. Assertion mana yang benar-benar menguji perilaku?",
+      "options": [
+        "assertNotNull(calculator)",
+        "assertEquals(new BigDecimal(\"150\"), calculator.calculateFee(new BigDecimal(\"10000\"), \"IDR\"))",
+        "assertTrue(true)"
+      ],
+      "answer": 1,
+      "explanation": "Unit test harus menguji nilai fee observable, bukan hanya keberadaan objek atau test dummy.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Untuk batas maksimum inclusive 1.000.000, kombinasi test mana paling kuat?",
+      "options": [
+        "Satu test 1.000.001 saja",
+        "Satu test 1.000.000 saja",
+        "Test 1.000.000 berhasil dan 1.000.001 memicu IllegalArgumentException"
+      ],
+      "answer": 2,
+      "explanation": "Pisahkan exact maximum yang valid dari input yang melewati batas dan ditolak.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "USD principal 0.34 pada rate 1.5% menghasilkan fee mentah 0.00510. Dengan HALF_UP skala dua hasilnya?",
+      "options": [
+        "USD 0.01",
+        "USD 0.00",
+        "USD 0.0051"
+      ],
+      "answer": 0,
+      "explanation": "HALF_UP membulatkan 0.00510 menjadi 0.01 saat target memiliki dua desimal.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Dengan kebijakan lab, apa hasil input IDR 1.50 atau USD 1.001?",
+      "options": [
+        "Dibulatkan diam-diam menjadi IDR 2 atau USD 1.00",
+        "Ditolak karena principal tidak bisa direpresentasikan tepat dalam skala currency",
+        "Dikonversi menggunakan FX rate"
+      ],
+      "answer": 1,
+      "explanation": "RoundingMode.UNNECESSARY memaksa presisi input valid; kalkulator tidak membulatkan principal yang melanggar skala.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "JUnit test bisa berjalan di IDE, tetapi Maven report belum ada. Mana bukti yang tepat untuk TST-007?",
+      "options": [
+        "Satu screenshot IDE cukup",
+        "Jalankan unit test dengan @SpringBootTest walaupun tanpa Spring dependency",
+        "Maven Surefire benar-benar menemukan dan menjalankan test, report berisi nonzero tests dan zero failures"
+      ],
+      "answer": 2,
+      "explanation": "Kriteria unit ini meminta Maven menjalankan JUnit tanpa Spring context. Report dari Maven membuktikan test discovery, bukan hanya source code test.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

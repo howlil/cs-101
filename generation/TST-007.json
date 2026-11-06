@@ -1,0 +1,44 @@
+{
+  "itemId": "TST-007",
+  "fingerprint": "sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1",
+  "sources": [
+    {
+      "title": "JUnit 5.14.4 — Test Annotations",
+      "url": "https://docs.junit.org/5.14.4/writing-tests/annotations.html"
+    },
+    {
+      "title": "JUnit 5.14.4 — Assertions",
+      "url": "https://docs.junit.org/5.14.4/writing-tests/assertions.html"
+    },
+    {
+      "title": "Apache Maven Surefire — JUnit Platform",
+      "url": "https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html"
+    },
+    {
+      "title": "Java 21 — BigDecimal",
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html"
+    },
+    {
+      "title": "Java 21 — RoundingMode",
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 JUnit Jupiter, input-boundary and currency-precision segments",
+      "assessedAt": "Five self-check questions, a real JUnit 5/Maven lab with positive and negative cases, and a deliberate mutation challenge",
+      "evidenceExpected": "JUnit Surefire outputs prove normal, zero, negative, at/max, over/max, rounding and USD/IDR behavior including expected exception types, with no Spring context."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "V3 independent lab exercise on corrected and deliberately broken fee behavior",
+      "assessedAt": "JUnit/Maven laboratory proof plus distinct USD rounding variation",
+      "evidenceExpected": "Maven clean verify report with nonzero tests and zero failures; exact decimal assertions and evidence a changed rounding rule would fail an existing test."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

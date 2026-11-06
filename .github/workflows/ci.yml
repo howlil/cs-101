@@ -72,6 +72,15 @@ jobs:
           git diff --exit-code -- src/content/lessons/SQL-001.mdx generation/SQL-001.json review-banks/SQL-001.json generation/pedagogy/SQL-001.json generation/sources/SQL-001.json generation/proofs/SQL-001.json generation/executables/SQL-001.json generation/verified/SQL-001.json
       - name: SQL-001 PostgreSQL 16 integration — no public port
         run: bash labs/SQL-001/verify-postgres.sh
+      - name: Verify TST-007 reproducible authoring (JUnit runtime external)
+        run: |
+          pnpm generation:validate TST-007
+          pnpm generation:promote TST-007
+          git diff --exit-code -- src/content/lessons/TST-007.mdx generation/TST-007.json review-banks/TST-007.json generation/pedagogy/TST-007.json generation/sources/TST-007.json generation/proofs/TST-007.json generation/executables/TST-007.json generation/verified/TST-007.json
+      - name: TST-007 JUnit Jupiter 5 / Maven Surefire verification
+        run: |
+          mvn -B -ntp -f labs/TST-007/pom.xml clean verify
+          python3 labs/TST-007/verify-surefire.py
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -119,6 +128,20 @@ jobs:
           grep -q 'SQL Workbench — six queries and repeatable init.sql' /tmp/catalog-project.html
           grep -q 'enam query inspeksi' /tmp/catalog-project.html
           if grep -q 'Concept graph for this lesson' /tmp/catalog-project.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-007' > /tmp/money-unit-materi.html
+          grep -q 'Money Unit Tests' /tmp/money-unit-materi.html
+          grep -q 'Satu test = satu kontrak' /tmp/money-unit-materi.html
+          grep -q 'JUnit 5.14.4' /tmp/money-unit-materi.html
+          grep -q 'Explore Knowledge Graph' /tmp/money-unit-materi.html
+          if grep -q 'Outline kurikulum' /tmp/money-unit-materi.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-007&view=soal' > /tmp/money-unit-soal.html
+          grep -q 'Lima soal diagnosis unit test' /tmp/money-unit-soal.html
+          grep -q 'Cek jawaban' /tmp/money-unit-soal.html
+          if grep -q 'Concept graph for this lesson' /tmp/money-unit-soal.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-007&view=project' > /tmp/money-unit-project.html
+          grep -q 'Money Unit Tests — JUnit 5 behavior matrix' /tmp/money-unit-project.html
+          grep -q 'Surefire report' /tmp/money-unit-project.html
+          if grep -q 'Concept graph for this lesson' /tmp/money-unit-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=soal' > /tmp/java-build-quiz.html

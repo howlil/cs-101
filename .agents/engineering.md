@@ -27,6 +27,7 @@ G11: JAV-001 distinguishes JDK fixture's compile/loading evidence from actual Ma
 G12: New Java and PostgreSQL rubric evidence must cite actual CLI/DB runs, while new cross-domain mappings cannot alter existing HTTP routes, prerequisite graph semantics or canonical unit publication status.
 G13: NET-006 code-level connect/EOF/refusal evidence must not be promoted into packet-level TCP handshake or retransmission claims without actual capture.
 G14: SQL-001 V3 receipt asserts authorship and explicitly not-executable SQL runtime, while a separate Docker-isolated PostgreSQL 16 integration step proves schema/data and repeatability. No application database binding is introduced.
+G15: TST-007 distinguishes generator's no-executable Maven/JUnit status from actual Surefire execution; the dedicated pure Java lab tests observable fee results, fixed decimal policy and errors without Spring context.
 DEC1: JSON overlay + in-memory adjacency preferred to changing generated manifest or adding graph DB.
 D1: Pilot proposed relationships require editorial review before promotion to reviewed.
 DEC2: A read-only, depth-specific path derives from concept-level reviewed requires and the existing proposed itemIds editorial ordering. Missing prerequisite outcomes are surfaced as gaps.
@@ -42,6 +43,7 @@ DEC11: JAV-001 uses a self-contained JDK 21 compiler/runtime fixture with no Mav
 DEC12: Cross-domain expansion is a small editorial overlay addition with two typed evidence categories, not imported workbook edits or an auto-generated graph.
 DEC13: NET-006 uses ephemeral loopback Node sockets with local stream-level proof only; privileged network capture belongs to a disposable VM learner lab.
 DEC14: PostgreSQL SQL runner remains outside the eight-second Node/Java V3 authoring fixture: a disposable Docker container with no external network runs lab SQL and six inspections in CI; authoring plan keeps an explicit not-executable reason.
+DEC15: Use a separate Maven project with JUnit Jupiter 5.14.4 and Surefire 3.5.4 to prove TST-007 instead of adding plugin execution to the bounded authoring runner or starting Spring; assert test count from Surefire XML.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -61,3 +63,4 @@ PF14 (P18,G11) [important] | JAV-001 V3 artifacts, real JDK 21 compile/runtime p
 PF15 (P19,G12) [important] | G1 path/rubric validation, graph canvas neighborhood and HTTP route smoke for authored/outline cases | merge | pnpm ci
 PF16 (P20,G13) [important] | NET-006 V3 receipt, Node loopback fixture and Materi/Soal/Project route smoke | merge | pnpm ci
 PF17 (P21,G14) [important] | SQL-001 reproducible bundle, isolated real PostgreSQL run, six-query expected data and focused route smoke | merge | pnpm ci
+PF18 (P22,G15) [important] | TST-007 authoring V3 receipt, real Maven Surefire 20-case report and Materi/Soal/Project smoke | merge | pnpm ci

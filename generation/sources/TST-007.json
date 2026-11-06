@@ -1,0 +1,139 @@
+{
+  "itemId": "TST-007",
+  "curriculumFingerprint": "sha256:550ad830ca8e70ee20bfa4ae0af9747be61815a37631f39f84a8d2674b8e05f1",
+  "sources": [
+    {
+      "title": "JUnit 5.14.4 — Test Annotations",
+      "url": "https://docs.junit.org/5.14.4/writing-tests/annotations.html",
+      "tier": 0,
+      "supports": [
+        "@Test, @DisplayName and @BeforeEach lifecycle",
+        "Jupiter API annotation behavior"
+      ],
+      "notes": [
+        "Test annotations; test execution per method"
+      ]
+    },
+    {
+      "title": "JUnit 5.14.4 — Assertions",
+      "url": "https://docs.junit.org/5.14.4/writing-tests/assertions.html",
+      "tier": 0,
+      "supports": [
+        "assertEquals, assertThrows, assertAll and behavior-oriented assertions"
+      ],
+      "notes": [
+        "Assertion methods and exception testing"
+      ]
+    },
+    {
+      "title": "Apache Maven Surefire — JUnit Platform",
+      "url": "https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html",
+      "tier": 0,
+      "supports": [
+        "JUnit Jupiter test discovery/execution by Maven Surefire and the JUnit platform"
+      ],
+      "notes": [
+        "JUnit Platform Engine and Maven plugin integration"
+      ]
+    },
+    {
+      "title": "Java 21 — BigDecimal",
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html",
+      "tier": 0,
+      "supports": [
+        "decimal arithmetic, setScale, compareTo and precise string construction"
+      ],
+      "notes": [
+        "BigDecimal methods, scale and value comparisons"
+      ]
+    },
+    {
+      "title": "Java 21 — RoundingMode",
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html",
+      "tier": 0,
+      "supports": [
+        "HALF_UP versus HALF_EVEN rounding policies and UNNECESSARY validation"
+      ],
+      "notes": [
+        "RoundingMode enum semantics"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "junit-lifecycle",
+      "statement": "JUnit Jupiter @Test marks individual test methods and @BeforeEach runs setup before each test method rather than starting a Spring application context.",
+      "conceptIds": [
+        "junit-lifecycle"
+      ],
+      "sourceUrl": "https://docs.junit.org/5.14.4/writing-tests/annotations.html",
+      "locator": "@Test and @BeforeEach annotations",
+      "rationale": "Official Jupiter annotation reference defines the lifecycle and execution timing."
+    },
+    {
+      "id": "junit-assertions",
+      "statement": "JUnit Jupiter provides assertEquals, assertThrows and assertAll for checking observable values, expected exceptions and grouped behaviors.",
+      "conceptIds": [
+        "test-aaa",
+        "boundary-matrix"
+      ],
+      "sourceUrl": "https://docs.junit.org/5.14.4/writing-tests/assertions.html",
+      "locator": "JUnit Jupiter Assertions methods and examples",
+      "rationale": "JUnit 5 assertion reference defines equality and exception assertion methods."
+    },
+    {
+      "id": "surefire-jupiter",
+      "statement": "Maven Surefire runs JUnit Jupiter tests through the JUnit Platform when an appropriate Jupiter TestEngine is available.",
+      "conceptIds": [
+        "junit-lifecycle",
+        "maven-proof"
+      ],
+      "sourceUrl": "https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html",
+      "locator": "Using JUnit 5 Platform / Configuring JUnit Platform",
+      "rationale": "Official Surefire documentation identifies JUnit Jupiter engine discovery through Maven."
+    },
+    {
+      "id": "bigdecimal-scale",
+      "statement": "BigDecimal decimal arithmetic and setScale support exact decimal quantities without binary floating-point representations.",
+      "conceptIds": [
+        "money-decimals"
+      ],
+      "sourceUrl": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html",
+      "locator": "Class BigDecimal / setScale / operations",
+      "rationale": "Java 21 BigDecimal reference specifies decimal precision, scale and arithmetic contracts."
+    },
+    {
+      "id": "bigdecimal-compare",
+      "statement": "BigDecimal compareTo compares numeric values while equals requires equal scale and unscaled value representations.",
+      "conceptIds": [
+        "money-decimals",
+        "boundary-matrix"
+      ],
+      "sourceUrl": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html",
+      "locator": "compareTo and equals numerical representation",
+      "rationale": "BigDecimal documentation explicitly contrasts numeric comparison and representation equality."
+    },
+    {
+      "id": "rounding-modes",
+      "statement": "RoundingMode.HALF_UP rounds discarded half-way decimal values upward, while UNNECESSARY throws when reducing scale would lose value.",
+      "conceptIds": [
+        "money-decimals",
+        "boundary-matrix"
+      ],
+      "sourceUrl": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html",
+      "locator": "HALF_UP and UNNECESSARY rounding modes",
+      "rationale": "Java 21 RoundingMode reference defines both fixed rounding behaviors."
+    },
+    {
+      "id": "maven-test-gate",
+      "statement": "A Maven test run using Surefire can execute JUnit tests without loading a Spring Boot ApplicationContext.",
+      "conceptIds": [
+        "maven-proof"
+      ],
+      "sourceUrl": "https://maven.apache.org/components/surefire/maven-surefire-plugin/examples/junit-platform.html",
+      "locator": "Using JUnit 5 Platform / Configuring JUnit Platform",
+      "rationale": "Surefire executes Jupiter engine test classes directly with no requirement for Spring libraries."
+    }
+  ]
+}
