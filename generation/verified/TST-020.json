@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "TST-020",
+  "curriculumFingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "hashes": {
+    "lesson": "e19b1377fe51ea1453f7877d8227fb6f0fce02f6af1457ab5b03edfda3ea41c1",
+    "pedagogy": "184f8772071c2079f0e49d3f84d335a02684adfccdf63e1dc6525ad99d66d8d3",
+    "questionBank": "783fb00f9052293e4682377219f4e093c7a32c28621e648c30a1749de2016642",
+    "sourcePack": "59ff1ee5f99c05efd283e5ff34ffa04c4ffbbdc4fd4c5e74a5dd4531db90fb6f",
+    "exampleProof": "0fb2e186a6717902e8196ae5ba16092ac7a10d66ada4f1498e5ffeac4df00517",
+    "examplePlan": "bf38d99c8acba57c4670d0598b8941a7e8bbce5f0e9358dec301effd0740581d"
+  }
+}

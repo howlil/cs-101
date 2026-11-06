@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "TST-020",
+  "curriculumFingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "examples": [
+    {
+      "id": "transfer-contract-drift",
+      "runtime": "node",
+      "file": "contract-drift.mjs",
+      "expectedStdout": "baseline-response=valid\nadditive-optional=tolerant-accept\nrequired-removal=detected\namount-type-change=detected\nnew-required=detected\npayload-missing-and-type=detected\npayload-enum=detected\nstrict-consumer=rejects-unknown\nruntime=static-fixture-only\n"
+    }
+  ]
+}

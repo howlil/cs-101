@@ -1,0 +1,79 @@
+{
+  "itemId": "TST-020",
+  "version": "lesson-spec-v1:sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "curriculumFingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Provider menghapus currency dari Transfer.required. Apa risikonya?",
+      "options": [
+        "Tidak berisiko karena schema lebih permisif",
+        "Consumer lama dapat menerima response tanpa currency dan gagal",
+        "Semua field required selalu opsional"
+      ],
+      "answer": 1,
+      "explanation": "Menghapus required melemahkan janji provider yang mungkin dipakai client lama.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Transfer.amount adalah string tetapi server mengirim number. Apa hasil tes?",
+      "options": [
+        "Fail: JSON type berubah",
+        "Pass selama HTTP 201",
+        "Pass karena nilainya tetap sama"
+      ],
+      "answer": 0,
+      "explanation": "Representasi JSON number berbeda dari decimal string pada kontrak.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Field memo baru opsional pada Transfer dengan additionalProperties true. Apa verdict?",
+      "options": [
+        "Pasti aman untuk semua consumer",
+        "Kandidat kompatibel untuk consumer toleran",
+        "Pasti breaking bagi semua client"
+      ],
+      "answer": 1,
+      "explanation": "Schema open menerima field tambahan, tetapi consumer strict masih harus diuji.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Mengapa schema diff dan payload assertion perlu terpisah?",
+      "options": [
+        "Schema saja membuktikan server aktual",
+        "Payload actual dapat salah meskipun schema tidak berubah",
+        "HTTP status menggantikan pengecekan type"
+      ],
+      "answer": 1,
+      "explanation": "Schema drift membandingkan janji dan instance check menilai respons terobservasi.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Legacy consumer memakai reject-unknown-property. Apa yang terjadi jika memo ditambahkan?",
+      "options": [
+        "Tidak mungkin gagal",
+        "Wajib mengubah 201 menjadi 200",
+        "Dapat gagal walaupun memo opsional dan schema mengizinkan"
+      ],
+      "answer": 2,
+      "explanation": "Kompatibilitas membutuhkan verifikasi consumer aktual, bukan hanya spec check.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

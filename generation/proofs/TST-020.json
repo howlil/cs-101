@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "TST-020",
+  "curriculumFingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "transfer-contract-drift",
+      "runtime": "node",
+      "file": "contract-drift.mjs",
+      "fixtureSha256": "c59fb3649b17a5a375a86f10386fecf42d628b5896084921e83e36bdb17a9f8e",
+      "stdoutSha256": "3a341f3afb2559ee6c392572ff8c6518277d978e67bec0b88c48780f99d27b9e",
+      "verified": true
+    }
+  ]
+}

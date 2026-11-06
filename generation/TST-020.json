@@ -1,0 +1,40 @@
+{
+  "itemId": "TST-020",
+  "fingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "sources": [
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html"
+    },
+    {
+      "title": "JSON Schema Validation 2020-12",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-validation"
+    },
+    {
+      "title": "JSON Schema Core 2020-12",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-core"
+    },
+    {
+      "title": "JSON Schema Understanding: Objects",
+      "url": "https://json-schema.org/understanding-json-schema/reference/object"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments about provider guarantees, type/instance drift and optional evolution",
+      "assessedAt": "Five questions and deterministic Node contract checker",
+      "evidenceExpected": "Required-field removal and changed amount type are rejected; optional memo accepted by tolerant consumer, with strict caveat."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent Account field and optional displayTag exercises",
+      "assessedAt": "Independent Project plus mutation proof",
+      "evidenceExpected": "A separate breaking mutation produces a failure and consumer-specific compatibility behavior is documented."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}
