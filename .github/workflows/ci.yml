@@ -113,7 +113,7 @@ jobs:
       - name: Single-page smoke test
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           pnpm start > /tmp/cs101-smoke.log 2>&1 &
           pid=$!
           trap 'status=$?; if [ "$status" -ne 0 ]; then echo "SMOKE FAILURE: server log"; tail -n 100 /tmp/cs101-smoke.log; fi; kill "$pid" 2>/dev/null || true' EXIT
