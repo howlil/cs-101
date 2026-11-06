@@ -1,0 +1,48 @@
+{
+  "itemId": "TST-021",
+  "fingerprint": "sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24",
+  "sources": [
+    {
+      "title": "Pact JS — Consumer Tests",
+      "url": "https://docs.pact.io/implementation_guides/javascript/docs/consumer"
+    },
+    {
+      "title": "Pact JS — Provider Verification",
+      "url": "https://docs.pact.io/implementation_guides/javascript/docs/provider"
+    },
+    {
+      "title": "Pact — Verifying Pacts",
+      "url": "https://docs.pact.io/getting_started/verifying_pacts"
+    },
+    {
+      "title": "Pact — Writing Consumer Tests",
+      "url": "https://docs.pact.io/consumer"
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html"
+    },
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 objectives: consumer expectations, Pact provider replay, and breaking provider-type mutation",
+      "assessedAt": "Five local quiz questions and a dedicated CI Pact 17.1.4 consumer/provider lab with a healthy and negative verification",
+      "evidenceExpected": "A generated Pact file describes 200 success and 404 problem; healthy local provider passes; changing amount to number causes genuine Pact provider verification rejection."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "New Account consumer and alternative currency mutation as independent variations",
+      "assessedAt": "Project requires an independent consumer-driven contract mutation and recorded provider verification verdict",
+      "evidenceExpected": "An additional interaction and independent field/error mutation with provider verification pass/fail evidence, not only a static JSON checker."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

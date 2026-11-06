@@ -1,0 +1,136 @@
+---
+taskId: "TST-021"
+title: "Mock Bank Contract — Pact Consumer and Provider Verification"
+description: "Define real Pact consumer expectations for transfer success and error; replay them against a healthy and deliberately broken local provider."
+demo: false
+curriculumFingerprint: "sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-021.json';
+import questionBank from '../../../review-banks/TST-021.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Problem:** provider transfer mengubah bentuk response tanpa mengubah endpoint. Bagaimana consumer membuktikan bahwa perubahan itu mematahkan data yang benar-benar dibacanya?
+
+**Mulai:** identifikasi empat bagian expectation: status HTTP, amount string, currency IDR, dan error Problem Details ketika transfer tidak ditemukan.
+
+<MentalModel title="Pact = expectation consumer + provider verification">
+
+- **Consumer:** jalankan kode client terhadap Pact mock server, bukan hanya menguji JSON hard-coded.
+- **Contract:** Pact mencatat GET transfer success 200 dan transfer not found 404.
+- **Provider:** Verifier memutar ulang contract yang sama terhadap Node HTTP provider lokal.
+- **Mutation:** ganti satu hal, amount dari JSON string ke JSON number, lalu provider verifier wajib menolak.
+- **Batas:** tidak ada backend Spring MVC, autentikasi bank, database, settlement, atau broker eksternal pada lab ini.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+      Transfer client
+             |
+       Pact mock test
+             |
+      Generated pact
+             |
+        Pact Verifier
+          /      \
+  Healthy local  Mutated local
+   Node provider  Node provider
+         |          |
+       PASS      amount:number
+                    |
+                 FAIL (expected)
+~~~
+
+</ConceptGraph>
+
+## Consumer expectation
+
+| Operation | HTTP | Contract fields |
+| --- | --- | --- |
+| GET /transfers/tr-001 | 200 | transferId, amount string, currency IDR, status PENDING |
+| GET /transfers/missing | 404 | Content-Type application/problem+json, type, title, status |
+
+**Kenapa tidak full E2E?** Contract testing membuktikan kecocokan interface yang dipakai consumer. Untuk perubahan JSON type, pengujian provider Pact lebih cepat dan lebih terisolasi daripada men-deploy seluruh bank simulator. Bukan berarti integrasi dan security test bisa dihapus untuk alur pembayaran sesungguhnya.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber primer
+
+<SourceList sources={[
+ {title:'Pact JS — Consumer Tests',url:'https://docs.pact.io/implementation_guides/javascript/docs/consumer'},
+ {title:'Pact JS — Provider Verification',url:'https://docs.pact.io/implementation_guides/javascript/docs/provider'},
+ {title:'Pact — Verifying Pacts',url:'https://docs.pact.io/getting_started/verifying_pacts'},
+ {title:'Pact — Writing Consumer Tests',url:'https://docs.pact.io/consumer'},
+ {title:'RFC 9457 — Problem Details',url:'https://www.rfc-editor.org/rfc/rfc9457.html'},
+ {title:'OpenAPI 3.1.1 Specification',url:'https://spec.openapis.org/oas/v3.1.1.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Real Pact JS laboratory
+
+Jalankan Node 24 pada root repository:
+
+~~~sh
+npm install --prefix labs/TST-021 --no-audit --no-fund --package-lock=false
+node labs/TST-021/pact-contract.mjs
+~~~
+
+Gunakan Pact JS 17.1.4 yang dideklarasikan oleh lab. Urutan bukti:
+- Consumer menjalankan fungsi HTTP client terhadap mock server Pact, menghasilkan file Pact.
+- Verifier memutar ulang success 200 dan error 404 terhadap local HTTP server yang sehat.
+- Provider kedua mengubah amount string menjadi number; Pact harus mengembalikan verification failure yang *diassert* oleh negative test.
+
+Generator V3 **tidak** mengklaim menjalankan Pact: dependency native dijalankan secara terpisah di CI. Lab menulis kontrak ke direktori sementara, bukan ke database atau file user. Tidak perlu Pact Broker untuk demonstrasi lokal ini.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal consumer-driven contract
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent Project — Provider Compatibility Gate
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Mock Bank Contract — consumer-driven breaking change"
+ brief="Buat consumer expectation pada layanan bank simulasi, verifikasi provider yang sehat, lalu ubah satu field response secara sengaja agar Pact provider verification gagal tanpa menjalankan full E2E."
+ acceptanceCriteria={[
+  'Consumer test menjalankan fungsi client nyata terhadap Pact mock server dan menghasilkan kontrak yang memiliki success serta error interaction.',
+  'Success 200 memverifikasi amount berbentuk JSON string dan currency; 404 memverifikasi application/problem+json type/title/status.',
+  'Verifier memutar ulang Pact file terhadap HTTP provider lokal yang benar dan lulus pada kedua interaction.',
+  'Provider yang sama sengaja diubah amount dari string menjadi number; verifier menolak, dan negative assertion memastikan hasil itu diobservasi.',
+  'Gunakan Pact 17.1.4 dalam lingkungan test terisolasi; jangan tambahkan runtime dependency ke aplikasi Astro.',
+  'Terapkan kasus independen memakai field currency atau response Account yang berbeda dari contoh amount.',
+  'Pisahkan bukti lab Node lokal dari verifikasi provider Spring nyata, keamanan, bank eksternal dan settlement.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Mampu menjelaskan siapa yang menentukan consumer contract dan bagaimana Pact mock server menghasilkannya.',
+ 'Mampu membedakan consumer mock test dari provider verification.',
+ 'Paham alasan perubahan amount JSON string menjadi number harus gagal sebelum deploy.',
+ 'Tidak menyatakan bahwa pengujian Pact lokal otomatis membuktikan integrasi produksi.'
+]} />
+
+</LessonStage>

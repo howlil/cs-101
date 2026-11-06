@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "itemId": "TST-021",
+  "curriculumFingerprint": "sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24",
+  "status": "not-executable",
+  "noExecutableReason": "Pact JS 17 requires a separately installed native Pact mock/verification runtime; the bounded generator executes standalone Node/Java source files with no external package installation. A separate existing GitHub CI workflow executes actual Pact consumer mock creation and provider verification against a local HTTP server, including a deliberate rejected response type mutation. The V3 receipt is explicitly not-executable.",
+  "examples": []
+}

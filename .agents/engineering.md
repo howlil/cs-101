@@ -28,6 +28,7 @@ G12: New Java and PostgreSQL rubric evidence must cite actual CLI/DB runs, while
 G13: NET-006 code-level connect/EOF/refusal evidence must not be promoted into packet-level TCP handshake or retransmission claims without actual capture.
 G14: SQL-001 V3 receipt asserts authorship and explicitly not-executable SQL runtime, while a separate Docker-isolated PostgreSQL 16 integration step proves schema/data and repeatability. No application database binding is introduced.
 G15: TST-007 distinguishes generator's no-executable Maven/JUnit status from actual Surefire execution; the dedicated pure Java lab tests observable fee results, fixed decimal policy and errors without Spring context.
+G19: TST-021's Pact V4 contract must be authored by running a consumer client against Pact mock and independently replayed against local HTTP provider. Positive and deliberate amount type mutation verdicts are separately asserted; the generator's not-executable status is not Pact proof.
 G18: TST-020 detects selected SYS-008 response schema and payload drift on cloned candidates, distinguishes tolerant from strict consumer behavior and never claims complete OpenAPI or deployed consumer verification.
 G17: TST-019 uses real ephemeral loopback HTTP against an in-memory educational stub to verify SYS-008 responses, including 3 mutation guards; 422 is absent and Spring/auth/settlement remain unproven.
 G16: SYS-008 static OpenAPI spec examples and Node fixture require real status/error/DTO consistency, without conflating static review with a deployed Spring service, auth provider or payment guarantees.
@@ -47,6 +48,7 @@ DEC12: Cross-domain expansion is a small editorial overlay addition with two typ
 DEC13: NET-006 uses ephemeral loopback Node sockets with local stream-level proof only; privileged network capture belongs to a disposable VM learner lab.
 DEC14: PostgreSQL SQL runner remains outside the eight-second Node/Java V3 authoring fixture: a disposable Docker container with no external network runs lab SQL and six inspections in CI; authoring plan keeps an explicit not-executable reason.
 DEC15: Use a separate Maven project with JUnit Jupiter 5.14.4 and Surefire 3.5.4 to prove TST-007 instead of adding plugin execution to the bounded authoring runner or starting Spring; assert test count from Surefire XML.
+DEC19: TST-021 keeps Pact 17.1.4 in isolated labs/TST-021/package.json, outside Astro dependencies; CI uses the existing verification workflow and a temporary Pact contract file without a broker or deployed bank integration.
 DEC18: TST-020 uses one bounded Node 24 source fixture against tracked SYS-008 OpenAPI; no new runtime dependencies or changes to the canonical contract.
 DEC16: Publish SYS-008 as a standalone OpenAPI 3.1.1 JSON design proposal and use bounded Node contract/example checks in V3 authoring; preserve separate actual Spring MVC/auth/runtime implementation proof.
 
@@ -69,6 +71,7 @@ PF15 (P19,G12) [important] | G1 path/rubric validation, graph canvas neighborhoo
 PF16 (P20,G13) [important] | NET-006 V3 receipt, Node loopback fixture and Materi/Soal/Project route smoke | merge | pnpm ci
 PF17 (P21,G14) [important] | SQL-001 reproducible bundle, isolated real PostgreSQL run, six-query expected data and focused route smoke | merge | pnpm ci
 PF18 (P22,G15) [important] | TST-007 authoring V3 receipt, real Maven Surefire 20-case report and Materi/Soal/Project smoke | merge | pnpm ci
+PF22 (P26,G19) [important] | TST-021 V3 reproducibility and actual Pact consumer mock, provider replay, negative type mutation, 3-view smoke | merge | pnpm ci and dedicated Pact step
 PF21 (P25,G18) [important] | TST-020 V3 reproducibility, required/type/enum negative checks and additive conditional consumer tests with 3-view smoke | merge | pnpm ci
 PF20 (P24,G17) [important] | ten live HTTP requests, three mutation rejects, explicit 422 contract gap | merge | CI TST-019 fixture
 PF19 (P23,G16) [important] | SYS-008 V3 byte-reproducible static checker, RFC status/error shape, G1 contextual routes and three-view smoke | merge | pnpm ci

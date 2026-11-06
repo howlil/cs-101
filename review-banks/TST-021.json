@@ -1,0 +1,79 @@
+{
+  "itemId": "TST-021",
+  "version": "lesson-spec-v1:sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24",
+  "curriculumFingerprint": "sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Apa yang perlu dilakukan Pact consumer test agar ekspektasinya mewakili client nyata?",
+      "options": [
+        "Memanggil fungsi client yang digunakan consumer melalui mock server Pact",
+        "Langsung menyalin semua controller code provider",
+        "Hanya memvalidasi schema OpenAPI tanpa request"
+      ],
+      "answer": 0,
+      "explanation": "Consumer-driven contract berasal dari kebutuhan consumer yang benar-benar menjalankan fungsi client ketika test.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Consumer Pact test berhasil menghasilkan file contract. Apakah provider sudah terbukti kompatibel?",
+      "options": [
+        "Ya, file Pact cukup",
+        "Belum, Verifier harus replay contract ke provider instance yang dijalankan",
+        "Ya, selama HTTP method GET"
+      ],
+      "answer": 1,
+      "explanation": "Provider verification merupakan langkah terpisah untuk menguji implementasi provider terhadap expectation dari consumer.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Consumer mengharapkan amount JSON string, provider memberi number. Apa hasil yang benar?",
+      "options": [
+        "Pass karena nilainya sama",
+        "Pass selama status 200",
+        "Pact provider verification gagal karena type mismatch"
+      ],
+      "answer": 2,
+      "explanation": "Matcher string Pact menolak actual JSON number sehingga breaking change terdeteksi.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Untuk transfer yang tidak ditemukan, field error stabil mana yang dipakai dalam lab SYS-008?",
+      "options": [
+        "HTTP 404 dengan RFC 9457 type/title/status",
+        "HTTP 200 dengan null tanpa schema",
+        "HTTP 422 untuk seluruh missing resource"
+      ],
+      "answer": 0,
+      "explanation": "Kontrak SYS-008 mendefinisikan 404 Problem Details; lab tidak menciptakan code error baru.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa cakupan yang boleh diklaim ketika Pact Verifier lokal lulus?",
+      "options": [
+        "Pembayaran dan settlement produksi sudah aman",
+        "Provider Node lokal memenuhi interaksi Pact yang diuji, belum menguji Spring, auth, DB atau production",
+        "Semua consumer versi lama pasti kompatibel"
+      ],
+      "answer": 1,
+      "explanation": "Verifier menguji suatu provider instance dan interaksi konkret; tidak menggantikan integrasi backend nyata.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

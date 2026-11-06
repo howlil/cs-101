@@ -1,0 +1,116 @@
+{
+  "itemId": "TST-021",
+  "curriculumFingerprint": "sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24",
+  "sources": [
+    {
+      "title": "Pact JS — Consumer Tests",
+      "url": "https://docs.pact.io/implementation_guides/javascript/docs/consumer",
+      "tier": 0,
+      "supports": [
+        "Pact mock server, consumer tests, generated Pact file and interactions"
+      ],
+      "notes": [
+        "Pact V4 builder, executeTest, matching JSON body"
+      ]
+    },
+    {
+      "title": "Pact JS — Provider Verification",
+      "url": "https://docs.pact.io/implementation_guides/javascript/docs/provider",
+      "tier": 0,
+      "supports": [
+        "Verifier pactUrls and running a local provider with stateHandlers"
+      ],
+      "notes": [
+        "VerifyProvider and local Pact file workflow"
+      ]
+    },
+    {
+      "title": "Pact — Verifying Pacts",
+      "url": "https://docs.pact.io/getting_started/verifying_pacts",
+      "tier": 0,
+      "supports": [
+        "Provider verification replays pact interactions and checks actual response"
+      ],
+      "notes": [
+        "Overview: provider verification, local file, state setup"
+      ]
+    },
+    {
+      "title": "Pact — Writing Consumer Tests",
+      "url": "https://docs.pact.io/consumer",
+      "tier": 0,
+      "supports": [
+        "Consumer expectation comes from tested client behavior, not provider implementation"
+      ],
+      "notes": [
+        "Good consumer tests use provider states and actually invoke the client"
+      ]
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "tier": 0,
+      "supports": [
+        "application/problem+json, stable type/title/status error body"
+      ],
+      "notes": [
+        "Sections 3 and 3.1"
+      ]
+    },
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html",
+      "tier": 0,
+      "supports": [
+        "Status 200 and 404 representations for SYS-008 transfer GET"
+      ],
+      "notes": [
+        "Response Object, Media Type Object and Schema Object"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "consumer-mock-interactions",
+      "statement": "Pact consumer tests execute a real API client against Pact's generated mock server and write expectation interactions as a Pact contract file.",
+      "conceptIds": [
+        "pact-consumer-contract"
+      ],
+      "sourceUrl": "https://docs.pact.io/implementation_guides/javascript/docs/consumer",
+      "locator": "Contract Testing Process (HTTP), Consumer API and Example",
+      "rationale": "Pact JS documentation defines the consumer mock test and output pact file."
+    },
+    {
+      "id": "provider-verifier-implementation",
+      "statement": "The Pact Verifier replays contract interactions against a locally running provider and fails when expected types or responses do not match.",
+      "conceptIds": [
+        "provider-replay-verification",
+        "breaking-provider-regression"
+      ],
+      "sourceUrl": "https://docs.pact.io/implementation_guides/javascript/docs/provider",
+      "locator": "Provider Verification / Provider API Testing / Verification Options",
+      "rationale": "The official JS guide defines Verifier and pactUrls for provider verification."
+    },
+    {
+      "id": "pact-consumer-scope",
+      "statement": "Consumer-driven contracts express the outbound expectations of consumer code, not every possible OpenAPI response or backend feature.",
+      "conceptIds": [
+        "pact-consumer-contract"
+      ],
+      "sourceUrl": "https://docs.pact.io/consumer",
+      "locator": "Writing Consumer tests / test actual collaborating client",
+      "rationale": "Official Pact recommendations distinguish consumer contracts from broad provider implementation tests."
+    },
+    {
+      "id": "http-problem-error",
+      "statement": "RFC 9457 defines a structured problem-details JSON representation with type, title and status values.",
+      "conceptIds": [
+        "error-state-contract"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "locator": "Section 3.1 Members of a Problem Details Object",
+      "rationale": "The RFC specifies the three error fields used in the consumer expectation."
+    }
+  ]
+}

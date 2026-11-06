@@ -98,6 +98,21 @@ jobs:
           pnpm generation:validate TST-020
           pnpm generation:promote TST-020
           git diff --exit-code -- src/content/lessons/TST-020.mdx generation/TST-020.json review-banks/TST-020.json generation/pedagogy/TST-020.json generation/sources/TST-020.json generation/proofs/TST-020.json generation/executables/TST-020.json generation/verified/TST-020.json generation/fixtures/TST-020/contract-drift.mjs
+      - name: Verify TST-021 reproducible V3 authoring (Pact runtime external)
+        run: |
+          pnpm generation:validate TST-021
+          pnpm generation:promote TST-021
+          git diff --exit-code -- src/content/lessons/TST-021.mdx generation/TST-021.json review-banks/TST-021.json generation/pedagogy/TST-021.json generation/sources/TST-021.json generation/proofs/TST-021.json generation/executables/TST-021.json generation/verified/TST-021.json
+      - name: TST-021 real Pact JS consumer and provider verification
+        env:
+          SCARF_ANALYTICS: 'false'
+        run: |
+          set -euo pipefail
+          npm install --prefix labs/TST-021 --no-audit --no-fund --package-lock=false
+          node labs/TST-021/pact-contract.mjs | tee /tmp/tst-021-pact.log
+          grep -q 'consumer-pact=generated-two-interactions' /tmp/tst-021-pact.log
+          grep -q 'healthy-provider=pact-verified' /tmp/tst-021-pact.log
+          grep -q 'numeric-amount-provider=pact-verifier-rejected' /tmp/tst-021-pact.log
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -198,6 +213,19 @@ jobs:
           grep -q 'Contract Drift — detect breaking response evolution' /tmp/tst-020-project.html
           grep -q 'Required evidence: Framework integration test' /tmp/tst-020-project.html
           if grep -q 'Concept graph for this lesson' /tmp/tst-020-project.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-021' > /tmp/tst-021-materi.html
+          grep -q 'Mock Bank Contract' /tmp/tst-021-materi.html
+          grep -q 'Pact = expectation consumer + provider verification' /tmp/tst-021-materi.html
+          grep -q 'Pact JS' /tmp/tst-021-materi.html
+          if grep -q 'Outline kurikulum' /tmp/tst-021-materi.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-021&view=soal' > /tmp/tst-021-soal.html
+          grep -q 'Lima soal consumer-driven contract' /tmp/tst-021-soal.html
+          grep -q 'Cek jawaban' /tmp/tst-021-soal.html
+          if grep -q 'Concept graph for this lesson' /tmp/tst-021-soal.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-021&view=project' > /tmp/tst-021-project.html
+          grep -q 'Mock Bank Contract — consumer-driven breaking change' /tmp/tst-021-project.html
+          grep -q 'Independent Project' /tmp/tst-021-project.html
+          if grep -q 'Concept graph for this lesson' /tmp/tst-021-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=soal' > /tmp/java-build-quiz.html
