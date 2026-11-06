@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "TST-019",
+  "curriculumFingerprint": "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "examples": [
+    {
+      "id": "http-contract-loopback",
+      "runtime": "node",
+      "file": "http-contract.mjs",
+      "expectedStdout": "http-paths=3\nhttp-roundtrips=10\nstatus-matrix=200,201,400,401,403,404,409,500\nnegative-mutations=3-detected\n422=undeclared\ntarget=local-educational-stub\n"
+    }
+  ]
+}

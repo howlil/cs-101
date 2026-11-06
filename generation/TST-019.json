@@ -1,0 +1,40 @@
+{
+  "itemId": "TST-019",
+  "fingerprint": "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "sources": [
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+    },
+    {
+      "title": "OpenAPI 3.1.1 Specification",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html"
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html"
+    },
+    {
+      "title": "Node.js HTTP API",
+      "url": "https://nodejs.org/api/http.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 objectives: response oracle, wire matrix and mutation-based schema/error checks",
+      "assessedAt": "Ten HTTP exchanges, three negative mutations, five self-check questions and contract-gap declaration",
+      "evidenceExpected": "200/201/400/401/403/404/409/500 observed on local stub; 422 not declared; response Content-Type, required fields, headers and Problem status correct."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent GET account checks and response error/schema drift",
+      "assessedAt": "New account 200/404 scenario plus independent production Spring contract test challenge",
+      "evidenceExpected": "A different account case, demonstrated negative mutation detection, and explicit runtime evidence boundary."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

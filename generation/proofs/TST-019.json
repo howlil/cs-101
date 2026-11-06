@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "TST-019",
+  "curriculumFingerprint": "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "http-contract-loopback",
+      "runtime": "node",
+      "file": "http-contract.mjs",
+      "fixtureSha256": "8a5e83829a6d89689f6e0a1a0fb0dd54f74bc81c8a2918de621b5ffe0a298a10",
+      "stdoutSha256": "3ff102e7dd2843dfe4e61edb455d50eb8d31407622fa6de9f4d3c64e24090f95",
+      "verified": true
+    }
+  ]
+}

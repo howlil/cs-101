@@ -1,0 +1,94 @@
+{
+  "itemId": "TST-019",
+  "curriculumFingerprint": "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "sources": [
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "tier": 0,
+      "supports": [
+        "HTTP methods, status 200/201/400/401/403/404/409/422/500 and response headers"
+      ],
+      "notes": [
+        "Sections 9, 10 and 15; 422 is valid HTTP, but is not declared in SYS-008"
+      ]
+    },
+    {
+      "title": "OpenAPI 3.1.1 Specification",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html",
+      "tier": 0,
+      "supports": [
+        "Operation response maps, Content-Type, headers and response schema"
+      ],
+      "notes": [
+        "Paths, Operation, Response and Schema Object definitions"
+      ]
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "tier": 0,
+      "supports": [
+        "application/problem+json and matching status of HTTP response and problem body"
+      ],
+      "notes": [
+        "Sections 3, 3.1.2 and 5"
+      ]
+    },
+    {
+      "title": "Node.js HTTP API",
+      "url": "https://nodejs.org/api/http.html",
+      "tier": 0,
+      "supports": [
+        "An actual ephemeral HTTP server with http.createServer and server.listen"
+      ],
+      "notes": [
+        "Node 24 HTTP API; fixture remains an educational stub"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "http-contract-status",
+      "statement": "An operation's declared HTTP responses and status semantics form the expected behavior for its API clients.",
+      "conceptIds": [
+        "status-oracle"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 15.3–15.6 Status Codes",
+      "rationale": "The IETF standard defines response semantics, while the actual declared matrix is in SYS-008 OpenAPI."
+    },
+    {
+      "id": "response-contract",
+      "statement": "OpenAPI operations can declare response status codes and typed media/header and JSON payload schemas.",
+      "conceptIds": [
+        "status-oracle",
+        "schema-error-guards"
+      ],
+      "sourceUrl": "https://spec.openapis.org/oas/v3.1.1.html",
+      "locator": "Operation Object, Responses Object and Schema Object",
+      "rationale": "The OpenAPI standard provides the response and schema contract language used by the checker."
+    },
+    {
+      "id": "problem-payload-status",
+      "statement": "RFC 9457 defines application/problem+json and requires a provided status member to match the actual HTTP status.",
+      "conceptIds": [
+        "schema-error-guards"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "locator": "Sections 3 and 3.1.2 Status",
+      "rationale": "The primary standard documents the body-to-wire status consistency invariant."
+    },
+    {
+      "id": "loopback-http-runtime",
+      "statement": "Node's HTTP server can accept network requests on a listening socket and send HTTP response codes and headers.",
+      "conceptIds": [
+        "live-http"
+      ],
+      "sourceUrl": "https://nodejs.org/api/http.html",
+      "locator": "http.createServer and server.listen",
+      "rationale": "Node's official runtime documentation defines the live HTTP boundary exercised by the lab."
+    }
+  ]
+}

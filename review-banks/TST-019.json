@@ -1,0 +1,79 @@
+{
+  "itemId": "TST-019",
+  "version": "lesson-spec-v1:sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "curriculumFingerprint": "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "RFC 9110 mengenal 422 tetapi SYS-008 POST tidak mendeklarasikan 422. Bagaimana verdict-nya?",
+      "options": [
+        "Lulus karena 422 adalah status HTTP valid",
+        "Laporkan gap kontrak; 422 butuh perubahan spec eksplisit",
+        "Ubah semua 400 menjadi 422 dalam checker"
+      ],
+      "answer": 1,
+      "explanation": "Status yang mungkin menurut RFC tidak otomatis menjadi respons yang dijanjikan oleh OpenAPI operasi ini.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa assertion penting saat POST /transfers mengembalikan HTTP 201?",
+      "options": [
+        "Location mengarah ke ID yang ada di body dan schema Transfer valid",
+        "Cukup status 201 walau tanpa header",
+        "Status transfer harus COMPLETED"
+      ],
+      "answer": 0,
+      "explanation": "Location dan response schema adalah bagian observable contract; 201 tidak menyatakan transfer telah settled.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "GET /accounts tanpa kredensial mengembalikan 401 tetapi tidak memiliki WWW-Authenticate. Apa hasilnya?",
+      "options": [
+        "Pass karena body JSON",
+        "Pass bila nilainya 401",
+        "Fail karena challenge header wajib"
+      ],
+      "answer": 2,
+      "explanation": "RFC 9110 mewajibkan challenge pada 401 dan SYS-008 juga mendeklarasikannya.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Problem body menyebut status 500 sementara response HTTP adalah 409. Apa tindakan checker?",
+      "options": [
+        "Fail karena tidak konsisten menurut RFC 9457",
+        "Abaikan status di body",
+        "Auto-convert status menjadi 200"
+      ],
+      "answer": 0,
+      "explanation": "Generator harus menyelaraskan nilai status yang disediakan dengan HTTP response code sebenarnya.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa yang terbukti ketika seluruh sepuluh live HTTP request pada stub Node lulus?",
+      "options": [
+        "Spring MVC, JWT dan transaksi keuangan telah terbukti",
+        "Perilaku HTTP stub lokal sesuai subset kontrak, Spring/security/DB harus diuji terpisah",
+        "Semua consumer versi lama pasti kompatibel"
+      ],
+      "answer": 1,
+      "explanation": "Fixture berjalan di memory pada Node loopback dan belum menyentuh aplikasi Spring atau sistem pembayaran nyata.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

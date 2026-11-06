@@ -88,6 +88,11 @@ jobs:
           git diff --exit-code -- src/content/lessons/SYS-008.mdx generation/SYS-008.json review-banks/SYS-008.json generation/pedagogy/SYS-008.json generation/sources/SYS-008.json generation/proofs/SYS-008.json generation/executables/SYS-008.json generation/verified/SYS-008.json generation/fixtures/SYS-008/contract-review.mjs
       - name: TST-019 real HTTP contract test against local educational stub
         run: node labs/TST-019/http-contract.mjs
+      - name: Verify TST-019 reproducible V3 authoring and HTTP fixture
+        run: |
+          pnpm generation:validate TST-019
+          pnpm generation:promote TST-019
+          git diff --exit-code -- src/content/lessons/TST-019.mdx generation/TST-019.json review-banks/TST-019.json generation/pedagogy/TST-019.json generation/sources/TST-019.json generation/proofs/TST-019.json generation/executables/TST-019.json generation/verified/TST-019.json generation/fixtures/TST-019/http-contract.mjs
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
@@ -165,6 +170,17 @@ jobs:
           grep -q 'Required evidence: Reasoned design review' /tmp/sys-transfer-project.html
           grep -q 'Next unit' /tmp/sys-transfer-project.html
           if grep -q 'Concept graph for this lesson' /tmp/sys-transfer-project.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-019&concept=api-contract-testing&level=G1' > /tmp/tst-019-materi.html
+          grep -q 'REST Contract Matrix' /tmp/tst-019-materi.html
+          grep -q 'API contract test = spec oracle' /tmp/tst-019-materi.html
+          if grep -q 'Outline kurikulum' /tmp/tst-019-materi.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-019&view=soal&concept=api-contract-testing&level=G1' > /tmp/tst-019-soal.html
+          grep -q 'Lima soal diagnosis API contract' /tmp/tst-019-soal.html
+          grep -q 'Cek jawaban' /tmp/tst-019-soal.html
+          if grep -q 'Concept graph for this lesson' /tmp/tst-019-soal.html; then exit 1; fi
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-019&view=project&concept=api-contract-testing&level=G1' > /tmp/tst-019-project.html
+          grep -q 'REST Contract Matrix — independent HTTP verification' /tmp/tst-019-project.html
+          if grep -q 'Concept graph for this lesson' /tmp/tst-019-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-009' > /tmp/catalog-java.html
           grep -q 'Duplicate Payment Checker' /tmp/catalog-java.html
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=JAV-001&view=soal' > /tmp/java-build-quiz.html

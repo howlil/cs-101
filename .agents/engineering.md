@@ -67,5 +67,5 @@ PF15 (P19,G12) [important] | G1 path/rubric validation, graph canvas neighborhoo
 PF16 (P20,G13) [important] | NET-006 V3 receipt, Node loopback fixture and Materi/Soal/Project route smoke | merge | pnpm ci
 PF17 (P21,G14) [important] | SQL-001 reproducible bundle, isolated real PostgreSQL run, six-query expected data and focused route smoke | merge | pnpm ci
 PF18 (P22,G15) [important] | TST-007 authoring V3 receipt, real Maven Surefire 20-case report and Materi/Soal/Project smoke | merge | pnpm ci
-PF20 (G17) [important] | ten live HTTP requests, three mutation rejects, explicit 422 contract gap | merge | CI TST-019 fixture
+PF20 (P24,G17) [important] | ten live HTTP requests, three mutation rejects, explicit 422 contract gap | merge | CI TST-019 fixture
 PF19 (P23,G16) [important] | SYS-008 V3 byte-reproducible static checker, RFC status/error shape, G1 contextual routes and three-view smoke | merge | pnpm ci

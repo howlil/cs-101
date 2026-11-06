@@ -1,0 +1,143 @@
+---
+taskId: "TST-019"
+title: "REST Contract Matrix — Live HTTP Contract Testing"
+description: "Turn SYS-008 OpenAPI into 10 real HTTP checks for status, headers, schema and Problem Details; report undeclared 422 accurately."
+demo: false
+curriculumFingerprint: "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-019.json';
+import questionBank from '../../../review-banks/TST-019.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** OpenAPI SYS-008 tampak benar di atas kertas. Bagaimana memastikan server benar-benar mengirim status, header, JSON schema dan error yang dijanjikan?
+
+**Langkah pertama:** lihat tiga operation response maps di contracts/SYS-008/transfer-api.openapi.json. Jangan menciptakan expected response baru hanya karena HTTP RFC mendefinisikannya.
+
+<MentalModel title="API contract test = spec oracle + observed HTTP">
+
+- Expected: status dan schema dari OpenAPI 3.1.1 pada method/path yang tepat.
+- Observed: request sungguhan lewat Node HTTP server, lalu baca status, Content-Type, Location dan WWW-Authenticate.
+- Error: application/problem+json dengan status body yang sama seperti status HTTP.
+- Drift: response yang salah harus gagal, bukan tertutup oleh success path.
+- Scope: server adalah **educational in-memory stub** dengan token tetap; tidak ada Spring, database, OAuth atau transfer uang nyata.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+SYS-008 OpenAPI
+      |
+  exact response matrix
+      |
+  HTTP server 127.0.0.1:ephemeral
+      |
+   fetch: 10 real requests
+      |
+   status + headers + JSON schema
+      |
+  validate RFC 9457 Problem
+      |
+  reject 3 broken responses
+
+422 RFC valid -> NOT declared in SYS-008
+~~~
+
+</ConceptGraph>
+
+## Declared response matrix
+
+| Method/path | Success | Declared errors |
+| --- | --- | --- |
+| POST /transfers | 201 plus Location | 400, 401, 403, 409, 500 |
+| GET /transfers/{id} | 200 | 401, 403, 404, 500 |
+| GET /accounts/{id} | 200 | 401, 403, 404, 500 |
+
+**422 Unprocessable Content:** disebut dalam kriteria kurikulum dan RFC 9110, tetapi **belum ada di SYS-008 OpenAPI**. Status ini adalah *contract gap*, bukan bukti pengujian lulus. Perlu revisi kontrak dan implementasi yang disengaja jika 422 akan didukung.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Primary references
+
+<SourceList sources={[
+ {title:'RFC 9110 — HTTP Semantics',url:'https://www.rfc-editor.org/rfc/rfc9110.html'},
+ {title:'OpenAPI 3.1.1 Specification',url:'https://spec.openapis.org/oas/v3.1.1.html'},
+ {title:'RFC 9457 — Problem Details for HTTP APIs',url:'https://www.rfc-editor.org/rfc/rfc9457.html'},
+ {title:'Node.js HTTP API',url:'https://nodejs.org/api/http.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Live wire test: request, response, assertion
+
+Run with Node 24 at repository root:
+
+~~~sh
+node labs/TST-019/http-contract.mjs
+~~~
+
+Expected result:
+
+~~~text
+http-paths=3
+http-roundtrips=10
+status-matrix=200,201,400,401,403,404,409,500
+negative-mutations=3-detected
+422=undeclared
+target=local-educational-stub
+~~~
+
+Skenario memeriksa success 200/201, invalid amount 400, missing credentials 401, forbidden 403, missing resource 404, duplicate clientReference 409, dan simulated 500. Setiap respons melewati pemeriksaan Content-Type serta subset schema: required fields, tipe primitive, enum, pattern dan optional properties.
+
+Harness juga sengaja membuat tiga respons invalid: status RFC 9457 tidak cocok, 401 tanpa challenge, dan JSON amount berupa number. Ketiganya harus ditolak. Checker tidak mengimplementasikan seluruh spesifikasi JSON Schema atau menguji aplikasi Spring nyata.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal diagnosis API contract
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent Project — REST Contract Matrix
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="REST Contract Matrix — independent HTTP verification"
+ brief="Uji SYS-008 dengan contract oracle terpisah dari server target. Tambahkan kasus yang berbeda dari stub, atau jalankan kontrak sama terhadap aplikasi Spring MVC yang benar-benar hidup, dan jangan laporkan 422 lulus sebelum OpenAPI direvisi."
+ acceptanceCriteria={[
+  'Daftarkan tiga method/path dengan status 200, 201, 400, 401, 403, 404, 409 dan 500 yang memang dideklarasikan.',
+  'Laporkan status 422 sebagai gap di OpenAPI SYS-008, bukan secara fiktif mengubah 400 ke 422.',
+  'Kirim real HTTP requests dan periksa 201 Location, 401 WWW-Authenticate serta Content-Type setiap respons.',
+  'Validasi required schema fields, JSON type, enum dan pattern serta Problem Details type/title/status.',
+  'Buktikan response body status salah, challenge 401 hilang, dan amount number ditolak oleh checker.',
+  'Uji skenario GET account lain dan jalankan minimal satu failure case berbeda dari worked example.',
+  'Tulis batas verifikasi: Node loopback stub tidak membuktikan Spring MVC, JWT, database, consumer compatibility atau financial settlement.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Mampu membedakan HTTP status RFC yang tersedia dengan status yang dideklarasikan dalam OpenAPI.',
+ 'Bisa membaca hasil 10 HTTP round-trips, termasuk success dan negative cases.',
+ 'Mendeteksi header, Problem Details dan breaking JSON field type.',
+ 'Tidak menyamakan verified educational fixture dengan tested production API.'
+]} />
+
+</LessonStage>

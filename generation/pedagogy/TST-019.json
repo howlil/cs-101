@@ -1,0 +1,191 @@
+{
+  "unitId": "TST-019",
+  "curriculumFingerprint": "sha256:62285f749c29eee63e89c0f25744152d535d9b75a26e1111207e20ea96ab876d",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "build-response-oracle",
+        "objective": "Compare the required workbook status set to the exact responses promised by SYS-008 OpenAPI.",
+        "whyItMatters": "An API test based on a guessed code is not a check of the public contract.",
+        "mentalModel": "The response matrix belongs to each method/path in OpenAPI, not to an arbitrary global list of HTTP status codes.",
+        "explanation": "SYS-008 promises POST transfer 201/400/401/403/409/500, GET transfer and account 200/401/403/404/500. RFC 9110 defines 422 Unprocessable Content but this API does not declare it. A TST-019 test must explicitly report the mismatch, not fabricate a 422 success or silently change 400. 201 also requires Location while 401 requires WWW-Authenticate.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The workbook requests a 422 test case, but the POST /transfers response map has no 422.",
+          "steps": [
+            {
+              "action": "Read the three SYS-008 operations and enumerate response keys.",
+              "reason": "Only the checked-in design specifies observable promises.",
+              "expectedResult": "Exactly three operation matrices, including GET 404."
+            },
+            {
+              "action": "Check POST 422 against the declared response keys.",
+              "reason": "An RFC-defined status is not automatically supported by this particular API.",
+              "expectedResult": "Report 422 as undeclared rather than a passing test."
+            },
+            {
+              "action": "Add Location and WWW-Authenticate to the matrix.",
+              "reason": "A correct HTTP status can still have an invalid header contract.",
+              "expectedResult": "201/401 required response headers are explicit."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Can the current SYS-008 contract legitimately be tested as promising HTTP 422?",
+          "hints": [
+            "Look at /transfers.post.responses in OpenAPI.",
+            "422 is defined by RFC 9110 but not declared by this operation."
+          ],
+          "explanation": "No. Keep malformed POST input on documented 400 until a versioned contract change deliberately introduces 422."
+        },
+        "independentChallenge": {
+          "prompt": "For GET /accounts/{id}, evaluate whether an undocumented 409 response is contract-compliant.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "A per-operation status/header matrix with an explicit explanation of the 422 gap."
+          ],
+          "variationFromExample": "GET account 409 is a different operation and failure category than POST transfer 422."
+        },
+        "firstAction": "List the exact response keys of POST /transfers from SYS-008.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming HTTP 422 is supported simply because it exists in the standard.",
+          "whyItFails": "The standard lists possible statuses, not commitments made by an individual OpenAPI document.",
+          "correctiveAction": "Validate each operation's declared response map and request a specification change for a new status."
+        },
+        "selfCheck": {
+          "expectedObservation": "Three explicit operation matrices match OpenAPI and 422 is labeled absent.",
+          "ifUnexpected": "Read the actual paths object instead of relying on an external checklist."
+        },
+        "continueFromHere": {
+          "nextAction": "Run live local HTTP requests against the response matrix.",
+          "resumeCue": "Begin from POST 201 and its two error families, then inspect GET."
+        }
+      },
+      {
+        "id": "verify-wire-contract",
+        "objective": "Run ten real HTTP requests to a local server and verify positive and negative responses.",
+        "whyItMatters": "Static specification checks cannot prove what an HTTP server sends on the wire.",
+        "mentalModel": "Arrange isolated server -> Act network fetch -> Assert status, headers and schema -> Release socket.",
+        "explanation": "The fixture binds to 127.0.0.1 on a random port, handles POST/GET transfers/accounts with in-memory resources, and uses fixed bearer strings only for demonstration. It performs 10 live HTTP requests covering statuses 200/201/400/401/403/404/409/500. The 201 response provides a resource URI and PENDING body, not completed financial settlement.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A new transfer is created, read again, and its account is retrieved through real HTTP.",
+          "steps": [
+            {
+              "action": "Run node labs/TST-019/http-contract.mjs from the repository root.",
+              "reason": "This starts an actual ephemeral HTTP server.",
+              "expectedResult": "The program records ten successful round-trip checks."
+            },
+            {
+              "action": "Check POST Location points at the new transfer resource.",
+              "reason": "201 Created must identify the created representation.",
+              "expectedResult": "Location equals /transfers/tr-001 and body.transferId matches."
+            },
+            {
+              "action": "Request missing credentials, forbidden and absent resource cases.",
+              "reason": "Negative paths must produce stable machine-readable outcomes.",
+              "expectedResult": "401 challenge, 403 denial and 404 missing resource with Problem Details."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why does reading an OpenAPI example not prove a running service returns Location?",
+          "hints": [
+            "The example is a JSON declaration, not a network exchange.",
+            "Inspect actual headers returned by fetch from the HTTP server."
+          ],
+          "explanation": "A client must send a request to the running endpoint and examine the observed status and Location header; the educational server is still not Spring MVC."
+        },
+        "independentChallenge": {
+          "prompt": "Add a new GET account fixture and verify both 200 and 404 with different IDs.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "10 HTTP checks with statuses and headers plus an independent account request variant."
+          ],
+          "variationFromExample": "Read a new account not used in the transfer creation example."
+        },
+        "firstAction": "Execute the Node loopback fixture and inspect the response summary.",
+        "misconceptionRepair": {
+          "likelyMistake": "Claiming a test of the local in-memory stub proves Spring controller routing or JWT verification.",
+          "whyItFails": "The actual Spring runtime, DB connection and token verifier are never loaded by this exercise.",
+          "correctiveAction": "Run the same contract assertions against an independently implemented target service before claiming integration coverage."
+        },
+        "selfCheck": {
+          "expectedObservation": "All ten requests complete on a loopback socket and the server is closed cleanly.",
+          "ifUnexpected": "Check whether the ephemeral HTTP bind, JSON parser or assertion failed."
+        },
+        "continueFromHere": {
+          "nextAction": "Prove the checker rejects deliberately malformed responses.",
+          "resumeCue": "Follow the path from spec to request to actual header and JSON body."
+        }
+      },
+      {
+        "id": "detect-response-drift",
+        "objective": "Reject invalid Problem Details, missing 401 challenge and a breaking amount type mutation.",
+        "whyItMatters": "A test that passes a broken response cannot protect client contracts.",
+        "mentalModel": "The oracle validates independently of the handler: real HTTP status, media type, schema shape and error member status must agree.",
+        "explanation": "A selected OpenAPI schema subset validates required fields, string/integer types, patterns, enums and additionalProperties. Three deliberate mutations are rejected: HTTP 409 with body status 500, 401 without WWW-Authenticate, and JSON amount as a number instead of decimal string. The checker is not full JSON Schema evaluation or real consumer compatibility testing.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The HTTP response is 409 Conflict but the problem body claims status 500.",
+          "steps": [
+            {
+              "action": "Run the known-good ten-request matrix first.",
+              "reason": "A baseline distinguishes a bad handler from a broken test.",
+              "expectedResult": "All declared cases pass."
+            },
+            {
+              "action": "Inject status mismatch into a synthetic RFC 9457 body.",
+              "reason": "Problem status must match actual HTTP status.",
+              "expectedResult": "The assertion rejects it."
+            },
+            {
+              "action": "Drop the 401 auth challenge and retype the 201 amount field.",
+              "reason": "Headers and JSON primitive types are public contracts.",
+              "expectedResult": "Both independent mutations fail."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "What is wrong when HTTP status is 409 and problem.status equals 500?",
+          "hints": [
+            "Inspect RFC 9457 status member semantics.",
+            "The field and the response line describe the same occurrence."
+          ],
+          "explanation": "The representation contradicts the actual response. The test must fail and the handler must produce a consistent status."
+        },
+        "independentChallenge": {
+          "prompt": "Mutate GET account 200 to omit a required currency field and show the checker rejects it.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Three mutation rejections and a separately demonstrated missing required field failure."
+          ],
+          "variationFromExample": "An omitted Account.currency differs from the Transfer.amount type mismatch worked example."
+        },
+        "firstAction": "Compare the HTTP status and the problem body status from a negative response.",
+        "misconceptionRepair": {
+          "likelyMistake": "Sharing one generated response object between the stub and the test oracle without testing failure sensitivity.",
+          "whyItFails": "Both sides can drift together and still look green unless wrong responses are actively rejected.",
+          "correctiveAction": "Load the checked-in independent spec in the assertion boundary and add deliberate response mutations."
+        },
+        "selfCheck": {
+          "expectedObservation": "Three mutated responses fail the checker while normal wire cases pass.",
+          "ifUnexpected": "Verify assert.throws wraps the validator and no malformed response bypasses schema or header checks."
+        },
+        "continueFromHere": {
+          "nextAction": "Repeat the same test matrix against Spring MockMvc or a running isolated application.",
+          "resumeCue": "Start with the RFC 9457 body-to-wire invariant, then verify Location and amount typing."
+        }
+      }
+    ]
+  }
+}

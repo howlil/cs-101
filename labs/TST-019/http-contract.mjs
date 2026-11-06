@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const spec=JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)),'../../contracts/SYS-008/transfer-api.openapi.json'),'utf8'));
+let repoRoot=dirname(fileURLToPath(import.meta.url));
+while(!existsSync(join(repoRoot,'contracts/SYS-008/transfer-api.openapi.json'))){
+ const parent=dirname(repoRoot);
+ if(parent===repoRoot)throw new Error('Missing SYS-008 contract');
+ repoRoot=parent;
+}
+const spec=JSON.parse(readFileSync(join(repoRoot,'contracts/SYS-008/transfer-api.openapi.json'),'utf8'));
 const matrix={'POST /transfers':[201,400,401,403,409,500],
   'GET /transfers/{id}':[200,401,403,404,500],
   'GET /accounts/{id}':[200,401,403,404,500]};
