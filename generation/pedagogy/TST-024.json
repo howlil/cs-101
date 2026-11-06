@@ -1,0 +1,177 @@
+{
+  "unitId": "TST-024",
+  "curriculumFingerprint": "sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "private-network",
+        "objective": "Run a real HTTP service and PostgreSQL database with a fake external bank on an internal Docker network.",
+        "whyItMatters": "In-memory tests cannot prove SQL connectivity or HTTP calls between independent services.",
+        "mentalModel": "Test driver -> real transfer service -> PostgreSQL + HTTP fake bank.",
+        "explanation": "A Docker internal bridge connects three separate processes and a test driver, with no published host ports. PostgreSQL 16 is initialized with transfer schema; a Node HTTP service uses pg 8.16.3 to query the DB and calls a local bank stub. A trap tears down containers and network on exit. The Astro course application gains no database binding.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "In-memory tests pass although the real service cannot insert a DB record.",
+          "steps": [
+            {
+              "action": "Start PostgreSQL 16 on an internal Docker bridge.",
+              "reason": "Exercise the real database driver.",
+              "expectedResult": "Database becomes query-ready with no published ports."
+            },
+            {
+              "action": "Start service and bank stub on the same bridge.",
+              "reason": "Verify real cross-container HTTP and SQL.",
+              "expectedResult": "Test driver reaches service health and no production URL is configured."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why not call a real bank API from the automated integration suite?",
+          "hints": [
+            "Production calls can charge money and are not deterministic.",
+            "A separate local stub can reproduce controlled success and timeouts."
+          ],
+          "explanation": "Replace only the external bank with a deterministic HTTP stub; keep the service and PostgreSQL real."
+        },
+        "independentChallenge": {
+          "prompt": "Add a separate diagnostics container and call only the test service health endpoint.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "The diagnostics client accesses the internal service without a published port."
+          ],
+          "variationFromExample": "Different test client instead of transfer driver."
+        },
+        "firstAction": "Identify the four network roles.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating a fake in-memory method as an integration with a remote service.",
+          "whyItFails": "No network protocol or database driver is exercised.",
+          "correctiveAction": "Run real HTTP and PostgreSQL processes in isolation."
+        },
+        "selfCheck": {
+          "expectedObservation": "Containers share one internal network and publish no ports.",
+          "ifUnexpected": "Inspect Docker network, container aliases and SQL readiness."
+        },
+        "continueFromHere": {
+          "nextAction": "Make one successful transfer and inspect the saved row.",
+          "resumeCue": "Start from service, DB, bank and driver."
+        }
+      },
+      {
+        "id": "persist-success",
+        "objective": "Prove the real bank stub acknowledgement is committed to PostgreSQL without claiming settlement.",
+        "whyItMatters": "An HTTP 201 response alone cannot prove database persistence.",
+        "mentalModel": "INSERT PENDING -> bank POST ACCEPTED -> UPDATE providerOutcome ACCEPTED -> GET and psql.",
+        "explanation": "The Node service validates a five-field transfer, INSERTs PENDING via SQL, calls the fake bank and updates providerOutcome ACCEPTED with providerReference. The transfer status remains PENDING because acceptance is not settlement. A test driver checks HTTP 201 and GET, while the shell independently SELECTs the stored SQL row.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The service returns 201 but the provider reference was never saved in PostgreSQL.",
+          "steps": [
+            {
+              "action": "POST client-success-001 through the service.",
+              "reason": "Cross the actual HTTP, database and bank boundaries.",
+              "expectedResult": "HTTP 201, status PENDING and providerOutcome ACCEPTED."
+            },
+            {
+              "action": "GET the resource and SELECT the row directly.",
+              "reason": "Confirm persistence independent from the POST response.",
+              "expectedResult": "Same provider reference and ACCEPTED outcome stored in PostgreSQL."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Does a stub ACCEPTED result prove that money has settled?",
+          "hints": [
+            "The bank is not a ledger.",
+            "Transfer status deliberately remains PENDING."
+          ],
+          "explanation": "No. Provider acceptance is separate from final financial settlement."
+        },
+        "independentChallenge": {
+          "prompt": "Submit another successful transfer with a different reference and verify distinct persisted records.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Two independent SQL rows with different references."
+          ],
+          "variationFromExample": "Additional successful transfer rather than one."
+        },
+        "firstAction": "Write expected persisted PENDING and ACCEPTED fields.",
+        "misconceptionRepair": {
+          "likelyMistake": "Immediately marking accepted transfers COMPLETED.",
+          "whyItFails": "The stub did not perform settlement.",
+          "correctiveAction": "Keep transfer PENDING with providerOutcome ACCEPTED."
+        },
+        "selfCheck": {
+          "expectedObservation": "The DB stores PENDING/ACCEPTED and a bank reference.",
+          "ifUnexpected": "Compare API read-back and psql data."
+        },
+        "continueFromHere": {
+          "nextAction": "Inject a provider timeout after its request was observed.",
+          "resumeCue": "Begin from the successful SQL row."
+        }
+      },
+      {
+        "id": "persist-timeout",
+        "objective": "Persist UNKNOWN for a provider timeout and prove only one outbound bank attempt.",
+        "whyItMatters": "A provider may apply a payment before its reply is lost; retrying can duplicate effects.",
+        "mentalModel": "A single bank request times out -> SQL stores PENDING/UNKNOWN -> no automatic replay.",
+        "explanation": "For client-timeout-001 the bank stub records the request but waits 1100ms; the service aborts after 400ms and persists providerOutcome UNKNOWN with transfer status PENDING and no provider reference. Both HTTP GET and psql confirm the result, while stub tracking proves exactly two total bank requests, one for each scenario.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The fake bank receives a debit request but its reply exceeds the client deadline.",
+          "steps": [
+            {
+              "action": "POST the timeout transfer through the same service.",
+              "reason": "Exercise real HTTP dispatch before response loss.",
+              "expectedResult": "The stub receives one request, but the caller times out."
+            },
+            {
+              "action": "Read the API, SQL row and stub call list.",
+              "reason": "Ensure UNKNOWN survives persistence without blind retry.",
+              "expectedResult": "PENDING/UNKNOWN, null reference, exactly one request for the timeout scenario."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Can a timed-out bank request safely be marked REJECTED and retried?",
+          "hints": [
+            "Timeout is a client observation, not a bank outcome.",
+            "The first debit could already have been applied upstream."
+          ],
+          "explanation": "No. Preserve UNKNOWN and reconcile provider state before any retry under a proven idempotency contract."
+        },
+        "independentChallenge": {
+          "prompt": "Make the bank stub reset the socket after receiving a request and verify persisted UNKNOWN.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Socket reset produces a distinct PENDING/UNKNOWN SQL row with one bank attempt."
+          ],
+          "variationFromExample": "Reset after receipt instead of waiting beyond deadline."
+        },
+        "firstAction": "Write expected PENDING/UNKNOWN before running the timeout case.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming network timeout means bank rejection.",
+          "whyItFails": "Remote work may have occurred before the response was lost.",
+          "correctiveAction": "Persist UNKNOWN and do not blindly retry."
+        },
+        "selfCheck": {
+          "expectedObservation": "PostgreSQL contains PENDING/ACCEPTED and PENDING/UNKNOWN rows.",
+          "ifUnexpected": "Inspect SQL UPDATE and bank call count."
+        },
+        "continueFromHere": {
+          "nextAction": "Explore transactional idempotency and reconciliation in a later advanced slice.",
+          "resumeCue": "Remember no reply does not mean no bank effect."
+        }
+      }
+    ]
+  }
+}

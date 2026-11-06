@@ -1,0 +1,80 @@
+{
+  "itemId": "TST-024",
+  "version": "lesson-spec-v1:sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378",
+  "curriculumFingerprint": "sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Apa yang diuji TST-024 dibanding Node in-memory test?",
+      "options": [
+        "PostgreSQL nyata dan HTTP fake bank lintas container",
+        "Bank produksi dan settlement",
+        "Full browser test"
+      ],
+      "answer": 0,
+      "explanation": "Tes menyeberangi boundary service, DB dan test double HTTP.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Provider stub mengembalikan ACCEPTED. Apa transfer status yang aman?",
+      "options": [
+        "COMPLETED",
+        "PENDING dengan providerOutcome ACCEPTED",
+        "REJECTED"
+      ],
+      "answer": 1,
+      "explanation": "Accepted tidak membuktikan settlement.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Bank stub menerima POST tetapi service timeout. Apa persisted state?",
+      "options": [
+        "REJECTED",
+        "COMPLETED",
+        "PENDING dengan providerOutcome UNKNOWN"
+      ],
+      "answer": 2,
+      "explanation": "Outcome bank tidak diketahui setelah timeout.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Bagaimana membuktikan row benar-benar disimpan?",
+      "options": [
+        "Cek HTTP status saja",
+        "HTTP GET dan SELECT langsung dari PostgreSQL",
+        "Cek UI"
+      ],
+      "answer": 1,
+      "explanation": "Bukti SQL independen menunjukkan persistence.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Mengapa menggunakan Docker --internal tanpa port host?",
+      "options": [
+        "Menjamin pembayaran bank berhasil",
+        "Memastikan tidak ada bug sama sekali",
+        "Membatasi traffic ke dependency test dan menghindari produksi"
+      ],
+      "answer": 2,
+      "explanation": "Network isolation menghindari panggilan produksi dan dependency eksternal.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

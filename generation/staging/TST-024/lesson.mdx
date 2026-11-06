@@ -1,0 +1,141 @@
+---
+taskId: "TST-024"
+title: "Service Boundary Suite — PostgreSQL and Fake Bank"
+description: "Exercise real Node HTTP, PostgreSQL 16 and isolated bank stub to prove accepted and unknown outcomes are persisted."
+demo: false
+curriculumFingerprint: "sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-024.json';
+import questionBank from '../../../review-banks/TST-024.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** unit tests lulus, tetapi service sungguhan dapat gagal menyimpan transfer di database atau keliru menganggap provider timeout sebagai REJECTED.
+
+**Mulai:** pisahkan apa yang perlu dijalankan nyata dan apa yang harus tetap diisolasi sebagai fake bank.
+
+<MentalModel title="Real service, real database, fake bank">
+
+- Transfer API berjalan sebagai service Node HTTP, memakai PostgreSQL driver pg.
+- PostgreSQL 16 menyimpan transfer PENDING dan providerOutcome ACCEPTED atau UNKNOWN.
+- Fake bank adalah proses HTTP berbeda yang menjawab ACCEPTED atau menunda balasan.
+- Docker internal network menghubungkan semua proses tanpa published host ports.
+- Bukti hasil berasal dari GET API dan SELECT langsung melalui psql.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+      Internal Docker network
+          Test driver
+              |
+         Node HTTP API
+          /        \
+    PostgreSQL    Fake Bank
+       ^             |
+       |         success/timeout
+       +--- UPDATE providerOutcome
+            ACCEPTED / UNKNOWN
+          transfer stays PENDING
+~~~
+
+</ConceptGraph>
+
+## Dua jalur uji
+
+| Scenario | HTTP | PostgreSQL | Bank requests |
+| --- | --- | --- | --- |
+| Fake bank accepts | 201 Created | PENDING / ACCEPTED, provider reference | 1 |
+| Fake bank replies after deadline | 201 Created | PENDING / UNKNOWN, no reference | 1 |
+
+Provider ACCEPTED tidak membuktikan settlement. Saat timeout, bank dapat sudah menerima request, sehingga UNKNOWN harus direkonsiliasi sebelum retry.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber primer
+
+<SourceList sources={[
+ {title:'Martin Fowler — The Practical Test Pyramid',url:'https://martinfowler.com/articles/practical-test-pyramid.html'},
+ {title:'Docker — Network internal mode',url:'https://docs.docker.com/reference/cli/docker/network/create/'},
+ {title:'PostgreSQL 16 — INSERT',url:'https://www.postgresql.org/docs/16/sql-insert.html'},
+ {title:'node-postgres — Parameterized Queries',url:'https://node-postgres.com/features/queries'},
+ {title:'Node.js v24 — AbortSignal.timeout',url:'https://nodejs.org/download/release/latest-v24.x/docs/api/globals.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Real PostgreSQL service-boundary lab
+
+Dengan Docker daemon dan Node/npm, jalankan di repository root:
+
+~~~sh
+bash labs/TST-024/verify.sh
+~~~
+
+Expected output:
+
+~~~text
+service-boundary-network=internal
+transfer-success=persisted-accepted
+transfer-timeout=persisted-unknown
+bank-requests=2
+published-ports=0
+production-bank-requests=0
+tst024-postgres16=verified
+~~~
+
+Skrip menyiapkan PostgreSQL 16, real Node transfer service dan HTTP fake bank pada internal Docker bridge, lalu menjalankan dua transfer. Hasil dicek lewat API GET dan psql langsung, diikuti cleanup otomatis seluruh container dan network.
+
+**Batas:** tidak memakai Spring MVC, auth bank, ledger atau pembayaran asli. V3 generator tidak dapat menjalankan Docker, maka receipt unit ini ditandai not-executable; tes integrasi terpisah wajib lulus di CI.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal service boundary
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent Project — Persisted Failure-Safe Transfers
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Service Boundary Suite — PostgreSQL and isolated bank"
+ brief="Bangun tes service transfer nyata dengan PostgreSQL 16 dan fake bank HTTP untuk satu acceptance dan satu timeout."
+ acceptanceCriteria={[
+  'Jalankan service HTTP, PostgreSQL 16 dan bank stub sebagai proses terpisah di Docker internal network.',
+  'Tidak ada published host port atau URL bank produksi.',
+  'Sukses menghasilkan 201 dan persisted PENDING/ACCEPTED dengan providerReference.',
+  'Timeout menghasilkan persisted PENDING/UNKNOWN tanpa menganggap REJECTED atau COMPLETED.',
+  'Verifikasi kedua hasil lewat GET API dan direct SELECT PostgreSQL.',
+  'Bank stub menerima tepat dua POST tanpa automatic debit retry.',
+  'Sistem membersihkan network dan container walaupun pengujian gagal.',
+  'Kasus independen: lakukan socket reset sesudah bank menerima request dan buktikan UNKNOWN.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Membedakan integration test berbasis service dari unit, contract, atau E2E.',
+ 'Membuktikan hasil tersimpan di PostgreSQL, bukan hanya respons HTTP.',
+ 'Mengerti timeout UNKNOWN dan acceptance bukan settlement.',
+ 'Tidak mengklaim Node fake bank sebagai bank produksi.'
+]} />
+
+</LessonStage>

@@ -1,0 +1,114 @@
+{
+  "itemId": "TST-024",
+  "curriculumFingerprint": "sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378",
+  "sources": [
+    {
+      "title": "Martin Fowler — The Practical Test Pyramid",
+      "url": "https://martinfowler.com/articles/practical-test-pyramid.html",
+      "tier": 0,
+      "supports": [
+        "Live service/database with fake external dependency"
+      ],
+      "notes": [
+        "Integration Tests"
+      ]
+    },
+    {
+      "title": "Docker — Network Create",
+      "url": "https://docs.docker.com/reference/cli/docker/network/create/",
+      "tier": 0,
+      "supports": [
+        "Isolated internal container-to-container network"
+      ],
+      "notes": [
+        "Network internal mode"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — INSERT",
+      "url": "https://www.postgresql.org/docs/16/sql-insert.html",
+      "tier": 0,
+      "supports": [
+        "INSERT, ON CONFLICT and RETURNING"
+      ],
+      "notes": [
+        "SQL INSERT"
+      ]
+    },
+    {
+      "title": "node-postgres — Parameterized Queries",
+      "url": "https://node-postgres.com/features/queries",
+      "tier": 0,
+      "supports": [
+        "Parameterized SQL database access"
+      ],
+      "notes": [
+        "Parameterized query"
+      ]
+    },
+    {
+      "title": "Node.js v24 — Globals",
+      "url": "https://nodejs.org/download/release/latest-v24.x/docs/api/globals.html",
+      "tier": 0,
+      "supports": [
+        "HTTP deadline via AbortSignal.timeout"
+      ],
+      "notes": [
+        "AbortSignal.timeout"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "boundary-tests",
+      "statement": "Integration tests can run real application and database components while replacing external services with local test doubles.",
+      "conceptIds": [
+        "private-boundary"
+      ],
+      "sourceUrl": "https://martinfowler.com/articles/practical-test-pyramid.html",
+      "locator": "Integration Tests",
+      "rationale": "Primary testing article explains real DB and fake HTTP service boundaries."
+    },
+    {
+      "id": "internal-network",
+      "statement": "Docker internal networks allow communication between their containers while restricting outside connectivity.",
+      "conceptIds": [
+        "private-boundary"
+      ],
+      "sourceUrl": "https://docs.docker.com/reference/cli/docker/network/create/",
+      "locator": "Network internal mode",
+      "rationale": "Official Docker CLI describes internal isolation."
+    },
+    {
+      "id": "insert-row",
+      "statement": "PostgreSQL INSERT RETURNING returns a row inserted in the real database.",
+      "conceptIds": [
+        "sql-persistence"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/sql-insert.html",
+      "locator": "INSERT RETURNING clause",
+      "rationale": "PostgreSQL 16 SQL reference defines persisted insert semantics."
+    },
+    {
+      "id": "bind-parameters",
+      "statement": "node-postgres supports parameterized SQL queries rather than interpolating user values.",
+      "conceptIds": [
+        "sql-persistence"
+      ],
+      "sourceUrl": "https://node-postgres.com/features/queries",
+      "locator": "Parameterized query",
+      "rationale": "Official Node driver guide supports parameter binding."
+    },
+    {
+      "id": "timeout-deadline",
+      "statement": "Node AbortSignal.timeout creates an abort signal after the specified time.",
+      "conceptIds": [
+        "ambiguous-timeout"
+      ],
+      "sourceUrl": "https://nodejs.org/download/release/latest-v24.x/docs/api/globals.html",
+      "locator": "AbortSignal.timeout",
+      "rationale": "Official Node v24 API reference."
+    }
+  ]
+}

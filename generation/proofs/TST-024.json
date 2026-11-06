@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "itemId": "TST-024",
+  "curriculumFingerprint": "sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378",
+  "status": "not-executable",
+  "noExecutableReason": "The bounded Pedagogy V3 runner supports only standalone Node and Java files and cannot provision PostgreSQL Docker, npm pg dependencies or a private Docker network. A separate CI integration step runs labs/TST-024/verify.sh with real Node HTTP, PostgreSQL 16 and a fake bank. The V3 proof is explicitly not executable.",
+  "examples": []
+}

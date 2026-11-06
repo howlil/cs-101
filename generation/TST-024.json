@@ -1,0 +1,44 @@
+{
+  "itemId": "TST-024",
+  "fingerprint": "sha256:b3874c27a616be4c523bd21c528855d379ec88691c97dd1d0e70caf3c5738378",
+  "sources": [
+    {
+      "title": "Martin Fowler — The Practical Test Pyramid",
+      "url": "https://martinfowler.com/articles/practical-test-pyramid.html"
+    },
+    {
+      "title": "Docker — Network Create",
+      "url": "https://docs.docker.com/reference/cli/docker/network/create/"
+    },
+    {
+      "title": "PostgreSQL 16 — INSERT",
+      "url": "https://www.postgresql.org/docs/16/sql-insert.html"
+    },
+    {
+      "title": "node-postgres — Parameterized Queries",
+      "url": "https://node-postgres.com/features/queries"
+    },
+    {
+      "title": "Node.js v24 — Globals",
+      "url": "https://nodejs.org/download/release/latest-v24.x/docs/api/globals.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 segments cover isolation, accepted persistence and timeout UNKNOWN",
+      "assessedAt": "Five questions and independent Docker PostgreSQL/HTTP integration gate",
+      "evidenceExpected": "Two service POSTs, two confirmed SQL rows, a fake bank with exactly two requests and no external traffic."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent diagnostic client, another accepted transfer and socket reset",
+      "assessedAt": "Project checklist plus direct DB and stub-count assertions",
+      "evidenceExpected": "Additional integration fault has persisted outcome and deterministic cleanup."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

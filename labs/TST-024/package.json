@@ -1,0 +1,9 @@
+{
+  "name": "cs101-tst-024-service-boundary",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pg": "8.16.3"
+  }
+}
