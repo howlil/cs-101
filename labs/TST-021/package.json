@@ -1,0 +1,12 @@
+{
+  "name": "cs101-tst-021-pact-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test:contract": "node pact-contract.mjs"
+  },
+  "devDependencies": {
+    "@pact-foundation/pact": "17.1.4"
+  }
+}

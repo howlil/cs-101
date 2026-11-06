@@ -1,0 +1,320 @@
+{
+  "itemId": "TST-021",
+  "curriculumFingerprint": "sha256:5962e3199aebf5adb771964b102c4f6c7878428dd1b8c6afe8907a3b09c94b24",
+  "payoff": "Generate a real Pact consumer contract and verify a local provider passes healthy 200/404 responses but fails when the amount JSON type changes.",
+  "learningOutcomes": [
+    "definisikan satu consumer expectation (status, amount, currency, error) dengan Pact; provider sengaja mengubah field type; verification gagal sebelum deployment."
+  ],
+  "mentalModel": "Client expectation -> Pact mock interaction -> generated Pact file -> Verifier replays against local provider -> healthy pass / mutated amount failure.",
+  "relationshipGraph": "SYS-008 OpenAPI -> TST-019 HTTP matrix -> TST-020 drift risk -> TST-021 consumer-driven Pact -> provider verification gate (local only).",
+  "concepts": [
+    {
+      "id": "pact-consumer-contract",
+      "title": "Consumer contract authoring",
+      "mechanism": "Pact V4 consumer mock captures the HTTP request and fields the client actually uses, then writes a Pact file.",
+      "sourceUrls": [
+        "https://docs.pact.io/implementation_guides/javascript/docs/consumer",
+        "https://docs.pact.io/consumer"
+      ]
+    },
+    {
+      "id": "provider-replay-verification",
+      "title": "Independent provider verification",
+      "mechanism": "The Pact verifier reads the consumer-generated Pact and performs HTTP requests against a local service configured for the stated provider states.",
+      "sourceUrls": [
+        "https://docs.pact.io/implementation_guides/javascript/docs/provider",
+        "https://docs.pact.io/getting_started/verifying_pacts"
+      ]
+    },
+    {
+      "id": "breaking-provider-regression",
+      "title": "Type mutation negative proof",
+      "mechanism": "The provider intentionally returns a JSON number for amount where a Pact matcher requires a string, so verification must reject the changed provider.",
+      "sourceUrls": [
+        "https://docs.pact.io/implementation_guides/javascript/docs/provider",
+        "https://docs.pact.io/getting_started/verifying_pacts"
+      ]
+    },
+    {
+      "id": "error-state-contract",
+      "title": "Problem Details error contract",
+      "mechanism": "A not-found interaction checks HTTP 404 and type/title/status under application/problem+json without inventing an undeclared error code.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9457.html",
+        "https://spec.openapis.org/oas/v3.1.1.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "A Pact consumer test alone does not prove a live provider contract.",
+    "Pact contracts encode consumer expectations, not every possible provider schema field.",
+    "A successful negative mutation test must assert verifier rejection, not silently skip the broken provider.",
+    "Real Pact verification against the educational Node provider is not proof of Spring MVC, JWT, settlement, database, or deployment."
+  ],
+  "practice": [
+    "Write and invoke the real consumer client inside a Pact V4 mock interaction for transfer 200 and 404.",
+    "Generate a Pact file and replay it with Pact Verifier against a bound local Node HTTP service.",
+    "Change only amount from JSON string to number, rerun verifier and assert rejection before release."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 objectives: consumer expectations, Pact provider replay, and breaking provider-type mutation",
+      "assessedAt": "Five local quiz questions and a dedicated CI Pact 17.1.4 consumer/provider lab with a healthy and negative verification",
+      "evidenceExpected": "A generated Pact file describes 200 success and 404 problem; healthy local provider passes; changing amount to number causes genuine Pact provider verification rejection."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "New Account consumer and alternative currency mutation as independent variations",
+      "assessedAt": "Project requires an independent consumer-driven contract mutation and recorded provider verification verdict",
+      "evidenceExpected": "An additional interaction and independent field/error mutation with provider verification pass/fail evidence, not only a static JSON checker."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "consumer-expectation",
+        "objective": "Define one real Pact consumer contract for the transfer 200 success and a stable 404 error.",
+        "whyItMatters": "An integration breaks when a provider changes fields that a consumer actually reads, even if other provider endpoints still function.",
+        "mentalModel": "The consumer owns its expectation; Pact mocks the provider while the consumer client makes actual HTTP requests.",
+        "explanation": "The lab consumer calls GET /transfers/tr-001 and expects 200, string amount, IDR currency and PENDING status; for a missing transfer it expects 404 and RFC 9457 problem type/title/status. Pact records these actual consumer interactions. The error expectation intentionally uses the SYS-008 NotFound response instead of inventing an error code. Authentication is outside this educational fixture.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A transfer detail screen needs a predictable amount and a sensible not-found message.",
+          "steps": [
+            {
+              "action": "Write a tiny transfer-reading client and invoke it inside Pact.executeTest.",
+              "reason": "It proves the consumer's own code is tested against the mock server.",
+              "expectedResult": "The client receives typed transfer fields from Pact's mock server."
+            },
+            {
+              "action": "Record the 200 and 404 interactions in a Pact contract.",
+              "reason": "Provider verification requires concrete consumer expectations, including errors.",
+              "expectedResult": "One Pact file records two different HTTP interactions."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Should a Pact consumer test call its real client function, or issue arbitrary fixture-only requests?",
+          "hints": [
+            "Consumer-driven contracts describe what the consumer's production code actually does.",
+            "Pact's mock server must be called from the tested client, not a separate hard-coded assertion-only script."
+          ],
+          "explanation": "Call the real consumer-side function; Pact verifies its traffic and serializes the interactions for provider verification."
+        },
+        "independentChallenge": {
+          "prompt": "Add a new consumer expectation for a suspended account GET in the existing Account API, with an independently defined success body.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A Pact contract produced by invoking a real Account client function and containing the expected status/body."
+          ],
+          "variationFromExample": "Account success is a different consumer scenario from transfer detail success."
+        },
+        "firstAction": "Inspect the SYS-008 GET transfer 200 and 404 examples.",
+        "misconceptionRepair": {
+          "likelyMistake": "Copying the provider's implementation code into the consumer expectation.",
+          "whyItFails": "The contract would then confirm the provider's current behavior rather than what the client needs.",
+          "correctiveAction": "Define only the fields the consumer reads, and exercise the client through the mock."
+        },
+        "selfCheck": {
+          "expectedObservation": "Pact emits the consumer/provider contract containing one success and one error interaction.",
+          "ifUnexpected": "Verify both Pact interactions were generated, rather than validating only a JSON file name."
+        },
+        "continueFromHere": {
+          "nextAction": "Replay the recorded contract against a real local provider.",
+          "resumeCue": "Resume by checking the client's two HTTP requests."
+        }
+      },
+      {
+        "id": "local-provider-verification",
+        "objective": "Replay the generated Pact through the real Pact provider verifier against a local HTTP provider.",
+        "whyItMatters": "A generated contract by itself does not prove any provider version serves compatible responses.",
+        "mentalModel": "Consumer mock tests create expectations; provider verification separately invokes a running provider.",
+        "explanation": "The provider verifier reads the Pact file and sends requests to a temporary Node HTTP server; stateHandlers prepare the transfer-present and transfer-missing cases. Green means this local educational provider satisfies the selected consumer interactions. No actual bank, Spring MVC, JWT, database or deployed service is involved.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A Pact file exists but no provider has run the verification.",
+          "steps": [
+            {
+              "action": "Start a local provider bound to a random 127.0.0.1 port.",
+              "reason": "The test must observe real HTTP response behavior instead of a hand-written simulation.",
+              "expectedResult": "A local server serves the known transfer and not-found error."
+            },
+            {
+              "action": "Run Pact Verifier with pactUrls and state handlers.",
+              "reason": "The verifier replays exactly the consumer's recorded interactions against the provider.",
+              "expectedResult": "Both success and not-found interactions pass Pact verification."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Does a green Pact consumer mock test prove the deployed bank provider implements the same contract?",
+          "hints": [
+            "Consumer mock tests use a fake provider.",
+            "Pact Verifier must replay the pact against an actual provider instance."
+          ],
+          "explanation": "No. The provider verifier proves compatibility only for the provider instance and interactions it actually ran."
+        },
+        "independentChallenge": {
+          "prompt": "Use a different running provider instance that returns an incorrect 404 body and show Pact verification fails.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A separate provider verification with a deliberately invalid RFC 9457 problem status or type."
+          ],
+          "variationFromExample": "Mutate the not-found problem representation rather than success transfer fields."
+        },
+        "firstAction": "Locate the generated Pact file and the Verifier's providerBaseUrl option.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating a successfully generated Pact JSON file as proof of provider compatibility.",
+          "whyItFails": "File generation proves consumer expectations were captured, not that a real provider meets them.",
+          "correctiveAction": "Launch the service and run verifier with pactUrls, observing each HTTP request."
+        },
+        "selfCheck": {
+          "expectedObservation": "The healthy local provider handles both expected interactions and verification succeeds.",
+          "ifUnexpected": "Check the provider state name, port, response media type and exact returned field types."
+        },
+        "continueFromHere": {
+          "nextAction": "Run a deliberate provider field-type mutation.",
+          "resumeCue": "Resume from the healthy provider verification result."
+        }
+      },
+      {
+        "id": "negative-provider-change",
+        "objective": "Catch a breaking provider amount type mutation before allowing a release.",
+        "whyItMatters": "A provider can silently serialize a decimal amount as a JSON number instead of the consumer's string representation.",
+        "mentalModel": "The same unchanged Pact must pass a healthy provider and fail a mutated provider.",
+        "explanation": "The lab makes exactly one provider behavior change: amount becomes a JSON number instead of the declared decimal string. Pact's type matcher requires string; its verifier must reject the changed provider response. The negative test is an expected failure assertion, not an accidentally red CI job. Test both positive and intentionally negative verification and distinguish a local provider stub from a real production system.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A provider refactor changes amount from a JSON string to the numeric value 125000.",
+          "steps": [
+            {
+              "action": "Keep the original Pact untouched and start a second provider with numeric amount.",
+              "reason": "The negative control must test a provider regression rather than replacing the consumer contract.",
+              "expectedResult": "The emitted response contains a number rather than a string."
+            },
+            {
+              "action": "Replay the exact Pact again and assert the verifier rejects the mutated provider.",
+              "reason": "Failing provider verification blocks incompatible behavior before deployment.",
+              "expectedResult": "The mutated provider fails while the healthy provider previously passed."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Can an HTTP 200 response with amount numeric pass the Pact when the consumer expects a string?",
+          "hints": [
+            "A Pact matcher can bind the expected JSON value type.",
+            "The unchanged Pact expects the amount field to remain a string."
+          ],
+          "explanation": "No. The provider returns the wrong JSON type even when status, path and currency remain correct."
+        },
+        "independentChallenge": {
+          "prompt": "Mutate a separate response field, such as currency from IDR string to a JSON number, and prove the unchanged Pact rejects it.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "An independent failing Pact provider verification for currency type drift with a healthy baseline that still passes."
+          ],
+          "variationFromExample": "Different response field and type from the amount mutation shown in the lab."
+        },
+        "firstAction": "Read the amount matcher in the consumer's 200 interaction.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating the CI's successful run as evidence the deliberately broken provider also passed.",
+          "whyItFails": "The suite should succeed by observing and asserting the bad provider's expected verification failure.",
+          "correctiveAction": "Assert a healthy pass and an isolated negative failure from the same contract."
+        },
+        "selfCheck": {
+          "expectedObservation": "Healthy provider passes, the changed amount type fails under Pact verifier.",
+          "ifUnexpected": "Inspect whether the verifier actually replayed the success interaction, and ensure any failure is due to the intentional schema mismatch."
+        },
+        "continueFromHere": {
+          "nextAction": "Translate the lab to a real provider test environment, with dependencies stubbed and a versioned Pact broker if needed.",
+          "resumeCue": "Resume by comparing the original Pact amount string matcher against the mutated provider payload."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Apa yang perlu dilakukan Pact consumer test agar ekspektasinya mewakili client nyata?",
+      "options": [
+        "Memanggil fungsi client yang digunakan consumer melalui mock server Pact",
+        "Langsung menyalin semua controller code provider",
+        "Hanya memvalidasi schema OpenAPI tanpa request"
+      ],
+      "answer": 0,
+      "explanation": "Consumer-driven contract berasal dari kebutuhan consumer yang benar-benar menjalankan fungsi client ketika test.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Consumer Pact test berhasil menghasilkan file contract. Apakah provider sudah terbukti kompatibel?",
+      "options": [
+        "Ya, file Pact cukup",
+        "Belum, Verifier harus replay contract ke provider instance yang dijalankan",
+        "Ya, selama HTTP method GET"
+      ],
+      "answer": 1,
+      "explanation": "Provider verification merupakan langkah terpisah untuk menguji implementasi provider terhadap expectation dari consumer.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Consumer mengharapkan amount JSON string, provider memberi number. Apa hasil yang benar?",
+      "options": [
+        "Pass karena nilainya sama",
+        "Pass selama status 200",
+        "Pact provider verification gagal karena type mismatch"
+      ],
+      "answer": 2,
+      "explanation": "Matcher string Pact menolak actual JSON number sehingga breaking change terdeteksi.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Untuk transfer yang tidak ditemukan, field error stabil mana yang dipakai dalam lab SYS-008?",
+      "options": [
+        "HTTP 404 dengan RFC 9457 type/title/status",
+        "HTTP 200 dengan null tanpa schema",
+        "HTTP 422 untuk seluruh missing resource"
+      ],
+      "answer": 0,
+      "explanation": "Kontrak SYS-008 mendefinisikan 404 Problem Details; lab tidak menciptakan code error baru.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa cakupan yang boleh diklaim ketika Pact Verifier lokal lulus?",
+      "options": [
+        "Pembayaran dan settlement produksi sudah aman",
+        "Provider Node lokal memenuhi interaksi Pact yang diuji, belum menguji Spring, auth, DB atau production",
+        "Semua consumer versi lama pasti kompatibel"
+      ],
+      "answer": 1,
+      "explanation": "Verifier menguji suatu provider instance dan interaksi konkret; tidak menggantikan integrasi backend nyata.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}
