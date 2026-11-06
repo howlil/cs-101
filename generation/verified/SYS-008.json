@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "itemId": "SYS-008",
+  "curriculumFingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "hashes": {
+    "lesson": "19f86ce3e187a49b175d49cd0e6eaeefb254f684313a3b30a790a65359e14b11",
+    "pedagogy": "4051922d3eec387eb7ebe2c591659c876613089f7c81f614e76cea603d4562fd",
+    "questionBank": "7a1c20c3b24f5b10545b35cf1b0fb11d2bd54299d5573ee85b4d592efc4879c1",
+    "sourcePack": "32e9fb16f2110c3a63b442fa53849f5d22e2a7c0c47e072a6e8d72147bdd57cc",
+    "exampleProof": "eb6808a8216c3280c46a1d4a785722147cba5a22051b46c33f5ef062d157ed0b",
+    "examplePlan": "ebdc37f4e8de375d42b25a0e8edaaf6ae1b34a5a4b12cf2c4e9cb39f3e0b3508"
+  }
+}

@@ -1,0 +1,225 @@
+---
+taskId: "SYS-008"
+title: "Transfer API Spec — Resource and Error Contract"
+description: "Design POST/GET transfer/account resources, OpenAPI 3.1.1 DTOs, 201/Location, RFC 9457 errors and backwards-compatible evolution."
+demo: false
+curriculumFingerprint: "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/SYS-008.json';
+import questionBank from '../../../review-banks/SYS-008.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Problem:** frontend membutuhkan API transfer dengan request, response, status, dan error yang stabil, walaupun implementasi controller, service dan database bisa berubah.
+
+**Mulai:** tulis kontrak tiga operasi terlebih dahulu: `POST /transfers`, `GET /transfers/{id}`, dan `GET /accounts/{id}`. Jangan membuat controller sebelum semua respons observable disepakati.
+
+<MentalModel title="API design = observable contract, bukan implementasi transaksi">
+
+- **Resource:** `POST /transfers` membuat resource transfer; `GET` mengambil representasi transfer atau account. Resource HTTP bukan otomatis satu tabel database.
+- **Request DTO:** `clientReference`, `sourceAccountId`, `destinationAccountId`, `amount` sebagai **decimal string**, dan `currency` (`IDR`/`USD`).
+- **201 Created:** transfer resource tercipta dan `Location` menunjuk URI-nya; **tidak membuktikan dana sudah settled**.
+- **Error contract:** kode HTTP mengungkap kategori kegagalan; RFC 9457 `application/problem+json` memberi `type`, `title`, `status`, dan `detail` yang aman.
+- **Security:** `401` berarti credentials hilang/tidak valid dan membutuhkan `WWW-Authenticate`; `403` berarti identitas valid tetapi operasi ditolak.
+- **Compatibility:** field respons baru yang opsional dapat bersifat additive, tetapi tetap perlu diuji terhadap consumer lama.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+Bearer-authenticated client
+         |
+         +--> POST /transfers
+         |       CreateTransfer JSON
+         |       201 Created + Location: /transfers/tr-001
+         |       Transfer JSON (status=PENDING)
+         |
+         +--> GET /transfers/{id} --> 200 Transfer / 404 missing
+         |
+         +--> GET /accounts/{id}  --> 200 Account / 404 missing
+         |
+         +--> 400 invalid input / 401 missing auth (+ challenge)
+         +--> 403 forbidden / 409 reference conflict / 500 server
+                  |
+             application/problem+json
+                  |
+        V1 required fields are preserved
+                  |
+          V1.1 optional description
+~~~
+
+</ConceptGraph>
+
+## Resource dan response matrix
+
+| Endpoint | Success | Kegagalan yang dimodelkan |
+| --- | --- | --- |
+| `POST /transfers` | **201** + `Location` + Transfer | **400, 401, 403, 409, 500** |
+| `GET /transfers/{id}` | **200** + Transfer | **401, 403, 404, 500** |
+| `GET /accounts/{id}` | **200** + Account | **401, 403, 404, 500** |
+
+Kebijakan lab: `409` berarti **clientReference** sudah digunakan. Itu keputusan desain yang harus benar-benar diimplementasikan sebelum dipakai; dokumen tidak membuktikan *idempotent retries*, deduplikasi transaksi atau pemrosesan tepat sekali.
+
+### Contoh POST request
+
+~~~http
+POST /transfers HTTP/1.1
+Authorization: Bearer <demo-token>
+Content-Type: application/json
+Accept: application/json
+
+{
+  "clientReference": "client-ref-001",
+  "sourceAccountId": "acc-01",
+  "destinationAccountId": "acc-02",
+  "amount": "125000.00",
+  "currency": "IDR"
+}
+~~~
+
+### Contoh 201 Created
+
+~~~http
+HTTP/1.1 201 Created
+Location: /transfers/tr-001
+Content-Type: application/json
+
+{
+  "transferId": "tr-001",
+  "clientReference": "client-ref-001",
+  "sourceAccountId": "acc-01",
+  "destinationAccountId": "acc-02",
+  "amount": "125000.00",
+  "currency": "IDR",
+  "status": "PENDING",
+  "createdAt": "2026-11-06T08:00:00Z"
+}
+~~~
+
+Contoh ini memodelkan response; tidak ada bearer token sungguhan, service di-deploy, atau database yang diakses.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber resmi
+
+<SourceList sources={[
+  {title:'RFC 9110 — HTTP Semantics and status codes',url:'https://www.rfc-editor.org/rfc/rfc9110.html'},
+  {title:'RFC 9457 — Problem Details for HTTP APIs',url:'https://www.rfc-editor.org/rfc/rfc9457.html'},
+  {title:'OpenAPI Specification 3.1.1',url:'https://spec.openapis.org/oas/v3.1.1.html'},
+  {title:'RFC 6750 — OAuth 2.0 Bearer Token Usage',url:'https://www.rfc-editor.org/rfc/rfc6750.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Desain failure: jangan tertukar 400 / 401 / 403 / 409 / 500
+
+| Status | Kapan digunakan pada kontrak latihan | Yang dilakukan client |
+| --- | --- | --- |
+| **400** | JSON/field amount atau ID tidak valid | Perbaiki payload |
+| **401** | Bearer token hilang atau invalid | Ikuti `WWW-Authenticate` challenge |
+| **403** | Sudah authenticated, tidak berhak mengakses akun | Jangan otomatis mengulang dengan token identik |
+| **404** | Transfer/account ID tidak ditemukan | Periksa resource ID; kebijakan concealment harus konsisten |
+| **409** | `clientReference` telah dipakai (kebijakan lab) | Selidiki konflik; jangan membuat referensi baru secara buta |
+| **500** | Server mengalami kondisi tidak terduga | Tampilkan pesan aman; jangan tampilkan stack trace |
+
+Contoh problem detail untuk konflik:
+
+~~~http
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+
+{
+  "type": "urn:cs101:problem:reference-conflict",
+  "title": "Client reference conflict",
+  "status": 409,
+  "detail": "The clientReference is already in use."
+}
+~~~
+
+Untuk 401, gunakan `WWW-Authenticate: Bearer realm="transfers"` beserta status 401. `urn:cs101:problem:...` adalah identifier contoh yang **tidak dirancang untuk dereference**. Konsumen memakai `type` dan status, bukan parsing dari `detail` yang bisa berubah.
+
+## OpenAPI 3.1.1 — spesifikasi yang dapat diperiksa
+
+Kontrak JSON lengkap: `contracts/SYS-008/transfer-api.openapi.json` di repository. File itu berisi ketiga path, schema CreateTransfer/Transfer/Account/Problem, parameter ID, security scheme Bearer, response examples dan status/error matrix.
+
+Jalankan pemeriksaan lokal pada Node 24:
+
+~~~sh
+node generation/fixtures/SYS-008/contract-review.mjs
+~~~
+
+Output yang diharapkan:
+
+~~~text
+contract-paths=3
+contract-status-matrix=passed
+contract-problem-details=passed
+contract-backward-compatible=passed
+contract-runtime=not-executed
+~~~
+
+Checker ini membaca file OpenAPI yang ditrack dan memeriksa **subset kontrak dan contoh**: tiga operasi, 201/Location, tipe `amount` string, 401 challenge, kesesuaian status Problem Details, dan perubahan opsional. Ini **bukan validator lengkap spesifikasi OpenAPI**, bukan HTTP integration test, dan bukan bukti Spring MVC sudah sesuai kontrak.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal design review
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Project — Transfer API Spec
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+Bandingkan dua response berikut dari perspektif **client versi lama**:
+
+~~~json
+{
+  "transferId": "tr-001",
+  "amount": "125000.00",
+  "currency": "IDR"
+}
+~~~
+
+Versi selanjutnya menambahkan `"description": "Transfer antar akun"` sebagai properti **opsional** dan tetap mempertahankan semua field wajib lainnya. Perubahan `"amount": "125000.00"` menjadi `"amount": 125000` adalah **breaking type change**. Kedua cuplikan di atas disederhanakan untuk pembahasan; full request/response tetap harus mengikuti field wajib dalam file OpenAPI.
+
+<Challenge
+  title="Transfer API Spec — status, payload, and backwards compatibility"
+  brief="Tuliskan kontrak tiga endpoint lengkap dengan DTO, status 201/400/401/403/409/500 serta 404 untuk GET, alasan status, error Problem Details yang aman, dan perubahan optional response field yang tetap diuji pada older client."
+  acceptanceCriteria={[
+    'Definisikan POST /transfers, GET /transfers/{id}, GET /accounts/{id} dengan method, path, request/response DTO dan contoh representasi.',
+    'Pada success POST, tunjukkan HTTP 201 Created dan Location yang sama dengan URI resource transfer baru.',
+    'Jelaskan alasan 400/401/403/409/500, dan 404 pada GET; 401 wajib menyertakan WWW-Authenticate Bearer challenge.',
+    'Gunakan application/problem+json dengan type/title/status/detail, cocokkan status body dan HTTP, tanpa stack trace/SQL/token/account secret.',
+    'Tunjukkan bahwa 409 clientReference collision adalah kebijakan desain, bukan bukti deduplikasi atau idempotent payment.',
+    'Tulis evolusi V1→V1.1 dengan satu field response opsional, pertahankan semua field required beserta tipe, dan uji minimal satu consumer lama.',
+    'Jalankan Node checker untuk static OpenAPI contract dan lampirkan outputnya. Jelaskan bahwa runtime Spring MVC, auth nyata dan ledger settlement memerlukan verifikasi terpisah.'
+  ]}
+/>
+
+<ExitCriteria items={[
+  'Dapat menjelaskan resource boundaries dan perbedaan POST 201 dengan GET 200/404.',
+  'Mampu menulis JSON request/response dan Location dari transfer yang tercipta.',
+  'Memilih 400/401/403/409/500 dan 404 sesuai RFC 9110, dengan Problem Details RFC 9457 yang konsisten.',
+  'Dapat menunjukkan proposal backward-compatible evolution dan menguji breaking change.',
+  'Tidak menyamakan static contract review dengan framework integration maupun settlement finansial.'
+]} />
+
+</LessonStage>

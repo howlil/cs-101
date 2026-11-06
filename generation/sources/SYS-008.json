@@ -1,0 +1,150 @@
+{
+  "itemId": "SYS-008",
+  "curriculumFingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "sources": [
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "tier": 0,
+      "supports": [
+        "POST and GET request methods, 201 Created and Location, 200/400/401/403/404/409/500 HTTP status semantics",
+        "401 requires WWW-Authenticate challenge"
+      ],
+      "notes": [
+        "Sections 9.3.1, 9.3.3, 10.2.2, 15.3.2 and 15.5"
+      ]
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "tier": 0,
+      "supports": [
+        "application/problem+json media type with type, title, status and detail",
+        "problem status must match the actual HTTP response; do not expose implementation internals"
+      ],
+      "notes": [
+        "Sections 3.1 and 5"
+      ]
+    },
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html",
+      "tier": 0,
+      "supports": [
+        "HTTP operations, requestBody, responses, schema, examples, securitySchemes",
+        "JSON representation and schema-defined optional additions"
+      ],
+      "notes": [
+        "Sections 4.2, 4.8.16, 4.8.24, 4.8.27"
+      ]
+    },
+    {
+      "title": "RFC 6750 — OAuth 2.0 Bearer Token Usage",
+      "url": "https://www.rfc-editor.org/rfc/rfc6750.html",
+      "tier": 0,
+      "supports": [
+        "Authorization Bearer credential presentation",
+        "WWW-Authenticate Bearer challenge for authentication errors"
+      ],
+      "notes": [
+        "Sections 2.1 and 3; this lab does not issue or validate tokens"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "http-created-location",
+      "statement": "A successful POST that creates a transfer resource can return 201 Created with Location identifying the new transfer resource.",
+      "conceptIds": [
+        "resource-contract"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 10.2.2 Location and 15.3.2 201 Created",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "http-bad-request",
+      "statement": "400 Bad Request describes a client-side request problem, including malformed or invalid input, rather than an authenticated ownership denial.",
+      "conceptIds": [
+        "error-semantics"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Section 15.5.1 400 Bad Request",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "http-auth-challenge",
+      "statement": "401 Unauthorized means the request lacks valid authentication credentials; a server sending 401 must provide a WWW-Authenticate challenge.",
+      "conceptIds": [
+        "auth-boundary",
+        "error-semantics"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 15.5.2 401 Unauthorized and 11.6.1",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "http-forbidden-not-found",
+      "statement": "403 Forbidden denies a understood request, while 404 Not Found can describe a missing target resource and may also avoid disclosing a forbidden resource.",
+      "conceptIds": [
+        "auth-boundary",
+        "resource-contract"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 15.5.4 403 Forbidden and 15.5.5 404 Not Found",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "http-conflict-server-error",
+      "statement": "409 Conflict describes a conflict with current resource state, while 500 Internal Server Error describes an unexpected server condition.",
+      "conceptIds": [
+        "error-semantics"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "locator": "Sections 15.5.10 409 Conflict and 15.6.1 500 Internal Server Error",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "problem-json",
+      "statement": "RFC 9457 defines application/problem+json with stable type/title and a status member which must match the HTTP response status when provided.",
+      "conceptIds": [
+        "error-semantics"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9457.html",
+      "locator": "Sections 3 and 3.1.2",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "openapi-machine-contract",
+      "statement": "OpenAPI 3.1.1 allows a JSON document to define paths, operation responses, request bodies, component schemas and bearer authentication requirements.",
+      "conceptIds": [
+        "contract-schema",
+        "resource-contract"
+      ],
+      "sourceUrl": "https://spec.openapis.org/oas/v3.1.1.html",
+      "locator": "Sections 4.2 Format, 4.8 Paths/Responses/Schemas/Security",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "bearer-header",
+      "statement": "OAuth 2.0 bearer tokens may be carried in an Authorization Bearer request header, with Bearer in the WWW-Authenticate challenge when authentication is missing.",
+      "conceptIds": [
+        "auth-boundary"
+      ],
+      "sourceUrl": "https://www.rfc-editor.org/rfc/rfc6750.html",
+      "locator": "Sections 2.1 Authorization Request Header Field and 3 WWW-Authenticate",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    },
+    {
+      "id": "optional-evolution",
+      "statement": "An optional added response field can be documented as an additive design evolution without modifying an existing required field or path; compatibility still requires client consumer review.",
+      "conceptIds": [
+        "contract-evolution"
+      ],
+      "sourceUrl": "https://spec.openapis.org/oas/v3.1.1.html",
+      "locator": "Sections 4.8.24 Schema Object and Responses",
+      "rationale": "The cited primary HTTP, Problem Details, OpenAPI or OAuth source defines the relevant message, schema or status contract; implementation and consumer compatibility remain separate verification requirements."
+    }
+  ]
+}

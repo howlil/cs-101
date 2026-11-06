@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "SYS-008",
+  "curriculumFingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "examples": [
+    {
+      "id": "static-openapi-review",
+      "runtime": "node",
+      "file": "contract-review.mjs",
+      "expectedStdout": "contract-paths=3\ncontract-status-matrix=passed\ncontract-problem-details=passed\ncontract-backward-compatible=passed\ncontract-runtime=not-executed\n"
+    }
+  ]
+}

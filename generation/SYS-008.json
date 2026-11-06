@@ -1,0 +1,40 @@
+{
+  "itemId": "SYS-008",
+  "fingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "sources": [
+    {
+      "title": "RFC 9110 — HTTP Semantics",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+    },
+    {
+      "title": "RFC 9457 — Problem Details for HTTP APIs",
+      "url": "https://www.rfc-editor.org/rfc/rfc9457.html"
+    },
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html"
+    },
+    {
+      "title": "RFC 6750 — OAuth 2.0 Bearer Token Usage",
+      "url": "https://www.rfc-editor.org/rfc/rfc6750.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments: resource/method DTOs, HTTP status/problem semantics and compatible evolution",
+      "assessedAt": "Five self-check questions, OpenAPI 3.1.1 spec and static contract checks plus human design review",
+      "evidenceExpected": "Three defined methods/paths, request/response payloads, 201/Location, 400/401/403/409/500 with status rationale and 404 retrieval, safe RFC 9457 errors, and additive optional-field evolution."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent request/status matrix and optional-version compatibility review",
+      "assessedAt": "OpenAPI static checker and human-reviewed changed optional field plus older-client mutation",
+      "evidenceExpected": "A written contract with status decision matrix, example payloads and a before/after compatibility diff, not claimed as running Spring MVC or payment processing."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

@@ -28,6 +28,7 @@ G12: New Java and PostgreSQL rubric evidence must cite actual CLI/DB runs, while
 G13: NET-006 code-level connect/EOF/refusal evidence must not be promoted into packet-level TCP handshake or retransmission claims without actual capture.
 G14: SQL-001 V3 receipt asserts authorship and explicitly not-executable SQL runtime, while a separate Docker-isolated PostgreSQL 16 integration step proves schema/data and repeatability. No application database binding is introduced.
 G15: TST-007 distinguishes generator's no-executable Maven/JUnit status from actual Surefire execution; the dedicated pure Java lab tests observable fee results, fixed decimal policy and errors without Spring context.
+G16: SYS-008 static OpenAPI spec examples and Node fixture require real status/error/DTO consistency, without conflating static review with a deployed Spring service, auth provider or payment guarantees.
 DEC1: JSON overlay + in-memory adjacency preferred to changing generated manifest or adding graph DB.
 D1: Pilot proposed relationships require editorial review before promotion to reviewed.
 DEC2: A read-only, depth-specific path derives from concept-level reviewed requires and the existing proposed itemIds editorial ordering. Missing prerequisite outcomes are surfaced as gaps.
@@ -44,6 +45,7 @@ DEC12: Cross-domain expansion is a small editorial overlay addition with two typ
 DEC13: NET-006 uses ephemeral loopback Node sockets with local stream-level proof only; privileged network capture belongs to a disposable VM learner lab.
 DEC14: PostgreSQL SQL runner remains outside the eight-second Node/Java V3 authoring fixture: a disposable Docker container with no external network runs lab SQL and six inspections in CI; authoring plan keeps an explicit not-executable reason.
 DEC15: Use a separate Maven project with JUnit Jupiter 5.14.4 and Surefire 3.5.4 to prove TST-007 instead of adding plugin execution to the bounded authoring runner or starting Spring; assert test count from Surefire XML.
+DEC16: Publish SYS-008 as a standalone OpenAPI 3.1.1 JSON design proposal and use bounded Node contract/example checks in V3 authoring; preserve separate actual Spring MVC/auth/runtime implementation proof.
 
 ## Verification
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
@@ -64,3 +66,4 @@ PF15 (P19,G12) [important] | G1 path/rubric validation, graph canvas neighborhoo
 PF16 (P20,G13) [important] | NET-006 V3 receipt, Node loopback fixture and Materi/Soal/Project route smoke | merge | pnpm ci
 PF17 (P21,G14) [important] | SQL-001 reproducible bundle, isolated real PostgreSQL run, six-query expected data and focused route smoke | merge | pnpm ci
 PF18 (P22,G15) [important] | TST-007 authoring V3 receipt, real Maven Surefire 20-case report and Materi/Soal/Project smoke | merge | pnpm ci
+PF19 (P23,G16) [important] | SYS-008 V3 byte-reproducible static checker, RFC status/error shape, G1 contextual routes and three-view smoke | merge | pnpm ci

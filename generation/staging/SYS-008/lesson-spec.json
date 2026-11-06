@@ -1,0 +1,348 @@
+{
+  "itemId": "SYS-008",
+  "curriculumFingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "payoff": "Design a complete transfer/account HTTP API with explicit status semantics, problem+json errors and defensible version evolution.",
+  "learningOutcomes": [
+    "define POST /transfers, GET /transfers/{id}, GET /accounts/{id}; contoh payload, 201/400/401/403/409/500, backward-compatible evolution dan reason status choice."
+  ],
+  "mentalModel": "HTTP API is a client-visible resource/method/DTO/status contract; implementation, persistence, authentication policy and settlement are separate systems. Error responses follow RFC 9457; compatible evolution preserves older required field types.",
+  "relationshipGraph": "POST /transfers + TransferCreate → 201/Location + TransferResponse → GET /transfers/{id} 200/404; GET /accounts/{id} 200/404; auth 401/403; input 400; conflict 409; server 500; proposal V1 → optional description V1.1.",
+  "concepts": [
+    {
+      "id": "resource-contract",
+      "title": "HTTP resource methods and Location",
+      "mechanism": "POST creates a transfer resource at a stable URI, GET retrieves transfer/account representations and 201 Location identifies the created resource.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9110.html",
+        "https://spec.openapis.org/oas/v3.1.1.html"
+      ]
+    },
+    {
+      "id": "contract-schema",
+      "title": "OpenAPI 3.1.1 request/response DTO",
+      "mechanism": "Machine-readable paths, requestBody, schemas and examples describe the observable API without requiring Spring or database implementation.",
+      "sourceUrls": [
+        "https://spec.openapis.org/oas/v3.1.1.html"
+      ]
+    },
+    {
+      "id": "auth-boundary",
+      "title": "Bearer credentials vs authorization",
+      "mechanism": "401 with WWW-Authenticate challenges missing/invalid credentials while 403 denies a valid principal's forbidden action.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9110.html",
+        "https://www.rfc-editor.org/rfc/rfc6750.html"
+      ]
+    },
+    {
+      "id": "error-semantics",
+      "title": "HTTP status and RFC 9457 problem details",
+      "mechanism": "400/401/403/404/409/500 communicate distinct failure categories with type/title/status and safe detail.",
+      "sourceUrls": [
+        "https://www.rfc-editor.org/rfc/rfc9110.html",
+        "https://www.rfc-editor.org/rfc/rfc9457.html"
+      ]
+    },
+    {
+      "id": "contract-evolution",
+      "title": "Backward-compatible API response evolution",
+      "mechanism": "An optional response property may preserve old required fields/types; cross-client compatibility must still be tested.",
+      "sourceUrls": [
+        "https://spec.openapis.org/oas/v3.1.1.html"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "201 Created does not mean funds have settled or a ledger has been reconciled.",
+    "401 missing/invalid credentials requires WWW-Authenticate; 403 is permission denial with valid credentials.",
+    "409 duplicate client reference is this lab's policy, not automatic payment idempotency.",
+    "Never expose sensitive account data, stack traces or internal SQL in 500 Problem Details.",
+    "An OpenAPI document and static fixture are not a deployed Spring MVC API.",
+    "A new optional field is only a compatibility candidate until old consumers are tested.",
+    "Use JSON decimal strings for example money amounts, not binary floating-point values."
+  ],
+  "practice": [
+    "Write POST/GET resource and DTO contract using OpenAPI JSON.",
+    "Map 201/400/401/403/404/409/500 to user-observable examples with RFC 9457 errors.",
+    "Review optional-field evolution against required JSON types and a deliberately breaking mutation."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments: resource/method DTOs, HTTP status/problem semantics and compatible evolution",
+      "assessedAt": "Five self-check questions, OpenAPI 3.1.1 spec and static contract checks plus human design review",
+      "evidenceExpected": "Three defined methods/paths, request/response payloads, 201/Location, 400/401/403/409/500 with status rationale and 404 retrieval, safe RFC 9457 errors, and additive optional-field evolution."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent request/status matrix and optional-version compatibility review",
+      "assessedAt": "OpenAPI static checker and human-reviewed changed optional field plus older-client mutation",
+      "evidenceExpected": "A written contract with status decision matrix, example payloads and a before/after compatibility diff, not claimed as running Spring MVC or payment processing."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "design-resources-and-dtos",
+        "objective": "Describe three transfer/account resources with stable request and response shapes and correct POST/GET semantics.",
+        "whyItMatters": "Clients depend on paths, methods and payload formats that should survive controller refactors and database schema changes.",
+        "mentalModel": "The API contract is the observable boundary: POST /transfers creates a resource; GET /transfers/{id} and GET /accounts/{id} retrieve representations. Resource models are not the same thing as database tables.",
+        "explanation": "SYS-008 defines POST /transfers, GET /transfers/{id}, and GET /accounts/{id}. POST requires clientReference, sourceAccountId, destinationAccountId, amount as a decimal string and currency IDR/USD. A successful POST returns 201 with Location: /transfers/tr-001 and the new transfer representation. The server assigns transferId and createdAt; a client must not assume synchronous settlement from 201. GET may return 200 with the requested representation or 404 when absent. The example uses bearer authentication and clientReference conflict as an explicitly designed policy, not a guarantee of real idempotency or fraud checks. Avoid returning binary floating-point for monetary amounts.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A client needs to create a transfer, fetch it by ID, then query the source account without knowledge of the underlying database.",
+          "steps": [
+            {
+              "action": "Define three paths with HTTP methods and stable identifiers.",
+              "reason": "Resource naming separates client-visible contract from backend persistence structure.",
+              "expectedResult": "POST transfers and two GET-by-ID routes exist in the spec."
+            },
+            {
+              "action": "Write POST request as typed JSON, with decimal amount encoded as string.",
+              "reason": "Floating-point serialization should not silently change the example monetary quantity.",
+              "expectedResult": "source/destination IDs, clientReference, amount and currency are declared required."
+            },
+            {
+              "action": "Specify 201 with Location and a Transfer representation.",
+              "reason": "Client must learn the URI of the created transfer resource.",
+              "expectedResult": "HTTP Location points to /transfers/tr-001, echoed by transferId in response."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why does POST /transfers return 201 with Location rather than only return 200 and no resource identifier?",
+          "hints": [
+            "201 signals a new resource was created.",
+            "Location identifies the primary created resource."
+          ],
+          "explanation": "The API makes creation explicit; Location gives the URI to retrieve the created transfer, while response includes its representation."
+        },
+        "independentChallenge": {
+          "prompt": "Add a separate mock transfer example with a different ID and amount, then justify 201/Location plus GET 200/404 behavior without assuming money has settled.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Concrete POST/GET path table, JSON request/response examples and a 201 Location URI consistent with the transfer ID."
+          ],
+          "variationFromExample": "A new transfer with a different decimal string and owner/account IDs instead of the worked tr-001 example."
+        },
+        "firstAction": "Write down the exact three canonical method/path pairs before drafting DTOs.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating an HTTP resource path as a database table name or a successful POST as completed settlement.",
+          "whyItFails": "Resource representations can differ from storage; HTTP 201 only reports creation of a resource.",
+          "correctiveAction": "Model client-visible IDs, content type and Location independent from database schema and business-state transitions."
+        },
+        "selfCheck": {
+          "expectedObservation": "The specification has three operations, required DTO fields, and 201/Location consistent with a created transfer.",
+          "ifUnexpected": "Inspect openapi.json paths and response objects; compare example transferId with the Location path."
+        },
+        "continueFromHere": {
+          "nextAction": "Classify authorization, validation and conflict errors with precise status semantics.",
+          "resumeCue": "Anchor the work in POST creation and GET retrieval contracts, then review the sample request."
+        }
+      },
+      {
+        "id": "define-status-and-problem-errors",
+        "objective": "Select and justify 201, 400, 401, 403, 404, 409 and 500 with a consistent RFC 9457 error envelope.",
+        "whyItMatters": "Retry logic, authentication prompts and support diagnostics depend on clients receiving the right status class without leaked internal information.",
+        "mentalModel": "HTTP status communicates protocol outcome; problem+json communicates typed, safe error context. 401 challenges authentication, 403 rejects permitted access, 409 signals state conflict.",
+        "explanation": "Choose 400 for malformed/invalid transfer input, 401 with WWW-Authenticate: Bearer for absent/invalid credentials, 403 for an authenticated caller lacking permission, 404 for absent transfer/account resources, 409 for a clientReference already used under the example API policy, and 500 for an unexpected server failure. RFC 9457 error body uses type, title, status, detail and optional instance; if status is present it must match the HTTP line. The exact business scenario assigned to 409 is a proposed policy, not a universal status rule. Never return stack traces, credentials, raw SQL or hidden account details in client-visible problems; clients should parse type and status rather than human-readable detail. 401 vs 403 must not be conflated.",
+        "prerequisiteConceptIds": [
+          "resource-contract"
+        ],
+        "workedExample": {
+          "problem": "A client submits a transfer with missing required amount, then retries with invalid Bearer credentials, then uses an existing client reference.",
+          "steps": [
+            {
+              "action": "Classify invalid JSON/body under 400 and include a typed Problem Details body.",
+              "reason": "Malformed client input is different from an internal failure.",
+              "expectedResult": "HTTP 400 matches problem.status 400, without sensitive internal detail."
+            },
+            {
+              "action": "Return 401 and WWW-Authenticate for absent/invalid bearer credentials; 403 for valid but unauthorized identity.",
+              "reason": "Authentication and authorization have different client recovery paths.",
+              "expectedResult": "A 401 challenge exists; the 403 example contains no credential leak."
+            },
+            {
+              "action": "Return 409 for duplicate clientReference per explicit policy, 500 for unexpected internal errors.",
+              "reason": "A state conflict is distinct from server unavailability.",
+              "expectedResult": "Problem type and HTTP status are stable; 500 detail remains generic."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Authenticated caller lacks permission for account acc-02. Should the API return 401 with no challenge or 403?",
+          "hints": [
+            "401 is for missing/invalid authentication credentials and must challenge.",
+            "403 is for a understood request that server refuses to fulfill."
+          ],
+          "explanation": "Use 403 for valid credentials without permission, or deliberately use 404 to conceal resource existence if that is a documented security policy. Not an invalid 401 lacking a challenge."
+        },
+        "independentChallenge": {
+          "prompt": "Write a negative-case table for invalid JSON, no bearer token, valid token without permission, duplicate clientReference and unexpected infrastructure failure; justify each status plus problem type.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "At least five distinct cases matching response status, WWW-Authenticate where required and RFC 9457 body properties; no leaked stack traces."
+          ],
+          "variationFromExample": "A separate matrix using different account ownership and failure detail from the worked sample."
+        },
+        "firstAction": "Make a two-column table of authentication failure versus authorization failure.",
+        "misconceptionRepair": {
+          "likelyMistake": "Returning 401 for every forbidden request or using 500 for malformed client input.",
+          "whyItFails": "Clients cannot distinguish reauthentication from permission denial or fix input errors consistently.",
+          "correctiveAction": "Match 401/403/400/409/500 semantics and require safe problem+json status/title/type fields."
+        },
+        "selfCheck": {
+          "expectedObservation": "The OpenAPI contract includes six required status choices plus 404 retrieval, with 401 explicitly carrying Bearer challenge.",
+          "ifUnexpected": "Check RFC 9110 definitions and RFC 9457 before assigning status; update examples and schema together."
+        },
+        "continueFromHere": {
+          "nextAction": "Define a compatible response evolution and verify a client designed for the older representation.",
+          "resumeCue": "Inspect the HTTP status line and Problem Details status as one consistent pair."
+        }
+      },
+      {
+        "id": "review-backward-compatibility",
+        "objective": "Distinguish additive response changes from breaking schema/required-field changes and review with concrete older-client expectations.",
+        "whyItMatters": "A release that removes or retypes a required response field can break existing clients even when server-side code compiles and endpoint tests stay green.",
+        "mentalModel": "A versioned contract is a set of observable promises. Add optional response metadata without changing previously required fields; verify consumers before declaring compatibility.",
+        "explanation": "The first transfer response requires transferId, sourceAccountId, destinationAccountId, amount, currency, status and createdAt. A proposed V1.1 adds an optional description string only: old fields and their types remain identical. Removing amount or replacing decimal string with a JSON number is breaking for the older contract. This lab includes an explicit older-client consumer that reads the known required fields and ignores the optional added description. That one fixture is design-time compatibility evidence only, not a proof that *every* real consumer tolerates unknown fields. Review idempotency, security, logging, retries, backward compatibility and server enforcement with a separately implemented service; the spec does not execute Spring MVC or banking transactions.",
+        "prerequisiteConceptIds": [
+          "resource-contract",
+          "error-semantics"
+        ],
+        "workedExample": {
+          "problem": "An API team wants to add an optional display description to an existing transfer response without breaking the original client.",
+          "steps": [
+            {
+              "action": "Keep required TransferResponse properties unchanged and add optional description in V1.1.",
+              "reason": "An old client must still find the required identifiers, amount string and currency.",
+              "expectedResult": "The same old required keys and types remain valid in both examples."
+            },
+            {
+              "action": "Run the standalone contract fixture against baseline and optional-field evolution examples.",
+              "reason": "A design-time test catches local schema/type drift and a deliberately breaking change.",
+              "expectedResult": "Old-reader check passes for additive description and rejects amount-as-number."
+            },
+            {
+              "action": "Document the proof boundary and real consumer test required before deployment.",
+              "reason": "A static contract cannot guarantee all downstream clients accept unknown fields.",
+              "expectedResult": "Review sheet lists consumer validation and Spring integration as follow-up evidence."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Is changing amount from \"125000.00\" to 125000 a backward-compatible evolution if an older client expects a decimal string?",
+          "hints": [
+            "The JSON type changes from string to number.",
+            "Additive optional fields and type replacement have different compatibility risks."
+          ],
+          "explanation": "No. It changes the observable JSON type, which can break older clients. Keep amount as decimal string; add optional metadata without changing existing required fields."
+        },
+        "independentChallenge": {
+          "prompt": "Propose a different optional transfer metadata field, preserve all required V1 types, and demonstrate an older-client reader accepts it while rejecting a changed currency or amount type.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A before/after response diff showing only optional metadata, passing older-client fixture, and one deliberately breaking mutation rejected by the checker.",
+            "A review note stating which consumer and real Spring tests are still required."
+          ],
+          "variationFromExample": "A new optional audit-facing or display metadata field instead of the lesson's example description."
+        },
+        "firstAction": "Write the original required TransferResponse field names and types from the OpenAPI schema.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming adding any field or changing a JSON type is always backward-compatible without consumer knowledge.",
+          "whyItFails": "Strict client validators can reject unknown fields, and retyping required values can break parsers.",
+          "correctiveAction": "Treat additive optional changes as candidates for compatibility, validate actual clients, and keep required field names/types unchanged."
+        },
+        "selfCheck": {
+          "expectedObservation": "The standalone contract checker passes the optional description example but rejects an amount-as-number mutation.",
+          "ifUnexpected": "Inspect schema required arrays, public type definitions and actual older-client code; restore old types before review."
+        },
+        "continueFromHere": {
+          "nextAction": "Use this API contract to design a real Spring MVC controller and external contract tests in SPR-006 and TST-019.",
+          "resumeCue": "Compare V1 vs proposed V1.1 from the perspective of an already-shipped client, not only the new server."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "POST /transfers berhasil membuat tr-001. Respons paling tepat jika resource baru dapat diambil melalui GET?",
+      "options": [
+        "201 Created dan Location: /transfers/tr-001",
+        "200 OK tanpa resource identifier selalu wajib",
+        "500 Internal Server Error karena belum settled"
+      ],
+      "answer": 0,
+      "explanation": "201 menandakan resource dibuat; Location mengidentifikasi URI utama resource yang tercipta. Ini bukan bukti settlement.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Client mengirim Authorization token yang tidak valid. Respons RFC 9110 yang harus dikirim?",
+      "options": [
+        "403 tanpa challenge selalu",
+        "401 disertai WWW-Authenticate challenge",
+        "409 untuk token lama"
+      ],
+      "answer": 1,
+      "explanation": "401 untuk kredensial tidak valid dan response harus menyertakan challenge yang berlaku.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Pemilik token valid mencoba mengakses transfer yang tidak berizin. Pilihan status umum?",
+      "options": [
+        "201",
+        "400 untuk semua masalah akses",
+        "403 Forbidden (atau 404 jika kebijakan menyembunyikan keberadaan resource didokumentasikan)"
+      ],
+      "answer": 2,
+      "explanation": "403 untuk request dipahami tetapi ditolak; kebijakan 404 untuk menyembunyikan keberadaan harus jelas dan konsisten.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "API mengembalikan status HTTP 409 tetapi body problem+json berisi status: 500. Apa kesalahannya?",
+      "options": [
+        "RFC 9457 mengharuskan status body sama dengan HTTP response bila disertakan",
+        "Body tidak boleh memiliki type/title",
+        "500 body selalu boleh karena lebih aman"
+      ],
+      "answer": 0,
+      "explanation": "Ketika disertakan, status dalam Problem Details harus cocok dengan status HTTP yang benar-benar dikirim.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Versi API baru menambah description opsional tetapi tidak mengubah field lama. Klaim kompatibilitas yang tepat?",
+      "options": [
+        "Semua client lama pasti kompatibel tanpa test",
+        "Kandidat backward-compatible; uji old-client parsing, dan perubahan amount string→number justru breaking",
+        "Harus mengganti semua field required"
+      ],
+      "answer": 1,
+      "explanation": "Optional additive field dapat kompatibel, tetapi strict consumers perlu diuji; mengubah tipe field lama adalah breaking.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

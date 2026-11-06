@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "SYS-008",
+  "curriculumFingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "static-openapi-review",
+      "runtime": "node",
+      "file": "contract-review.mjs",
+      "fixtureSha256": "d176244bf7edd9fb683c3449e5f5843c2e63103d0ae9356b25295f870c1b2d4c",
+      "stdoutSha256": "7614e949197bf8592d1e27e56263f487fe9d400b071f2a91c166d0b895746b39",
+      "verified": true
+    }
+  ]
+}

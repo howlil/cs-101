@@ -1,0 +1,78 @@
+{
+  "itemId": "SYS-008",
+  "version": "lesson-spec-v1:sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "curriculumFingerprint": "sha256:a4d4b4a7e0fd9e1201d688260e967b26b6c9266fe04b7cb24a618f52e996fb84",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "POST /transfers berhasil membuat tr-001. Respons paling tepat jika resource baru dapat diambil melalui GET?",
+      "options": [
+        "201 Created dan Location: /transfers/tr-001",
+        "200 OK tanpa resource identifier selalu wajib",
+        "500 Internal Server Error karena belum settled"
+      ],
+      "answer": 0,
+      "explanation": "201 menandakan resource dibuat; Location mengidentifikasi URI utama resource yang tercipta. Ini bukan bukti settlement.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Client mengirim Authorization token yang tidak valid. Respons RFC 9110 yang harus dikirim?",
+      "options": [
+        "403 tanpa challenge selalu",
+        "401 disertai WWW-Authenticate challenge",
+        "409 untuk token lama"
+      ],
+      "answer": 1,
+      "explanation": "401 untuk kredensial tidak valid dan response harus menyertakan challenge yang berlaku.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Pemilik token valid mencoba mengakses transfer yang tidak berizin. Pilihan status umum?",
+      "options": [
+        "201",
+        "400 untuk semua masalah akses",
+        "403 Forbidden (atau 404 jika kebijakan menyembunyikan keberadaan resource didokumentasikan)"
+      ],
+      "answer": 2,
+      "explanation": "403 untuk request dipahami tetapi ditolak; kebijakan 404 untuk menyembunyikan keberadaan harus jelas dan konsisten.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "API mengembalikan status HTTP 409 tetapi body problem+json berisi status: 500. Apa kesalahannya?",
+      "options": [
+        "RFC 9457 mengharuskan status body sama dengan HTTP response bila disertakan",
+        "Body tidak boleh memiliki type/title",
+        "500 body selalu boleh karena lebih aman"
+      ],
+      "answer": 0,
+      "explanation": "Ketika disertakan, status dalam Problem Details harus cocok dengan status HTTP yang benar-benar dikirim.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Versi API baru menambah description opsional tetapi tidak mengubah field lama. Klaim kompatibilitas yang tepat?",
+      "options": [
+        "Semua client lama pasti kompatibel tanpa test",
+        "Kandidat backward-compatible; uji old-client parsing, dan perubahan amount string→number justru breaking",
+        "Harus mengganti semua field required"
+      ],
+      "answer": 1,
+      "explanation": "Optional additive field dapat kompatibel, tetapi strict consumers perlu diuji; mengubah tipe field lama adalah breaking.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

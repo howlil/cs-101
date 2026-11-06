@@ -1,0 +1,492 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "SYS-008 — Transfer API Spec (educational proposal)",
+    "version": "1.0.0",
+    "description": "Static learning contract only. No deployed HTTP service, authentication provider, payment settlement, persistence, or exactly-once/idempotency guarantee. Decimal amounts are JSON strings. ClientReference uniqueness and status transitions are proposed policies, not implementations."
+  },
+  "servers": [
+    {
+      "url": "https://api.example.test",
+      "description": "Example-only reserved domain; no service deployed"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/transfers": {
+      "post": {
+        "tags": [
+          "Transfers"
+        ],
+        "operationId": "createTransfer",
+        "summary": "Create a transfer resource",
+        "description": "Proposed design. Creates a PENDING resource; 201 does not indicate settled funds. Duplicate clientReference is rejected with 409 under this educational policy; not evidence of idempotent retries.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransfer"
+              },
+              "example": {
+                "clientReference": "client-ref-001",
+                "sourceAccountId": "acc-01",
+                "destinationAccountId": "acc-02",
+                "amount": "125000.00",
+                "currency": "IDR"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "A transfer resource was created, not necessarily settled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transfer"
+                },
+                "example": {
+                  "transferId": "tr-001",
+                  "clientReference": "client-ref-001",
+                  "sourceAccountId": "acc-01",
+                  "destinationAccountId": "acc-02",
+                  "amount": "125000.00",
+                  "currency": "IDR",
+                  "status": "PENDING",
+                  "createdAt": "2026-11-06T08:00:00Z"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "URI of the created transfer",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/transfers/tr-001"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/transfers/{id}": {
+      "get": {
+        "tags": [
+          "Transfers"
+        ],
+        "operationId": "getTransfer",
+        "summary": "Read a transfer resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Server-assigned transfer ID",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "tr-001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer found; status is not a settlement guarantee.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transfer"
+                },
+                "example": {
+                  "transferId": "tr-001",
+                  "clientReference": "client-ref-001",
+                  "sourceAccountId": "acc-01",
+                  "destinationAccountId": "acc-02",
+                  "amount": "125000.00",
+                  "currency": "IDR",
+                  "status": "PENDING",
+                  "createdAt": "2026-11-06T08:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/accounts/{id}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "getAccount",
+        "summary": "Read an account resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Account ID",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "acc-01"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account found; no balance disclosure or ownership claim implied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                },
+                "example": {
+                  "accountId": "acc-01",
+                  "currency": "IDR",
+                  "status": "ACTIVE"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Example-only bearer challenge; token issuer/validator not implemented."
+      }
+    },
+    "schemas": {
+      "CreateTransfer": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clientReference",
+          "sourceAccountId",
+          "destinationAccountId",
+          "amount",
+          "currency"
+        ],
+        "properties": {
+          "clientReference": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 64,
+            "description": "Client-supplied reference unique by proposed API policy; no deduplication implementation."
+          },
+          "sourceAccountId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "destinationAccountId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*(\\.[0-9]{1,2})?$",
+            "description": "Positive decimal quantity encoded as string; currency-specific scale validation is an implementation requirement."
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "IDR",
+              "USD"
+            ]
+          }
+        }
+      },
+      "Transfer": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "transferId",
+          "clientReference",
+          "sourceAccountId",
+          "destinationAccountId",
+          "amount",
+          "currency",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "transferId": {
+            "type": "string"
+          },
+          "clientReference": {
+            "type": "string"
+          },
+          "sourceAccountId": {
+            "type": "string"
+          },
+          "destinationAccountId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "IDR",
+              "USD"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "REJECTED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional example of additive response evolution in v1.1; no old required fields removed."
+          }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "accountId",
+          "currency",
+          "status"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "IDR",
+              "USD"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED"
+            ]
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri-reference"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid transfer request",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "urn:cs101:problem:invalid-request",
+              "title": "Invalid transfer request",
+              "status": 400,
+              "detail": "Required fields or amount are invalid."
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid Bearer credentials",
+        "headers": {
+          "WWW-Authenticate": {
+            "description": "Authentication challenge per RFC 9110",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Bearer realm=\"transfers\""
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "urn:cs101:problem:unauthenticated",
+              "title": "Authentication required",
+              "status": 401,
+              "detail": "Bearer credentials are missing or invalid."
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Access denied",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "urn:cs101:problem:forbidden",
+              "title": "Access denied",
+              "status": 403,
+              "detail": "Caller cannot access this account or transfer."
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "urn:cs101:problem:not-found",
+              "title": "Resource not found",
+              "status": 404,
+              "detail": "The requested resource was not found."
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Client reference conflict",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "urn:cs101:problem:reference-conflict",
+              "title": "Client reference conflict",
+              "status": 409,
+              "detail": "The clientReference is already in use."
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "urn:cs101:problem:internal-error",
+              "title": "Internal server error",
+              "status": 500,
+              "detail": "An unexpected error occurred."
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-cs101-compatibility": {
+    "baselineVersion": "1.0.0",
+    "proposedVersion": "1.1.0",
+    "additiveOptionalProperty": "description",
+    "compatibilityNote": "An additive optional response field is a candidate for backward compatibility; strict/closed clients must still be tested. Removing/retyping required fields is breaking.",
+    "baselineRequiredTransferProperties": [
+      "transferId",
+      "clientReference",
+      "sourceAccountId",
+      "destinationAccountId",
+      "amount",
+      "currency",
+      "status",
+      "createdAt"
+    ]
+  },
+  "x-cs101-evidence-limit": "Static OpenAPI design. Single-file Node fixture checks selected paths, examples, required fields and status semantics; it does not run a real HTTP server, Spring MVC, API authentication, persistence or bank transfers."
+}
