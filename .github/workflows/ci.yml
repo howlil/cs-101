@@ -86,6 +86,8 @@ jobs:
           pnpm generation:validate SYS-008
           pnpm generation:promote SYS-008
           git diff --exit-code -- src/content/lessons/SYS-008.mdx generation/SYS-008.json review-banks/SYS-008.json generation/pedagogy/SYS-008.json generation/sources/SYS-008.json generation/proofs/SYS-008.json generation/executables/SYS-008.json generation/verified/SYS-008.json generation/fixtures/SYS-008/contract-review.mjs
+      - name: TST-019 real HTTP contract test against local educational stub
+        run: node labs/TST-019/http-contract.mjs
       - name: Validate authored lessons and question banks
         run: pnpm validate
       - name: Unit tests
