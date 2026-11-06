@@ -36,17 +36,6 @@
       ]
     },
     {
-      "title": "Pact — Writing Consumer Tests",
-      "url": "https://docs.pact.io/consumer",
-      "tier": 0,
-      "supports": [
-        "Consumer expectation comes from tested client behavior, not provider implementation"
-      ],
-      "notes": [
-        "Good consumer tests use provider states and actually invoke the client"
-      ]
-    },
-    {
       "title": "RFC 9457 — Problem Details for HTTP APIs",
       "url": "https://www.rfc-editor.org/rfc/rfc9457.html",
       "tier": 0,
@@ -98,9 +87,9 @@
       "conceptIds": [
         "pact-consumer-contract"
       ],
-      "sourceUrl": "https://docs.pact.io/consumer",
-      "locator": "Writing Consumer tests / test actual collaborating client",
-      "rationale": "Official Pact recommendations distinguish consumer contracts from broad provider implementation tests."
+      "sourceUrl": "https://docs.pact.io/implementation_guides/javascript/docs/consumer",
+      "locator": "Consumer Tests / Example and Contract Testing Process (HTTP)",
+      "rationale": "The Pact JS consumer guide recommends exercising the real API client against the mock provider."
     },
     {
       "id": "http-problem-error",

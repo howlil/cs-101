@@ -15,10 +15,6 @@
       "url": "https://docs.pact.io/getting_started/verifying_pacts"
     },
     {
-      "title": "Pact — Writing Consumer Tests",
-      "url": "https://docs.pact.io/consumer"
-    },
-    {
       "title": "RFC 9457 — Problem Details for HTTP APIs",
       "url": "https://www.rfc-editor.org/rfc/rfc9457.html"
     },

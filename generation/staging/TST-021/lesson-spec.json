@@ -13,8 +13,7 @@
       "title": "Consumer contract authoring",
       "mechanism": "Pact V4 consumer mock captures the HTTP request and fields the client actually uses, then writes a Pact file.",
       "sourceUrls": [
-        "https://docs.pact.io/implementation_guides/javascript/docs/consumer",
-        "https://docs.pact.io/consumer"
+        "https://docs.pact.io/implementation_guides/javascript/docs/consumer"
       ]
     },
     {
