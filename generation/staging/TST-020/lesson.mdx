@@ -1,0 +1,140 @@
+---
+taskId: "TST-020"
+title: "Contract Drift — Breaking and Additive API Changes"
+description: "Detect required field removal and response type drift, and verify optional field evolution against tolerant and strict consumers."
+demo: false
+curriculumFingerprint: "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-020.json';
+import questionBank from '../../../review-banks/TST-020.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** API transfer masih mengembalikan 201, tetapi refactor mengubah field JSON dan mematahkan consumer yang bergantung pada kontrak lama.
+
+**Mulai:** baca delapan field wajib di schema Transfer dari kontrak SYS-008.
+
+<MentalModel title="Contract drift = rusaknya jaminan provider">
+
+- **Schema drift:** field yang dulu wajib menjadi opsional, atau amount berubah tipe dari string menjadi number.
+- **Payload drift:** respons yang dikirim tidak memenuhi schema, walaupun spesifikasinya belum berubah.
+- **Additive:** field memo opsional dapat diterima consumer toleran jika additionalProperties true.
+- **Batas:** consumer strict masih dapat menolak field baru; test schema tidak membuktikan kompatibilitas semua client.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+SYS-008 OpenAPI
+    |
+Transfer baseline
+    |
+    +-- Schema diff: required / type change --> fail
+    |
+    +-- Payload diff: missing / number / enum --> fail
+    |
+    +-- Optional memo
+           |               |
+       tolerant          strict legacy
+       accepts           rejects
+~~~
+
+</ConceptGraph>
+
+## Matrix perubahan kontrak
+
+| Perubahan | Hasil yang diharapkan |
+| --- | --- |
+| Hapus currency dari required | Breaking guarantee |
+| Ubah amount dari string menjadi number | Breaking type |
+| Jadikan memo baru required | Breaking untuk respons lama |
+| Tambah memo opsional | Kandidat kompatibel untuk consumer toleran |
+| Hilangkan currency dalam body atau kirim EUR | Invalid terhadap baseline |
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber primer
+
+<SourceList sources={[
+ {title:'OpenAPI Specification 3.1.1',url:'https://spec.openapis.org/oas/v3.1.1.html'},
+ {title:'JSON Schema Validation 2020-12',url:'https://json-schema.org/draft/2020-12/json-schema-validation'},
+ {title:'JSON Schema Core 2020-12',url:'https://json-schema.org/draft/2020-12/json-schema-core'},
+ {title:'JSON Schema Objects',url:'https://json-schema.org/understanding-json-schema/reference/object'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Jalankan drift checker
+
+Dari root repository dengan Node 24:
+
+~~~sh
+node generation/fixtures/TST-020/contract-drift.mjs
+~~~
+
+Output yang diharapkan:
+
+~~~text
+baseline-response=valid
+additive-optional=tolerant-accept
+required-removal=detected
+amount-type-change=detected
+new-required=detected
+payload-missing-and-type=detected
+payload-enum=detected
+strict-consumer=rejects-unknown
+runtime=static-fixture-only
+~~~
+
+Checker membaca sumber SYS-008 asli, lalu menjalankan perubahan pada salinan memori. Semua mutasi breaking wajib ditolak oleh assertion. Fixture ini bukan validator lengkap JSON Schema/OpenAPI, bukan Pact, dan bukan integration test Spring MVC.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal Contract Drift
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Project — Independent Contract Compatibility Gate
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Contract Drift — detect breaking response evolution"
+ brief="Pertahankan SYS-008 baseline lalu uji kandidat perubahan. Buktikan penghapusan required field dan type mutation membuat checker gagal; buktikan optional field baru hanya kompatibel untuk consumer yang mendukungnya."
+ acceptanceCriteria={[
+  'Gunakan Transfer response schema dari OpenAPI SYS-008 yang benar-benar ditrack.',
+  'Tolak penghapusan field wajib dan perubahan tipe amount string menjadi number.',
+  'Tolak actual response tanpa currency, invalid enum EUR, dan field baru yang menjadi required.',
+  'Tunjukkan optional memo diterima oleh tolerant consumer tetapi strict client dapat menolaknya.',
+  'Jalankan Node contract-drift checker, dengan semua intentional breaking mutations terdeteksi.',
+  'Uji satu kasus berbeda menggunakan Account atau optional displayTag, bukan mengulang worked example.',
+  'Bedakan static spec/instance fixture dari pemeriksaan consumer/provider production yang nyata.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Mampu membedakan schema drift dari actual payload drift.',
+ 'Memahami arah kompatibilitas respons dari provider ke consumer.',
+ 'Dapat membuktikan breaking response changes gagal pada fixture.',
+ 'Tidak mengklaim semua client kompatibel hanya karena optional field lolos schema check.'
+]} />
+
+</LessonStage>

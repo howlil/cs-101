@@ -1,0 +1,295 @@
+{
+  "itemId": "TST-020",
+  "curriculumFingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "payoff": "Detect breaking required-field and type drift while checking a conditional additive response evolution.",
+  "learningOutcomes": [
+    "ubah response field dari required menjadi absent atau type berbeda; contract suite harus mendeteksi break dan tetap menerima optional field baru yang backward-compatible."
+  ],
+  "mentalModel": "Baseline provider response -> compare schema guarantees -> validate candidate JSON -> test tolerant and strict consumers.",
+  "relationshipGraph": "SYS-008 Transfer -> required/type invariants -> drift mutation rejection -> optional memo -> tolerant accepts / strict rejects.",
+  "concepts": [
+    {
+      "id": "provider-guarantee",
+      "title": "Provider response guarantees",
+      "mechanism": "Required Transfer response fields form a promise to clients; removing one from required can break consumer assumptions.",
+      "sourceUrls": [
+        "https://spec.openapis.org/oas/v3.1.1.html",
+        "https://json-schema.org/draft/2020-12/json-schema-validation"
+      ]
+    },
+    {
+      "id": "schema-drift",
+      "title": "Schema drift versus payload drift",
+      "mechanism": "Changing amount type in the declared schema and sending a number while the old schema still requires a string are distinct regressions.",
+      "sourceUrls": [
+        "https://spec.openapis.org/oas/v3.1.1.html",
+        "https://json-schema.org/draft/2020-12/json-schema-validation"
+      ]
+    },
+    {
+      "id": "optional-evolution",
+      "title": "Additive fields and strict consumers",
+      "mechanism": "An optional memo works with the open Transfer schema; a strict client may independently reject unknown fields.",
+      "sourceUrls": [
+        "https://json-schema.org/draft/2020-12/json-schema-core",
+        "https://json-schema.org/understanding-json-schema/reference/object"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "Removing a provider response required flag can break older consumers.",
+    "A schema type change differs from a response instance type violation.",
+    "An optional field can break strict clients despite additionalProperties true.",
+    "This Node static fixture is not real HTTP, Spring MVC or production consumer verification."
+  ],
+  "practice": [
+    "Compare required Transfer response properties.",
+    "Mutate schema and JSON payload separately.",
+    "Test new optional memo against tolerant and strict consumers."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments about provider guarantees, type/instance drift and optional evolution",
+      "assessedAt": "Five questions and deterministic Node contract checker",
+      "evidenceExpected": "Required-field removal and changed amount type are rejected; optional memo accepted by tolerant consumer, with strict caveat."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent Account field and optional displayTag exercises",
+      "assessedAt": "Independent Project plus mutation proof",
+      "evidenceExpected": "A separate breaking mutation produces a failure and consumer-specific compatibility behavior is documented."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "required-provider-fields",
+        "objective": "Detect removed required response guarantees against an older provider contract.",
+        "whyItMatters": "An older client can rely on currency being present even when a new schema makes it optional.",
+        "mentalModel": "Response compatibility flows from provider guarantees toward existing clients.",
+        "explanation": "Removing currency from required weakens the old provider guarantee. A new response missing currency may fail an older consumer despite the new schema validating it.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A Transfer schema drops currency from its required list but leaves it in properties.",
+          "steps": [
+            {
+              "action": "Compare Transfer.required across the tracked baseline and a cloned candidate.",
+              "reason": "An older client can rely on currency being present even when a new schema makes it optional.",
+              "expectedResult": "A missing required guarantee is rejected."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Is removing a field from a provider response required array always backward-compatible?",
+          "hints": [
+            "Read the baseline required list first.",
+            "Consider whether an old client may access currency without null checks."
+          ],
+          "explanation": "Removing currency from required weakens the old provider guarantee. A new response missing currency may fail an older consumer despite the new schema validating it."
+        },
+        "independentChallenge": {
+          "prompt": "Repeat the test with createdAt removed from required instead of currency.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "A missing required guarantee is rejected."
+          ],
+          "variationFromExample": "Assess an audit timestamp rather than the currency demonstration."
+        },
+        "firstAction": "Compare Transfer.required across the tracked baseline and a cloned candidate.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming a changed provider response remains compatible because the HTTP status is unchanged.",
+          "whyItFails": "Clients deserialize required JSON keys and types, not only the status line.",
+          "correctiveAction": "Compare the baseline provider guarantee and exercise a deliberately breaking response mutation."
+        },
+        "selfCheck": {
+          "expectedObservation": "A missing required guarantee is rejected.",
+          "ifUnexpected": "Compare the tracked SYS-008 OpenAPI response and the mutated candidate without editing the baseline."
+        },
+        "continueFromHere": {
+          "nextAction": "Inspect the next candidate and run the bounded Node fixture.",
+          "resumeCue": "Return to the eight baseline Transfer required fields."
+        }
+      },
+      {
+        "id": "schema-and-instance-types",
+        "objective": "Detect breaking type changes and malformed response instances independently.",
+        "whyItMatters": "A numeric JSON amount can break existing clients expecting a decimal string.",
+        "mentalModel": "Schema diff catches changed promises while instance validation catches nonconforming emitted data.",
+        "explanation": "Transfer.amount is a string. Changing the declared type to number breaks the contract; sending a numeric value under the original schema violates it. Missing currency and invalid EUR must also fail.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The response sends numeric amount despite the unchanged string schema.",
+          "steps": [
+            {
+              "action": "Mutate a cloned schema amount.type and a separate cloned response amount value.",
+              "reason": "A numeric JSON amount can break existing clients expecting a decimal string.",
+              "expectedResult": "Both schema change and payload mutation are rejected."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why test both changed schemas and actual response bodies?",
+          "hints": [
+            "Check JSON string versus number.",
+            "Validate the response against the old schema, not the candidate."
+          ],
+          "explanation": "Transfer.amount is a string. Changing the declared type to number breaks the contract; sending a numeric value under the original schema violates it. Missing currency and invalid EUR must also fail."
+        },
+        "independentChallenge": {
+          "prompt": "Check that the GET Account response rejects a numeric currency field.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Both schema change and payload mutation are rejected."
+          ],
+          "variationFromExample": "Use a different DTO and field instead of the Transfer amount example."
+        },
+        "firstAction": "Mutate a cloned schema amount.type and a separate cloned response amount value.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming a changed provider response remains compatible because the HTTP status is unchanged.",
+          "whyItFails": "Clients deserialize required JSON keys and types, not only the status line.",
+          "correctiveAction": "Compare the baseline provider guarantee and exercise a deliberately breaking response mutation."
+        },
+        "selfCheck": {
+          "expectedObservation": "Both schema change and payload mutation are rejected.",
+          "ifUnexpected": "Compare the tracked SYS-008 OpenAPI response and the mutated candidate without editing the baseline."
+        },
+        "continueFromHere": {
+          "nextAction": "Inspect the next candidate and run the bounded Node fixture.",
+          "resumeCue": "Return to the eight baseline Transfer required fields."
+        }
+      },
+      {
+        "id": "optional-consumer-compatibility",
+        "objective": "Test optional field additions with both tolerant and strict legacy consumers.",
+        "whyItMatters": "A green schema diff is not a guarantee every deployed client accepts unknown properties.",
+        "mentalModel": "Optional additive evolution is conditional on the actual consumer's unknown-field handling.",
+        "explanation": "Transfer has additionalProperties true. Adding optional memo preserves the eight required fields and passes a tolerant old schema. A deliberately strict legacy consumer rejects memo, proving consumer review remains necessary.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A new optional memo field is added to an otherwise unchanged Transfer response.",
+          "steps": [
+            {
+              "action": "Add memo as a non-required property and validate it with tolerant and strict consumers.",
+              "reason": "A green schema diff is not a guarantee every deployed client accepts unknown properties.",
+              "expectedResult": "Tolerant response passes while strict consumer rejects unknown memo."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Does a new optional field guarantee that every consumer remains compatible?",
+          "hints": [
+            "Check additionalProperties true in the old schema.",
+            "A strict consumer may use its own reject-unknown policy."
+          ],
+          "explanation": "Transfer has additionalProperties true. Adding optional memo preserves the eight required fields and passes a tolerant old schema. A deliberately strict legacy consumer rejects memo, proving consumer review remains necessary."
+        },
+        "independentChallenge": {
+          "prompt": "Replace memo with an optional displayTag and validate the two consumer behaviors.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Tolerant response passes while strict consumer rejects unknown memo."
+          ],
+          "variationFromExample": "Try a different optional property on a new consumer fixture."
+        },
+        "firstAction": "Add memo as a non-required property and validate it with tolerant and strict consumers.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming a changed provider response remains compatible because the HTTP status is unchanged.",
+          "whyItFails": "Clients deserialize required JSON keys and types, not only the status line.",
+          "correctiveAction": "Compare the baseline provider guarantee and exercise a deliberately breaking response mutation."
+        },
+        "selfCheck": {
+          "expectedObservation": "Tolerant response passes while strict consumer rejects unknown memo.",
+          "ifUnexpected": "Compare the tracked SYS-008 OpenAPI response and the mutated candidate without editing the baseline."
+        },
+        "continueFromHere": {
+          "nextAction": "Inspect the next candidate and run the bounded Node fixture.",
+          "resumeCue": "Return to the eight baseline Transfer required fields."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Provider menghapus currency dari Transfer.required. Apa risikonya?",
+      "options": [
+        "Tidak berisiko karena schema lebih permisif",
+        "Consumer lama dapat menerima response tanpa currency dan gagal",
+        "Semua field required selalu opsional"
+      ],
+      "answer": 1,
+      "explanation": "Menghapus required melemahkan janji provider yang mungkin dipakai client lama.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Transfer.amount adalah string tetapi server mengirim number. Apa hasil tes?",
+      "options": [
+        "Fail: JSON type berubah",
+        "Pass selama HTTP 201",
+        "Pass karena nilainya tetap sama"
+      ],
+      "answer": 0,
+      "explanation": "Representasi JSON number berbeda dari decimal string pada kontrak.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Field memo baru opsional pada Transfer dengan additionalProperties true. Apa verdict?",
+      "options": [
+        "Pasti aman untuk semua consumer",
+        "Kandidat kompatibel untuk consumer toleran",
+        "Pasti breaking bagi semua client"
+      ],
+      "answer": 1,
+      "explanation": "Schema open menerima field tambahan, tetapi consumer strict masih harus diuji.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Mengapa schema diff dan payload assertion perlu terpisah?",
+      "options": [
+        "Schema saja membuktikan server aktual",
+        "Payload actual dapat salah meskipun schema tidak berubah",
+        "HTTP status menggantikan pengecekan type"
+      ],
+      "answer": 1,
+      "explanation": "Schema drift membandingkan janji dan instance check menilai respons terobservasi.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Legacy consumer memakai reject-unknown-property. Apa yang terjadi jika memo ditambahkan?",
+      "options": [
+        "Tidak mungkin gagal",
+        "Wajib mengubah 201 menjadi 200",
+        "Dapat gagal walaupun memo opsional dan schema mengizinkan"
+      ],
+      "answer": 2,
+      "explanation": "Kompatibilitas membutuhkan verifikasi consumer aktual, bukan hanya spec check.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

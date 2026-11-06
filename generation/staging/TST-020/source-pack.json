@@ -1,0 +1,96 @@
+{
+  "itemId": "TST-020",
+  "curriculumFingerprint": "sha256:3137d8186dc5bbaa9a2343050eca937e3683778a74656799f0d203b81a62fe2f",
+  "sources": [
+    {
+      "title": "OpenAPI Specification 3.1.1",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html",
+      "tier": 0,
+      "supports": [
+        "Response schema and content type",
+        "JSON Schema 2020-12 in OpenAPI 3.1"
+      ],
+      "notes": [
+        "Response and Schema Objects"
+      ]
+    },
+    {
+      "title": "JSON Schema Validation 2020-12",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "tier": 0,
+      "supports": [
+        "Required fields, primitive types, patterns and enum"
+      ],
+      "notes": [
+        "Sections 6.1, 6.3 and 6.5.3"
+      ]
+    },
+    {
+      "title": "JSON Schema Core 2020-12",
+      "url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "tier": 0,
+      "supports": [
+        "Properties and additionalProperties applicator"
+      ],
+      "notes": [
+        "Section 10.3.2.3"
+      ]
+    },
+    {
+      "title": "JSON Schema Understanding: Objects",
+      "url": "https://json-schema.org/understanding-json-schema/reference/object",
+      "tier": 1,
+      "supports": [
+        "Optional properties, required fields and strict extra-field policy"
+      ],
+      "notes": [
+        "Required Properties; Additional Properties"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "openapi-schema",
+      "statement": "OpenAPI 3.1 response descriptions can use JSON Schema to specify a provider response representation.",
+      "conceptIds": [
+        "provider-guarantee",
+        "schema-drift"
+      ],
+      "sourceUrl": "https://spec.openapis.org/oas/v3.1.1.html",
+      "locator": "Response Object and Schema Object",
+      "rationale": "The normative OAS document defines response schema descriptions."
+    },
+    {
+      "id": "required-guarantee",
+      "statement": "JSON Schema required lists describe which properties must appear in a valid object instance.",
+      "conceptIds": [
+        "provider-guarantee",
+        "schema-drift"
+      ],
+      "sourceUrl": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "locator": "Section 6.5.3 required",
+      "rationale": "The validation vocabulary describes property presence constraints."
+    },
+    {
+      "id": "extra-field-applicator",
+      "statement": "An additionalProperties schema applies to names not already matched by properties in the current schema.",
+      "conceptIds": [
+        "optional-evolution"
+      ],
+      "sourceUrl": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "locator": "Section 10.3.2.3 additionalProperties",
+      "rationale": "The core specification defines how extra property validation works."
+    },
+    {
+      "id": "optional-not-universal",
+      "statement": "An optional property is absent from required, while additionalProperties false rejects unknown properties in strict object validation.",
+      "conceptIds": [
+        "optional-evolution"
+      ],
+      "sourceUrl": "https://json-schema.org/understanding-json-schema/reference/object",
+      "locator": "Required Properties and Additional Properties",
+      "rationale": "The official tutorial illustrates open and closed object validation."
+    }
+  ]
+}
