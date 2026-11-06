@@ -11,12 +11,23 @@ trap cleanup EXIT
 docker run --detach --rm --network none --name "$NAME" \
   -e POSTGRES_HOST_AUTH_METHOD=trust postgres:16-alpine >/dev/null
 
+# The official image starts a temporary server during init, then stops it and
+# starts the final PostgreSQL server. pg_isready alone can race that restart.
 ready=0
 for _ in {1..90}; do
-  if docker exec "$NAME" pg_isready -q -U postgres >/dev/null 2>&1; then ready=1; break; fi
+  if docker logs "$NAME" 2>&1 | grep -F 'PostgreSQL init process complete; ready for start up.' >/dev/null; then
+    if docker exec "$NAME" psql -U postgres -d postgres -X -A -t -v ON_ERROR_STOP=1 -c 'SELECT 1' 2>/dev/null | grep -qx '1'; then
+      ready=1
+      break
+    fi
+  fi
   sleep 0.5
 done
-if [ "$ready" -ne 1 ]; then echo "PostgreSQL container never became ready" >&2; exit 1; fi
+if [ "$ready" -ne 1 ]; then
+  echo "Final PostgreSQL server never became query-ready" >&2
+  docker logs "$NAME" 2>&1 | tail -40 >&2
+  exit 1
+fi
 psql_file() {
   local db="$1" file="$2"
   docker exec -i "$NAME" psql -U postgres -d "$db" -X -q -A -t -v ON_ERROR_STOP=1 < "$file"
