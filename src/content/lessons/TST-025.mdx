@@ -1,0 +1,146 @@
+---
+taskId: "TST-025"
+title: "Journey Selection — Two High-Value E2E Flows"
+description: "Select two bank user journeys for E2E smoke, route technical regressions downward and distinguish smoke from acceptance."
+demo: false
+curriculumFingerprint: "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/TST-025.json';
+import questionBank from '../../../review-banks/TST-025.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** setiap validasi bank dimasukkan ke browser E2E. CI jadi mahal, rapuh, dan error yang seharusnya mudah dicari di API/SQL malah sulit didiagnosis.
+
+**Mulai:** pilih dua perjalanan pengguna yang menghasilkan nilai bisnis nyata dan bukti yang benar-benar terlihat.
+
+<MentalModel title="Two E2E journeys, technical regressions below">
+
+- **E2E smoke 1:** login → view balance; assert nilai saldo milik akun terautentikasi terlihat.
+- **E2E smoke 2:** login → transfer → receipt; assert reference transfer unik dan status PENDING terlihat. Receipt bukan bukti settlement.
+- **Unit:** rounding/fee calculations. **API:** invalid login, pagination dan malformed JSON.
+- **Contract:** provider/consumer amount type drift. **Integration:** idempotency replay dan timeout yang menyimpan UNKNOWN.
+- **Smoke** = dua alur penting; **regression** = proteksi luas di seluruh layer; **acceptance** = kriteria hasil yang bisa diamati, bukan sinonim browser.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+                    High-value user outcomes
+                            |
+                   2 E2E smoke journeys
+                  /                    \
+          Login -> Balance       Login -> Transfer -> Receipt
+                   \                      /
+                    visible business assertions
+                            |
+               technical failure cases below
+                 /       |        |       \
+               Unit     API    Contract  Integration
+             rounding  errors    drift    DB/timeout
+~~~
+
+</ConceptGraph>
+
+## Test stage decision matrix
+
+| Scenario | Best-fit test stage | Why |
+| --- | --- | --- |
+| Login → view balance | E2E smoke | Authenticated user navigation plus visible balance |
+| Login → transfer → receipt | E2E smoke | Visible confirmation after multi-step user workflow |
+| Fee rounding | Unit | Pure arithmetic with deterministic values |
+| Invalid login, negative pagination, malformed JSON | API | Request/response contracts and validation |
+| Amount schema drift | Contract | Consumer-provider compatibility |
+| Same-key payment conflict | Integration | Request replay and persisted state |
+| Bank timeout persists UNKNOWN | Integration | Real service, bank stub and PostgreSQL |
+
+**Batas yang disengaja:** CS-101 adalah pustaka materi tanpa login maupun aplikasi bank. Kedua perjalanan ini adalah **rencana pengujian untuk aplikasi bank hipotetis**, belum test browser yang dijalankan. Jangan menambahkan sistem bank atau akun ke CS-101 untuk memenuhi unit pemilihan strategi.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Sumber primer
+
+<SourceList sources={[
+ {title:'Martin Fowler — The Practical Test Pyramid',url:'https://martinfowler.com/articles/practical-test-pyramid.html'},
+ {title:'Playwright — Best Practices',url:'https://playwright.dev/docs/best-practices'},
+ {title:'Playwright — Authentication and test isolation',url:'https://playwright.dev/docs/auth'},
+ {title:'UK Home Office — Test Pyramid',url:'https://engineering.homeoffice.gov.uk/standards/test-pyramid/'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Executable test selection audit
+
+Jalankan fixture Node 24 dari root repository:
+
+~~~sh
+node generation/fixtures/TST-025/journey-selection.mjs
+~~~
+
+Expected stdout:
+
+~~~text
+e2e-selected=login-balance,login-transfer-receipt
+lower-layer-regressions=7
+lower-layers=api,contract,integration,unit
+smoke-journeys=2
+invalid-plans-rejected=4
+production-dependencies=0
+browser-execution=not-performed
+~~~
+
+Fixture ini memvalidasi pilihan test strategy secara deterministik: tepat dua E2E, tujuh kasus regression di layer lebih murah, isolasi akun/fixture dan larangan dependency produksi. Negative mutation guards menguji bahwa menambah E2E tidak perlu, menghilangkan receipt, atau menggunakan bank produksi akan ditolak.
+
+**Batas proof:** ini menguji **strategi pemilihan tes**, bukan autentikasi, transfer, browser, screenshot, API live ataupun penerimaan bank produksi. Browser smoke adalah unit lanjutan, TST-026.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal test pyramid
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent Project — Minimal E2E Plan
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Journey Selection — two critical E2E plans and lower-layer regression"
+ brief="Rancang rencana pengujian untuk aplikasi bank contoh: dua journey yang sungguh bernilai di browser, tujuh kasus kompleks di layer yang tepat, dan acceptance criteria yang dapat diobservasi."
+ acceptanceCriteria={[
+  'Pilih persis dua E2E smoke: login→lihat saldo dan login→transfer→receipt.',
+  'Untuk masing-masing alur, tentukan langkah pengguna, observed UI result, serta data setup dan cleanup yang terisolasi.',
+  'Receipt menampilkan transfer reference dan PENDING; jangan mengklaim settled bank transaction.',
+  'Tempatkan rounding di unit; login failure, pagination dan malformed body di API.',
+  'Tempatkan amount schema drift di contract, serta idempotency dan timeout di integration/DB.',
+  'Bedakan smoke release signal, regresi lapisan bawah, dan acceptance business outcome.',
+  'Buat variasi independen untuk ticketing: login→lihat tiket dan checkout→konfirmasi, tanpa menggandakan negative cases sebagai browser E2E.',
+  'Laporkan bahwa strategi telah diverifikasi, sedangkan browser belum dijalankan dan aplikasi bank belum diimplementasikan.'
+ ]}
+/>
+
+<ExitCriteria items={[
+ 'Mampu mempertahankan dua high-value E2E dengan user-visible assertions.',
+ 'Mampu memilih test layer yang paling murah namun dapat membuktikan invariant.',
+ 'Memahami smoke, regression dan acceptance sebagai tujuan yang berbeda.',
+ 'Tidak menyamakan static strategy audit dengan browser atau payment execution.'
+]} />
+
+</LessonStage>

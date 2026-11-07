@@ -24,6 +24,7 @@ B16: A learner navigates curated G1 cross-domain concept neighborhoods linking J
 B17: A learner opens NET-006 as a source-backed V3 TCP handshake/sequence/retransmission/close lesson, completes five questions and follows an independent packet capture challenge.
 B18: A learner opens SQL-001 as a complete source-backed V3 SQL Workbench, runs a repeatable init.sql on isolated PostgreSQL and compares six real database query results, with the evidence scope clearly marked.
 B19: A learner opens TST-007 as a complete V3 Money Unit Tests lesson with 20 runnable JUnit Jupiter cases for the explicitly educational FeeCalculator policy, then proves results via Maven without Spring context.
+B27: A learner opens TST-025 as a V3 journey-selection lesson with exactly two hypothetical E2E smoke plans, seven lower-layer regression cases, five questions and a reproducible strategy audit that refuses browser-proof claims.
 B26: A learner opens TST-024 with three V3 segments, five questions and a real service boundary lab proving PostgreSQL persisted accepted and timeout-unknown outcomes on a Docker internal network.
 B25: A learner opens TST-023 as a V3 adversarial-input lesson with five questions, 21 real HTTP negative requests, stable RFC 9457 errors and idempotency replay/conflict proof.
 B24: A learner opens TST-022 with three V3 objectives, five questions and 11 actual HTTP fault cases that preserve UNKNOWN after lost replies and never blindly retry a debit.
@@ -53,6 +54,7 @@ C13: New G1 cross-domain links and assessment rubrics remain proposed; outline u
 C14: NET-006 local Node fixture checks socket-level connect/EOF/refusal only; no fake packet capture, SYN/ACK flags, retransmission or timeout proof is allowed.
 C15: SQL-001 must not imply PostgreSQL proof from an empty executable plan; independent PostgreSQL 16 CI creates fresh and replayed sandbox data and checks actual query/constraint behavior, without a production DB binding.
 C16: TST-007 V3 generator cannot prove Maven/JUnit behavior via the single-file runner; its not-executable status is paired with a real Maven JUnit/Surefire gate verifying 20 tests with zero failures and no Spring context. Fee parameters are lab policy, not real financial tariffs.
+C24: TST-025 is a test-strategy selection unit only: the fixture validates two candidate user journeys and seven lower-layer allocations, without executing browser automation, real login, banking UI, payment processing or production dependencies; browser smoke implementation belongs to TST-026.
 C23: TST-024 uses a separate Node HTTP service, real PostgreSQL 16 and an internal-only fake bank. The V3 generator is explicitly non-executable, with actual Docker proof in CI; no bank settlement, Spring runtime or concurrent idempotency claim.
 C22: TST-023's local Node fixture demonstrates sequential in-memory validation and key replay only, not atomic concurrent persistence, authorization or bank settlement; its page and body limits are lab-specific.
 C21: TST-022 uses an ephemeral Node HTTP stub modeling WireMock fault types, not WireMock itself or a bank provider. A RETRYABLE condition is not permission to replay a debit; SUCCESS means accepted by stub, not settlement.
@@ -62,7 +64,7 @@ C18: TST-019's Node network fixture tests only an educational in-memory server, 
 C17: SYS-008's Node fixture validates a selected OpenAPI design subset only; it never claims live HTTP, Spring MVC, authentication, idempotent transfer, settlement or universal consumer compatibility.
 
 ## Scope
-In: HTTP pilot, depth-specific paths/rubrics, and fifteen authored V3 units (NET-001, NET-006, SPR-006, OSX-029, PRD-002, JAV-001, SQL-001, TST-007, SYS-008, TST-019, TST-020, TST-021, TST-022, TST-023, TST-024); SQL-001 and TST-007 use separate PostgreSQL/Maven integration proof.
+In: HTTP pilot, depth-specific paths/rubrics, and sixteen authored V3 units (NET-001, NET-006, SPR-006, OSX-029, PRD-002, JAV-001, SQL-001, TST-007, SYS-008, TST-019, TST-020, TST-021, TST-022, TST-023, TST-024, TST-025); SQL-001 and TST-007 use separate PostgreSQL/Maven integration proof.
 Out: learner tracking, adaptive mastery, inferred graph edges, bulk lesson generation.
 
 ## Proof
@@ -88,6 +90,7 @@ P19 (B16,C13): Four G1 cross-domain concepts add only explicit source-mapped can
 P20 (B17,C14): NET-006 V3 bundle promotes byte-identically with a real Node 24 stream fixture, five questions and separate Materi/Soal/Project URL smoke; packet capture remains manual.
 P21 (B18,C15): SQL-001 publishes repeatable V3 artifacts and three views; Docker-isolated PostgreSQL 16 executes init.sql, six SELECT queries, replay, fresh second DB and FK negative case in merge CI.
 P22 (B19,C16): TST-007 V3 authoring reproduces byte-identically; JDK 21 Maven Surefire discovers exactly 20 Jupiter tests with zero errors/failures/skips; Materi/Soal/Project smoke is green without Spring context.
+P30 (B27,C24): TST-025 V3 content reproduces byte-identically with a 2-journey/7-lower-layer selection fixture that rejects four faulty plans, verifies no production dependencies, and renders Materi/Soal/Project; no browser execution claimed.
 P29 (B26,C23): TST-024 V3 content reproduces byte-identically and isolated Node service/real PostgreSQL/fake bank integration confirms accepted and timeout UNKNOWN outcomes via GET and direct SQL, no published port/production request and full teardown.
 P28 (B25,C22): TST-023 reproducible V3 receipt, 21 negative HTTP cases, stable problems, no invalid mutations, 201 replay/409 conflict, and three-route smoke.
 P27 (B24,C21): TST-022 V3 receipt and 11 actual HTTP fault interactions prove explicit outcomes, remote-applied timeout/reset remain UNKNOWN, and zero automatic debit retry; Materi/Soal/Project smoke passes.

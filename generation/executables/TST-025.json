@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "itemId": "TST-025",
+  "curriculumFingerprint": "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "examples": [
+    {
+      "id": "journey-selection-audit",
+      "runtime": "node",
+      "file": "journey-selection.mjs",
+      "expectedStdout": "e2e-selected=login-balance,login-transfer-receipt\nlower-layer-regressions=7\nlower-layers=api,contract,integration,unit\nsmoke-journeys=2\ninvalid-plans-rejected=4\nproduction-dependencies=0\nbrowser-execution=not-performed\n"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "itemId": "TST-025",
+  "fingerprint": "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "sources": [
+    {
+      "title": "Martin Fowler — The Practical Test Pyramid",
+      "url": "https://martinfowler.com/articles/practical-test-pyramid.html"
+    },
+    {
+      "title": "Playwright — Best Practices",
+      "url": "https://playwright.dev/docs/best-practices"
+    },
+    {
+      "title": "Playwright — Authentication",
+      "url": "https://playwright.dev/docs/auth"
+    },
+    {
+      "title": "UK Home Office — Test Pyramid",
+      "url": "https://engineering.homeoffice.gov.uk/standards/test-pyramid/"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments teach critical journey selection, lower-layer boundary allocation and smoke/regression/acceptance",
+      "assessedAt": "Five questions and standalone deterministic Node selection audit with negative mutation guards",
+      "evidenceExpected": "Exactly two proposed E2E workflows with observable results; seven lower-layer test scenarios placed in unit, API, contract or integration; no browser execution claim."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent ticketing/checkout selection plus scenario boundary and isolation exercise",
+      "assessedAt": "Project exercise plus Node test matrix assertions for selected E2E, fake dependencies and rejected invalid plan variants",
+      "evidenceExpected": "A small test strategy with two high-value journeys, lower-layer negative coverage and explicit data isolation without external production requests."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

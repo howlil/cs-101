@@ -1,0 +1,95 @@
+{
+  "itemId": "TST-025",
+  "curriculumFingerprint": "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "sources": [
+    {
+      "title": "Martin Fowler — The Practical Test Pyramid",
+      "url": "https://martinfowler.com/articles/practical-test-pyramid.html",
+      "tier": 0,
+      "supports": [
+        "Minimal E2E high-value journeys and lower-level integration coverage"
+      ],
+      "notes": [
+        "End-to-End Tests; Integration Tests"
+      ]
+    },
+    {
+      "title": "Playwright — Best Practices",
+      "url": "https://playwright.dev/docs/best-practices",
+      "tier": 0,
+      "supports": [
+        "User-visible assertions and isolated E2E testing, avoiding implementation details"
+      ],
+      "notes": [
+        "Test user-visible behavior; Make tests as isolated as possible; Use locators"
+      ]
+    },
+    {
+      "title": "Playwright — Authentication",
+      "url": "https://playwright.dev/docs/auth",
+      "tier": 0,
+      "supports": [
+        "Isolated browser state and separate test users for mutating flows"
+      ],
+      "notes": [
+        "Introduction; Moderate: one account per parallel worker"
+      ]
+    },
+    {
+      "title": "UK Home Office — Test Pyramid",
+      "url": "https://engineering.homeoffice.gov.uk/standards/test-pyramid/",
+      "tier": 0,
+      "supports": [
+        "Limit E2E to critical journeys while automating more unit and integration tests"
+      ],
+      "notes": [
+        "Must avoid large numbers of end-to-end tests"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "minimal-high-value",
+      "statement": "E2E suites should concentrate on a very small number of the application's most valuable complete user journeys, leaving edge cases to lower layers.",
+      "conceptIds": [
+        "journey-prioritization",
+        "layer-selection"
+      ],
+      "sourceUrl": "https://martinfowler.com/articles/practical-test-pyramid.html",
+      "locator": "End-to-End Tests",
+      "rationale": "Fowler recommends keeping E2E sparse, and proving boundary conditions at lower levels."
+    },
+    {
+      "id": "user-visible",
+      "statement": "Browser tests should assert user-visible outcomes and avoid private implementation details.",
+      "conceptIds": [
+        "journey-prioritization"
+      ],
+      "sourceUrl": "https://playwright.dev/docs/best-practices",
+      "locator": "Testing philosophy — Test user-visible behavior",
+      "rationale": "Official Playwright guide defines robust user-facing assertions."
+    },
+    {
+      "id": "isolated-data",
+      "statement": "Browser state should be isolated between tests; tests that mutate shared server state may need separate test accounts.",
+      "conceptIds": [
+        "smoke-regression-acceptance"
+      ],
+      "sourceUrl": "https://playwright.dev/docs/auth",
+      "locator": "Introduction; Moderate: one account per parallel worker",
+      "rationale": "Playwright authentication documentation details isolation and per-worker accounts."
+    },
+    {
+      "id": "pyramid-efficiency",
+      "statement": "A test pyramid favors many cheap unit tests, fewer integration tests and a limited set of E2E scenarios for critical flows.",
+      "conceptIds": [
+        "layer-selection",
+        "smoke-regression-acceptance"
+      ],
+      "sourceUrl": "https://engineering.homeoffice.gov.uk/standards/test-pyramid/",
+      "locator": "Requirements; You MUST avoid large numbers of end-to-end tests",
+      "rationale": "Government engineering guidance describes stage selection based on risk and maintenance cost."
+    }
+  ]
+}

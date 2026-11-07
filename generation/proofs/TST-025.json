@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "itemId": "TST-025",
+  "curriculumFingerprint": "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "status": "verified",
+  "examples": [
+    {
+      "id": "journey-selection-audit",
+      "runtime": "node",
+      "file": "journey-selection.mjs",
+      "fixtureSha256": "98ab4fa015723cac968541365b2413f80d220acd063bb63f9d993e4a40513c13",
+      "stdoutSha256": "073bd82783e4be7375babc490c1eeec15cdfe2d420633c6774d94b6f73e98cc5",
+      "verified": true
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+{
+  "itemId": "TST-025",
+  "curriculumFingerprint": "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "payoff": "Select exactly two high-value hypothetical banking E2E journeys, route seven technical regression cases downward and distinguish smoke, regression and acceptance without installing a browser.",
+  "learningOutcomes": [
+    "pilih 2 high-value E2E flows (login→view balance, login→transfer→receipt); jelaskan kasus kompleks yang sebaiknya tetap di API/integration tests."
+  ],
+  "mentalModel": "User-value cross-system workflows -> two E2E smoke; technical edge cases -> unit/API/contract/service integration; acceptance = observable outcomes across layers.",
+  "relationshipGraph": "TST-019 contract -> TST-021 Pact -> TST-022 provider fault -> TST-023 adversarial inputs -> TST-024 DB integration -> TST-025 E2E selection -> TST-026 browser smoke implementation.",
+  "concepts": [
+    {
+      "id": "journey-prioritization",
+      "title": "High-value user journey selection",
+      "mechanism": "Retain end-to-end checks for login to balance and login to transfer to receipt because they cross authentication, navigation and user-visible business output.",
+      "sourceUrls": [
+        "https://martinfowler.com/articles/practical-test-pyramid.html",
+        "https://playwright.dev/docs/best-practices"
+      ]
+    },
+    {
+      "id": "layer-selection",
+      "title": "Cheapest faithful test boundary",
+      "mechanism": "Place fee rounding in unit, malformed status and pagination in API, contract drift in contract, and timeout/persisted UNKNOWN in service integration.",
+      "sourceUrls": [
+        "https://martinfowler.com/articles/practical-test-pyramid.html",
+        "https://engineering.homeoffice.gov.uk/standards/test-pyramid/"
+      ]
+    },
+    {
+      "id": "smoke-regression-acceptance",
+      "title": "Smoke vs regression vs acceptance",
+      "mechanism": "Smoke is a narrow high-value release signal; regression includes broader lower-layer cases; acceptance states observable business outcomes, not a synonym for browser automation.",
+      "sourceUrls": [
+        "https://engineering.homeoffice.gov.uk/standards/test-pyramid/",
+        "https://playwright.dev/docs/best-practices",
+        "https://playwright.dev/docs/auth"
+      ]
+    }
+  ],
+  "misconceptions": [
+    "More E2E browser edge cases do not automatically improve confidence or signal quality.",
+    "A transfer receipt marked PENDING does not prove financial settlement.",
+    "Provider timeout and idempotency need real HTTP/database integration checks, not extra browser tests.",
+    "Smoke, regression and business acceptance are different test purposes, not synonyms.",
+    "The Node selection fixture does not execute Playwright, bank UI, login or actual user journeys."
+  ],
+  "practice": [
+    "Define login→balance and login→transfer→receipt with observable end conditions and isolated fixtures.",
+    "Map fee rounding, invalid login, pagination, malformed payload, idempotency replay, API drift and provider timeout to cheaper faithful test stages.",
+    "Review smoke/regression/acceptance distinctions and reject accidental new E2E cases or production dependencies using the Node fixture."
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "Three V3 segments teach critical journey selection, lower-layer boundary allocation and smoke/regression/acceptance",
+      "assessedAt": "Five questions and standalone deterministic Node selection audit with negative mutation guards",
+      "evidenceExpected": "Exactly two proposed E2E workflows with observable results; seven lower-layer test scenarios placed in unit, API, contract or integration; no browser execution claim."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent ticketing/checkout selection plus scenario boundary and isolation exercise",
+      "assessedAt": "Project exercise plus Node test matrix assertions for selected E2E, fake dependencies and rejected invalid plan variants",
+      "evidenceExpected": "A small test strategy with two high-value journeys, lower-layer negative coverage and explicit data isolation without external production requests."
+    }
+  ],
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "select-two-critical-journeys",
+        "objective": "Select exactly two valuable end-to-end user journeys with observable outcomes and no unnecessary test duplication.",
+        "whyItMatters": "UI E2E tests are expensive and fragile; excessive coverage obscures the critical release signal.",
+        "mentalModel": "Select a user-visible cross-system outcome, not one browser test per validation branch.",
+        "explanation": "For a hypothetical bank application, journey one is login → view balance and journey two is login → transfer → receipt. Both cross authentication and navigation to a business outcome visible to a user. The receipt shows a created/PENDING transfer reference, not completed bank settlement. This selection is a design exercise: CS-101 itself is a read-only educational library, with no login or banking UI. The executable fixture checks this proposed selection; it does not launch a browser.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "An engineer proposes a browser E2E for every pagination and currency validation error.",
+          "steps": [
+            {
+              "action": "List two highest-value full user tasks: balance access and transfer receipt.",
+              "reason": "These combine important behavior that a single API assertion cannot prove from the user's perspective.",
+              "expectedResult": "Two distinct, end-user-observable journeys."
+            },
+            {
+              "action": "Write visible end conditions for each one.",
+              "reason": "An E2E smoke must prove the user reached the intended outcome.",
+              "expectedResult": "Balance amount visible; receipt reference and PENDING status visible."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Which is a stronger E2E selection: checking limit=-1 in ten browsers, or login→transfer→receipt once?",
+          "hints": [
+            "Choose a complete user value path.",
+            "Negative query bounds are testable without a browser."
+          ],
+          "explanation": "Retain login→transfer→receipt as the critical E2E; test invalid limits in API tests."
+        },
+        "independentChallenge": {
+          "prompt": "Choose two minimal journeys for a ticketing service: login→see ticket and login→buy ticket→confirmation; state a distinct observable result for each.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Exactly two user-value journeys, each with a visible final assertion and no redundant validation branches."
+          ],
+          "variationFromExample": "Ticketing purchase rather than banking transfer."
+        },
+        "firstAction": "Write the balance journey in three steps.",
+        "misconceptionRepair": {
+          "likelyMistake": "Counting dozens of browser edge cases as automatically stronger reliability.",
+          "whyItFails": "It creates fragile duplication while missing a concise business-value signal.",
+          "correctiveAction": "Reserve E2E for critical cross-system user paths; prove edge cases at lower boundaries."
+        },
+        "selfCheck": {
+          "expectedObservation": "Two E2E candidates remain: login→balance and login→transfer→receipt.",
+          "ifUnexpected": "Check whether each candidate includes both authentication and a user-visible business result."
+        },
+        "continueFromHere": {
+          "nextAction": "Route lower-value validation and failure cases to lower test layers.",
+          "resumeCue": "Start from the two real user goals, not framework test types."
+        }
+      },
+      {
+        "id": "route-edge-cases-downward",
+        "objective": "Classify complex validation and failure cases into unit, API, contract or service-integration tests rather than E2E.",
+        "whyItMatters": "A lower-level test often reproduces a failure more reliably, with faster diagnostics and isolated dependencies.",
+        "mentalModel": "Place the assertion at the cheapest real boundary that can observe the failure.",
+        "explanation": "Decimal rounding belongs to unit tests. Unsupported pagination and invalid amounts belong to API tests. OpenAPI field-type drift belongs to contract testing. Idempotency key replay and provider timeout/UNKNOWN persistence belong to real service and database integration tests. These choices build on TST-019 through TST-024 and should not be duplicated as browser E2E matrix rows. API/integration tests remain necessary alongside two browser journeys.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "The provider times out after receiving a debit; QA suggests 15 browser cases to inspect UNKNOWN outcomes.",
+          "steps": [
+            {
+              "action": "Identify whether browser navigation is essential to observe the failure.",
+              "reason": "Provider timeout and persisted state are primarily service-boundary contracts.",
+              "expectedResult": "The failure can be proven through HTTP requests, stub call counts and SQL rows."
+            },
+            {
+              "action": "Assign the provider timeout case to service integration, and field-type drift to contract tests.",
+              "reason": "Keep E2E tests narrowly focused on visible user journey outcomes.",
+              "expectedResult": "All technical edge cases have an owner below E2E."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Where should a same-key/different-amount HTTP 409 with one DB record be verified?",
+          "hints": [
+            "This requires request replay and persisted state.",
+            "A browser cannot make the SQL invariants clearer than the service test."
+          ],
+          "explanation": "At API/service integration, with the stable 409 response and a direct state assertion."
+        },
+        "independentChallenge": {
+          "prompt": "Route a duplicate ticket checkout, 503 ticket provider timeout, and tax rounding to the cheapest faithful test boundaries.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A rationale-based mapping with duplicate checkout in integration, timeout in integration, and rounding in unit."
+          ],
+          "variationFromExample": "Ticketing provider instead of bank provider."
+        },
+        "firstAction": "Pick one failure case and name the layer that can verify its invariant.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming browser E2E is required because the failure has business impact.",
+          "whyItFails": "Business risk matters, but the test boundary should match where the invariant is observable.",
+          "correctiveAction": "Retain one E2E happy path and move boundary-specific failure branches into focused tests."
+        },
+        "selfCheck": {
+          "expectedObservation": "No negative pagination, malformed JSON, idempotency conflict, contract drift or timeout case is classified as a new E2E.",
+          "ifUnexpected": "Ask whether a user-visible navigation step is essential to reproduce each assertion."
+        },
+        "continueFromHere": {
+          "nextAction": "Define what smoke, regression and acceptance each mean in a release.",
+          "resumeCue": "Resume with the cheapest faithful test boundary rule."
+        }
+      },
+      {
+        "id": "define-smoke-and-acceptance",
+        "objective": "Distinguish a two-journey smoke gate from the broad regression suite and from business acceptance criteria.",
+        "whyItMatters": "If all tests are called E2E or acceptance, a team cannot keep CI fast or interpret failures.",
+        "mentalModel": "Smoke = critical narrow release signal; regression = broader change protection; acceptance = observable business criteria across layers.",
+        "explanation": "The two chosen journeys are proposed browser smoke cases for a future bank UI. Their acceptance conditions are 'balance visible for an authenticated account' and 'receipt reference/status visible after transfer'. Regression cases include unit/API/contract/integration tests for rounding, auth, invalid amount, pagination, idempotency, drift and timeout persistence. For the bank mutation journey, seed a unique test account and fake external provider; avoid production credentials and shared mutable accounts. Browser automation and any real bank UI are intentionally deferred to TST-026 and later.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A smoke suite fails because the transfer test reuses an account changed by the previous test.",
+          "steps": [
+            {
+              "action": "Use a dedicated seeded account per mutating scenario and isolate browser state.",
+              "reason": "Tests must not depend on execution order or prior balances.",
+              "expectedResult": "Two journeys can run independently."
+            },
+            {
+              "action": "Define release smoke separately from broad regression and acceptance statements.",
+              "reason": "Different evidence tiers answer different questions.",
+              "expectedResult": "Two proposed E2E smoke journeys, multiple lower-level regression checks, and two visible acceptance conditions."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Does passing two proposed E2E smoke flows prove every debit edge case is correct?",
+          "hints": [
+            "Smoke is a narrow high-value signal.",
+            "API, contract and database integration tests still own complex edge cases."
+          ],
+          "explanation": "No. Smoke is only a critical workflow check, not a substitute for regression or financial settlement evidence."
+        },
+        "independentChallenge": {
+          "prompt": "Plan seeded, isolated state for two checkout flows with one purchase receipt, and state what is excluded from browser smoke.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Independent account/fixture scope, observable receipt criteria and delegated API/integration negative tests."
+          ],
+          "variationFromExample": "Checkout and receipt with isolated inventory instead of bank account balance."
+        },
+        "firstAction": "Write the user-visible acceptance criterion for balance and receipt.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating two browser smoke passes as evidence of full production readiness or financial correctness.",
+          "whyItFails": "They do not cover provider edge cases, ledger settlement or concurrency guarantees.",
+          "correctiveAction": "Keep separate regression/integration coverage and explicitly state the smoke evidence limit."
+        },
+        "selfCheck": {
+          "expectedObservation": "Exactly two proposed E2E smoke cases, lower-layer regression coverage and independent test-data plans.",
+          "ifUnexpected": "Inspect each test's data ownership and whether it claims business effects beyond visible UI."
+        },
+        "continueFromHere": {
+          "nextAction": "Implement a browser smoke only when a real local banking UI exists and the next curriculum unit requires it.",
+          "resumeCue": "Remember smoke, regression and acceptance answer different questions."
+        }
+      }
+    ]
+  },
+  "reviewQuestions": [
+    {
+      "id": "q1",
+      "prompt": "Dua user journey E2E bernilai tinggi untuk aplikasi bank contoh adalah?",
+      "options": [
+        "Login→saldo dan login→transfer→receipt",
+        "10 variasi page=-1 dengan browser",
+        "Semua kombinasi format amount melalui UI"
+      ],
+      "answer": 0,
+      "explanation": "Kedua alur melintasi autentikasi dan navigasi menuju hasil yang terlihat pengguna.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Provider timeout dan hasil UNKNOWN yang tersimpan di PostgreSQL sebaiknya diuji pada layer?",
+      "options": [
+        "CSS snapshot E2E",
+        "Service integration dengan stub bank dan SQL",
+        "Hanya mock fungsi unit tanpa DB"
+      ],
+      "answer": 1,
+      "explanation": "Service integration mengamati boundary HTTP dan state persisted secara langsung.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Pemeriksaan decimal rounding fee transfer paling efisien pada?",
+      "options": [
+        "UI E2E setiap angka",
+        "Screenshot visual",
+        "Unit test dengan input/output deterministik"
+      ],
+      "answer": 2,
+      "explanation": "Aturan aritmetika tidak memerlukan browser atau external provider.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Perbedaan smoke test dan regression suite?",
+      "options": [
+        "Smoke memeriksa critical journey singkat; regression mencakup perubahan dan edge cases lebih luas",
+        "Smoke selalu memverifikasi produksi settlement",
+        "Regression hanya bisa dilakukan manual"
+      ],
+      "answer": 0,
+      "explanation": "Smoke memberi sinyal cepat untuk alur utama, regression menjaga banyak kontrak pada layer tepat.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa yang sebenarnya dibuktikan fixture TST-025?",
+      "options": [
+        "Dua browser E2E banking berhasil dijalankan",
+        "Rencana seleksi dan alokasi layer konsisten; browser belum dijalankan",
+        "Login bank produksi terverifikasi"
+      ],
+      "answer": 1,
+      "explanation": "Fixture Node memvalidasi test strategy secara deterministik, tidak menjalankan aplikasi bank atau browser.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "itemId": "TST-025",
+  "version": "lesson-spec-v1:sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "curriculumFingerprint": "sha256:908460334076a2b5dc34107458ebf3f5f696309072195878ac8d6bba00ca4d24",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Dua user journey E2E bernilai tinggi untuk aplikasi bank contoh adalah?",
+      "options": [
+        "Login→saldo dan login→transfer→receipt",
+        "10 variasi page=-1 dengan browser",
+        "Semua kombinasi format amount melalui UI"
+      ],
+      "answer": 0,
+      "explanation": "Kedua alur melintasi autentikasi dan navigasi menuju hasil yang terlihat pengguna.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Provider timeout dan hasil UNKNOWN yang tersimpan di PostgreSQL sebaiknya diuji pada layer?",
+      "options": [
+        "CSS snapshot E2E",
+        "Service integration dengan stub bank dan SQL",
+        "Hanya mock fungsi unit tanpa DB"
+      ],
+      "answer": 1,
+      "explanation": "Service integration mengamati boundary HTTP dan state persisted secara langsung.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Pemeriksaan decimal rounding fee transfer paling efisien pada?",
+      "options": [
+        "UI E2E setiap angka",
+        "Screenshot visual",
+        "Unit test dengan input/output deterministik"
+      ],
+      "answer": 2,
+      "explanation": "Aturan aritmetika tidak memerlukan browser atau external provider.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Perbedaan smoke test dan regression suite?",
+      "options": [
+        "Smoke memeriksa critical journey singkat; regression mencakup perubahan dan edge cases lebih luas",
+        "Smoke selalu memverifikasi produksi settlement",
+        "Regression hanya bisa dilakukan manual"
+      ],
+      "answer": 0,
+      "explanation": "Smoke memberi sinyal cepat untuk alur utama, regression menjaga banyak kontrak pada layer tepat.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa yang sebenarnya dibuktikan fixture TST-025?",
+      "options": [
+        "Dua browser E2E banking berhasil dijalankan",
+        "Rencana seleksi dan alokasi layer konsisten; browser belum dijalankan",
+        "Login bank produksi terverifikasi"
+      ],
+      "answer": 1,
+      "explanation": "Fixture Node memvalidasi test strategy secara deterministik, tidak menjalankan aplikasi bank atau browser.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    }
+  ]
+}
