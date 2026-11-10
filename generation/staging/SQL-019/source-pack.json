@@ -1,0 +1,133 @@
+{
+  "itemId": "SQL-019",
+  "curriculumFingerprint": "sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd",
+  "sources": [
+    {
+      "title": "PostgreSQL 16 — Explicit Locking",
+      "url": "https://www.postgresql.org/docs/16/explicit-locking.html",
+      "tier": 0,
+      "supports": [
+        "SELECT FOR UPDATE row locks",
+        "locking until transaction end",
+        "deadlock prevention through consistent order"
+      ],
+      "notes": [
+        "Section 13.3.2 Row-Level Locks; 13.3.4 Deadlocks"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — Transaction Isolation",
+      "url": "https://www.postgresql.org/docs/16/transaction-iso.html",
+      "tier": 0,
+      "supports": [
+        "READ COMMITTED writer semantics",
+        "waiting UPDATE reevaluates predicate against new row"
+      ],
+      "notes": [
+        "Section 13.2.1 Read Committed Isolation Level"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — UPDATE",
+      "url": "https://www.postgresql.org/docs/16/sql-update.html",
+      "tier": 0,
+      "supports": [
+        "conditional UPDATE WHERE predicate",
+        "UPDATE 0 not being a SQL error",
+        "RETURNING affected row"
+      ],
+      "notes": [
+        "UPDATE Description / Outputs"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — SELECT",
+      "url": "https://www.postgresql.org/docs/16/sql-select.html",
+      "tier": 0,
+      "supports": [
+        "SELECT FOR UPDATE locking clause",
+        "ordered rows with ORDER BY"
+      ],
+      "notes": [
+        "SELECT Locking Clause; ORDER BY"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — Monitoring Statistics",
+      "url": "https://www.postgresql.org/docs/16/monitoring-stats.html",
+      "tier": 0,
+      "supports": [
+        "pg_stat_activity wait_event_type Lock observation",
+        "separating actual wait from timing assumption"
+      ],
+      "notes": [
+        "28.2.3 pg_stat_activity / wait_event_type"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "row-locks",
+      "statement": "SELECT FOR UPDATE blocks another transaction from taking a conflicting row lock until the current transaction finishes.",
+      "conceptIds": [
+        "row-locking"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/explicit-locking.html",
+      "locator": "Section 13.3.2 Row-Level Locks",
+      "rationale": "The official row-locking reference describes lock conflicts and transaction lifetime."
+    },
+    {
+      "id": "read-committed",
+      "statement": "At READ COMMITTED a row-updating command can wait for a concurrent writer and reevaluate its WHERE clause on the newly updated version of the row.",
+      "conceptIds": [
+        "conditional-debit"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/transaction-iso.html",
+      "locator": "Section 13.2.1 Read Committed Isolation Level",
+      "rationale": "The isolation reference explicitly describes reevaluation of concurrent UPDATE conditions."
+    },
+    {
+      "id": "update-zero",
+      "statement": "PostgreSQL UPDATE may affect zero rows without producing an SQL error, so a wallet debit must inspect affected-row count before recording a withdrawal.",
+      "conceptIds": [
+        "conditional-debit"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/sql-update.html",
+      "locator": "UPDATE Outputs: UPDATE count and zero-row behavior",
+      "rationale": "The UPDATE command specification says UPDATE 0 is successful as a command."
+    },
+    {
+      "id": "lock-order",
+      "statement": "Locking shared database objects in a consistent order reduces deadlock risk when opposing transactions touch the same set of accounts.",
+      "conceptIds": [
+        "ordered-locking"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/explicit-locking.html",
+      "locator": "Section 13.3.4 Deadlocks",
+      "rationale": "The PostgreSQL documentation recommends consistent acquisition order."
+    },
+    {
+      "id": "select-order",
+      "statement": "SELECT supports an ORDER BY clause together with FOR UPDATE row locking, allowing an explicit account ID lock-order contract.",
+      "conceptIds": [
+        "ordered-locking"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/sql-select.html",
+      "locator": "SELECT Syntax / ORDER BY and FOR UPDATE",
+      "rationale": "The SELECT reference defines both clauses in a single SELECT query."
+    },
+    {
+      "id": "observed-wait",
+      "statement": "The pg_stat_activity view exposes wait_event_type so a test can assert a session actually waits on a Lock event.",
+      "conceptIds": [
+        "row-locking",
+        "conditional-debit",
+        "ordered-locking"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/monitoring-stats.html",
+      "locator": "28.2.3 pg_stat_activity: wait_event_type",
+      "rationale": "The statistics reference documents activity and wait event fields."
+    }
+  ]
+}
