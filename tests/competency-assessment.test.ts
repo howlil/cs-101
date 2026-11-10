@@ -22,7 +22,7 @@ test('all curated outcomes have nonempty proposed, source-mapped rubrics',()=>{
     assert.equal(new Set(outcome.assessment.criteria.map(c=>c.id)).size,outcome.assessment.criteria.length);
     assert.ok(outcome.assessment.criteria.every(c=>
       outcome.itemIds.includes(c.itemId) && !!c.check.trim() && !!c.passWhen.trim()
-      && ['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test'].includes(c.evidenceKind)));
+      && ['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test','http-test'].includes(c.evidenceKind)));
   }
 });
 

@@ -5,7 +5,7 @@ import type { CurriculumGraph } from './curriculum-v2/graph';
 export const LEARNING_LEVELS=['G0','G1','G2','G3','G4'] as const;
 export type LearningLevel=typeof LEARNING_LEVELS[number];
 const levelSchema=z.enum(LEARNING_LEVELS);
-const evidenceKindSchema=z.enum(['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test']);
+const evidenceKindSchema=z.enum(['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test','http-test']);
 export const EVIDENCE_KIND_LABELS:Record<z.infer<typeof evidenceKindSchema>,string>={
   'design-review':'Reasoned design review',
   'framework-test':'Framework integration test',
@@ -14,6 +14,7 @@ export const EVIDENCE_KIND_LABELS:Record<z.infer<typeof evidenceKindSchema>,stri
   'cluster-test':'Live dependency / Kubernetes test',
   'cli-build':'Reproducible Java / Maven CLI build',
   'database-test':'Live PostgreSQL integration test',
+  'http-test':'Real HTTP contract and fault test',
 };
 const criterionSchema=z.object({
   id:curriculumSlugSchema,itemId:itemIdSchema,evidenceKind:evidenceKindSchema,
