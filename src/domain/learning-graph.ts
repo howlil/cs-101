@@ -121,6 +121,32 @@ export function buildLearningGraph(input:unknown,curriculum:CurriculumGraph):Lea
     active.delete(id);seen.add(id);
   }
   for(const c of data.concepts)visit(c.id);
+  // Concept-level prerequisites apply at each depth. Independent DAG checks above
+  // are insufficient: a concept edge and a competency edge may form a mixed cycle.
+  const allParents=new Map<string,string[]>();
+  const addParent=(child:string,parent:string)=>{
+    allParents.set(child,[...(allParents.get(child)??[]),parent]);
+  };
+  for(const r of data.relations){
+    if(r.type==='requires'&&r.status==='reviewed'){
+      for(const level of LEARNING_LEVELS)
+        addParent(r.to+'/'+level,r.from+'/'+level);
+    }
+  }
+  for(const dependency of data.competencyDependencies){
+    if(dependency.status==='reviewed')
+      addParent(competencyKey(dependency.to),competencyKey(dependency.from));
+  }
+  const allSeen=new Set<string>(),allActive=new Set<string>();
+  const visitCombined=(key:string):void=>{
+    if(allActive.has(key))throw new Error('Mixed prerequisite cycle: '+key);
+    if(allSeen.has(key))return;
+    allActive.add(key);
+    for(const parent of allParents.get(key)??[])visitCombined(parent);
+    allActive.delete(key);
+    allSeen.add(key);
+  };
+  for(const key of allParents.keys())visitCombined(key);
   return {...data,conceptsById,curriculum};
 }
 export function getFocusedConcept(graph:LearningGraph,requested:string|null,requestedLevel:string|null=null):FocusedConcept{

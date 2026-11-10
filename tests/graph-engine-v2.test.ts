@@ -60,3 +60,23 @@ test('proposed dependencies are not gates even when structurally valid',()=>{
   const plan=planLearningGoal(modified,{conceptId:'api-contract-testing',level:'G1'},new Set());
   assert.deepEqual(plan.steps.map(s=>s.itemId),['SPR-011','TST-019','TST-020']);
 });
+
+test('combined concept and competency prerequisites reject a cycle at build time',()=>{
+  // Each dependency family is acyclic independently, but together they form:
+  // tcp-connection/G1 -> server-binding/G1 -> tcp-connection/G1.
+  const mixed={
+    ...overlay,
+    relations:[...overlay.relations,{
+      from:'tcp-connection',to:'server-binding',type:'requires',status:'reviewed',
+      rationale:'Reviewed isolated legacy dependency fixture'
+    }],
+    competencyDependencies:[...overlay.competencyDependencies,{
+      from:{conceptId:'server-binding',level:'G1'},
+      to:{conceptId:'tcp-connection',level:'G1'},
+      type:'requires',status:'reviewed',
+      rationale:'Reviewed isolated depth-specific fixture',
+      sourceItemIds:['OSX-029','NET-006']
+    }]
+  };
+  assert.throws(()=>buildLearningGraph(mixed,curriculum),/Mixed prerequisite cycle/);
+});
