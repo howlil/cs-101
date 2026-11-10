@@ -2,6 +2,10 @@ name: Deploy cs-101 to Cloudflare (manual)
 
 on:
   workflow_dispatch:
+  # Explicit opt-in only. Ordinary master pushes never deploy.
+  push:
+    branches:
+      - master
 
 permissions:
   contents: read
@@ -12,7 +16,11 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/master'
+    if: >-
+      github.ref == 'refs/heads/master' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'push' &&
+        contains(github.event.head_commit.message, '[deploy:cs-101]')))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -36,6 +44,8 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Verify source before production deployment
+        run: pnpm ci
       - run: pnpm run build:cloudflare
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v4
