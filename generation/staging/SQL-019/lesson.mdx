@@ -1,0 +1,148 @@
+---
+taskId: "SQL-019"
+title: "Last Balance Race — Concurrent Debit Safety"
+description: "Buktikan dua withdrawal serentak tidak overdraft memakai row lock, guarded UPDATE dan dua sesi PostgreSQL 16."
+demo: false
+curriculumFingerprint: "sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/SQL-019.json';
+import questionBank from '../../../review-banks/SQL-019.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** dua withdrawal (80.00 dan 70.00) berebut saldo 100.00. Dua transaksi terpisah bisa melihat saldo lama yang sama dan sama-sama mengira debit aman.
+
+**Mulai:** tulis hasil yang semestinya ketika 80.00 berhasil lebih dahulu: saldo tersisa 20.00, withdrawal 70.00 ditolak, hanya satu ledger record tersimpan.
+
+<MentalModel title="Saldo aman = row lock + write guard + verified persistence">
+
+- **SELECT FOR UPDATE:** mengunci row agar transaksi lain yang ingin menulis/mengunci row sama harus menunggu.
+- **READ COMMITTED:** setelah transaksi pertama commit, locking SELECT atau UPDATE yang menunggu dapat melihat versi row terbaru.
+- **Conditional UPDATE:** `UPDATE ... SET balance=balance-amount WHERE balance>=amount` menggabungkan validasi saldo dan perubahan row.
+- **UPDATE 0:** bukan SQL error; wajib cek `ROW_COUNT` atau `RETURNING`, lalu tolak withdrawal tanpa menulis ledger.
+- **Ordered locking:** transfer berlawanan arah mengunci seluruh account ID dalam urutan yang sama sebelum debit/kredit.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+             Wallet W-01 = 100.00
+               /               \
+     Session A: -80        Session B: -70
+        BEGIN                 BEGIN
+   lock/update W-01      tries same row
+        |                      |
+  row lock held         waits (Lock event)
+        |                      |
+     COMMIT                  resumes
+        |                      |
+   balance 20.00        WHERE >=70 false
+        |                      |
+  withdrawal W-FIRST     UPDATE 0 / abort
+               \              /
+          independent SELECT
+        balance=20.00 | rows=1
+
+  Multi-account: both sessions lock A-01 then A-02
+~~~ 
+
+</ConceptGraph>
+
+## Dua strategi PostgreSQL 16
+
+| Strategi | Kapan menunggu | Aturan penerimaan |
+| --- | --- | --- |
+| `SELECT ... FOR UPDATE` | Saat mengambil row lock sebelum membaca saldo | Baca saldo setelah lock, lalu jalankan debit terjaga |
+| `UPDATE ... WHERE balance>=amount` | Saat conditional write bertabrakan dengan penulis lain | Sukses hanya jika tepat satu row berubah |
+
+Keduanya diuji dengan **dua koneksi psql serentak**. CI mengamati `pg_stat_activity.wait_event_type='Lock'` dari sesi ketiga, bukan menganggap dua skrip yang berurutan sebagai pengujian race. Pada kasus multi-akun, kedua transaksi mengunci row dalam urutan `account_id` yang sama agar menghindari pola circular wait yang diuji.
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Referensi resmi PostgreSQL 16
+
+<SourceList sources={[
+ {title:'PostgreSQL 16 — Explicit Locking',url:'https://www.postgresql.org/docs/16/explicit-locking.html'},
+ {title:'PostgreSQL 16 — Transaction Isolation',url:'https://www.postgresql.org/docs/16/transaction-iso.html'},
+ {title:'PostgreSQL 16 — UPDATE',url:'https://www.postgresql.org/docs/16/sql-update.html'},
+ {title:'PostgreSQL 16 — SELECT',url:'https://www.postgresql.org/docs/16/sql-select.html'},
+ {title:'PostgreSQL 16 — Monitoring Statistics',url:'https://www.postgresql.org/docs/16/monitoring-stats.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Lab concurrency PostgreSQL 16
+
+Dari root repository, dengan Docker dan Python 3:
+
+~~~sh
+bash labs/SQL-019/verify-postgres.sh
+~~~
+
+Contoh hasil yang harus dibuktikan secara nyata:
+
+~~~text
+sql019-locking-overlap=observed
+sql019-locking-one-success=verified
+sql019-conditional-overlap=observed
+sql019-conditional-one-success=verified
+sql019-ordered-lock-overlap=observed
+sql019-opposing-transfers=no-deadlock
+sql019-postgres16=verified
+~~~
+
+Lab menggunakan `labs/SQL-019/init.sql` dan `verify-concurrency.py` sebagai pengatur dua backend psql yang hidup bersamaan. Saat session B menunggu, pemeriksa melihat Lock event sungguhan. Setelah session A commit, session B menolak debit yang sudah tidak memenuhi saldo. Sesi terpisah memeriksa saldo 20.00 dan satu withdrawal sebesar 80.00. Kasus transfer multi-akun memeriksa total 200.00 dan dua transfer tercatat.
+
+**Batas bukti:** generator V3 tidak menjalankan PostgreSQL sehingga fixture receipt bertanda `not-executable`; integrasi real PostgreSQL merupakan gate CI terpisah. Tidak ada payment provider, benchmark, retries otomatis atau database produksi.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal — Last Balance Race
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent challenge — Two-session overspend prevention
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Last Balance Race — no double withdrawal"
+ brief="Gunakan dua akun atau wallet baru; buat dua withdrawal overlap yang bersama-sama melebihi saldo. Tunjukkan satu transaksi ditolak dan tidak ada saldo atau ledger salah."
+ acceptanceCriteria={[
+  'Dua backend PostgreSQL 16 harus benar-benar hidup dan overlap, bukan dua eksekusi serial.',
+  'Amati Lock wait aktual dari pg_stat_activity pada session B sebelum session A commit.',
+  'Paling banyak satu withdrawal berhasil; cek jumlah row dan balance dari koneksi independen.',
+  'Saldo akhir tidak negatif, dan UPDATE 0 diperlakukan sebagai kegagalan bisnis.',
+  'Jika dua account disentuh, kunci keduanya dalam urutan ID yang konsisten.',
+  'Coba dataset berbeda: 110.00 dengan 95.00 dan 40.00; jelaskan expected final state.',
+  'Jangan mengklaim serializability, semua jadwal konkurensi, production payment atau settlement.'
+]}
+/>
+
+<ExitCriteria items={[
+ 'Mampu menjelaskan mengapa dua SELECT biasa rentan stale balance.',
+ 'Membedakan row lock eksplisit dan conditional write yang melakukan locking implisit.',
+ 'Bisa menunjukkan satu Lock wait dan satu kegagalan saldo dalam dua transaksi nyata.',
+ 'Menjelaskan mengapa urutan lock berbeda bisa membentuk deadlock.',
+ 'Memisahkan bukti concurrency lab dari klaim universal maupun settlement ke bank.'
+]}/>
+
+</LessonStage>

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "itemId": "SQL-019",
+  "curriculumFingerprint": "sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd",
+  "status": "not-executable",
+  "noExecutableReason": "The bounded V3 example runner supports only Node and Java single-file fixtures; SQL-019 requires real overlapping PostgreSQL 16 sessions. The dedicated CI step runs labs/SQL-019/verify-postgres.sh with a disposable Docker PostgreSQL database and live Python-coordinated psql backends, asserting pg_stat_activity Lock waits, safe withdrawals and ordered opposing transfers.",
+  "examples": []
+}

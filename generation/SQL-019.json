@@ -1,0 +1,44 @@
+{
+  "itemId": "SQL-019",
+  "fingerprint": "sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd",
+  "sources": [
+    {
+      "title": "PostgreSQL 16 — Explicit Locking",
+      "url": "https://www.postgresql.org/docs/16/explicit-locking.html"
+    },
+    {
+      "title": "PostgreSQL 16 — Transaction Isolation",
+      "url": "https://www.postgresql.org/docs/16/transaction-iso.html"
+    },
+    {
+      "title": "PostgreSQL 16 — UPDATE",
+      "url": "https://www.postgresql.org/docs/16/sql-update.html"
+    },
+    {
+      "title": "PostgreSQL 16 — SELECT",
+      "url": "https://www.postgresql.org/docs/16/sql-select.html"
+    },
+    {
+      "title": "PostgreSQL 16 — Monitoring Statistics",
+      "url": "https://www.postgresql.org/docs/16/monitoring-stats.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 segments for real row contention, READ COMMITTED conditional update and deterministic multirow lock order",
+      "assessedAt": "Five reasoning questions plus independent PostgreSQL 16 live two-session lock-wait and persisted state integration",
+      "evidenceExpected": "Two overlapping psql sessions, third-session observed Lock wait, one withdrawal row for the initial 100.00 wallet and final balance 20.00; the competing withdrawal rejected."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent changed-wallet amounts and reverse-direction transfer exercises",
+      "assessedAt": "Scenario-specific PostgreSQL proofs and independent alternate-case challenge",
+      "evidenceExpected": "New data with concurrent competing requests, an actual blocked PostgreSQL backend, no overdraft, correctly rejected second request and ledger state consistent with one success."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

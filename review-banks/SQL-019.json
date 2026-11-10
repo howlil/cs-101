@@ -1,0 +1,78 @@
+{
+  "itemId": "SQL-019",
+  "version": "lesson-spec-v1:sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd",
+  "curriculumFingerprint": "sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Wallet 100.00 menerima dua withdrawal concurrent 80.00 dan 70.00. A memegang FOR UPDATE lalu commit 80.00. Apa yang harus dilihat B di READ COMMITTED setelah lock dilepas?",
+      "options": [
+        "100.00 karena SELECT B sudah dimulai",
+        "20.00; withdrawal 70.00 harus ditolak",
+        "-50.00 karena kedua withdrawal otomatis berhasil"
+      ],
+      "answer": 1,
+      "explanation": "Locking SELECT B menunggu transaksi A selesai dan membaca row yang sudah berubah; 20.00 tidak cukup untuk debit 70.00.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Apa arti UPDATE 0 dari UPDATE accounts SET balance=balance-70 WHERE balance>=70?",
+      "options": [
+        "SQL error otomatis dan transaksi pasti rollback",
+        "Tidak ada row diperbarui, meskipun perintah berhasil; jangan insert withdrawal",
+        "Bukti transfer 70 sudah tersimpan"
+      ],
+      "answer": 1,
+      "explanation": "PostgreSQL UPDATE 0 bukan error; perlu cek ROW_COUNT atau RETURNING agar ledger hanya ditulis jika debit berhasil.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Dua psql command dijalankan bergantian tanpa overlap tetapi hasil saldo aman. Klaim bukti concurrency yang tepat?",
+      "options": [
+        "Sudah membuktikan lock contention",
+        "Belum; perlu dua session overlap dan observasi Lock wait aktual",
+        "Pasti serializable meskipun default READ COMMITTED"
+      ],
+      "answer": 1,
+      "explanation": "Pengujian concurrency harus membuktikan ada kontensi aktual, misalnya pg_stat_activity.wait_event_type='Lock'.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Transaksi A→B mengunci A kemudian B; B→A mengunci B kemudian A. Risiko utamanya?",
+      "options": [
+        "Dapat terjadi deadlock karena circular wait",
+        "Kedua transaksi selalu fail karena FOREIGN KEY",
+        "Tidak ada risiko karena masing-masing mengunci sumber sendiri"
+      ],
+      "answer": 0,
+      "explanation": "Berbeda arah kunci membentuk siklus tunggu. Kunci kedua row dalam urutan ID yang sama untuk kedua transfer.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Manakah yang benar-benar dibuktikan lab SQL-019 ketika kedua withdrawal total 150 dari saldo 100?",
+      "options": [
+        "Kinerja throughput ribuan request dan semua level isolasi",
+        "Satu interleaving PG16 aktual: kedua sesi bertabrakan di lock, hanya satu withdrawal tersimpan, saldo tidak negatif",
+        "Jaminan settlement bank lintas layanan"
+      ],
+      "answer": 1,
+      "explanation": "Lab membuktikan penolakan overspend dan lock wait untuk interleaving dan setting yang diuji; bukan stress, bank atau distributed transaction.",
+      "criterionIds": [
+        "challenge"
+      ]
+    }
+  ]
+}
