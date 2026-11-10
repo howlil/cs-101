@@ -1,0 +1,190 @@
+{
+  "unitId": "SQL-017",
+  "curriculumFingerprint": "sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "commit-debit-credit-ledger",
+        "objective": "Wrap debit, credit and ledger insert in one PostgreSQL BEGIN/COMMIT transaction.",
+        "whyItMatters": "A transfer cannot count as successful if the sender loses money without the recipient and ledger reflecting the same operation.",
+        "mentalModel": "BEGIN establishes one unit of work; COMMIT publishes the complete set of three writes, not a series of independently committed side effects.",
+        "explanation": "Start from two accounts A-01=1000.00 and A-02=200.00 in the disposable cs101_sql017 schema. The success script debits 125.00, credits 125.00 and writes TX-SUCCESS to the ledger within one BEGIN/COMMIT. An isolated SQL session observes A-01=875.00, A-02=325.00 and one ledger row. Sum remains 1200.00. This demonstrates transaction atomicity in this sequential sandbox only; it does not prove concurrent overdraft safety, business authorization, idempotency or double-entry accounting.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A-01 sends 125.00 to A-02 and a corresponding transfer ledger row must be written.",
+          "steps": [
+            {
+              "action": "Run init.sql against an isolated PostgreSQL 16 database, then inspect account balances.",
+              "reason": "Establish an independently observed baseline before mutation.",
+              "expectedResult": "A-01=1000.00, A-02=200.00, ledger=0."
+            },
+            {
+              "action": "Run commit.sql with BEGIN, debit, credit, INSERT, COMMIT.",
+              "reason": "Treat all three durable mutations as one transaction.",
+              "expectedResult": "The psql session exits successfully."
+            },
+            {
+              "action": "In another psql session run inspect.sql.",
+              "reason": "Test persisted database state rather than relying on a success message from the writer.",
+              "expectedResult": "A-01=875.00, A-02=325.00, ledger=1, conserved=1200.00."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Which observable condition distinguishes a complete 125.00 transfer from a partial debit?",
+          "hints": [
+            "Compare all three persisted data changes, not just total money.",
+            "Check both account rows and the ledger row after the writer finishes."
+          ],
+          "explanation": "The proof requires correct source balance, destination balance and one corresponding ledger row. Total conservation alone can hide a missing ledger write."
+        },
+        "independentChallenge": {
+          "prompt": "Adapt the transfer to a different sandbox with C-01=750.00 and C-02=50.00; transfer 90.00 and verify all three persisted values.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Separate SELECT results: C-01=660.00, C-02=140.00 and one transfer row after COMMIT."
+          ],
+          "variationFromExample": "Use different accounts, initial amounts and a 90.00 transfer rather than A-01/A-02 with 125.00."
+        },
+        "firstAction": "Read the two account balances in init.sql; predict their values after a 125.00 transfer before running commit.sql.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating three SQL statements as atomic merely because they appear in the same file.",
+          "whyItFails": "With implicit per-statement commits, an error after debit can leave durable partial updates.",
+          "correctiveAction": "Surround debit, credit and insert with explicit BEGIN/COMMIT and verify the effects in a separate connection."
+        },
+        "selfCheck": {
+          "expectedObservation": "A-01=875.00, A-02=325.00, ledger=1 and conserved total 1200.00.",
+          "ifUnexpected": "Inspect BEGIN/COMMIT placement, WHERE predicates and which database and schema the read-only inspection uses."
+        },
+        "continueFromHere": {
+          "nextAction": "Inject an error after both account updates but before COMMIT.",
+          "resumeCue": "First reproduce the successful three-write transaction and save its inspected database snapshot."
+        }
+      },
+      {
+        "id": "abort-after-ledger-conflict",
+        "objective": "Demonstrate that a duplicate ledger PRIMARY KEY before COMMIT rolls back earlier debit and credit changes.",
+        "whyItMatters": "Passing happy-path queries is insufficient: a database write can fail after multiple prior mutations.",
+        "mentalModel": "Inside a transaction, the write failure aborts the unit of work; the database rolls back debit and credit instead of leaving a half transfer.",
+        "explanation": "The fail-before-commit.sql script starts after TX-SUCCESS already exists. It debits 30.00 and credits 30.00, then attempts to insert another ledger row with transfer_id TX-SUCCESS. PostgreSQL rejects the duplicate PRIMARY KEY. With psql ON_ERROR_STOP=1 the script terminates before COMMIT and the connection closes; the incomplete transaction is rolled back. An independent query still sees the previous committed balances and exactly one TX-SUCCESS row. This proves one failure path, not every possible crash or distributed failure.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A second transfer tries to reuse TX-SUCCESS; the error occurs only after account balances were updated.",
+          "steps": [
+            {
+              "action": "Record the state after commit.sql.",
+              "reason": "A baseline is necessary to detect any partial persisted mutation.",
+              "expectedResult": "875.00 / 325.00, one ledger row."
+            },
+            {
+              "action": "Run fail-before-commit.sql and require the psql script to exit nonzero.",
+              "reason": "The ledger PRIMARY KEY conflict is the controlled failure before the COMMIT statement.",
+              "expectedResult": "A database uniqueness error prevents the script from reaching COMMIT."
+            },
+            {
+              "action": "Rerun inspect.sql using a new psql connection.",
+              "reason": "Only a separate connection confirms previous committed state is untouched.",
+              "expectedResult": "Balances and ledger count exactly match the pre-failure snapshot."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "The ledger INSERT fails, but the debit SQL had already returned UPDATE 1. What can you conclude about the persisted debit?",
+          "hints": [
+            "Differentiate execution within a transaction from COMMIT.",
+            "Check the value from an independent connection after the writer aborts."
+          ],
+          "explanation": "UPDATE 1 inside an open transaction is not a committed change. Aborting rolls back all earlier writes in that transaction."
+        },
+        "independentChallenge": {
+          "prompt": "For a different transfer TX-CHECK, force a CHECK(amount > 0) violation after changing two balances, then prove both balances and row count are unchanged.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "A nonzero error exit and an independent before/after SELECT matching all accounts and ledger records."
+          ],
+          "variationFromExample": "A negative amount CHECK constraint failure replaces the duplicate PRIMARY KEY example."
+        },
+        "firstAction": "Find the duplicate transfer_id in fail-before-commit.sql and predict whether either updated balance will survive.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming the database already stored the debit because UPDATE affected one row before the INSERT error.",
+          "whyItFails": "Rows modified inside an uncommitted transaction are not durable committed state, and a failed transaction aborts.",
+          "correctiveAction": "Run a fresh SELECT after the failing session ends and compare the full before/after snapshot."
+        },
+        "selfCheck": {
+          "expectedObservation": "Nonzero psql status and exactly the same balances/ledger as before the failure.",
+          "ifUnexpected": "Check that the session used ON_ERROR_STOP=1, that COMMIT was not executed, and that no statement ran outside BEGIN."
+        },
+        "continueFromHere": {
+          "nextAction": "Prove an intentional ROLLBACK without relying on a SQL error.",
+          "resumeCue": "Begin from the post-success snapshot; one duplicated ledger key should abort an otherwise valid transaction."
+        }
+      },
+      {
+        "id": "explicit-rollback-and-independent-proof",
+        "objective": "Verify explicit ROLLBACK and fresh-database replay without pretending static SQL is runtime evidence.",
+        "whyItMatters": "A correct transaction lesson must distinguish intentional cancellation and real persisted-state observation.",
+        "mentalModel": "ROLLBACK cancels every write in the active transaction; a new session must observe the prior committed snapshot, and a fresh database should reproduce the same result.",
+        "explanation": "The explicit-rollback.sql script changes debit, credit and inserts TX-CANCEL before issuing ROLLBACK instead of COMMIT. None of those effects remain. The verification script also creates sql017_fresh, initializes it from zero and commits the same transfer. Docker runs PostgreSQL 16 with --network none and no host ports, preventing access to production services. The V3 single-file generator cannot start PostgreSQL, so its executable-proof receipt stays explicitly not-executable; real PostgreSQL evidence is produced in the separate CI integration step.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A user cancels a 40.00 transfer after preparing all three SQL mutations.",
+          "steps": [
+            {
+              "action": "Record the committed TX-SUCCESS state from an independent session.",
+              "reason": "Make the expected reference state observable.",
+              "expectedResult": "875.00 / 325.00; one ledger row."
+            },
+            {
+              "action": "Execute explicit-rollback.sql.",
+              "reason": "ROLLBACK is a successful command that discards the entire active transaction.",
+              "expectedResult": "Script exits zero but does not persist TX-CANCEL."
+            },
+            {
+              "action": "Read inspect.sql and repeat the success scenario in sql017_fresh.",
+              "reason": "Verify cancellation and reproducibility without relying on the first session's buffers.",
+              "expectedResult": "Original DB unchanged; fresh DB reaches the same 875.00 / 325.00 snapshot."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A psql script ends with ROLLBACK and exits 0. Does exit code 0 demonstrate that account balances changed?",
+          "hints": [
+            "Successful execution of ROLLBACK means cancellation succeeded.",
+            "Compare independent persisted balances and ledger count."
+          ],
+          "explanation": "A successful rollback is not a successful transfer; it confirms the transaction was canceled. Observe persisted state separately."
+        },
+        "independentChallenge": {
+          "prompt": "Use a fresh disposable schema with accounts D-01/D-02 and explicitly ROLLBACK an attempted 15.00 transfer, then show persisted ledger count remains zero.",
+          "criterionIds": [
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Actual independent PostgreSQL SELECT output before and after the aborted transaction, plus a fresh database replay."
+          ],
+          "variationFromExample": "Different identities and a 15.00 intentional cancellation rather than the 40.00 TX-CANCEL example."
+        },
+        "firstAction": "Find the final statement in explicit-rollback.sql and predict whether TX-CANCEL will exist after the script exits.",
+        "misconceptionRepair": {
+          "likelyMistake": "Treating a nonzero exit from a simulated failure, or a zero exit from ROLLBACK, as the whole proof of atomicity.",
+          "whyItFails": "Exit codes describe process outcomes, not the full persisted state of both accounts and the ledger.",
+          "correctiveAction": "Use a separate inspection session and compare every protected row/ledger count with the baseline."
+        },
+        "selfCheck": {
+          "expectedObservation": "Explicit ROLLBACK leaves the same balance and ledger snapshot; a fresh sandbox yields the known committed state.",
+          "ifUnexpected": "Check the database name, schema qualifier, and that SELECT runs after the transaction session closed."
+        },
+        "continueFromHere": {
+          "nextAction": "Recreate the same three-write atomicity test with an independently chosen failing constraint.",
+          "resumeCue": "Verify the persisted before/after snapshot in a second session, not just the writer's exit status."
+        }
+      }
+    ]
+  }
+}

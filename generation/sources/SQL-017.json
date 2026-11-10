@@ -1,0 +1,128 @@
+{
+  "itemId": "SQL-017",
+  "curriculumFingerprint": "sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90",
+  "sources": [
+    {
+      "title": "PostgreSQL 16 — Transactions",
+      "url": "https://www.postgresql.org/docs/16/tutorial-transactions.html",
+      "tier": 0,
+      "supports": [
+        "BEGIN/COMMIT transaction boundary",
+        "multiple debit and credit changes treated as one operation",
+        "intermediate changes invisible outside transaction"
+      ],
+      "notes": [
+        "Section 3.4 Transactions"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — COMMIT",
+      "url": "https://www.postgresql.org/docs/16/sql-commit.html",
+      "tier": 0,
+      "supports": [
+        "durable effects after successful COMMIT"
+      ],
+      "notes": [
+        "COMMIT / Description"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — ROLLBACK",
+      "url": "https://www.postgresql.org/docs/16/sql-rollback.html",
+      "tier": 0,
+      "supports": [
+        "explicit transaction abort discards preceding writes"
+      ],
+      "notes": [
+        "ROLLBACK / Description"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — Constraints",
+      "url": "https://www.postgresql.org/docs/16/ddl-constraints.html",
+      "tier": 0,
+      "supports": [
+        "unique primary key rejects duplicate ledger transfer ID",
+        "row-level CHECK guards negative account balance and amount"
+      ],
+      "notes": [
+        "Sections 5.4.1, 5.4.4, 5.4.5"
+      ]
+    },
+    {
+      "title": "PostgreSQL 16 — psql",
+      "url": "https://www.postgresql.org/docs/16/app-psql.html",
+      "tier": 0,
+      "supports": [
+        "ON_ERROR_STOP exits on failed SQL in non-interactive script",
+        "independent psql session observes committed database state"
+      ],
+      "notes": [
+        "Variables / ON_ERROR_STOP, Exit Status"
+      ]
+    }
+  ],
+  "unsupportedClaims": [],
+  "claims": [
+    {
+      "id": "transaction-boundary",
+      "statement": "BEGIN and COMMIT group several PostgreSQL statements as one atomic transaction whose intermediate effects are not visible to other transactions.",
+      "conceptIds": [
+        "transaction-unit"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/tutorial-transactions.html",
+      "locator": "Section 3.4 Transactions — grouping statements with BEGIN and COMMIT",
+      "rationale": "The PostgreSQL tutorial explicitly defines transaction atomicity and invisibility of intermediate states."
+    },
+    {
+      "id": "commit-durability",
+      "statement": "COMMIT ends a successful transaction and makes its updates visible and durable, including a debit, credit, and ledger insertion inside one transaction.",
+      "conceptIds": [
+        "transaction-unit"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/sql-commit.html",
+      "locator": "COMMIT / Description",
+      "rationale": "The official COMMIT command reference defines visibility and durability of committed changes."
+    },
+    {
+      "id": "rollback-undo",
+      "statement": "ROLLBACK aborts an open transaction and discards updates performed in it, preserving the database state preceding that transaction.",
+      "conceptIds": [
+        "rollback-failure"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/sql-rollback.html",
+      "locator": "ROLLBACK / Description",
+      "rationale": "The PostgreSQL ROLLBACK command documentation defines the abort effect."
+    },
+    {
+      "id": "unique-ledger-key",
+      "statement": "A PRIMARY KEY uniquely identifies rows and rejects a duplicate transfer_id, providing a reproducible SQL error before COMMIT.",
+      "conceptIds": [
+        "rollback-failure"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/ddl-constraints.html",
+      "locator": "Section 5.4.4 Primary Keys",
+      "rationale": "The official constraint reference establishes unique key enforcement for duplicate inserts."
+    },
+    {
+      "id": "psql-error-stop",
+      "statement": "Noninteractive psql exits with an error code when an SQL script errors and ON_ERROR_STOP is enabled, instead of silently continuing to COMMIT.",
+      "conceptIds": [
+        "persisted-proof"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/app-psql.html",
+      "locator": "Variables / ON_ERROR_STOP and Exit Status",
+      "rationale": "The psql reference specifies error-stop behavior and exit status for script execution."
+    },
+    {
+      "id": "transaction-visible",
+      "statement": "A second independent PostgreSQL session can inspect persisted state after the first session commits or closes an aborted transaction.",
+      "conceptIds": [
+        "persisted-proof"
+      ],
+      "sourceUrl": "https://www.postgresql.org/docs/16/tutorial-transactions.html",
+      "locator": "Section 3.4 Transactions — transaction visibility",
+      "rationale": "The transaction tutorial distinguishes uncommitted intermediate changes from committed database-visible effects."
+    }
+  ]
+}

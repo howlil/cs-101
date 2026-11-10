@@ -1,0 +1,44 @@
+{
+  "itemId": "SQL-017",
+  "fingerprint": "sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90",
+  "sources": [
+    {
+      "title": "PostgreSQL 16 — Transactions",
+      "url": "https://www.postgresql.org/docs/16/tutorial-transactions.html"
+    },
+    {
+      "title": "PostgreSQL 16 — COMMIT",
+      "url": "https://www.postgresql.org/docs/16/sql-commit.html"
+    },
+    {
+      "title": "PostgreSQL 16 — ROLLBACK",
+      "url": "https://www.postgresql.org/docs/16/sql-rollback.html"
+    },
+    {
+      "title": "PostgreSQL 16 — Constraints",
+      "url": "https://www.postgresql.org/docs/16/ddl-constraints.html"
+    },
+    {
+      "title": "PostgreSQL 16 — psql",
+      "url": "https://www.postgresql.org/docs/16/app-psql.html"
+    }
+  ],
+  "coverage": [
+    {
+      "criterionId": "source-task",
+      "taughtAt": "V3 staged mental model of transaction boundary, debit/credit/ledger and forced failure",
+      "assessedAt": "Questions q1–q4 plus real PostgreSQL 16 commit and failure-rollback proof",
+      "evidenceExpected": "Independent psql results show complete committed balances and ledger, while forced error before COMMIT leaves the prior persisted snapshot unchanged."
+    },
+    {
+      "criterionId": "challenge",
+      "taughtAt": "Independent alternate constraint failure and intentional ROLLBACK transfer exercise",
+      "assessedAt": "Questions q3 and q5 plus standalone PostgreSQL ROLLBACK and changed-case challenge",
+      "evidenceExpected": "New sandbox with changed IDs/amounts proves error abort and explicit rollback preserve all account balances and ledger count."
+    }
+  ],
+  "validator": {
+    "passed": true,
+    "issues": []
+  }
+}

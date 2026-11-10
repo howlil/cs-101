@@ -27,6 +27,7 @@ G10: Each proposed assessment criterion declares a typed evidence kind, enforced
 G11: JAV-001 distinguishes JDK fixture's compile/loading evidence from actual Maven build/manifest verification, which remains a learner challenge.
 G12: New Java and PostgreSQL rubric evidence must cite actual CLI/DB runs, while new cross-domain mappings cannot alter existing HTTP routes, prerequisite graph semantics or canonical unit publication status.
 G13: NET-006 code-level connect/EOF/refusal evidence must not be promoted into packet-level TCP handshake or retransmission claims without actual capture.
+G24: SQL-017 distinguishes reproducible V3 content receipt (PostgreSQL not executable by generator) from real isolated PostgreSQL 16 atomic debit, credit and ledger verification; each balance UPDATE must affect exactly one row, and zero-row debit/credit, failure before COMMIT, and explicit ROLLBACK must leave all balances and ledger unchanged. No concurrent transfer or distributed settlement proof.
 G14: SQL-001 V3 receipt asserts authorship and explicitly not-executable SQL runtime, while a separate Docker-isolated PostgreSQL 16 integration step proves schema/data and repeatability. No application database binding is introduced.
 G15: TST-007 distinguishes generator's no-executable Maven/JUnit status from actual Surefire execution; the dedicated pure Java lab tests observable fee results, fixed decimal policy and errors without Spring context.
 G23: TST-025 selects only login→balance and login→transfer→receipt for hypothetical E2E smoke; fee arithmetic, API inputs, provider contracts and DB timeout/idempotency are delegated to lower layers and browser execution is out of scope.
@@ -62,6 +63,7 @@ DEC18: TST-020 uses one bounded Node 24 source fixture against tracked SYS-008 O
 DEC16: Publish SYS-008 as a standalone OpenAPI 3.1.1 JSON design proposal and use bounded Node contract/example checks in V3 authoring; preserve separate actual Spring MVC/auth/runtime implementation proof.
 
 ## Verification
+PF31 (P35,G24) [critical] | SQL-017 V3 source/receipt reproduction, PostgreSQL 16 commit and two rollback paths with independent persisted-state assertions, three-view HTTP smoke | pr | pnpm generation:validate SQL-017; bash labs/SQL-017/verify-postgres.sh; pnpm ci
 PF30 (P34,G4) [important] | canonical P0 mapping, cross-level dependency path, rubric evidence and honest outline-only availability | iter/pr | pnpm test; pnpm graph:validate; pnpm ci
 PF29 (P33,G1) [important] | depth-bounded graph BFS, edge dedup/direction, layout and accessible text links | iter/pr | pnpm test; pnpm ci
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test

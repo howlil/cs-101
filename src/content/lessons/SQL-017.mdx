@@ -1,0 +1,149 @@
+---
+taskId: "SQL-017"
+title: "Atomic Transfer — COMMIT and ROLLBACK"
+description: "Jalankan transfer debit, kredit, dan ledger atomik dalam PostgreSQL 16; buktikan rollback dari state tersimpan."
+demo: false
+curriculumFingerprint: "sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90"
+---
+
+import LessonStage from '../../components/lesson/LessonStage.astro';
+import MentalModel from '../../components/lesson/MentalModel.astro';
+import ConceptGraph from '../../components/lesson/ConceptGraph.astro';
+import LearningSegments from '../../components/lesson/LearningSegments.astro';
+import Quiz from '../../components/lesson/Quiz.astro';
+import Challenge from '../../components/lesson/Challenge.astro';
+import ExitCriteria from '../../components/lesson/ExitCriteria.astro';
+import SourceList from '../../components/lesson/SourceList.astro';
+import pedagogyRecord from '../../../generation/pedagogy/SQL-017.json';
+import questionBank from '../../../review-banks/SQL-017.json';
+
+export const lessonSegments = pedagogyRecord.pedagogy.segments;
+
+<LessonStage stage="understand">
+
+> **Masalah:** debit berhasil, tetapi proses gagal ketika menambah ledger row. Tanpa transaksi atomik, sebagian perubahan bisa menetap dan membuat saldo tidak konsisten.
+
+**Mulai:** prediksi saldo A-01=1000.00 dan A-02=200.00 setelah transfer 125.00; lalu prediksi hasil jika ledger INSERT gagal sebelum COMMIT.
+
+<MentalModel title="BEGIN → debit → credit → ledger → COMMIT atau ROLLBACK">
+
+- **BEGIN:** mulai satu transaksi, bukan sekadar mengelompokkan statement dalam file.
+- **COMMIT:** memublikasikan debit, kredit dan ledger sebagai satu perubahan tersimpan.
+- **ROLLBACK:** membatalkan seluruh perubahan yang belum committed dalam transaksi.
+- **Injected failure:** PRIMARY KEY ledger menolak transfer_id duplikat setelah dua UPDATE; koneksi yang gagal tidak boleh menyimpan salah satunya.
+- **Observed proof:** query semua akun dan jumlah ledger dari sesi PostgreSQL kedua setelah penulis selesai.
+
+</MentalModel>
+
+<ConceptGraph>
+
+~~~text
+                         PostgreSQL 16
+    Initial A-01:1000.00  A-02:200.00  Ledger:0
+                            |
+                          BEGIN
+                            |
+                 debit 125.00 A-01
+                            |
+                 credit 125.00 A-02
+                            |
+                 INSERT ledger row
+                   /                \
+           success                 PK conflict
+               |                        |
+             COMMIT                 abort session
+               |                        |
+      875.00 / 325.00            ROLLBACK by DB
+         ledger: 1                  no new writes
+               \                        /
+                   independent SELECT
+~~~
+
+</ConceptGraph>
+
+## Mekanisme dan batas jaminan
+
+Jika seluruh statement berada dalam **satu BEGIN/COMMIT**, kegagalan sebelum COMMIT tidak meninggalkan debit tanpa kredit. ROLLBACK eksplisit juga membatalkan transaksi yang sebenarnya valid. Ini adalah **atomicity** pada satu database dan tiga penulisan yang diuji, bukan jaminan concurrency, idempotency, authorization, settlement bank, atau complete double-entry journal.
+
+| Skenario | Hasil persistent A-01 / A-02 | Ledger | Total |
+| --- | --- | --- | --- |
+| Awal | 1000.00 / 200.00 | 0 | 1200.00 |
+| COMMIT 125.00 | 875.00 / 325.00 | 1 | 1200.00 |
+| Duplikat transfer_id sebelum COMMIT | Tetap 875.00 / 325.00 | Tetap 1 | 1200.00 |
+| Transfer lain lalu ROLLBACK | Tetap 875.00 / 325.00 | Tetap 1 | 1200.00 |
+
+<LearningSegments stage="understand" segments={lessonSegments} />
+
+## Referensi PostgreSQL 16
+
+<SourceList sources={[
+ {title:'PostgreSQL 16 — transaction',url:'https://www.postgresql.org/docs/16/tutorial-transactions.html'},
+ {title:'PostgreSQL 16 — commit',url:'https://www.postgresql.org/docs/16/sql-commit.html'},
+ {title:'PostgreSQL 16 — rollback',url:'https://www.postgresql.org/docs/16/sql-rollback.html'},
+ {title:'PostgreSQL 16 — constraints',url:'https://www.postgresql.org/docs/16/ddl-constraints.html'},
+ {title:'PostgreSQL 16 — psql',url:'https://www.postgresql.org/docs/16/app-psql.html'}
+]} />
+
+</LessonStage>
+
+<LessonStage stage="practice">
+
+## Jalankan lab PostgreSQL sungguhan
+
+Dari root repository, dengan Docker terpasang:
+
+~~~sh
+bash labs/SQL-017/verify-postgres.sh
+~~~
+
+Bukti yang diharapkan:
+
+~~~text
+sql017-seed=verified
+sql017-commit=atomic
+sql017-forced-failure=rolled-back
+sql017-explicit-rollback=verified
+sql017-fresh-database=verified
+sql017-postgres16=verified
+~~~
+
+Lab memakai database disposable PostgreSQL 16, **tanpa host port** dan **tanpa akses network keluar**. Script melakukan tiga operasi dalam satu transaction; memaksa kegagalan UNIQUE/PRIMARY KEY pada ledger; lalu memakai SELECT pada koneksi baru untuk membandingkan persisted state. Gunakan juga `labs/SQL-017/inspect.sql` untuk memeriksa query aktual.
+
+**Proof boundary:** generator V3 tidak menjalankan database; receipt fixture bertanda `not-executable`. Hanya tes Docker PostgreSQL terpisah dalam CI yang membuktikan perilaku DB.
+
+<LearningSegments stage="practice" segments={lessonSegments} />
+
+## Lima soal — Atomic Transfer
+
+<Quiz bank={questionBank} />
+
+</LessonStage>
+
+<LessonStage stage="evidence">
+
+## Independent challenge — Abort tanpa partial write
+
+<LearningSegments stage="evidence" segments={lessonSegments} />
+
+<Challenge
+ title="Atomic Transfer — debit, credit, ledger, rollback"
+ brief="Bangun transfer untuk dua akun baru dengan nominal berbeda; injeksikan kegagalan sebelum COMMIT dan verifikasi seluruh state tetap sebelum transaksi."
+ acceptanceCriteria={[
+  'Semua debit, kredit dan ledger INSERT berada di dalam satu BEGIN/COMMIT.',
+  'Transfer sukses mengubah kedua saldo dan menambah tepat satu ledger row.',
+  'Kegagalan setelah dua UPDATE tetapi sebelum COMMIT menyebabkan rollback untuk semua perubahan.',
+  'ROLLBACK eksplisit pada transaksi valid tidak menyisakan ledger TX-CANCEL.',
+  'Bukti berupa dua pemeriksaan persisted state pada koneksi independen, bukan sekadar stdout script.',
+  'Total saldo dalam satu currency fixture tetap sama pada setiap state.',
+  'Gunakan DB disposable; jangan mengklaim concurrency/idempotency/settlement dari uji sequential.'
+]}
+/>
+
+<ExitCriteria items={[
+ 'Dapat menjelaskan mengapa BEGIN/COMMIT diperlukan untuk lebih dari satu statement.',
+ 'Bisa membedakan COMMIT, SQL error yang menggagalkan transaksi, dan ROLLBACK eksplisit.',
+ 'Bisa menunjukkan kedua saldo serta ledger tidak berubah setelah failure.',
+ 'Mengetahui batas lab atomisitas terhadap idempotency, concurrency dan pembayaran riil.'
+]}/>
+
+</LessonStage>

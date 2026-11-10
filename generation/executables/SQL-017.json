@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "itemId": "SQL-017",
+  "curriculumFingerprint": "sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90",
+  "examples": [],
+  "noExecutableReason": "The V3 generator supports bounded standalone Node and Java fixtures, not PostgreSQL. A separate CI step runs labs/SQL-017/verify-postgres.sh against a disposable PostgreSQL 16 container with no published ports, verifying COMMIT, error-triggered rollback, explicit ROLLBACK and fresh-database reproduction."
+}

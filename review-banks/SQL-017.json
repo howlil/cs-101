@@ -1,0 +1,78 @@
+{
+  "itemId": "SQL-017",
+  "version": "lesson-spec-v1:sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90",
+  "curriculumFingerprint": "sha256:f7bb76a708a6f1d7e8eaa8497ff9daa002d27588d3855d095a1337ea037f2d90",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Tiga statement debit, kredit, dan INSERT ledger ditulis di satu file tanpa BEGIN/COMMIT. Kesimpulan yang benar?",
+      "options": [
+        "Pasti atomic karena satu file",
+        "Masing-masing statement dapat ter-commit terpisah sehingga terjadi partial write",
+        "PRIMARY KEY otomatis menyatukan semua statement"
+      ],
+      "answer": 1,
+      "explanation": "Atomicity tiga perubahan membutuhkan transaction boundary eksplisit. Satu file bukan satu transaksi.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "Setelah commit transfer 125.00 dari saldo 1000.00 ke saldo 200.00, observasi valid mana?",
+      "options": [
+        "A-01=875.00, A-02=325.00, ledger=1",
+        "A-01=875.00, A-02=200.00, ledger=1",
+        "A-01=1000.00, A-02=325.00, ledger=0"
+      ],
+      "answer": 0,
+      "explanation": "Debit, kredit, dan ledger harus terpersist bersama; jumlah saldo tetap 1200.00 dalam fixture ini.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q3",
+      "prompt": "Ledger INSERT dengan transfer_id duplikat gagal setelah kedua UPDATE di dalam BEGIN. Apa bukti rollback?",
+      "options": [
+        "Log UPDATE 1 pada sender",
+        "SELECT pada koneksi baru menunjukkan dua balance dan ledger count persis seperti sebelum kegagalan",
+        "psql keluar nonzero tanpa membaca database"
+      ],
+      "answer": 1,
+      "explanation": "Bukti persisted-state mencakup kedua saldo dan row ledger dari sesi independen.",
+      "criterionIds": [
+        "source-task",
+        "challenge"
+      ]
+    },
+    {
+      "id": "q4",
+      "prompt": "Sebuah transaction melakukan tiga perubahan valid lalu menjalankan ROLLBACK dan psql exit 0. Apa hasil persisted-nya?",
+      "options": [
+        "Transfer otomatis berhasil",
+        "Semua perubahan dalam transaksi dibatalkan",
+        "Hanya ledger row dibatalkan, saldo tetap berubah"
+      ],
+      "answer": 1,
+      "explanation": "ROLLBACK berhasil membatalkan seluruh perubahan dalam transaksi; exit 0 bukan bukti uang ditransfer.",
+      "criterionIds": [
+        "source-task"
+      ]
+    },
+    {
+      "id": "q5",
+      "prompt": "Apa batas bukti dari lab SQL-017 yang menguji sequential BEGIN/COMMIT/ROLLBACK dengan PostgreSQL nyata?",
+      "options": [
+        "Membuktikan idempotency, serializable concurrency, dan settlement bank produksi",
+        "Membuktikan atomicity pada skenario yang diuji; concurrency, idempotency dan remote settlement perlu tes lain",
+        "Membuktikan hanya sintaks tanpa state karena psql berbeda tidak bisa membaca data"
+      ],
+      "answer": 1,
+      "explanation": "Lab memakai database nyata dan inspect session terpisah, tetapi tidak menguji transaksi paralel, auth atau payment provider.",
+      "criterionIds": [
+        "challenge"
+      ]
+    }
+  ]
+}
