@@ -121,9 +121,11 @@ export function buildLearningGraph(input:unknown,curriculum:CurriculumGraph):Lea
     active.delete(id);seen.add(id);
   }
   for(const c of data.concepts)visit(c.id);
-  // One-hop canvas renders one link per concept pair. Reverse related edges or
-  // competing relation types otherwise produce duplicate neighbor IDs.
-  unique(data.relations.map(r=>[r.from,r.to].sort().join('/')),'concept pair relation');
+  // Related is undirected, so the reverse spelling is the same relationship.
+  // Different relation types may coexist: the focused canvas selects a single
+  // representative edge, while the planner still traverses reviewed requires.
+  unique(data.relations.filter(r=>r.type==='related')
+    .map(r=>[r.from,r.to].sort().join('/')),'concept pair relation');
   // Concept-level prerequisites apply at each depth. Independent DAG checks above
   // are insufficient: a concept edge and a competency edge may form a mixed cycle.
   const allParents=new Map<string,string[]>();
@@ -157,10 +159,18 @@ export function getFocusedConcept(graph:LearningGraph,requested:string|null,requ
   const concept=(requested&&graph.conceptsById.get(requested))||conceptsAtLevel(graph,level)[0]||graph.concepts[0];
   const outcome=concept.outcomes.find(o=>o.level===level);
   const nextOutcome=concept.outcomes.find(o=>LEARNING_LEVELS.indexOf(o.level)>LEARNING_LEVELS.indexOf(level));
-  const neighbors=outcome?graph.relations.filter(r=>r.from===concept.id||r.to===concept.id).map(relation=>({
-    concept:graph.conceptsById.get(relation.from===concept.id?relation.to:relation.from)!,relation,
-    direction:(relation.from===concept.id?'out':'in') as 'out'|'in',
-  })).filter(x=>x.concept.outcomes.some(o=>o.level===level)):[];
+  const rank=(r:ConceptRelation)=>r.type==='requires'?3:r.type==='deepens'?2:1;
+  const neighbors:FocusedConcept['neighbors']=[];
+  if(outcome)for(const relation of graph.relations){
+    if(relation.from!==concept.id&&relation.to!==concept.id)continue;
+    const peer=graph.conceptsById.get(relation.from===concept.id?relation.to:relation.from)!;
+    if(!peer.outcomes.some(o=>o.level===level))continue;
+    const candidate={concept:peer,relation,direction:
+      (relation.from===concept.id?'out':'in') as 'out'|'in'};
+    const at=neighbors.findIndex(n=>n.concept.id===peer.id);
+    if(at<0)neighbors.push(candidate);
+    else if(rank(relation)>rank(neighbors[at].relation))neighbors[at]=candidate;
+  }
   // A reviewed competency dependency overrides a merely related link in this depth's canvas.
   if(outcome)for(const dependency of graph.competencyDependencies.filter(d=>
     d.status==='reviewed'&&d.from.level===level&&d.to.level===level
