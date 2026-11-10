@@ -28,14 +28,26 @@ const outcomeSchema=z.object({
 const conceptSchema=z.object({id:curriculumSlugSchema,title:z.string().min(1),description:z.string().min(1),outcomes:z.array(outcomeSchema).min(1)});
 const applicationSchema=z.object({conceptId:curriculumSlugSchema,itemId:itemIdSchema,role:z.enum(['foundation','application','diagnostic','operation'])});
 const relationSchema=z.object({from:curriculumSlugSchema,to:curriculumSlugSchema,type:z.enum(['requires','related','deepens']),status:z.enum(['proposed','reviewed']),rationale:z.string().min(1)});
-export const learningOverlaySchema=z.object({version:z.literal(1),concepts:z.array(conceptSchema).min(1),applications:z.array(applicationSchema),relations:z.array(relationSchema)});
+const competencyRefSchema=z.object({conceptId:curriculumSlugSchema,level:levelSchema});
+const competencyDependencySchema=z.object({
+  from:competencyRefSchema,to:competencyRefSchema,type:z.literal('requires'),
+  status:z.enum(['proposed','reviewed']),rationale:z.string().min(1),
+  sourceItemIds:z.array(itemIdSchema).min(2),
+});
+export const learningOverlaySchema=z.object({
+  version:z.literal(2),concepts:z.array(conceptSchema).min(1),
+  applications:z.array(applicationSchema),relations:z.array(relationSchema),
+  competencyDependencies:z.array(competencyDependencySchema),
+});
 export type Concept=z.infer<typeof conceptSchema>;
 export type LevelOutcome=z.infer<typeof outcomeSchema>;
 export type AssessmentCriterion=z.infer<typeof criterionSchema>;
 export type ItemAssessment={task:string;status:LevelOutcome['status'];level:LearningLevel;criteria:AssessmentCriterion[]};
 export type ConceptRelation=z.infer<typeof relationSchema>;
+export type CompetencyRef=z.infer<typeof competencyRefSchema>;
+export type CompetencyDependency=z.infer<typeof competencyDependencySchema>;
 export type ConceptApplication={itemId:string;title:string;trackTitle:string;role:z.infer<typeof applicationSchema>['role']};
-export type LearningGraph={concepts:Concept[];conceptsById:Map<string,Concept>;applications:z.infer<typeof applicationSchema>[];relations:ConceptRelation[];curriculum:CurriculumGraph};
+export type LearningGraph={concepts:Concept[];conceptsById:Map<string,Concept>;applications:z.infer<typeof applicationSchema>[];relations:ConceptRelation[];competencyDependencies:CompetencyDependency[];curriculum:CurriculumGraph};
 export type FocusedConcept={level:LearningLevel;concept:Concept;outcome?:LevelOutcome;nextOutcome?:LevelOutcome;neighbors:Array<{concept:Concept;relation:ConceptRelation;direction:'in'|'out'}>;applications:ConceptApplication[]};
 function unique(keys:string[],label:string){if(new Set(keys).size!==keys.length)throw new Error('Duplicate '+label);}
 export function resolveLearningLevel(value:string|null):LearningLevel{return LEARNING_LEVELS.find(level=>level===value)??'G1';}
@@ -74,6 +86,32 @@ export function buildLearningGraph(input:unknown,curriculum:CurriculumGraph):Lea
       requires.set(r.to,[...(requires.get(r.to)??[]),r.from]);
     }
   }
+  const competencyKey=(ref:CompetencyRef)=>ref.conceptId+'/'+ref.level;
+  unique(data.competencyDependencies.map(d=>competencyKey(d.from)+'>'+competencyKey(d.to)),'competency dependency');
+  const competencyParents=new Map<string,string[]>();
+  for(const d of data.competencyDependencies){
+    const from=conceptsById.get(d.from.conceptId)?.outcomes.find(o=>o.level===d.from.level);
+    const to=conceptsById.get(d.to.conceptId)?.outcomes.find(o=>o.level===d.to.level);
+    if(!from||!to)throw new Error('Unknown competency reference: '+competencyKey(d.from)+' -> '+competencyKey(d.to));
+    if(competencyKey(d.from)===competencyKey(d.to))throw new Error('Self competency dependency: '+competencyKey(d.from));
+    const validIds=new Set([...from.itemIds,...to.itemIds]);
+    for(const id of d.sourceItemIds)if(!validIds.has(id))throw new Error('Dependency source item not mapped: '+id);
+    if(!d.sourceItemIds.some(id=>from.itemIds.includes(id))||!d.sourceItemIds.some(id=>to.itemIds.includes(id)))
+      throw new Error('Dependency must cite both competency outcomes: '+competencyKey(d.to));
+    if(d.status==='reviewed'){
+      const target=competencyKey(d.to);
+      competencyParents.set(target,[...(competencyParents.get(target)??[]),competencyKey(d.from)]);
+    }
+  }
+  const competencySeen=new Set<string>(),competencyActive=new Set<string>();
+  const visitCompetency=(key:string):void=>{
+    if(competencyActive.has(key))throw new Error('Competency prerequisite cycle: '+key);
+    if(competencySeen.has(key))return;
+    competencyActive.add(key);
+    for(const parent of competencyParents.get(key)??[])visitCompetency(parent);
+    competencyActive.delete(key);competencySeen.add(key);
+  };
+  for(const key of competencyParents.keys())visitCompetency(key);
   const seen=new Set<string>(),active=new Set<string>();
   function visit(id:string):void{
     if(active.has(id))throw new Error('Concept prerequisite cycle: '+id);
@@ -93,6 +131,19 @@ export function getFocusedConcept(graph:LearningGraph,requested:string|null,requ
     concept:graph.conceptsById.get(relation.from===concept.id?relation.to:relation.from)!,relation,
     direction:(relation.from===concept.id?'out':'in') as 'out'|'in',
   })).filter(x=>x.concept.outcomes.some(o=>o.level===level)):[];
+  // A reviewed competency dependency overrides a merely related link in this depth's canvas.
+  if(outcome)for(const dependency of graph.competencyDependencies.filter(d=>
+    d.status==='reviewed'&&d.from.level===level&&d.to.level===level
+    &&(d.from.conceptId===concept.id||d.to.conceptId===concept.id))){
+    const outward=dependency.from.conceptId===concept.id;
+    const peer=graph.conceptsById.get(outward?dependency.to.conceptId:dependency.from.conceptId)!;
+    const link={concept:peer,relation:{from:dependency.from.conceptId,to:dependency.to.conceptId,
+      type:'requires' as const,status:'reviewed' as const,rationale:dependency.rationale},
+      direction:(outward?'out':'in') as 'out'|'in'};
+    const at=neighbors.findIndex(n=>n.concept.id===peer.id);
+    if(at>=0)neighbors[at]=link;
+    else neighbors.push(link);
+  }
   const mapped=new Map(graph.applications.filter(a=>a.conceptId===concept.id).map(a=>[a.itemId,a]));
   const applications=(outcome?.itemIds??[]).map(id=>{
     const item=graph.curriculum.itemsById.get(id)!,app=mapped.get(id)!;

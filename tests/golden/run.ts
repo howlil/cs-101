@@ -178,8 +178,8 @@ try {
   rmSync(join(work, 'generation/NET-001.json'), {force:true});
   // This isolated manifest deliberately contains only JAV-009. Its concept
   // overlay must be equally isolated; never weaken production link validation.
-  writeJson('curriculum/learning-graph.v1.json', {
-    version:1,
+  writeJson('curriculum/learning-graph.v2.json', {
+    version:2,
     concepts:[{
       id:'golden-fixture',
       title:'Golden lesson concept',
@@ -195,6 +195,7 @@ try {
     }],
     applications:[{conceptId:'golden-fixture',itemId:GOLDEN_UNIT_ID,role:'application'}],
     relations:[],
+    competencyDependencies:[],
   });
   report('isolated curriculum fixture: 1 unit + 1 linked project; production manifest untouched');
 

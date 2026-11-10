@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "concepts": [
     {
       "id": "http-request-lifecycle",
@@ -393,6 +393,182 @@
           }
         }
       ]
+    },
+    {
+      "id": "money-unit-correctness",
+      "title": "Money Unit Correctness",
+      "description": "Deterministic money arithmetic, currency scale, boundary and regression verification in Java.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Verify precise monetary computations and reject invalid amounts without Spring.",
+          "evidence": "Real JDK 21 Maven JUnit output with edge-case assertions.",
+          "itemIds": [
+            "TST-007"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Implement and execute a pure-Java fee calculation test suite.",
+            "criteria": [
+              {
+                "id": "money-boundaries",
+                "itemId": "TST-007",
+                "evidenceKind": "cli-build",
+                "check": "Test negative, zero, maximum and invalid monetary input.",
+                "passWhen": "Maven Surefire reports discovered tests and all edge cases pass without a Spring context."
+              },
+              {
+                "id": "currency-precision",
+                "itemId": "TST-007",
+                "evidenceKind": "cli-build",
+                "check": "Prove rounding and IDR/USD scale policy.",
+                "passWhen": "JUnit assertions verify decimal results without floating-point leakage."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider-contract-verification",
+      "title": "Provider Contract Verification",
+      "description": "Consumer-driven provider expectations and breaking-change verification against real HTTP.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Produce and verify consumer-provider expectations, including a negative schema mutation.",
+          "evidence": "Actual Pact mock/provider verification and a deliberate negative mutation.",
+          "itemIds": [
+            "TST-021"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Generate a Pact consumer interaction and verify a local provider implementation.",
+            "criteria": [
+              {
+                "id": "consumer-pact",
+                "itemId": "TST-021",
+                "evidenceKind": "framework-test",
+                "check": "Capture a real consumer expectation via Pact mock.",
+                "passWhen": "Pact generates interactions from a real consumer invocation and verifies matching provider output."
+              },
+              {
+                "id": "provider-breaking-field",
+                "itemId": "TST-021",
+                "evidenceKind": "framework-test",
+                "check": "Reject a provider response changing the amount type.",
+                "passWhen": "Actual provider verifier rejects the mutated amount field; no production bank claim."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider-fault-handling",
+      "title": "Ambiguous Provider Outcomes",
+      "description": "Distinguish definite failures from unknown remote outcomes and verify persistence at service boundaries.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Handle ambiguous provider responses without blind debit retries and persist unknown outcomes.",
+          "evidence": "HTTP fault proof and PostgreSQL persisted state evidence.",
+          "itemIds": [
+            "TST-022",
+            "TST-024"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Inject a response-loss fault and inspect the persisted transfer outcome.",
+            "criteria": [
+              {
+                "id": "unknown-without-retry",
+                "itemId": "TST-022",
+                "evidenceKind": "http-test",
+                "check": "Classify timeout/reset after remote apply as UNKNOWN.",
+                "passWhen": "Real HTTP fault test observes one debit attempt, not a blind retry."
+              },
+              {
+                "id": "persisted-outcome",
+                "itemId": "TST-024",
+                "evidenceKind": "database-test",
+                "check": "Inspect accepted and unknown rows after service-provider calls.",
+                "passWhen": "An isolated PostgreSQL 16 test independently confirms persisted state after HTTP completion."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "adversarial-api-inputs",
+      "title": "Adversarial API Inputs",
+      "description": "Bound unsafe payloads and prove deterministic HTTP error contracts before mutation.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Reject malformed or conflicting transfer requests without modifying protected state.",
+          "evidence": "Real HTTP negative tests with stable problem details and idempotency conflicts.",
+          "itemIds": [
+            "TST-023"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Exercise malformed inputs, oversized requests and conflicting idempotency keys.",
+            "criteria": [
+              {
+                "id": "bounded-request-validation",
+                "itemId": "TST-023",
+                "evidenceKind": "http-test",
+                "check": "Reject invalid body/query/media inputs before mutation.",
+                "passWhen": "HTTP negative cases reject deterministically and leave state unchanged."
+              },
+              {
+                "id": "idempotency-conflict",
+                "itemId": "TST-023",
+                "evidenceKind": "http-test",
+                "check": "Distinguish exact replay from key reuse with changed payload.",
+                "passWhen": "Exact replay preserves original response and mismatched replay returns 409."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "test-journey-selection",
+      "title": "Test Journey Selection",
+      "description": "Choose a small set of end-to-end user journeys while proving most risks at lower testing layers.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Allocate critical journeys to E2E and regressions to the cheapest faithful verification boundary.",
+          "evidence": "Defensible test-stage assignment and explicit unexecuted browser claims.",
+          "itemIds": [
+            "TST-025"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Select two user journeys and seven lower-layer checks from a banking workflow.",
+            "criteria": [
+              {
+                "id": "e2e-boundary-choice",
+                "itemId": "TST-025",
+                "evidenceKind": "design-review",
+                "check": "Justify exactly two cross-boundary E2E journeys.",
+                "passWhen": "Plan identifies user value and why failure cannot be proven at a cheaper layer."
+              },
+              {
+                "id": "lower-layer-selection",
+                "itemId": "TST-025",
+                "evidenceKind": "design-review",
+                "check": "Allocate seven regressions to unit, API, contract and integration.",
+                "passWhen": "Plan explains the lower-stage proof and does not claim any browser run."
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "applications": [
@@ -480,6 +656,36 @@
       "conceptId": "api-design-contract",
       "itemId": "SPR-006",
       "role": "application"
+    },
+    {
+      "conceptId": "money-unit-correctness",
+      "itemId": "TST-007",
+      "role": "application"
+    },
+    {
+      "conceptId": "provider-contract-verification",
+      "itemId": "TST-021",
+      "role": "application"
+    },
+    {
+      "conceptId": "provider-fault-handling",
+      "itemId": "TST-022",
+      "role": "diagnostic"
+    },
+    {
+      "conceptId": "provider-fault-handling",
+      "itemId": "TST-024",
+      "role": "application"
+    },
+    {
+      "conceptId": "adversarial-api-inputs",
+      "itemId": "TST-023",
+      "role": "diagnostic"
+    },
+    {
+      "conceptId": "test-journey-selection",
+      "itemId": "TST-025",
+      "role": "application"
     }
   ],
   "relations": [
@@ -545,6 +751,72 @@
       "type": "related",
       "status": "proposed",
       "rationale": "Maven test and Java toolchain behavior affect reproducibility of Java-based API contract suites."
+    },
+    {
+      "from": "api-contract-testing",
+      "to": "provider-contract-verification",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Provider verification applies API contract expectations to consumer-provider interactions."
+    },
+    {
+      "from": "api-contract-testing",
+      "to": "adversarial-api-inputs",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Adversarial inputs probe documented API validation and error contracts."
+    },
+    {
+      "from": "provider-contract-verification",
+      "to": "provider-fault-handling",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Provider faults complement behavioral contract verification but have distinct evidence."
+    },
+    {
+      "from": "money-unit-correctness",
+      "to": "test-journey-selection",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Money arithmetic is a unit-test concern rather than an automatic browser E2E requirement."
+    }
+  ],
+  "competencyDependencies": [
+    {
+      "from": {
+        "conceptId": "api-design-contract",
+        "level": "G1"
+      },
+      "to": {
+        "conceptId": "api-contract-testing",
+        "level": "G1"
+      },
+      "type": "requires",
+      "status": "reviewed",
+      "rationale": "The contract suite must have an explicit, testable API resource/status/error specification before it can check drift; SYS-008 defines this contract, TST-019 and TST-020 consume it.",
+      "sourceItemIds": [
+        "SYS-008",
+        "TST-019",
+        "TST-020"
+      ]
+    },
+    {
+      "from": {
+        "conceptId": "api-contract-testing",
+        "level": "G1"
+      },
+      "to": {
+        "conceptId": "provider-contract-verification",
+        "level": "G1"
+      },
+      "type": "requires",
+      "status": "reviewed",
+      "rationale": "Consumer-driven verification builds on a defined request/response contract and change-detection semantics; TST-019/TST-020 precede the Pact-specific TST-021 lab.",
+      "sourceItemIds": [
+        "TST-019",
+        "TST-020",
+        "TST-021"
+      ]
     }
   ]
 }

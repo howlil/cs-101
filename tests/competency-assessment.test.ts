@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import manifest from '../curriculum/manifest.v2.json';
-import overlay from '../curriculum/learning-graph.v1.json';
+import overlay from '../curriculum/learning-graph.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { buildLearningGraph, assessmentForItem, getFocusedConcept } from '../src/domain/learning-graph';
 
@@ -13,9 +13,9 @@ const customize=(conceptId:string,level:string,modify:(outcome:any)=>any)=>({
     :concept),
 });
 
-test('all eleven curated outcomes have nonempty proposed, source-mapped rubrics',()=>{
+test('all curated outcomes have nonempty proposed, source-mapped rubrics',()=>{
   const outcomes=graph.concepts.flatMap(concept=>concept.outcomes);
-  assert.equal(outcomes.length,11);
+  assert.equal(outcomes.length,16);
   assert.ok(outcomes.every(o=>o.status==='proposed'&&o.assessment.task.trim()!==''));
   for(const outcome of outcomes){
     assert.ok(outcome.assessment.criteria.length>=2);
