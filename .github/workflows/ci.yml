@@ -79,6 +79,8 @@ jobs:
           git diff --exit-code -- src/content/lessons/SQL-017.mdx generation/SQL-017.json review-banks/SQL-017.json generation/pedagogy/SQL-017.json generation/sources/SQL-017.json generation/proofs/SQL-017.json generation/executables/SQL-017.json generation/verified/SQL-017.json
       - name: SQL-017 real PostgreSQL 16 atomic transfer and rollback
         run: bash labs/SQL-017/verify-postgres.sh
+      - name: SQL-019 live PostgreSQL 16 concurrent withdrawal and ordered-lock proof
+        run: bash labs/SQL-019/verify-postgres.sh
       - name: Verify TST-007 reproducible authoring (JUnit runtime external)
         run: |
           pnpm generation:validate TST-007
