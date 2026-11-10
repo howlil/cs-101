@@ -183,6 +183,23 @@ export function conceptsForItem(graph:LearningGraph,itemId:string):Concept[]{
   const ids=new Set(graph.applications.filter(a=>a.itemId===itemId).map(a=>a.conceptId));
   return graph.concepts.filter(c=>ids.has(c.id));
 }
+/**
+ * A goal path can link to a prerequisite owned by another concept and depth.
+ * Keep the goal's navigation context, but render the item's own mapped concept.
+ */
+export function resolveItemGraphPreview(
+  graph:LearningGraph,itemId:string,pathContext?:{conceptId:string;level:LearningLevel},
+):FocusedConcept|undefined{
+  const concepts=conceptsForItem(graph,itemId);
+  const matching=pathContext&&concepts.find(c=>c.id===pathContext.conceptId
+    &&c.outcomes.some(o=>o.level===pathContext.level));
+  const concept=matching??concepts.find(c=>c.outcomes.some(o=>o.level==='G1'))??concepts[0];
+  if(!concept)return;
+  const level=matching&&pathContext?pathContext.level
+    :concept.outcomes.find(o=>o.level==='G1')?.level??concept.outcomes[0]?.level;
+  return level?getFocusedConcept(graph,concept.id,level):undefined;
+}
+
 export function learningGraphHref(id:string,level?:LearningLevel):string{
   return '/?mode=graph&concept='+encodeURIComponent(id)+(level?'&level='+level:'');
 }

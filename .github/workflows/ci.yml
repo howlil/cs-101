@@ -190,6 +190,10 @@ jobs:
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-001&view=project' > /tmp/catalog-project.html
           grep -q 'SQL Workbench — six queries and repeatable init.sql' /tmp/catalog-project.html
           grep -q 'enam query inspeksi' /tmp/catalog-project.html
+          curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=SQL-006&concept=concurrent-debit-safety&level=G2' > /tmp/cross-level-prerequisite.html
+          grep -q 'Step 2 of 10' /tmp/cross-level-prerequisite.html
+          grep -q 'Concept graph for this lesson' /tmp/cross-level-prerequisite.html
+          grep -q 'Cross-domain connections' /tmp/cross-level-prerequisite.html
           if grep -q 'Concept graph for this lesson' /tmp/catalog-project.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-007' > /tmp/money-unit-materi.html
           grep -q 'Money Unit Tests' /tmp/money-unit-materi.html

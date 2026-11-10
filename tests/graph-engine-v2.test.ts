@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import manifest from '../curriculum/manifest.v2.json';
 import overlay from '../curriculum/learning-graph.v2.json';
 import {buildCurriculumGraph} from '../src/domain/curriculum-v2/graph';
-import {buildLearningGraph} from '../src/domain/learning-graph';
+import {buildLearningGraph,resolveItemGraphPreview} from '../src/domain/learning-graph';
 import {planLearningGoal} from '../src/domain/learning-planner';
 import {reportGraphCoverage} from '../src/domain/graph-coverage';
 const curriculum=buildCurriculumGraph(manifest);
@@ -79,4 +79,19 @@ test('combined concept and competency prerequisites reject a cycle at build time
     }]
   };
   assert.throws(()=>buildLearningGraph(mixed,curriculum),/Mixed prerequisite cycle/);
+});
+
+test('goal path to a prerequisite uses the item-owned graph preview rather than a missing target outcome',()=>{
+  const crossLevel=resolveItemGraphPreview(graph,'SQL-006',{
+    conceptId:'concurrent-debit-safety',level:'G2',
+  });
+  assert.equal(crossLevel?.concept.id,'relational-schema');
+  assert.equal(crossLevel?.level,'G1');
+  assert.ok(crossLevel?.outcome);
+  const direct=resolveItemGraphPreview(graph,'SQL-017',{
+    conceptId:'ledger-atomicity',level:'G1',
+  });
+  assert.equal(direct?.concept.id,'ledger-atomicity');
+  assert.equal(direct?.level,'G1');
+  assert.equal(resolveItemGraphPreview(graph,'JAV-003'),undefined);
 });

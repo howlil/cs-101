@@ -5,7 +5,7 @@ import ContentLibrary from '../components/library/ContentLibrary.astro';
 import EmptyCurriculum from '../components/library/EmptyCurriculum.astro';
 import KnowledgeGraph from '../components/curriculum/KnowledgeGraph.astro';
 import graphOverlay from '../../curriculum/learning-graph.v2.json';
-import { buildLearningGraph, getFocusedConcept, conceptsForItem, assessmentForItem, getConceptNeighborhood } from '../domain/learning-graph';
+import { buildLearningGraph, getFocusedConcept, conceptsForItem, assessmentForItem, getConceptNeighborhood, resolveItemGraphPreview } from '../domain/learning-graph';
 import { curriculumGraph } from '../server/curriculum';
 import { getLearningPath, getItemPathContext } from '../domain/learning-path';
 import { planLearningGoal } from '../domain/learning-planner';
@@ -42,14 +42,7 @@ const rendered = lesson ? await render(lesson) : null;
 const Content = rendered?.Content;
 const itemConcepts = item ? conceptsForItem(learningGraph, item.id) : [];
 // Preserve a valid explicit path first; otherwise choose the first mapped G1 outcome.
-const previewConcept = pathContext
-  ? itemConcepts.find(concept => concept.id === pathContext.conceptId)
-  : itemConcepts.find(concept => concept.outcomes.some(outcome => outcome.level === 'G1')) ?? itemConcepts[0];
-const previewLevel = pathContext?.level ?? previewConcept?.outcomes.find(outcome => outcome.level === 'G1')?.level
-  ?? previewConcept?.outcomes[0]?.level;
-const preview = previewConcept && previewLevel
-  ? getFocusedConcept(learningGraph, previewConcept.id, previewLevel)
-  : undefined;
+const preview = item ? resolveItemGraphPreview(learningGraph,item.id,pathContext) : undefined;
 const graphPreview = preview?.outcome ? {
   focus: { id: preview.concept.id, title: preview.concept.title,
     href: '/?mode=graph&concept=' + encodeURIComponent(preview.concept.id) + '&level=' + preview.level },
