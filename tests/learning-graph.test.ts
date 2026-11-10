@@ -78,7 +78,7 @@ test('invalid outcome mapping and duplicate level fail closed',()=>{
 });
 
 test('reverse duplicate conceptual relation fails in validation instead of crashing the one-hop canvas',()=>{
-  const related=overlay.relations.find(r=>r.type==='related')!;
+  const related={from:'http-request-lifecycle',to:'tcp-connection',type:'related' as const,status:'proposed' as const,rationale:'Existing semantic link fixture'};
   assert.throws(()=>buildLearningGraph({
     ...overlay,
     relations:[...overlay.relations,{...related,from:related.to,to:related.from}]
