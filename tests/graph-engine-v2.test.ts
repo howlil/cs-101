@@ -46,7 +46,7 @@ test('unmapped level stays an explicit outcome gap and unknown goal fails closed
   assert.throws(()=>planLearningGoal(graph,{conceptId:'not-in-graph',level:'G1'},new Set()),/Unknown learning goal/);
 });
 test('invalid, unsupported or cyclic dependency graphs fail closed',()=>{
-  const base=overlay.competencyDependencies[0];
+  const base=graph.competencyDependencies[0]!;
   const patch=(deps:unknown[])=>({...overlay,competencyDependencies:deps});
   assert.throws(()=>buildLearningGraph(patch([...overlay.competencyDependencies,base]),curriculum),/Duplicate competency dependency/);
   assert.throws(()=>buildLearningGraph(patch([{...base,from:{conceptId:'not-real',level:'G1'}}]),curriculum),/Unknown competency reference/);
@@ -55,7 +55,7 @@ test('invalid, unsupported or cyclic dependency graphs fail closed',()=>{
     ...base,from:base.to,to:base.from,sourceItemIds:['TST-019','SYS-008']}]),curriculum),/Competency prerequisite cycle/);
 });
 test('proposed dependencies are not gates even when structurally valid',()=>{
-  const d={...overlay.competencyDependencies[0],status:'proposed' as const};
+  const d={...graph.competencyDependencies[0]!,status:'proposed' as const};
   const modified=buildLearningGraph({...overlay,competencyDependencies:[d]},curriculum);
   const plan=planLearningGoal(modified,{conceptId:'api-contract-testing',level:'G1'},new Set());
   assert.deepEqual(plan.steps.map(s=>s.itemId),['SPR-011','TST-019','TST-020']);

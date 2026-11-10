@@ -5,6 +5,7 @@ import { getLearningPath } from './learning-path';
 export type LearningGoal={conceptId:string;level:LearningLevel};
 export type PlannedStep={
   itemId:string;title:string;trackTitle:string;conceptId:string;conceptTitle:string;
+  role:'foundation'|'application'|'diagnostic'|'operation';
   level:LearningLevel;priority:'P0'|'P1'|'P2'|'unknown';
   content:'published'|'outline';reason:'reviewed-prerequisite'|'suggested-outcome';
 };
@@ -24,7 +25,7 @@ export function planLearningGoal(graph:LearningGraph,goal:LearningGoal,published
     const priority=item.kind==='unit'
       ?(item.marketExpectation[0]?.slice(0,2)??'unknown'):'unknown';
     return {
-      itemId:step.itemId,title:step.title,trackTitle:step.trackTitle,
+      itemId:step.itemId,title:step.title,trackTitle:step.trackTitle,role:step.role,
       conceptId:step.conceptId,conceptTitle:step.conceptTitle,level:step.stepLevel,
       priority:(['P0','P1','P2'].includes(priority)?priority:'unknown') as PlannedStep['priority'],
       content:(publishedIds.has(step.itemId)?'published':'outline') as PlannedStep['content'],
