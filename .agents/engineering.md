@@ -2,6 +2,7 @@
 
 ## Responsibilities
 R1: Existing manifest is canonical for all unit IDs, source references and lesson fingerprints.
+R4: Transaction-correctness overlay maps four source-backed concepts across Java/PostgreSQL/Spring. Reviewed schema→atomic ledger→concurrent debit dependencies order study; all new assessment criteria are proposed and require real environment evidence.
 R2: Graph V2 overlay adds semantic links, depth-specific outcomes, reviewed competency dependencies with canonical source IDs, and proposed assessment blueprints without changing source imports.
 R3: Astro composes immutable graph data and renders server-selected URL views.
 S1: Overlay JSON immutable; URL query params own mode, selected concept and G0–G4 depth. The optional graph expansion toggle is local React state.
@@ -61,6 +62,7 @@ DEC18: TST-020 uses one bounded Node 24 source fixture against tracked SYS-008 O
 DEC16: Publish SYS-008 as a standalone OpenAPI 3.1.1 JSON design proposal and use bounded Node contract/example checks in V3 authoring; preserve separate actual Spring MVC/auth/runtime implementation proof.
 
 ## Verification
+PF30 (P34,G4) [important] | canonical P0 mapping, cross-level dependency path, rubric evidence and honest outline-only availability | iter/pr | pnpm test; pnpm graph:validate; pnpm ci
 PF29 (P33,G1) [important] | depth-bounded graph BFS, edge dedup/direction, layout and accessible text links | iter/pr | pnpm test; pnpm ci
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
 PF2 (P3,P4) [important] | validation, cycle and manifest integrity | iter/pr | pnpm test

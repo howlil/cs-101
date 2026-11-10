@@ -569,6 +569,190 @@
           }
         }
       ]
+    },
+    {
+      "id": "transfer-state-machine",
+      "title": "Transfer State Invariants",
+      "description": "Legal state transitions and field-level validation are distinct responsibilities: neither an invalid request nor a rejected transition may silently change transfer state.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Implement and verify legal CREATED / AUTHORIZED / SETTLED / FAILED transitions and deterministic input error codes.",
+          "evidence": "Java 21 reproducible unit-test output showing legal and illegal transitions plus unchanged state on rejection.",
+          "itemIds": [
+            "JAV-010",
+            "JAV-019"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Implement a minimal transfer aggregate and boundary validator; exercise legal transitions and malformed input.",
+            "criteria": [
+              {
+                "id": "transfer-transition-matrix",
+                "itemId": "JAV-010",
+                "evidenceKind": "cli-build",
+                "check": "Reject illegal transitions while preserving the previous transfer state.",
+                "passWhen": "Java 21 Maven tests cover CREATED, AUTHORIZED, SETTLED and FAILED branches, including an unchanged-state assertion after rejection."
+              },
+              {
+                "id": "transfer-invalid-input",
+                "itemId": "JAV-019",
+                "evidenceKind": "cli-build",
+                "check": "Distinguish missing amount, invalid account and unsupported currency.",
+                "passWhen": "Java 21 Maven tests assert stable specific error codes; no input silently falls back to a successful transfer."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "idempotent-transfer-replay",
+      "title": "Idempotent Transfer Replay",
+      "description": "Replay identity is a business invariant; in-memory deduplication, PostgreSQL unique-key enforcement and restart-safe HTTP handling require different proof boundaries.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Distinguish exact replay, conflicting key reuse and concurrent in-flight requests without a second financial side effect.",
+          "evidence": "Separate Java replay tests, PostgreSQL uniqueness tests and real Spring/PostgreSQL restart and concurrent-request evidence.",
+          "itemIds": [
+            "JAV-021",
+            "SQL-010",
+            "SPR-022"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Prove one logical transfer for exact and concurrent replays, reject a changed payload, and verify durability across restart.",
+            "criteria": [
+              {
+                "id": "replay-in-memory",
+                "itemId": "JAV-021",
+                "evidenceKind": "cli-build",
+                "check": "Return the stored outcome for identical request fingerprint; reject key reuse with different payload.",
+                "passWhen": "Java 21 Maven tests prove same-key/same-body replay has one debit, while changed-body reuse conflicts, including simulated failure."
+              },
+              {
+                "id": "idempotency-unique-key",
+                "itemId": "SQL-010",
+                "evidenceKind": "database-test",
+                "check": "Enforce merchant/key uniqueness and distinguish exact duplicate from conflicting payload.",
+                "passWhen": "PostgreSQL INSERT/ON CONFLICT tests leave one durable row for exact replay and reject conflicting fingerprints before financial mutation."
+              },
+              {
+                "id": "restart-safe-transfer",
+                "itemId": "SPR-022",
+                "evidenceKind": "framework-test",
+                "check": "Prove the same transfer outcome survives service restart and concurrent calls.",
+                "passWhen": "Real Spring service with PostgreSQL integration tests return the persisted result after restart; two concurrent identical requests create one transfer and changed payload returns 409."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ledger-atomicity",
+      "title": "Atomic Double-entry Ledger",
+      "description": "Balanced debit-credit posting and immutable journal history require explicit cross-row verification and transactional rollback; PostgreSQL CHECK alone cannot enforce an aggregate balance.",
+      "outcomes": [
+        {
+          "level": "G1",
+          "competency": "Post balanced, immutable journal entries and prove that an induced failure cannot partially commit debit, credit or ledger state.",
+          "evidence": "Java invariant tests, PostgreSQL journal/transaction tests and Spring transaction rollback integration evidence.",
+          "itemIds": [
+            "JAV-022",
+            "SQL-011",
+            "SQL-017",
+            "SPR-018"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Build a transfer posting workflow that is balanced per currency, immutable after posting and atomic under failure.",
+            "criteria": [
+              {
+                "id": "ledger-balance-invariant",
+                "itemId": "JAV-022",
+                "evidenceKind": "cli-build",
+                "check": "Preserve balanced postings, posted immutability and reversal as a separate counter-entry.",
+                "passWhen": "Java 21 Maven tests reconstruct account balances and prove per-currency debit-credit equality, with illegal mutation rejected."
+              },
+              {
+                "id": "ledger-schema-integrity",
+                "itemId": "SQL-011",
+                "evidenceKind": "database-test",
+                "check": "Use journals and postings with transactional cross-row balancing and immutable posted history.",
+                "passWhen": "Real PostgreSQL verification queries expose unbalanced candidate journals; transactional posting workflow refuses them without relying on a row-level CHECK."
+              },
+              {
+                "id": "atomic-debit-credit",
+                "itemId": "SQL-017",
+                "evidenceKind": "database-test",
+                "check": "Commit debit, credit and journal insert together; rollback on forced write failure.",
+                "passWhen": "PostgreSQL transaction fixtures prove a forced pre-commit exception leaves every persisted balance and posting unchanged."
+              },
+              {
+                "id": "spring-rollback-scope",
+                "itemId": "SPR-018",
+                "evidenceKind": "framework-test",
+                "check": "Prove Spring transaction scope and timeout cannot leave partial posted journal state.",
+                "passWhen": "Spring + PostgreSQL integration tests verify a runtime error rolls back all entries; readOnly is not treated as an authorization boundary."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "concurrent-debit-safety",
+      "title": "Concurrent Debit Safety",
+      "description": "MVCC snapshots, row locking and optimistic version checks constrain balance races; atomic single-transaction posting alone does not prevent lost updates under concurrent writes.",
+      "outcomes": [
+        {
+          "level": "G2",
+          "competency": "Diagnose overspend and lost-update races across two database sessions, and select a bounded locking/retry strategy.",
+          "evidence": "Reproducible two-session PostgreSQL concurrency output and Spring integration tests showing unchanged monetary invariants.",
+          "itemIds": [
+            "SQL-018",
+            "SQL-019",
+            "SPR-017",
+            "SPR-021"
+          ],
+          "status": "proposed",
+          "assessment": {
+            "task": "Reproduce and repair concurrent withdrawals at the last available balance, including a deadlock/failure path.",
+            "criteria": [
+              {
+                "id": "mvcc-snapshot-observation",
+                "itemId": "SQL-018",
+                "evidenceKind": "database-test",
+                "check": "Compare READ COMMITTED with REPEATABLE READ and SERIALIZABLE snapshot behavior.",
+                "passWhen": "PostgreSQL two-session transcript demonstrates an observable snapshot difference without implying all anomalies apply to every isolation level."
+              },
+              {
+                "id": "last-balance-race",
+                "itemId": "SQL-019",
+                "evidenceKind": "database-test",
+                "check": "Coordinate two withdrawals that exceed the available balance in aggregate.",
+                "passWhen": "Two PostgreSQL sessions show at most one successful withdrawal and nonnegative final balance using an explicit lock/conditional-update strategy."
+              },
+              {
+                "id": "optimistic-version-rejection",
+                "itemId": "SPR-017",
+                "evidenceKind": "framework-test",
+                "check": "Reject or safely handle stale account version writes.",
+                "passWhen": "Spring + PostgreSQL integration test shows two competing writes cannot silently overwrite one another; bounded retry policy is explicit."
+              },
+              {
+                "id": "debit-deadlock-policy",
+                "itemId": "SPR-021",
+                "evidenceKind": "framework-test",
+                "check": "Classify opposing lock orders and reject unbounded retries.",
+                "passWhen": "Concurrent Spring + PostgreSQL integration tests distinguish retryable deadlock from final failure, proving no double spend or negative balance."
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "applications": [
@@ -686,6 +870,71 @@
       "conceptId": "test-journey-selection",
       "itemId": "TST-025",
       "role": "application"
+    },
+    {
+      "conceptId": "transfer-state-machine",
+      "itemId": "JAV-010",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "transfer-state-machine",
+      "itemId": "JAV-019",
+      "role": "application"
+    },
+    {
+      "conceptId": "idempotent-transfer-replay",
+      "itemId": "JAV-021",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "idempotent-transfer-replay",
+      "itemId": "SQL-010",
+      "role": "application"
+    },
+    {
+      "conceptId": "idempotent-transfer-replay",
+      "itemId": "SPR-022",
+      "role": "application"
+    },
+    {
+      "conceptId": "ledger-atomicity",
+      "itemId": "JAV-022",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "ledger-atomicity",
+      "itemId": "SQL-011",
+      "role": "application"
+    },
+    {
+      "conceptId": "ledger-atomicity",
+      "itemId": "SQL-017",
+      "role": "application"
+    },
+    {
+      "conceptId": "ledger-atomicity",
+      "itemId": "SPR-018",
+      "role": "application"
+    },
+    {
+      "conceptId": "concurrent-debit-safety",
+      "itemId": "SQL-018",
+      "role": "foundation"
+    },
+    {
+      "conceptId": "concurrent-debit-safety",
+      "itemId": "SQL-019",
+      "role": "diagnostic"
+    },
+    {
+      "conceptId": "concurrent-debit-safety",
+      "itemId": "SPR-017",
+      "role": "application"
+    },
+    {
+      "conceptId": "concurrent-debit-safety",
+      "itemId": "SPR-021",
+      "role": "diagnostic"
     }
   ],
   "relations": [
@@ -800,6 +1049,34 @@
       "type": "related",
       "status": "proposed",
       "rationale": "Ambiguous debit outcomes require service-boundary and database checks; the testing strategy should not claim browser E2E alone proves recovery."
+    },
+    {
+      "from": "transfer-state-machine",
+      "to": "idempotent-transfer-replay",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "A replayed transfer must return a previously defined outcome; state validation and request identity are different concerns, so no hard prerequisite is inferred."
+    },
+    {
+      "from": "api-design-contract",
+      "to": "idempotent-transfer-replay",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "The HTTP transfer contract describes response and 409 behavior; replay safety additionally requires Java and PostgreSQL tests beyond an API schema."
+    },
+    {
+      "from": "ledger-atomicity",
+      "to": "idempotent-transfer-replay",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "A single atomic posting protects a unit of work, while idempotency prevents duplicate application across repeated requests; neither guarantee replaces the other."
+    },
+    {
+      "from": "ledger-atomicity",
+      "to": "provider-fault-handling",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Local database rollback cannot undo an external provider debit; uncertain remote outcomes need explicit persisted state and reconciliation."
     }
   ],
   "competencyDependencies": [
@@ -837,6 +1114,42 @@
         "TST-019",
         "TST-020",
         "TST-021"
+      ]
+    },
+    {
+      "from": {
+        "conceptId": "relational-schema",
+        "level": "G1"
+      },
+      "to": {
+        "conceptId": "ledger-atomicity",
+        "level": "G1"
+      },
+      "type": "requires",
+      "status": "reviewed",
+      "rationale": "SQL-011's balanced journals/postings require relational entity/key modeling from SQL-006; schema structure is needed to express the journal/posting integrity model before transactional posting.",
+      "sourceItemIds": [
+        "SQL-006",
+        "SQL-011"
+      ]
+    },
+    {
+      "from": {
+        "conceptId": "ledger-atomicity",
+        "level": "G1"
+      },
+      "to": {
+        "conceptId": "concurrent-debit-safety",
+        "level": "G2"
+      },
+      "type": "requires",
+      "status": "reviewed",
+      "rationale": "SQL-019 and SPR-021 test balance races over transactional debit/credit updates; SQL-017 and SPR-018 establish the atomic unit of work that concurrency guards must preserve.",
+      "sourceItemIds": [
+        "SQL-017",
+        "SPR-018",
+        "SQL-019",
+        "SPR-021"
       ]
     }
   ]

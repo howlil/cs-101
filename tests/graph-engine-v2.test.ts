@@ -13,11 +13,11 @@ test('curriculum remains 370 canonical units and new graph maps all authored uni
   const published=new Set(['JAV-001','NET-001','NET-006','OSX-029','PRD-002','SPR-006','SQL-001','SYS-008','TST-007','TST-019','TST-020','TST-021','TST-022','TST-023','TST-024','TST-025']);
   const c=reportGraphCoverage(graph,published);
   assert.equal(c.totalItems,370);
-  assert.equal(c.totalConcepts,14);
-  assert.equal(c.competencyOutcomes,16);
-  assert.equal(c.mappedItemCount,19);
+  assert.equal(c.totalConcepts,18);
+  assert.equal(c.competencyOutcomes,20);
+  assert.equal(c.mappedItemCount,32);
   assert.equal(c.unmappedPublished.length,0);
-  assert.equal(c.reviewedDependencies,2);
+  assert.equal(c.reviewedDependencies,4);
   assert.equal(c.byLevel.G3,0);
   assert.equal(c.byLevel.G4,0);
   assert.ok(c.components.length>=1);

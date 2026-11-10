@@ -93,7 +93,7 @@ Projects/integrations are rendered directly from the curriculum manifest. Old de
 
 ## Engineering curriculum graph V2
 
-The canonical import remains `curriculum/manifest.v2.json` (370 source-authored units); the independent overlay is `curriculum/learning-graph.v2.json`. The graph distinguishes **proposed conceptual relationships** from **reviewed, level-specific competency prerequisites**. Current reviewed G1 dependencies are API design contract → API contract testing → Pact provider verification. These order curriculum study only, not learner mastery or completed assessments.
+The canonical import remains `curriculum/manifest.v2.json` (370 source-authored units); the independent overlay is `curriculum/learning-graph.v2.json`. The graph distinguishes **proposed conceptual relationships** from **reviewed, level-specific competency prerequisites**. Reviewed dependencies include API design contract → API contract testing → Pact provider verification, plus relational schema G1 → atomic ledger G1 → concurrent debit safety G2. These order curriculum study only, not learner mastery or completed assessments.
 
 ```sh
 pnpm graph:status   # mapped/unmapped, reviewed dependency and depth coverage
@@ -101,4 +101,4 @@ pnpm graph:validate # reject invalid references, cycles and unmapped published l
 pnpm ci
 ```
 
-The Knowledge Graph view shows a goal-based study path with reviewed prerequisites first and published/outline availability. It also offers local 1-hop/2-hop exploration of curated same-level relations, with a deterministic bounded SVG layout and accessible text links. Missing G0/G3/G4 competencies are gaps rather than fabricated lessons. This project remains a stateless content library without learner tracking or a database binding.
+Four additional source-backed transaction concepts map 13 existing P0 Java, PostgreSQL and Spring Boot outlines (18 concepts, 20 competency outcomes, 32 uniquely mapped units, 4 reviewed competency dependencies). These are *not* authored lessons or demonstrated mastery. The Knowledge Graph view shows a goal-based study path with reviewed prerequisites first and published/outline availability. It also offers local 1-hop/2-hop exploration of curated same-level relations, with a deterministic bounded SVG layout and accessible text links. Missing G0/G3/G4 competencies are gaps rather than fabricated lessons. This project remains a stateless content library without learner tracking or a database binding.

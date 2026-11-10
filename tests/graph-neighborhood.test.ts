@@ -58,5 +58,5 @@ test('new proposed links stay discovery-only and do not add reviewed dependencie
   assert.equal(links.length,1);
   assert.equal(links[0].status,'proposed');
   assert.equal(links[0].type,'related');
-  assert.equal(graph.competencyDependencies.filter(d=>d.status==='reviewed').length,2);
+  assert.equal(graph.competencyDependencies.filter(d=>d.status==='reviewed').length,4);
 });

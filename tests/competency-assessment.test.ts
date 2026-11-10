@@ -15,7 +15,7 @@ const customize=(conceptId:string,level:string,modify:(outcome:any)=>any)=>({
 
 test('all curated outcomes have nonempty proposed, source-mapped rubrics',()=>{
   const outcomes=graph.concepts.flatMap(concept=>concept.outcomes);
-  assert.equal(outcomes.length,16);
+  assert.equal(outcomes.length,20);
   assert.ok(outcomes.every(o=>o.status==='proposed'&&o.assessment.task.trim()!==''));
   for(const outcome of outcomes){
     assert.ok(outcome.assessment.criteria.length>=2);
