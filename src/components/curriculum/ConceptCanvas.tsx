@@ -94,7 +94,7 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
           const w = node.active ? 246 : 190, h = node.active ? 112 : 94;
           return <a key={node.id} href={node.href} aria-label={`${node.title}${node.active ? ', selected' : ', related, ' + node.status}`}
             aria-current={node.active ? 'page' : undefined} className={node.active ? 'concept-canvas-node is-focus' : 'concept-canvas-node'}>
-            <title>{node.title}{node.status ? ` · ${node.relationType} / ${node.status}` : ` · ${level} selected concept`}</title>
+            <title>{`${node.title}${node.status ? ` · ${node.relationType} / ${node.status}` : ` · ${level} selected concept`}`}</title>
             <rect x={node.x-w/2} y={node.y-h/2} width={w} height={h} rx="18" />
             <text x={node.x} y={node.y - (lines.length - 1)*9} textAnchor="middle">
               {lines.map((line, i) => <tspan key={i} x={node.x} dy={i === 0 ? 0 : 18}>{line}</tspan>)}

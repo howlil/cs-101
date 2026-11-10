@@ -195,7 +195,8 @@ jobs:
           grep -q 'Money Unit Tests' /tmp/money-unit-materi.html
           grep -q 'Satu test = satu kontrak' /tmp/money-unit-materi.html
           grep -q 'JUnit 5.14.4' /tmp/money-unit-materi.html
-          grep -q 'Explore Knowledge Graph' /tmp/money-unit-materi.html
+          grep -q 'Explore concept graph' /tmp/money-unit-materi.html
+          grep -q 'Concept graph for this lesson' /tmp/money-unit-materi.html
           if grep -q 'Outline kurikulum' /tmp/money-unit-materi.html; then exit 1; fi
           curl --fail --silent --show-error 'http://127.0.0.1:4321/?item=TST-007&view=soal' > /tmp/money-unit-soal.html
           grep -q 'Lima soal diagnosis unit test' /tmp/money-unit-soal.html
