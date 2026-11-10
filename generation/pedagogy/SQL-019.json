@@ -1,0 +1,190 @@
+{
+  "unitId": "SQL-019",
+  "curriculumFingerprint": "sha256:900086cac3a9e5b18cd7b3bbfb3b6d86ddb1f5ec88678f0039f4efe3a475b7fd",
+  "pedagogy": {
+    "version": 3,
+    "segments": [
+      {
+        "id": "lock-the-last-balance",
+        "objective": "Coordinate two overlapping withdrawals against a single account using SELECT FOR UPDATE and one transaction per session.",
+        "whyItMatters": "A sequential test can pass while two customers both believe the last available balance is sufficient for their withdrawals.",
+        "mentalModel": "Session A holds the wallet's row lock, session B waits. Once A commits, B's locking SELECT under READ COMMITTED sees the updated row, not the old assumed 100.00.",
+        "explanation": "Begin with wallet W-01=100.00. Session A locks the row with SELECT ... FOR UPDATE, then session B tries to acquire the same lock for a 70.00 withdrawal while A plans to withdraw 80.00. A separate observer confirms B has wait_event_type='Lock' in pg_stat_activity. A commits its guarded 80.00 debit and withdrawal record. When B resumes, its SELECT FOR UPDATE returns 20.00 and the guarded 70.00 debit raises insufficient funds before any withdrawal record. Final persisted wallet balance=20.00; exactly one withdrawal row for 80.00. This proves the coordinated interleaving on real PostgreSQL 16, not all possible isolation or retry policies.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "Two customers try to withdraw 80.00 and 70.00 from a wallet with 100.00 available.",
+          "steps": [
+            {
+              "action": "In session A run BEGIN then SELECT balance FROM accounts WHERE account_id='W-01' FOR UPDATE.",
+              "reason": "Hold the wallet row lock until A commits or rolls back.",
+              "expectedResult": "Session A reads 100.00 and owns the conflicting lock."
+            },
+            {
+              "action": "In session B run a locking SELECT on the same row before A commits.",
+              "reason": "Force a real lock conflict rather than simulated parallelism.",
+              "expectedResult": "Another connection sees B waiting on a PostgreSQL Lock event."
+            },
+            {
+              "action": "Commit A's 80.00 guarded debit, then let B retry the 70.00 debit against the updated balance.",
+              "reason": "Only one withdrawal can satisfy the balance predicate.",
+              "expectedResult": "B sees 20.00, rejects insufficient funds and inserts no ledger row."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "A locks the wallet at 100.00, B requests 70.00, then A commits an 80.00 debit. What balance must B use when its FOR UPDATE query resumes at READ COMMITTED?",
+          "hints": [
+            "B's SELECT FOR UPDATE was blocked on A's row lock.",
+            "At READ COMMITTED, the locking SELECT resumes against the updated row."
+          ],
+          "explanation": "B must use 20.00, not its earlier assumption of 100.00, and reject a 70.00 debit."
+        },
+        "independentChallenge": {
+          "prompt": "On a separate sandbox, coordinate requests for 95.00 and 40.00 against an initial balance of 110.00; prove the second request loses the lock race without a negative balance.",
+          "criterionIds": [
+            "source-task"
+          ],
+          "expectedEvidence": [
+            "Two real psql backends, observed Lock event, one accepted withdrawal, final balance 15.00 and one persisted withdrawal record."
+          ],
+          "variationFromExample": "Uses a new starting balance and different withdrawals rather than 100.00 with 80.00 and 70.00."
+        },
+        "firstAction": "Draw a wallet with balance 100.00 and predict the result of two withdrawals worth 80.00 plus 70.00.",
+        "misconceptionRepair": {
+          "likelyMistake": "Reading balance outside the locking transaction, then assuming that old value is protected.",
+          "whyItFails": "A plain SELECT does not prevent another transaction from updating the row after it was read.",
+          "correctiveAction": "Acquire FOR UPDATE in the same transaction as the debit and enforce a checked balance predicate before recording the withdrawal."
+        },
+        "selfCheck": {
+          "expectedObservation": "B has an actual PostgreSQL Lock wait; only A commits, leaving balance 20.00 and exactly one withdrawal row.",
+          "ifUnexpected": "Inspect pg_stat_activity.wait_event_type, transaction boundaries, row key, statement timeout and independent persisted SELECT."
+        },
+        "continueFromHere": {
+          "nextAction": "Repeat the same contention without an explicit SELECT FOR UPDATE, using an atomic conditional UPDATE.",
+          "resumeCue": "Start from the one-wallet 100.00 state; require observing B blocked before A commits."
+        }
+      },
+      {
+        "id": "conditional-update-after-wait",
+        "objective": "Use UPDATE ... WHERE balance >= amount with a checked affected-row count under concurrent READ COMMITTED writes.",
+        "whyItMatters": "Even with database row locking, a zero-row UPDATE does not raise an SQL error; ignoring it can record a withdrawal that never debited an account.",
+        "mentalModel": "UPDATE obtains the row lock and, after a concurrent transaction commits, reevaluates the balance condition. A false condition yields UPDATE 0, which the application must interpret as insufficient funds.",
+        "explanation": "On a fresh wallet with balance 100.00, session A executes a guarded UPDATE for 80.00 and holds the transaction open. Session B concurrently executes a guarded UPDATE for 70.00, blocking on A's row lock. After A inserts a withdrawal record and commits, B's WHERE balance>=70.00 is reevaluated against balance 20.00 and updates zero rows. The DO block checks ROW_COUNT and raises insufficient funds; its transaction rolls back. The CI fixture verifies an actual Lock wait and independently inspects the final row and withdrawal count. A CHECK(balance>=0) is defense in depth; it does not replace checking whether the withdrawal succeeded.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "A conditional debit statement returns UPDATE 0 after another transaction commits first.",
+          "steps": [
+            {
+              "action": "Session A begins and executes UPDATE accounts SET balance=balance-80.00 WHERE account_id='W-01' AND balance>=80.00.",
+              "reason": "A single guarded write checks and changes the same row.",
+              "expectedResult": "Exactly one row is changed and A keeps its lock until COMMIT."
+            },
+            {
+              "action": "Session B concurrently executes the same guarded pattern for 70.00.",
+              "reason": "It must wait for the row and reevaluate its balance predicate.",
+              "expectedResult": "pg_stat_activity reports a Lock wait, followed by zero updated rows after A commits."
+            },
+            {
+              "action": "Check ROW_COUNT in the same PL/pgSQL DO block and throw on anything other than one.",
+              "reason": "UPDATE 0 by itself is not SQL failure and must not be followed by a ledger INSERT.",
+              "expectedResult": "A=success, B=insufficient funds; no B withdrawal record."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why is UPDATE 0 dangerous when the application immediately inserts a withdrawal ledger row?",
+          "hints": [
+            "An UPDATE with no matching WHERE predicate is still a successful SQL command.",
+            "A ledger row must only appear when the corresponding balance was actually reduced."
+          ],
+          "explanation": "If the balance predicate fails, affected-row count is zero. Without an explicit guard, the ledger may record money leaving when the account was never debited."
+        },
+        "independentChallenge": {
+          "prompt": "Start with 90.00 and concurrently request debits of 60.00 and 50.00 using conditional UPDATE only; prove one UPDATE 0 and no second withdrawal record.",
+          "criterionIds": [
+            "source-task",
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Observed Lock wait, checked ROW_COUNT failure, final balance 30.00, exactly one successful ledger row from a separate session."
+          ],
+          "variationFromExample": "Different initial balance and amounts using guarded UPDATE, not SELECT FOR UPDATE then debit."
+        },
+        "firstAction": "Find the WHERE balance>=80.00 predicate in the concurrency fixture before reading the rest of the test.",
+        "misconceptionRepair": {
+          "likelyMistake": "Assuming a zero-row UPDATE raises an exception automatically.",
+          "whyItFails": "PostgreSQL treats UPDATE 0 as a successful statement; subsequent INSERT can commit a false financial record.",
+          "correctiveAction": "Use UPDATE ... RETURNING or GET DIAGNOSTICS ROW_COUNT; reject zero before ledger mutation."
+        },
+        "selfCheck": {
+          "expectedObservation": "The second transaction waits on a real row lock then throws insufficient funds; persisted wallet remains nonnegative.",
+          "ifUnexpected": "Inspect the UPDATE WHERE clause and whether the ledger insertion occurs only after the row-count guard."
+        },
+        "continueFromHere": {
+          "nextAction": "Extend the lock discipline from one wallet to two accounts touched in opposite directions.",
+          "resumeCue": "Test SELECT FOR UPDATE once, then compare it with conditional UPDATE plus ROW_COUNT."
+        }
+      },
+      {
+        "id": "stable-two-account-lock-order",
+        "objective": "Acquire the same pair of account row locks in ascending ID order for opposing transfers.",
+        "whyItMatters": "Transfers A→B and B→A can deadlock when each transaction acquires its source first and then waits on the other account.",
+        "mentalModel": "Before writing either account, both sessions lock account IDs in the same ORDER BY sequence. This serializes the tested overlapping pair without a circular wait.",
+        "explanation": "Fresh accounts A-01=100.00 and A-02=100.00 are shared by opposite transfers. Session A locks both rows with SELECT ... WHERE account_id IN (...) ORDER BY account_id FOR UPDATE. Session B attempts the same and a separate observer sees its Lock wait. A transfers 40.00 from A-01 to A-02 and commits. B resumes, transfers 30.00 from A-02 to A-01, and commits. Independent SELECT shows A-01=90.00, A-02=110.00, two transfer rows and total 200.00. Consistent lock order prevents the tested deadlock pattern; it is not a universal guarantee that all possible deadlocks are impossible.",
+        "prerequisiteConceptIds": [],
+        "workedExample": {
+          "problem": "An A→B transfer and a B→A transfer need both account rows while running concurrently.",
+          "steps": [
+            {
+              "action": "For both transactions lock A-01 and A-02 with ORDER BY account_id FOR UPDATE before either UPDATE.",
+              "reason": "Every writer acquires shared rows in a consistent order.",
+              "expectedResult": "A holds both locks while B waits on a real Lock event."
+            },
+            {
+              "action": "Commit A→B 40.00, then let B execute B→A 30.00 using the same lock order.",
+              "reason": "Avoid a cycle where A holds one row and B holds the other.",
+              "expectedResult": "Both transactions commit sequentially without a deadlock in this interleaving."
+            },
+            {
+              "action": "Query accounts and transfer records in a third session.",
+              "reason": "Prove no partial writes or lost transferred value.",
+              "expectedResult": "A-01=90.00, A-02=110.00, transfers=2, total=200.00."
+            }
+          ]
+        },
+        "guidedPractice": {
+          "prompt": "Why can opposite transfers deadlock when each locks its own source account first?",
+          "hints": [
+            "A→B may hold A while waiting for B.",
+            "B→A may hold B while waiting for A; consistent global order removes this tested cycle."
+          ],
+          "explanation": "The wait-for graph can form A waits B and B waits A. Acquire all involved rows in a deterministic shared order, not business-direction order."
+        },
+        "independentChallenge": {
+          "prompt": "Using two new accounts X-01/X-02 with balances 200.00 each, run concurrent opposite transfers of 60.00 and 25.00 with both acquiring locks in sorted ID order.",
+          "criterionIds": [
+            "challenge"
+          ],
+          "expectedEvidence": [
+            "Observed blocked second session; both transactions commit; X-01=165.00, X-02=235.00, sum 400.00 and two distinct transfer rows."
+          ],
+          "variationFromExample": "Uses different account IDs, initial balances and amounts, checking the generality of the ordered locking rule."
+        },
+        "firstAction": "Sketch two transactions with arrows A→B and B→A, then identify which account each tries to lock first.",
+        "misconceptionRepair": {
+          "likelyMistake": "Locking the sender first for every transfer and assuming that is the same global order.",
+          "whyItFails": "Opposite transfer directions then acquire account locks in opposite orders and can form a deadlock.",
+          "correctiveAction": "Select both account rows in ascending account_id order FOR UPDATE before any account debit or credit."
+        },
+        "selfCheck": {
+          "expectedObservation": "A separate database session sees B waiting; A commits, then B commits; total remains 200.00.",
+          "ifUnexpected": "Inspect the ORDER BY clause and compare lock acquisition order across both transfer implementations."
+        },
+        "continueFromHere": {
+          "nextAction": "Apply this same locking contract to a different two-account transfer with independently checked invariants.",
+          "resumeCue": "When more than one row is modified, decide the shared lock order before writing either row."
+        }
+      }
+    ]
+  }
+}
