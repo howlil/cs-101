@@ -21,7 +21,7 @@ function labelLines(label: string): string[] {
 export default function ConceptCanvas({ focus, neighbors, level, neighborhood }: Props) {
   const [hops,setHops]=useState<1|2>(1);
   const canExpand=Boolean(neighborhood?.nodes.some(node=>node.hop===2));
-  const expanded=hops===2&&canExpand&&neighborhood;
+  const expanded=hops===2&&canExpand?neighborhood:undefined;
   const scene=expanded?buildExpandedCanvasScene(expanded):buildCanvasScene(focus,neighbors);
   const canvasWidth=expanded?EXPANDED_CANVAS_WIDTH:CANVAS_WIDTH;
   const canvasHeight=expanded?EXPANDED_CANVAS_HEIGHT:CANVAS_HEIGHT;
@@ -76,9 +76,10 @@ export default function ConceptCanvas({ focus, neighbors, level, neighborhood }:
       </div>
       <div className="concept-canvas-tools" aria-label="Graph viewport controls">
         {neighborhood && <div className="concept-canvas-depth" role="group" aria-label="Exploration depth">
-          <button type="button" aria-pressed={!expanded} onClick={()=>{setHops(1);setZoom(1);setOffset({x:0,y:0});}}>1 hop</button>
-          <button type="button" aria-pressed={Boolean(expanded)} disabled={!canExpand}
-            onClick={()=>{setHops(2);setZoom(1);setOffset({x:0,y:0});}}>2 hops</button>
+          <Button type="button" variant="ghost" size="sm" aria-pressed={!expanded}
+            onClick={()=>{setHops(1);setZoom(1);setOffset({x:0,y:0});}}>1 hop</Button>
+          <Button type="button" variant="ghost" size="sm" aria-pressed={Boolean(expanded)} disabled={!canExpand}
+            onClick={()=>{setHops(2);setZoom(1);setOffset({x:0,y:0});}}>2 hops</Button>
         </div>}
         <Button type="button" variant="ghost" size="sm" aria-label="Zoom out" title="Zoom out" onClick={() => setZoom(z => clamp(Math.round((z - 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom <= 0.8}><Minus size={15}/></Button>
         <output aria-label="Current zoom" aria-live="polite">{Math.round(zoom * 100)}%</output>
@@ -99,7 +100,7 @@ export default function ConceptCanvas({ focus, neighbors, level, neighborhood }:
           const to = scene.nodes.find(node => node.id === edge.to)!;
           return <line key={edge.from + '-' + edge.to} x1={from.x} y1={from.y} x2={to.x} y2={to.y}
             className={edge.status === 'proposed' ? 'concept-canvas-link is-proposed' : 'concept-canvas-link'} >
-            <title>{`${edge.type}: ${edge.from} → ${edge.to} (${edge.status})`}</title>
+            <title>{`${edge.type}: ${edge.from} to ${edge.to} (${edge.status})`}</title>
           </line>;
         })}
         {scene.nodes.map(node => {
