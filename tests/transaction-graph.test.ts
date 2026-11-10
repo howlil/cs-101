@@ -55,7 +55,9 @@ test('rubric criteria require distinct real Java, PostgreSQL and Spring proof bo
     assert.ok(focus.outcome?.assessment.criteria.length>=2);
     for(const criterion of focus.outcome!.assessment.criteria){
       assert.ok(focus.outcome!.itemIds.includes(criterion.itemId));
-      const trackId: string = curriculum.itemsById.get(criterion.itemId)!.trackId;
+      const mapped: ReturnType<typeof curriculum.itemsById.get> = curriculum.itemsById.get(criterion.itemId);
+      if (!mapped || mapped.kind !== 'unit') throw new Error('Expected mapped curriculum unit');
+      const trackId: string = mapped.trackId;
       if(trackId==='database')assert.equal(criterion.evidenceKind,'database-test');
       if(trackId==='spring-boot')assert.equal(criterion.evidenceKind,'framework-test');
       if(trackId==='java')assert.equal(criterion.evidenceKind,'cli-build');
