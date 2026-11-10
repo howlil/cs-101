@@ -40,6 +40,39 @@ psql_file postgres commit.sql >/dev/null
 assert_state postgres "$expected_committed"
 echo "sql017-commit=atomic"
 
+# Mutate only the source balance predicate of the SAME commit script.
+# Without ROW_COUNT checks a zero-row debit could still credit and record
+# TX-INSUFFICIENT, which would pass SQL constraints but create money.
+if insufficient_error="$(
+  sed -e 's/AND balance>=125.00/AND balance>=999999.00/' \
+      -e 's/TX-SUCCESS/TX-INSUFFICIENT/' "$ROOT/labs/SQL-017/commit.sql" |
+    docker exec -i "$NAME" psql -U postgres -d postgres -X -q -A -t -v ON_ERROR_STOP=1 2>&1
+)"; then
+  echo "Zero-row debit unexpectedly committed" >&2; exit 1
+fi
+if [[ "$insufficient_error" != *"Sender debit must update exactly one account"* ]]; then
+  printf 'Wrong insufficient-funds failure: %s\n' "$insufficient_error" >&2
+  exit 1
+fi
+assert_state postgres "$expected_committed"
+echo "sql017-insufficient-funds=rejected"
+
+# Mutate only the credit UPDATE target; ledger FK still points to A-02.
+# Without ROW_COUNT checks the debit and ledger would incorrectly commit.
+if missing_recipient_error="$(
+  sed -e "s/WHERE account_id='A-02'/WHERE account_id='A-MISSING'/" \
+      -e 's/TX-SUCCESS/TX-MISSING-DEST/' "$ROOT/labs/SQL-017/commit.sql" |
+    docker exec -i "$NAME" psql -U postgres -d postgres -X -q -A -t -v ON_ERROR_STOP=1 2>&1
+)"; then
+  echo "Zero-row credit unexpectedly committed" >&2; exit 1
+fi
+if [[ "$missing_recipient_error" != *"Recipient credit must update exactly one account"* ]]; then
+  printf 'Wrong missing-recipient failure: %s\n' "$missing_recipient_error" >&2
+  exit 1
+fi
+assert_state postgres "$expected_committed"
+echo "sql017-missing-recipient=rejected"
+
 # The forced duplicate-PK failure must be a real database error.
 # If BEGIN/COMMIT are accidentally removed, this check catches partial writes.
 if psql_file postgres fail-before-commit.sql >/dev/null 2>&1; then

@@ -105,7 +105,7 @@ Four additional source-backed transaction concepts map 13 existing P0 Java, Post
 
 ## SQL-017 — Atomic Transfer (PostgreSQL 16)
 
-SQL-017 is a source-backed V3 lesson with five questions. Three independent SQL writes (debit, credit and ledger INSERT) are bracketed with `BEGIN/COMMIT`. A real ledger primary-key conflict after the balance updates triggers rollback before COMMIT; another script exercises explicit ROLLBACK. A second psql session verifies all persisted balances, row counts and conservation after each scenario. A fresh disposable database repeats the committed scenario.
+SQL-017 is a source-backed V3 lesson with five questions. Three independent SQL writes (debit, credit and ledger INSERT) are bracketed with `BEGIN/COMMIT`. A real ledger primary-key conflict after the balance updates triggers rollback before COMMIT; another script exercises explicit ROLLBACK. Both balance UPDATE statements now reject zero affected rows, preventing a transfer with insufficient sender funds or an absent recipient from reaching COMMIT. The same SQL script is mutation-tested against both cases, and a second psql session verifies all persisted balances, row counts and conservation after each scenario. A fresh disposable database repeats the committed scenario.
 
 ```sh
 bash labs/SQL-017/verify-postgres.sh
