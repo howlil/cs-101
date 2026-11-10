@@ -4,7 +4,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 
 ## Product invariant
 
-- `/` is the only content page; `?item=ID` selects material, `?track=ID` selects a domain, and `?mode=graph&concept=ID&level=G1` selects a read-only level-specific concept neighborhood; optional `?item=ID&concept=ID&level=G1` carries validated study-path context.
+- `/` is the only content page; `?item=ID` selects material, `?track=ID` selects a domain, and `?mode=graph&concept=ID&level=G1` selects a read-only level-specific concept neighborhood (local 1/2-hop exploration); optional `?item=ID&concept=ID&level=G1` carries validated study-path context.
 - Sidebar reuses the domain selector and module accordion. No search field, global search button or command palette. Never add Today, progress, study sessions, reviews, evidence forms, or mandatory reflection UI.
 - Authored content is MDX at `src/content/lessons`. Quiz feedback is local/ephemeral and never persisted.
 - Unauthored items must say they are outlines and **must not fabricate explanations or generated questions**.
@@ -46,3 +46,5 @@ No standalone checkpoint or hard prerequisite may be inferred solely from row or
 - The graph overlay adds depth-specific reviewed competency dependencies with canonical source-item support. Do not modify the imported 370-item manifest to manufacture prerequisite edges.
 - Two reviewed G1 competency dependencies currently connect API contract design → contract testing → provider contract verification; other semantic concept relations remain proposed.
 - `planLearningGoal` returns an explainable read-only curriculum path with explicit outline gaps. It does not grant learner completion, unlock achievements or read retired D1 state.
+
+- Graph canvas expansion is client-local, capped at two curated hops and 18 nodes; it must not infer prerequisite edges or show an unmapped depth. Lesson previews stay one hop and keep accessible text-link alternatives.

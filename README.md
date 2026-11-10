@@ -101,4 +101,4 @@ pnpm graph:validate # reject invalid references, cycles and unmapped published l
 pnpm ci
 ```
 
-The Knowledge Graph view shows a goal-based study path with reviewed prerequisites first and published/outline availability. Missing G0/G3/G4 competencies are gaps rather than fabricated lessons. This project remains a stateless content library without learner tracking or a database binding.
+The Knowledge Graph view shows a goal-based study path with reviewed prerequisites first and published/outline availability. It also offers local 1-hop/2-hop exploration of curated same-level relations, with a deterministic bounded SVG layout and accessible text links. Missing G0/G3/G4 competencies are gaps rather than fabricated lessons. This project remains a stateless content library without learner tracking or a database binding.

@@ -1,12 +1,12 @@
 ---
-import type { Concept, FocusedConcept, LearningLevel } from '../../domain/learning-graph';
+import type { Concept, FocusedConcept, LearningLevel, GraphNeighborhood } from '../../domain/learning-graph';
 import { learningGraphHref, EVIDENCE_KIND_LABELS } from '../../domain/learning-graph';
 import type { LearningPath } from '../../domain/learning-path';
 import type { GoalPlan } from '../../domain/learning-planner';
 import { pathItemHref } from '../../domain/learning-path';
 import ConceptCanvas from './ConceptCanvas';
-interface Props {view:FocusedConcept;path:LearningPath;goalPlan:GoalPlan;concepts:Concept[];publishedLessonIds:string[]}
-const {view,path,goalPlan,concepts,publishedLessonIds}=Astro.props;
+interface Props {view:FocusedConcept;path:LearningPath;goalPlan:GoalPlan;neighborhood:GraphNeighborhood;concepts:Concept[];publishedLessonIds:string[]}
+const {view,path,goalPlan,neighborhood,concepts,publishedLessonIds}=Astro.props;
 const published=new Set(publishedLessonIds);
 const activeConcepts=concepts.filter(c=>c.outcomes.some(o=>o.level===view.level));
 const depths:Array<{id:LearningLevel;title:string}>=[
@@ -51,7 +51,7 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
         neighbors={view.neighbors.map(({concept,relation,direction})=>({
           id:concept.id,title:concept.title,href:learningGraphHref(concept.id,view.level),
           relationType:relation.type,status:relation.status,direction,
-        }))} level={view.level}/>}
+        }))} neighborhood={neighborhood} level={view.level}/>}
       <section class="knowledge-map" aria-label="Focused concept and connections">
         <article class="knowledge-focus">
           <p class="knowledge-eyebrow">{view.level} · Focused concept</p>

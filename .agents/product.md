@@ -32,6 +32,8 @@ B23: A learner opens TST-021 as a source-backed V3 Pact lesson with five questio
 B22: A learner opens authored TST-020 and diagnoses required-field/type response drift and conditional optional-field compatibility, with V3 source-backed material, five quiz questions and a reproducible Node fixture.
 B21: A learner opens authored TST-019 with 10 real HTTP loopback checks against SYS-008, five questions, three malformed-response rejects, and an explicit 422 contract gap.
 B20: A learner opens SYS-008 as a source-backed transfer API design lesson with three machine-readable paths, explicit 201/400/401/403/409/500 rationale, GET 404, RFC 9457 problem format and optional-field backward compatibility design review.
+B31: From the Knowledge Graph, a learner toggles one or two curated hops without changing canonical focus URLs, while lesson previews stay compact and one-hop.
+X7: Uncurated depths and a capped neighborhood do not fabricate concept links; keyboard/text alternatives remain usable.
 B28: A goal concept and level produces an explainable path from depth-specific reviewed competency dependencies, with actual authored/outline content states.
 B29: A learner sees curated G1 testing concepts for money correctness, provider contract, ambiguous provider outcomes, adversarial inputs and test-stage selection.
 B30: A deterministic graph coverage command reports unmapped authored lessons, published/outline distinctions and disconnected components.
@@ -102,5 +104,6 @@ P25 (B22,C19): TST-020 V3 content and static fixture regenerate byte-identically
 P24 (B21,C18): TST-019 V3 artifacts reproduce and local HTTP fixture completes ten real requests, rejects three intentional mutations, documents undeclared 422 and renders Materi/Soal/Project separately.
 P23 (B20,C17): SYS-008 V3 bundle and OpenAPI static contract fixture reproduce; mapped G1 Materi/Soal/Project render, errors/status match, and old-client optional-field acceptance plus breaking type rejection are exercised.
 
+P33 (B31,X7): Same-level two-hop BFS is deterministic, deduplicated, bounded, and shows only real curated relationships; legacy one-hop and missing-depth routes remain unchanged.
 P31 (B28,C1): Goal path is deterministic, uses only reviewed competency prerequisites, handles transitive dependencies, and preserves original item IDs and outline status.
 P32 (B29,B30,C2): All sixteen authored lessons have curated mappings; graph status reports item-level coverage without changing imported manifest or claiming mastery.

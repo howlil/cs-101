@@ -779,6 +779,27 @@
       "type": "related",
       "status": "proposed",
       "rationale": "Money arithmetic is a unit-test concern rather than an automatic browser E2E requirement."
+    },
+    {
+      "from": "service-readiness",
+      "to": "provider-fault-handling",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Dependency unavailability affects readiness, while lost provider replies create ambiguous transaction outcomes; distinguish health routing from financial recovery."
+    },
+    {
+      "from": "adversarial-api-inputs",
+      "to": "test-journey-selection",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Invalid transfer requests belong primarily to HTTP and contract regression tests rather than every browser journey."
+    },
+    {
+      "from": "provider-fault-handling",
+      "to": "test-journey-selection",
+      "type": "related",
+      "status": "proposed",
+      "rationale": "Ambiguous debit outcomes require service-boundary and database checks; the testing strategy should not claim browser E2E alone proves recovery."
     }
   ],
   "competencyDependencies": [

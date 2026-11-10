@@ -171,3 +171,57 @@ export function assessmentForItem(
   if(criteria.length===0)return;
   return {task:outcome.assessment.task,status:outcome.status,level,criteria};
 }
+
+export type GraphNeighborhoodNode={id:string;title:string;href:string;hop:0|1|2};
+export type GraphNeighborhoodEdge={
+  from:string;to:string;type:ConceptRelation['type'];
+  status:ConceptRelation['status'];rationale:string;
+};
+export type GraphNeighborhood={
+  focusId:string;level:LearningLevel;nodes:GraphNeighborhoodNode[];
+  edges:GraphNeighborhoodEdge[];truncated:boolean;
+};
+/**
+ * Explore only explicitly curated same-level edges, capped at two hops.
+ * Related/deepens edges remain discovery links, not study prerequisites.
+ * Reviewed competency prerequisites keep their actual from -> to direction.
+ */
+export function getConceptNeighborhood(
+  graph:LearningGraph,focus:FocusedConcept,maxHops:1|2=2,maxNodes=18,
+):GraphNeighborhood{
+  const nodes:GraphNeighborhoodNode[]=[{
+    id:focus.concept.id,title:focus.concept.title,
+    href:learningGraphHref(focus.concept.id,focus.level),hop:0,
+  }];
+  if(!focus.outcome)return {focusId:focus.concept.id,level:focus.level,nodes,edges:[],truncated:false};
+  const discovered=new Set([focus.concept.id]);
+  let truncated=false;
+  for(let i=0;i<nodes.length;i++){
+    const current=nodes[i];
+    if(current.hop>=maxHops)continue;
+    for(const {concept} of getFocusedConcept(graph,current.id,focus.level).neighbors){
+      if(discovered.has(concept.id))continue;
+      if(nodes.length>=maxNodes){truncated=true;continue;}
+      discovered.add(concept.id);
+      nodes.push({id:concept.id,title:concept.title,href:learningGraphHref(concept.id,focus.level),
+        hop:(current.hop+1) as 1|2});
+    }
+  }
+  const edges:GraphNeighborhoodEdge[]=[];
+  const keys=new Map<string,number>();
+  for(const node of nodes){
+    for(const {concept,relation} of getFocusedConcept(graph,node.id,focus.level).neighbors){
+      if(!discovered.has(concept.id))continue;
+      const key=relation.type==='related'
+        ?'related:'+ [relation.from,relation.to].sort().join('~')
+        :relation.type+':'+relation.from+'>'+relation.to;
+      const candidate={from:relation.from,to:relation.to,type:relation.type,
+        status:relation.status,rationale:relation.rationale};
+      const previous=keys.get(key);
+      if(previous===undefined){keys.set(key,edges.length);edges.push(candidate);}
+      else if(edges[previous].status==='proposed'&&candidate.status==='reviewed')edges[previous]=candidate;
+    }
+  }
+  return {focusId:focus.concept.id,level:focus.level,nodes,edges,truncated};
+}
+

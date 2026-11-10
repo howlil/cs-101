@@ -4,9 +4,9 @@
 R1: Existing manifest is canonical for all unit IDs, source references and lesson fingerprints.
 R2: Graph V2 overlay adds semantic links, depth-specific outcomes, reviewed competency dependencies with canonical source IDs, and proposed assessment blueprints without changing source imports.
 R3: Astro composes immutable graph data and renders server-selected URL views.
-S1: Overlay JSON immutable; URL query params own mode, selected concept and G0–G4 depth.
+S1: Overlay JSON immutable; URL query params own mode, selected concept and G0–G4 depth. The optional graph expansion toggle is local React state.
 K1: src/domain/learning-graph.ts validates and indexes the overlay.
-K2: src/components/curriculum/KnowledgeGraph.astro renders accessible concept neighborhoods with a React SVG canvas; graph-canvas-layout.ts derives positions from validated one-hop edges without persistence.
+K2: src/components/curriculum/KnowledgeGraph.astro renders accessible concept neighborhoods with a React SVG canvas; graph-canvas-layout.ts derives bounded deterministic one/two-hop scenes from validated same-level edges without persistence.
 K3: src/pages/index.astro selects mode; no new routes, databases or runtime dependencies.
 K4: src/domain/learning-path.ts traverses reviewed depth-aware prerequisites; learning-planner.ts explains goal paths and content availability; graph-coverage.ts reports completeness.
 
@@ -61,6 +61,7 @@ DEC18: TST-020 uses one bounded Node 24 source fixture against tracked SYS-008 O
 DEC16: Publish SYS-008 as a standalone OpenAPI 3.1.1 JSON design proposal and use bounded Node contract/example checks in V3 authoring; preserve separate actual Spring MVC/auth/runtime implementation proof.
 
 ## Verification
+PF29 (P33,G1) [important] | depth-bounded graph BFS, edge dedup/direction, layout and accessible text links | iter/pr | pnpm test; pnpm ci
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
 PF2 (P3,P4) [important] | validation, cycle and manifest integrity | iter/pr | pnpm test
 PF3 (P1,P3,P5,P6) [important] | Astro golden and HTTP smoke | merge | pnpm ci
