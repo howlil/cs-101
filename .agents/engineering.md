@@ -2,13 +2,14 @@
 
 ## Responsibilities
 R1: Existing manifest is canonical for all unit IDs, source references and lesson fingerprints.
-R2: The curated overlay adds semantic links, depth-specific outcomes and proposed assessment blueprints without changing source imports.
+R4: Transaction-correctness overlay maps four source-backed concepts across Java/PostgreSQL/Spring. Reviewed schema→atomic ledger→concurrent debit dependencies order study; all new assessment criteria are proposed and require real environment evidence.
+R2: Graph V2 overlay adds semantic links, depth-specific outcomes, reviewed competency dependencies with canonical source IDs, and proposed assessment blueprints without changing source imports.
 R3: Astro composes immutable graph data and renders server-selected URL views.
-S1: Overlay JSON immutable; URL query params own mode, selected concept and G0–G4 depth.
+S1: Overlay JSON immutable; URL query params own mode, selected concept and G0–G4 depth. The optional graph expansion toggle is local React state.
 K1: src/domain/learning-graph.ts validates and indexes the overlay.
-K2: src/components/curriculum/KnowledgeGraph.astro renders accessible concept neighborhoods with a React SVG canvas; graph-canvas-layout.ts derives positions from validated one-hop edges without persistence.
+K2: src/components/curriculum/KnowledgeGraph.astro renders accessible concept neighborhoods with a React SVG canvas; graph-canvas-layout.ts derives bounded deterministic one/two-hop scenes from validated same-level edges without persistence.
 K3: src/pages/index.astro selects mode; no new routes, databases or runtime dependencies.
-K4: src/domain/learning-path.ts owns deterministic depth-aware prerequisite traversal, contextual URLs and validation of route membership.
+K4: src/domain/learning-path.ts traverses reviewed depth-aware prerequisites; learning-planner.ts explains goal paths and content availability; graph-coverage.ts reports completeness.
 
 ## Flow and guarantees
 /?mode=graph&level=G2 -> validate outcome mappings -> show only G2 units and same-level neighbors -> /?item=ID. Missing level renders an honest gap.
@@ -16,7 +17,7 @@ Unknown selection -> valid default focus; invalid overlay -> fail build rather t
 G1: Only explicitly reviewed requires edges may represent hard prerequisites.
 G2: Workbook importer remains deterministic and untouched.
 G3: All outcome unit IDs must be explicitly mapped to the same concept; never infer a missing level.
-G4: 'requires' reviewed edges are traversed dependency-first and deduplicated; related edges never become prerequisite gates.
+G4: Reviewed competency-level 'requires' edges are traversed dependency-first across levels and deduplicated; proposed and related edges never become prerequisite gates.
 G5: URL route context is accepted only for a canonical mapped unit in the requested concept and depth.
 G6: Every assessment criterion ID is unique per outcome and references an item in that outcome; no automatic grading or persistent evidence.
 G7: Authored content must retain exact V3 receipts and runnable proof; source provenance is checked against primary RFC, Spring and Linux manuals.
@@ -61,6 +62,8 @@ DEC18: TST-020 uses one bounded Node 24 source fixture against tracked SYS-008 O
 DEC16: Publish SYS-008 as a standalone OpenAPI 3.1.1 JSON design proposal and use bounded Node contract/example checks in V3 authoring; preserve separate actual Spring MVC/auth/runtime implementation proof.
 
 ## Verification
+PF30 (P34,G4) [important] | canonical P0 mapping, cross-level dependency path, rubric evidence and honest outline-only availability | iter/pr | pnpm test; pnpm graph:validate; pnpm ci
+PF29 (P33,G1) [important] | depth-bounded graph BFS, edge dedup/direction, layout and accessible text links | iter/pr | pnpm test; pnpm ci
 PF1 (P1,P2) [important] | selectors + unknown concept fallback | iter/pr | pnpm test
 PF2 (P3,P4) [important] | validation, cycle and manifest integrity | iter/pr | pnpm test
 PF3 (P1,P3,P5,P6) [important] | Astro golden and HTTP smoke | merge | pnpm ci
@@ -87,3 +90,6 @@ PF22 (P26,G19) [important] | TST-021 V3 reproducibility and actual Pact consumer
 PF21 (P25,G18) [important] | TST-020 V3 reproducibility, required/type/enum negative checks and additive conditional consumer tests with 3-view smoke | merge | pnpm ci
 PF20 (P24,G17) [important] | ten live HTTP requests, three mutation rejects, explicit 422 contract gap | merge | CI TST-019 fixture
 PF19 (P23,G16) [important] | SYS-008 V3 byte-reproducible static checker, RFC status/error shape, G1 contextual routes and three-view smoke | merge | pnpm ci
+
+PF27 (P31,G4) [important] | depth-specific DAG, transitive path, cycle and provenance rejection | iter/pr | pnpm test
+PF28 (P32,G2) [important] | deterministic 370-unit import, graph coverage and authored mapping | iter/pr | pnpm graph:validate; pnpm ci

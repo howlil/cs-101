@@ -7,6 +7,7 @@ export type PathStep = ConceptApplication & {
   conceptId: string;
   conceptTitle: string;
   reviewedPrerequisite: boolean;
+  stepLevel: LearningLevel;
 };
 
 export type LearningPath = {
@@ -41,43 +42,53 @@ export function getLearningPath(graph: LearningGraph, focus: FocusedConcept): Le
   };
 
   const visited = new Set<string>();
-  const ordered: Concept[] = [];
+  const active = new Set<string>();
+  const ordered: Array<{concept:Concept;level:LearningLevel}> = [];
   let reviewedPrerequisiteCount = 0;
+  const key = (id:string,level:LearningLevel)=>id+'/'+level;
 
-  function visit(concept: Concept): void {
-    if (visited.has(concept.id)) return;
-    visited.add(concept.id);
-    const prerequisites = graph.relations.filter((relation) =>
-      relation.type === 'requires' && relation.status === 'reviewed' && relation.to === concept.id);
-    reviewedPrerequisiteCount += prerequisites.length;
-    for (const prerequisite of prerequisites) visit(graph.conceptsById.get(prerequisite.from)!);
-    const outcome = concept.outcomes.find((candidate) => candidate.level === focus.level);
-    if (outcome) ordered.push(concept);
-    else missingPrerequisites.push({
-      id: concept.id, title: concept.title,
-      availableLevels: concept.outcomes.map((entry) => entry.level),
+  function visit(concept: Concept, level:LearningLevel): void {
+    const id=key(concept.id,level);
+    if(visited.has(id))return;
+    if(active.has(id))throw new Error('Mixed prerequisite cycle: '+id);
+    active.add(id);
+    const legacy=graph.relations.filter(r=>
+      r.type==='requires' && r.status==='reviewed' && r.to===concept.id);
+    for(const relation of legacy){
+      reviewedPrerequisiteCount++;
+      visit(graph.conceptsById.get(relation.from)!,level);
+    }
+    const dependencies=graph.competencyDependencies.filter(d=>d.status==='reviewed'
+      &&d.to.conceptId===concept.id&&d.to.level===level);
+    for(const dependency of dependencies){
+      reviewedPrerequisiteCount++;
+      visit(graph.conceptsById.get(dependency.from.conceptId)!,dependency.from.level);
+    }
+    const outcome=concept.outcomes.find(candidate=>candidate.level===level);
+    if(outcome)ordered.push({concept,level});
+    else if(!missingPrerequisites.some(m=>m.id===concept.id))missingPrerequisites.push({
+      id:concept.id,title:concept.title,availableLevels:concept.outcomes.map(entry=>entry.level),
     });
+    active.delete(id);visited.add(id);
   }
 
-  visit(focus.concept);
-  const emitted = new Set<string>();
-  for (const concept of ordered) {
-    const outcome = concept.outcomes.find((entry) => entry.level === focus.level)!;
-    for (const itemId of outcome.itemIds) {
-      if (emitted.has(itemId)) continue;
+  visit(focus.concept,focus.level);
+  const emitted=new Set<string>();
+  for(const {concept,level} of ordered){
+    const outcome=concept.outcomes.find(entry=>entry.level===level)!;
+    for(const itemId of outcome.itemIds){
+      if(emitted.has(itemId))continue;
       emitted.add(itemId);
-      const item = graph.curriculum.itemsById.get(itemId)!;
-      const mapped = graph.applications.find((app) => app.conceptId === concept.id && app.itemId === itemId)!;
-      if (item.kind !== 'unit') throw new Error('Expected unit in learning path: ' + itemId);
-      steps.push({
-        itemId, title: item.title, role: mapped.role,
-        trackTitle: graph.curriculum.tracksById.get(item.trackId)!.title,
-        conceptId: concept.id, conceptTitle: concept.title,
-        reviewedPrerequisite: concept.id !== focus.concept.id,
-      });
+      const item=graph.curriculum.itemsById.get(itemId)!;
+      const mapped=graph.applications.find(app=>app.conceptId===concept.id&&app.itemId===itemId)!;
+      if(item.kind!=='unit')throw new Error('Expected unit in learning path: '+itemId);
+      steps.push({itemId,title:item.title,role:mapped.role,
+        trackTitle:graph.curriculum.tracksById.get(item.trackId)!.title,
+        conceptId:concept.id,conceptTitle:concept.title,
+        stepLevel:level,reviewedPrerequisite:concept.id!==focus.concept.id||level!==focus.level});
     }
   }
-  return { conceptId: focus.concept.id, level: focus.level, steps, missingPrerequisites, reviewedPrerequisiteCount };
+  return {conceptId:focus.concept.id,level:focus.level,steps,missingPrerequisites,reviewedPrerequisiteCount};
 }
 
 export function pathItemHref(

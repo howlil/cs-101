@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import manifest from '../curriculum/manifest.v2.json';
-import overlay from '../curriculum/learning-graph.v1.json';
+import overlay from '../curriculum/learning-graph.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { buildLearningGraph, getFocusedConcept } from '../src/domain/learning-graph';
 import { getLearningPath, getItemPathContext, pathItemHref } from '../src/domain/learning-path';
@@ -87,12 +87,11 @@ test('cross-domain study path preserves authored and outline identities without 
   const design=getLearningPath(graph,getFocusedConcept(graph,'api-design-contract','G1'));
   assert.deepEqual(boot.steps.map(s=>s.itemId),['JAV-001','SPR-001']);
   assert.deepEqual(sql.steps.map(s=>s.itemId),['SQL-001','SQL-006']);
-  assert.deepEqual(testing.steps.map(s=>s.itemId),['SPR-011','TST-019','TST-020']);
+  assert.deepEqual(testing.steps.map(s=>s.itemId),['SYS-008','SPR-006','SPR-011','TST-019','TST-020']);
   assert.deepEqual(design.steps.map(s=>s.itemId),['SYS-008','SPR-006']);
   for(const path of [boot,sql,testing,design]){
-    assert.equal(path.reviewedPrerequisiteCount,0);
     assert.deepEqual(path.missingPrerequisites,[]);
-    assert.ok(path.steps.every(s=>s.reviewedPrerequisite===false));
+    assert.ok(path.steps.length>0);
   }
   assert.equal(getItemPathContext(graph,'java-build-toolchain','G1','JAV-001')?.next?.itemId,'SPR-001');
   assert.equal(getItemPathContext(graph,'api-design-contract','G1','SPR-006')?.previous?.itemId,'SYS-008');

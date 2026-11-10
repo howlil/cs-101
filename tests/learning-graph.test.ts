@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import manifest from '../curriculum/manifest.v2.json';
-import overlay from '../curriculum/learning-graph.v1.json';
+import overlay from '../curriculum/learning-graph.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { buildLearningGraph, conceptsAtLevel, conceptsForItem, getFocusedConcept, learningGraphHref, resolveLearningLevel } from '../src/domain/learning-graph';
 
@@ -75,4 +75,27 @@ test('invalid outcome mapping and duplicate level fail closed',()=>{
   assert.throws(()=>buildLearningGraph(withOutcomes([{...first.outcomes[0],itemIds:['NET-999']}]),curriculum),/Outcome item is not mapped/);
   assert.throws(()=>buildLearningGraph(withOutcomes([{...first.outcomes[0],itemIds:['NET-006']}]),curriculum),/Outcome item is not mapped/);
   assert.throws(()=>buildLearningGraph(withOutcomes([{...first.outcomes[0],itemIds:['NET-001','NET-001']}]),curriculum),/Duplicate outcome item/);
+});
+
+test('reverse duplicate conceptual relation fails in validation instead of crashing the one-hop canvas',()=>{
+  const related={from:'http-request-lifecycle',to:'tcp-connection',type:'related' as const,status:'proposed' as const,rationale:'Existing semantic link fixture'};
+  assert.throws(()=>buildLearningGraph({
+    ...overlay,
+    relations:[...overlay.relations,{...related,from:related.to,to:related.from}]
+  },curriculum),/Duplicate concept pair relation/);
+});
+
+test('concept link and reviewed prerequisite can coexist without duplicating canvas neighbors',()=>{
+  const custom=buildLearningGraph({
+    ...overlay,
+    relations:[...overlay.relations,{
+      from:'server-binding',to:'http-request-lifecycle',type:'requires',
+      status:'reviewed',rationale:'Valid legacy prerequisite fixture',
+    }]
+  },curriculum);
+  const focus=getFocusedConcept(custom,'http-request-lifecycle','G1');
+  const binding=focus.neighbors.filter(n=>n.concept.id==='server-binding');
+  assert.equal(binding.length,1);
+  assert.equal(binding[0].relation.type,'requires');
+  assert.equal(binding[0].relation.status,'reviewed');
 });

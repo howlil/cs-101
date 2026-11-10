@@ -5,7 +5,7 @@ import type { CurriculumGraph } from './curriculum-v2/graph';
 export const LEARNING_LEVELS=['G0','G1','G2','G3','G4'] as const;
 export type LearningLevel=typeof LEARNING_LEVELS[number];
 const levelSchema=z.enum(LEARNING_LEVELS);
-const evidenceKindSchema=z.enum(['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test']);
+const evidenceKindSchema=z.enum(['design-review','framework-test','network-lab','packet-trace','cluster-test','cli-build','database-test','http-test']);
 export const EVIDENCE_KIND_LABELS:Record<z.infer<typeof evidenceKindSchema>,string>={
   'design-review':'Reasoned design review',
   'framework-test':'Framework integration test',
@@ -14,6 +14,7 @@ export const EVIDENCE_KIND_LABELS:Record<z.infer<typeof evidenceKindSchema>,stri
   'cluster-test':'Live dependency / Kubernetes test',
   'cli-build':'Reproducible Java / Maven CLI build',
   'database-test':'Live PostgreSQL integration test',
+  'http-test':'Real HTTP contract and fault test',
 };
 const criterionSchema=z.object({
   id:curriculumSlugSchema,itemId:itemIdSchema,evidenceKind:evidenceKindSchema,
@@ -28,14 +29,26 @@ const outcomeSchema=z.object({
 const conceptSchema=z.object({id:curriculumSlugSchema,title:z.string().min(1),description:z.string().min(1),outcomes:z.array(outcomeSchema).min(1)});
 const applicationSchema=z.object({conceptId:curriculumSlugSchema,itemId:itemIdSchema,role:z.enum(['foundation','application','diagnostic','operation'])});
 const relationSchema=z.object({from:curriculumSlugSchema,to:curriculumSlugSchema,type:z.enum(['requires','related','deepens']),status:z.enum(['proposed','reviewed']),rationale:z.string().min(1)});
-export const learningOverlaySchema=z.object({version:z.literal(1),concepts:z.array(conceptSchema).min(1),applications:z.array(applicationSchema),relations:z.array(relationSchema)});
+const competencyRefSchema=z.object({conceptId:curriculumSlugSchema,level:levelSchema});
+const competencyDependencySchema=z.object({
+  from:competencyRefSchema,to:competencyRefSchema,type:z.literal('requires'),
+  status:z.enum(['proposed','reviewed']),rationale:z.string().min(1),
+  sourceItemIds:z.array(itemIdSchema).min(2),
+});
+export const learningOverlaySchema=z.object({
+  version:z.literal(2),concepts:z.array(conceptSchema).min(1),
+  applications:z.array(applicationSchema),relations:z.array(relationSchema),
+  competencyDependencies:z.array(competencyDependencySchema),
+});
 export type Concept=z.infer<typeof conceptSchema>;
 export type LevelOutcome=z.infer<typeof outcomeSchema>;
 export type AssessmentCriterion=z.infer<typeof criterionSchema>;
 export type ItemAssessment={task:string;status:LevelOutcome['status'];level:LearningLevel;criteria:AssessmentCriterion[]};
 export type ConceptRelation=z.infer<typeof relationSchema>;
+export type CompetencyRef=z.infer<typeof competencyRefSchema>;
+export type CompetencyDependency=z.infer<typeof competencyDependencySchema>;
 export type ConceptApplication={itemId:string;title:string;trackTitle:string;role:z.infer<typeof applicationSchema>['role']};
-export type LearningGraph={concepts:Concept[];conceptsById:Map<string,Concept>;applications:z.infer<typeof applicationSchema>[];relations:ConceptRelation[];curriculum:CurriculumGraph};
+export type LearningGraph={concepts:Concept[];conceptsById:Map<string,Concept>;applications:z.infer<typeof applicationSchema>[];relations:ConceptRelation[];competencyDependencies:CompetencyDependency[];curriculum:CurriculumGraph};
 export type FocusedConcept={level:LearningLevel;concept:Concept;outcome?:LevelOutcome;nextOutcome?:LevelOutcome;neighbors:Array<{concept:Concept;relation:ConceptRelation;direction:'in'|'out'}>;applications:ConceptApplication[]};
 function unique(keys:string[],label:string){if(new Set(keys).size!==keys.length)throw new Error('Duplicate '+label);}
 export function resolveLearningLevel(value:string|null):LearningLevel{return LEARNING_LEVELS.find(level=>level===value)??'G1';}
@@ -74,6 +87,32 @@ export function buildLearningGraph(input:unknown,curriculum:CurriculumGraph):Lea
       requires.set(r.to,[...(requires.get(r.to)??[]),r.from]);
     }
   }
+  const competencyKey=(ref:CompetencyRef)=>ref.conceptId+'/'+ref.level;
+  unique(data.competencyDependencies.map(d=>competencyKey(d.from)+'>'+competencyKey(d.to)),'competency dependency');
+  const competencyParents=new Map<string,string[]>();
+  for(const d of data.competencyDependencies){
+    const from=conceptsById.get(d.from.conceptId)?.outcomes.find(o=>o.level===d.from.level);
+    const to=conceptsById.get(d.to.conceptId)?.outcomes.find(o=>o.level===d.to.level);
+    if(!from||!to)throw new Error('Unknown competency reference: '+competencyKey(d.from)+' -> '+competencyKey(d.to));
+    if(competencyKey(d.from)===competencyKey(d.to))throw new Error('Self competency dependency: '+competencyKey(d.from));
+    const validIds=new Set([...from.itemIds,...to.itemIds]);
+    for(const id of d.sourceItemIds)if(!validIds.has(id))throw new Error('Dependency source item not mapped: '+id);
+    if(!d.sourceItemIds.some(id=>from.itemIds.includes(id))||!d.sourceItemIds.some(id=>to.itemIds.includes(id)))
+      throw new Error('Dependency must cite both competency outcomes: '+competencyKey(d.to));
+    if(d.status==='reviewed'){
+      const target=competencyKey(d.to);
+      competencyParents.set(target,[...(competencyParents.get(target)??[]),competencyKey(d.from)]);
+    }
+  }
+  const competencySeen=new Set<string>(),competencyActive=new Set<string>();
+  const visitCompetency=(key:string):void=>{
+    if(competencyActive.has(key))throw new Error('Competency prerequisite cycle: '+key);
+    if(competencySeen.has(key))return;
+    competencyActive.add(key);
+    for(const parent of competencyParents.get(key)??[])visitCompetency(parent);
+    competencyActive.delete(key);competencySeen.add(key);
+  };
+  for(const key of competencyParents.keys())visitCompetency(key);
   const seen=new Set<string>(),active=new Set<string>();
   function visit(id:string):void{
     if(active.has(id))throw new Error('Concept prerequisite cycle: '+id);
@@ -82,6 +121,37 @@ export function buildLearningGraph(input:unknown,curriculum:CurriculumGraph):Lea
     active.delete(id);seen.add(id);
   }
   for(const c of data.concepts)visit(c.id);
+  // Related is undirected, so the reverse spelling is the same relationship.
+  // Different relation types may coexist: the focused canvas selects a single
+  // representative edge, while the planner still traverses reviewed requires.
+  unique(data.relations.filter(r=>r.type==='related')
+    .map(r=>[r.from,r.to].sort().join('/')),'concept pair relation');
+  // Concept-level prerequisites apply at each depth. Independent DAG checks above
+  // are insufficient: a concept edge and a competency edge may form a mixed cycle.
+  const allParents=new Map<string,string[]>();
+  const addParent=(child:string,parent:string)=>{
+    allParents.set(child,[...(allParents.get(child)??[]),parent]);
+  };
+  for(const r of data.relations){
+    if(r.type==='requires'&&r.status==='reviewed'){
+      for(const level of LEARNING_LEVELS)
+        addParent(r.to+'/'+level,r.from+'/'+level);
+    }
+  }
+  for(const dependency of data.competencyDependencies){
+    if(dependency.status==='reviewed')
+      addParent(competencyKey(dependency.to),competencyKey(dependency.from));
+  }
+  const allSeen=new Set<string>(),allActive=new Set<string>();
+  const visitCombined=(key:string):void=>{
+    if(allActive.has(key))throw new Error('Mixed prerequisite cycle: '+key);
+    if(allSeen.has(key))return;
+    allActive.add(key);
+    for(const parent of allParents.get(key)??[])visitCombined(parent);
+    allActive.delete(key);
+    allSeen.add(key);
+  };
+  for(const key of allParents.keys())visitCombined(key);
   return {...data,conceptsById,curriculum};
 }
 export function getFocusedConcept(graph:LearningGraph,requested:string|null,requestedLevel:string|null=null):FocusedConcept{
@@ -89,10 +159,31 @@ export function getFocusedConcept(graph:LearningGraph,requested:string|null,requ
   const concept=(requested&&graph.conceptsById.get(requested))||conceptsAtLevel(graph,level)[0]||graph.concepts[0];
   const outcome=concept.outcomes.find(o=>o.level===level);
   const nextOutcome=concept.outcomes.find(o=>LEARNING_LEVELS.indexOf(o.level)>LEARNING_LEVELS.indexOf(level));
-  const neighbors=outcome?graph.relations.filter(r=>r.from===concept.id||r.to===concept.id).map(relation=>({
-    concept:graph.conceptsById.get(relation.from===concept.id?relation.to:relation.from)!,relation,
-    direction:(relation.from===concept.id?'out':'in') as 'out'|'in',
-  })).filter(x=>x.concept.outcomes.some(o=>o.level===level)):[];
+  const rank=(r:ConceptRelation)=>r.type==='requires'?3:r.type==='deepens'?2:1;
+  const neighbors:FocusedConcept['neighbors']=[];
+  if(outcome)for(const relation of graph.relations){
+    if(relation.from!==concept.id&&relation.to!==concept.id)continue;
+    const peer=graph.conceptsById.get(relation.from===concept.id?relation.to:relation.from)!;
+    if(!peer.outcomes.some(o=>o.level===level))continue;
+    const candidate={concept:peer,relation,direction:
+      (relation.from===concept.id?'out':'in') as 'out'|'in'};
+    const at=neighbors.findIndex(n=>n.concept.id===peer.id);
+    if(at<0)neighbors.push(candidate);
+    else if(rank(relation)>rank(neighbors[at].relation))neighbors[at]=candidate;
+  }
+  // A reviewed competency dependency overrides a merely related link in this depth's canvas.
+  if(outcome)for(const dependency of graph.competencyDependencies.filter(d=>
+    d.status==='reviewed'&&d.from.level===level&&d.to.level===level
+    &&(d.from.conceptId===concept.id||d.to.conceptId===concept.id))){
+    const outward=dependency.from.conceptId===concept.id;
+    const peer=graph.conceptsById.get(outward?dependency.to.conceptId:dependency.from.conceptId)!;
+    const link={concept:peer,relation:{from:dependency.from.conceptId,to:dependency.to.conceptId,
+      type:'requires' as const,status:'reviewed' as const,rationale:dependency.rationale},
+      direction:(outward?'out':'in') as 'out'|'in'};
+    const at=neighbors.findIndex(n=>n.concept.id===peer.id);
+    if(at>=0)neighbors[at]=link;
+    else neighbors.push(link);
+  }
   const mapped=new Map(graph.applications.filter(a=>a.conceptId===concept.id).map(a=>[a.itemId,a]));
   const applications=(outcome?.itemIds??[]).map(id=>{
     const item=graph.curriculum.itemsById.get(id)!,app=mapped.get(id)!;
@@ -105,6 +196,23 @@ export function conceptsForItem(graph:LearningGraph,itemId:string):Concept[]{
   const ids=new Set(graph.applications.filter(a=>a.itemId===itemId).map(a=>a.conceptId));
   return graph.concepts.filter(c=>ids.has(c.id));
 }
+/**
+ * A goal path can link to a prerequisite owned by another concept and depth.
+ * Keep the goal's navigation context, but render the item's own mapped concept.
+ */
+export function resolveItemGraphPreview(
+  graph:LearningGraph,itemId:string,pathContext?:{conceptId:string;level:LearningLevel},
+):FocusedConcept|undefined{
+  const concepts=conceptsForItem(graph,itemId);
+  const matching=pathContext&&concepts.find(c=>c.id===pathContext.conceptId
+    &&c.outcomes.some(o=>o.level===pathContext.level));
+  const concept=matching??concepts.find(c=>c.outcomes.some(o=>o.level==='G1'))??concepts[0];
+  if(!concept)return;
+  const level=matching&&pathContext?pathContext.level
+    :concept.outcomes.find(o=>o.level==='G1')?.level??concept.outcomes[0]?.level;
+  return level?getFocusedConcept(graph,concept.id,level):undefined;
+}
+
 export function learningGraphHref(id:string,level?:LearningLevel):string{
   return '/?mode=graph&concept='+encodeURIComponent(id)+(level?'&level='+level:'');
 }
@@ -119,3 +227,57 @@ export function assessmentForItem(
   if(criteria.length===0)return;
   return {task:outcome.assessment.task,status:outcome.status,level,criteria};
 }
+
+export type GraphNeighborhoodNode={id:string;title:string;href:string;hop:0|1|2};
+export type GraphNeighborhoodEdge={
+  from:string;to:string;type:ConceptRelation['type'];
+  status:ConceptRelation['status'];rationale:string;
+};
+export type GraphNeighborhood={
+  focusId:string;level:LearningLevel;nodes:GraphNeighborhoodNode[];
+  edges:GraphNeighborhoodEdge[];truncated:boolean;
+};
+/**
+ * Explore only explicitly curated same-level edges, capped at two hops.
+ * Related/deepens edges remain discovery links, not study prerequisites.
+ * Reviewed competency prerequisites keep their actual from -> to direction.
+ */
+export function getConceptNeighborhood(
+  graph:LearningGraph,focus:FocusedConcept,maxHops:1|2=2,maxNodes=18,
+):GraphNeighborhood{
+  const nodes:GraphNeighborhoodNode[]=[{
+    id:focus.concept.id,title:focus.concept.title,
+    href:learningGraphHref(focus.concept.id,focus.level),hop:0,
+  }];
+  if(!focus.outcome)return {focusId:focus.concept.id,level:focus.level,nodes,edges:[],truncated:false};
+  const discovered=new Set([focus.concept.id]);
+  let truncated=false;
+  for(let i=0;i<nodes.length;i++){
+    const current=nodes[i];
+    if(current.hop>=maxHops)continue;
+    for(const {concept} of getFocusedConcept(graph,current.id,focus.level).neighbors){
+      if(discovered.has(concept.id))continue;
+      if(nodes.length>=maxNodes){truncated=true;continue;}
+      discovered.add(concept.id);
+      nodes.push({id:concept.id,title:concept.title,href:learningGraphHref(concept.id,focus.level),
+        hop:(current.hop+1) as 1|2});
+    }
+  }
+  const edges:GraphNeighborhoodEdge[]=[];
+  const keys=new Map<string,number>();
+  for(const node of nodes){
+    for(const {concept,relation} of getFocusedConcept(graph,node.id,focus.level).neighbors){
+      if(!discovered.has(concept.id))continue;
+      const key=relation.type==='related'
+        ?'related:'+ [relation.from,relation.to].sort().join('~')
+        :relation.type+':'+relation.from+'>'+relation.to;
+      const candidate={from:relation.from,to:relation.to,type:relation.type,
+        status:relation.status,rationale:relation.rationale};
+      const previous=keys.get(key);
+      if(previous===undefined){keys.set(key,edges.length);edges.push(candidate);}
+      else if(edges[previous].status==='proposed'&&candidate.status==='reviewed')edges[previous]=candidate;
+    }
+  }
+  return {focusId:focus.concept.id,level:focus.level,nodes,edges,truncated};
+}
+

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import manifest from '../curriculum/manifest.v2.json';
-import overlay from '../curriculum/learning-graph.v1.json';
+import overlay from '../curriculum/learning-graph.v2.json';
 import { buildCurriculumGraph } from '../src/domain/curriculum-v2/graph';
 import { buildLearningGraph, getFocusedConcept, learningGraphHref } from '../src/domain/learning-graph';
 import { buildCanvasScene, CANVAS_HEIGHT, CANVAS_WIDTH } from '../src/domain/graph-canvas-layout';
@@ -46,9 +46,9 @@ test('new concept neighborhoods expose only authored proposed relations at G1',(
   assert.deepEqual(scene('java-build-toolchain','G1').nodes.map(n=>n.id),
     ['java-build-toolchain','http-controller','api-contract-testing']);
   assert.deepEqual(scene('api-design-contract','G1').nodes.map(n=>n.id),
-    ['api-design-contract','http-controller','api-contract-testing','relational-schema']);
+    ['api-design-contract','http-controller','api-contract-testing','relational-schema','idempotent-transfer-replay']);
   assert.deepEqual(scene('relational-schema','G1').nodes.map(n=>n.id),
-    ['relational-schema','api-design-contract']);
+    ['relational-schema','api-design-contract','ledger-atomicity']);
   assert.deepEqual(scene('api-contract-testing','G2').nodes.map(n=>n.id),['api-contract-testing']);
   assert.equal(scene('api-contract-testing','G2').edges.length,0);
 });

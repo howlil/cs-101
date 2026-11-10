@@ -1,11 +1,12 @@
 "use client";
 
 import { useId, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
+import type { GraphNeighborhood } from '../../domain/learning-graph';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '../arc/button/button';
-import { buildCanvasScene, CANVAS_WIDTH, CANVAS_HEIGHT, type CanvasNeighbor } from '../../domain/graph-canvas-layout';
+import { buildCanvasScene, buildExpandedCanvasScene, CANVAS_WIDTH, CANVAS_HEIGHT, EXPANDED_CANVAS_WIDTH, EXPANDED_CANVAS_HEIGHT, type CanvasNeighbor } from '../../domain/graph-canvas-layout';
 
-interface Props { focus: { id: string; title: string; href: string }; neighbors: CanvasNeighbor[]; level: string }
+interface Props { focus: { id: string; title: string; href: string }; neighbors: CanvasNeighbor[]; level: string; neighborhood?:GraphNeighborhood }
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 function labelLines(label: string): string[] {
   const words = label.split(/\s+/);
@@ -17,15 +18,20 @@ function labelLines(label: string): string[] {
   return lines;
 }
 
-export default function ConceptCanvas({ focus, neighbors, level }: Props) {
-  const scene = buildCanvasScene(focus, neighbors);
+export default function ConceptCanvas({ focus, neighbors, level, neighborhood }: Props) {
+  const [hops,setHops]=useState<1|2>(1);
+  const canExpand=Boolean(neighborhood?.nodes.some(node=>node.hop===2));
+  const expanded=hops===2&&canExpand?neighborhood:undefined;
+  const scene=expanded?buildExpandedCanvasScene(expanded):buildCanvasScene(focus,neighbors);
+  const canvasWidth=expanded?EXPANDED_CANVAS_WIDTH:CANVAS_WIDTH;
+  const canvasHeight=expanded?EXPANDED_CANVAS_HEIGHT:CANVAS_HEIGHT;
   const dots = useId().replace(/:/g, '_');
   const drag = useRef<{ x: number; y: number } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const viewWidth = CANVAS_WIDTH / zoom, viewHeight = CANVAS_HEIGHT / zoom;
-  const viewX = (CANVAS_WIDTH - viewWidth) / 2 + offset.x;
-  const viewY = (CANVAS_HEIGHT - viewHeight) / 2 + offset.y;
+  const viewWidth = canvasWidth / zoom, viewHeight = canvasHeight / zoom;
+  const viewX = (canvasWidth - viewWidth) / 2 + offset.x;
+  const viewY = (canvasHeight - viewHeight) / 2 + offset.y;
 
   const startDrag = (event: PointerEvent<SVGRectElement>) => {
     if (event.button !== 0) return;
@@ -40,8 +46,8 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
     const dy = event.clientY - drag.current.y;
     drag.current = { x: event.clientX, y: event.clientY };
     setOffset(prev => ({
-      x: clamp(prev.x - dx * viewWidth / bounds.width, -CANVAS_WIDTH / 2, CANVAS_WIDTH / 2),
-      y: clamp(prev.y - dy * viewHeight / bounds.height, -CANVAS_HEIGHT / 2, CANVAS_HEIGHT / 2),
+      x: clamp(prev.x - dx * viewWidth / bounds.width, -canvasWidth / 2, canvasWidth / 2),
+      y: clamp(prev.y - dy * viewHeight / bounds.height, -canvasHeight / 2, canvasHeight / 2),
     }));
   };
   const endDrag = (event: PointerEvent<SVGRectElement>) => {
@@ -57,8 +63,8 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
     if (!delta) return;
     event.preventDefault();
     setOffset(prev => ({
-      x: clamp(prev.x + delta[0], -CANVAS_WIDTH / 2, CANVAS_WIDTH / 2),
-      y: clamp(prev.y + delta[1], -CANVAS_HEIGHT / 2, CANVAS_HEIGHT / 2),
+      x: clamp(prev.x + delta[0], -canvasWidth / 2, canvasWidth / 2),
+      y: clamp(prev.y + delta[1], -canvasHeight / 2, canvasHeight / 2),
     }));
   };
 
@@ -66,9 +72,15 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
     <div className="concept-canvas-bar">
       <div className="concept-canvas-heading">
         <strong>Concept connections</strong>
-        <span>{level} · {neighbors.length} reviewed-source links shown as proposed unless reviewed</span>
+        <span>{level} · {scene.nodes.length-1} visible concepts · {scene.edges.length} curated links</span>
       </div>
       <div className="concept-canvas-tools" aria-label="Graph viewport controls">
+        {neighborhood && <div className="concept-canvas-depth" role="group" aria-label="Exploration depth">
+          <Button type="button" variant="ghost" size="sm" aria-pressed={!expanded}
+            onClick={()=>{setHops(1);setZoom(1);setOffset({x:0,y:0});}}>1 hop</Button>
+          <Button type="button" variant="ghost" size="sm" aria-pressed={Boolean(expanded)} disabled={!canExpand}
+            onClick={()=>{setHops(2);setZoom(1);setOffset({x:0,y:0});}}>2 hops</Button>
+        </div>}
         <Button type="button" variant="ghost" size="sm" aria-label="Zoom out" title="Zoom out" onClick={() => setZoom(z => clamp(Math.round((z - 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom <= 0.8}><Minus size={15}/></Button>
         <output aria-label="Current zoom" aria-live="polite">{Math.round(zoom * 100)}%</output>
         <Button type="button" variant="ghost" size="sm" aria-label="Zoom in" title="Zoom in" onClick={() => setZoom(z => clamp(Math.round((z + 0.2) * 10) / 10, 0.8, 1.8))} disabled={zoom >= 1.8}><Plus size={15}/></Button>
@@ -76,8 +88,8 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
       </div>
     </div>
     <div className="concept-canvas-scroll">
-      <svg className="concept-canvas-svg" viewBox={`${viewX} ${viewY} ${viewWidth} ${viewHeight}`}
-        role="group" tabIndex={0} aria-label={`Graph at ${level}. Drag empty space or use arrow keys to pan. Tab to visit concept links.`} onKeyDown={keyPan}>
+      <svg className={`concept-canvas-svg${expanded?' is-expanded':''}`} viewBox={`${viewX} ${viewY} ${viewWidth} ${viewHeight}`}
+        role="group" tabIndex={0} aria-label={`Graph at ${level}, ${expanded?'two':'one'} hop${expanded?'s':''}. Drag empty space or use arrow keys to pan. Tab to visit concept links.`} onKeyDown={keyPan}>
         <defs><pattern id={dots} width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="var(--border-strong)" /></pattern></defs>
         <rect x="-900" y="-900" width="2800" height="2400" fill="var(--surface)" />
         <rect x="-900" y="-900" width="2800" height="2400" fill={`url(#${dots})`}
@@ -87,25 +99,33 @@ export default function ConceptCanvas({ focus, neighbors, level }: Props) {
           const from = scene.nodes.find(node => node.id === edge.from)!;
           const to = scene.nodes.find(node => node.id === edge.to)!;
           return <line key={edge.from + '-' + edge.to} x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-            className={edge.status === 'proposed' ? 'concept-canvas-link is-proposed' : 'concept-canvas-link'} />;
+            className={edge.status === 'proposed' ? 'concept-canvas-link is-proposed' : 'concept-canvas-link'} >
+            <title>{`${edge.type}: ${edge.from} to ${edge.to} (${edge.status})`}</title>
+          </line>;
         })}
         {scene.nodes.map(node => {
           const lines = labelLines(node.title);
           const w = node.active ? 246 : 190, h = node.active ? 112 : 94;
-          return <a key={node.id} href={node.href} aria-label={`${node.title}${node.active ? ', selected' : ', related, ' + node.status}`}
+          return <a key={node.id} href={node.href} aria-label={`${node.title}${node.active ? ', selected' : expanded ? `, ${node.hop} hops from focus` : ', related, ' + node.status}`}
             aria-current={node.active ? 'page' : undefined} className={node.active ? 'concept-canvas-node is-focus' : 'concept-canvas-node'}>
-            <title>{node.title}{node.status ? ` · ${node.relationType} / ${node.status}` : ` · ${level} selected concept`}</title>
+            <title>{expanded ? `${node.title} · ${node.hop} hop(s) · ${level}` : `${node.title}${node.status ? ` · ${node.relationType} / ${node.status}` : ` · ${level} selected concept`}`}</title>
             <rect x={node.x-w/2} y={node.y-h/2} width={w} height={h} rx="18" />
             <text x={node.x} y={node.y - (lines.length - 1)*9} textAnchor="middle">
               {lines.map((line, i) => <tspan key={i} x={node.x} dy={i === 0 ? 0 : 18}>{line}</tspan>)}
             </text>
             <text className="concept-canvas-node-subtitle" x={node.x} y={node.y+h/2-16} textAnchor="middle">
-              {node.active ? 'FOCUS · ' + level : `${node.relationType} · ${node.status}`}
+              {node.active ? 'FOCUS · ' + level : expanded ? `${node.hop} hop${node.hop===1?'':'s'}` : `${node.relationType} · ${node.status}`}
             </text>
           </a>;
         })}
       </svg>
     </div>
-    <p className="concept-canvas-footnote">Dashed connections = proposed editorial relationships, not mandatory prerequisites. Select any node to explore. Buttons and keyboard work without dragging.</p>
+    {expanded && <nav className="concept-canvas-extras" aria-label="Two-hop concept links">
+      <strong>Additional connections</strong>
+      <div>{expanded.nodes.filter(node=>node.hop===2).map(node=>
+        <a key={node.id} href={node.href}>{node.title}</a>)}</div>
+    </nav>}
+    {expanded?.truncated && <p className="concept-canvas-footnote" role="status">Showing a bounded neighborhood. Select a node to explore its other connections.</p>}
+    <p className="concept-canvas-footnote">Dashed = proposed relationship; solid = reviewed connection. Only reviewed prerequisites constrain a learning path. Keyboard and text links remain available.</p>
   </section>;
 }
