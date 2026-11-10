@@ -121,6 +121,9 @@ export function buildLearningGraph(input:unknown,curriculum:CurriculumGraph):Lea
     active.delete(id);seen.add(id);
   }
   for(const c of data.concepts)visit(c.id);
+  // One-hop canvas renders one link per concept pair. Reverse related edges or
+  // competing relation types otherwise produce duplicate neighbor IDs.
+  unique(data.relations.map(r=>[r.from,r.to].sort().join('/')),'concept pair relation');
   // Concept-level prerequisites apply at each depth. Independent DAG checks above
   // are insufficient: a concept edge and a competency edge may form a mixed cycle.
   const allParents=new Map<string,string[]>();

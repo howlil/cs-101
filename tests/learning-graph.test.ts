@@ -76,3 +76,11 @@ test('invalid outcome mapping and duplicate level fail closed',()=>{
   assert.throws(()=>buildLearningGraph(withOutcomes([{...first.outcomes[0],itemIds:['NET-006']}]),curriculum),/Outcome item is not mapped/);
   assert.throws(()=>buildLearningGraph(withOutcomes([{...first.outcomes[0],itemIds:['NET-001','NET-001']}]),curriculum),/Duplicate outcome item/);
 });
+
+test('reverse duplicate conceptual relation fails in validation instead of crashing the one-hop canvas',()=>{
+  const related=overlay.relations.find(r=>r.type==='related')!;
+  assert.throws(()=>buildLearningGraph({
+    ...overlay,
+    relations:[...overlay.relations,{...related,from:related.to,to:related.from}]
+  },curriculum),/Duplicate concept pair relation/);
+});
