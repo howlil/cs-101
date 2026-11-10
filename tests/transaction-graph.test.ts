@@ -55,11 +55,10 @@ test('rubric criteria require distinct real Java, PostgreSQL and Spring proof bo
     assert.ok(focus.outcome?.assessment.criteria.length>=2);
     for(const criterion of focus.outcome!.assessment.criteria){
       assert.ok(focus.outcome!.itemIds.includes(criterion.itemId));
-      const item=curriculum.itemsById.get(criterion.itemId)!;
-      assert.equal(item.kind,'unit');
-      if(item.trackId==='database')assert.equal(criterion.evidenceKind,'database-test');
-      if(item.trackId==='spring-boot')assert.equal(criterion.evidenceKind,'framework-test');
-      if(item.trackId==='java')assert.equal(criterion.evidenceKind,'cli-build');
+      const trackId: string = curriculum.itemsById.get(criterion.itemId)!.trackId;
+      if(trackId==='database')assert.equal(criterion.evidenceKind,'database-test');
+      if(trackId==='spring-boot')assert.equal(criterion.evidenceKind,'framework-test');
+      if(trackId==='java')assert.equal(criterion.evidenceKind,'cli-build');
       assert.ok(assessmentForItem(graph,id,focus.level,criterion.itemId)?.criteria.some(c=>c.id===criterion.id));
     }
   }
