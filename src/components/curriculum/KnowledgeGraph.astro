@@ -2,10 +2,11 @@
 import type { Concept, FocusedConcept, LearningLevel } from '../../domain/learning-graph';
 import { learningGraphHref, EVIDENCE_KIND_LABELS } from '../../domain/learning-graph';
 import type { LearningPath } from '../../domain/learning-path';
+import type { GoalPlan } from '../../domain/learning-planner';
 import { pathItemHref } from '../../domain/learning-path';
 import ConceptCanvas from './ConceptCanvas';
-interface Props {view:FocusedConcept;path:LearningPath;concepts:Concept[];publishedLessonIds:string[]}
-const {view,path,concepts,publishedLessonIds}=Astro.props;
+interface Props {view:FocusedConcept;path:LearningPath;goalPlan:GoalPlan;concepts:Concept[];publishedLessonIds:string[]}
+const {view,path,goalPlan,concepts,publishedLessonIds}=Astro.props;
 const published=new Set(publishedLessonIds);
 const activeConcepts=concepts.filter(c=>c.outcomes.some(o=>o.level===view.level));
 const depths:Array<{id:LearningLevel;title:string}>=[
@@ -17,7 +18,7 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
 ---
 <section class="knowledge-page" aria-label="Knowledge graph">
   <header class="knowledge-heading">
-    <p class="knowledge-eyebrow">Graph-based learning · Curated pilot</p>
+    <p class="knowledge-eyebrow">Engineering curriculum graph · Curated concepts</p>
     <h1>Explore engineering concepts</h1>
     <p>Choose learning depth and follow cross-domain applications. These are proposed competencies, not completed lessons or professional certifications.</p>
   </header>
@@ -96,15 +97,16 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
       {view.outcome&&(
         <section class="knowledge-applications" aria-label="Suggested learning path">
           <div class="knowledge-section-heading">
-            <h2>Suggested study path · {view.level}</h2>
-            <span>{path.steps.length} {path.steps.length===1?'unit':'units'}</span>
+            <h2>Goal-based study path · {view.level}</h2>
+            <span>{goalPlan.steps.length} {goalPlan.steps.length===1?'unit':'units'}</span>
           </div>
           <p class="knowledge-path-note">
-            {path.reviewedPrerequisiteCount>0
-              ? 'Reviewed concept prerequisites come first; units within a concept follow proposed editorial order.'
-              : 'Proposed editorial order only. No reviewed hard prerequisites exist for this concept.'}
+            {goalPlan.reviewedPrerequisiteCount>0
+              ? 'Reviewed competency prerequisites come first; units within each outcome follow editorial order.'
+              : 'Editorial order only. No reviewed competency prerequisites apply to this goal.'}
             Outlines are not completed lessons.
           </p>
+          <p class="knowledge-path-note">{goalPlan.publishedCount} authored lesson(s), {goalPlan.outlineCount} outline(s). This is a curriculum plan, not learner mastery or completion.</p>
           {path.missingPrerequisites.length>0&&(
             <div class="knowledge-path-gap" role="status">
               <strong>Prerequisite coverage gaps at {view.level}</strong>
@@ -122,16 +124,16 @@ const applicationLabel:Record<string,string>={foundation:'Foundation',applicatio
             </div>
           )}
           <ol class="knowledge-path-list">
-            {path.steps.map((step,index)=>(
+            {goalPlan.steps.map((step,index)=>(
               <li class="knowledge-path-step">
                 <span class="knowledge-path-number" aria-hidden="true">{index+1}</span>
                 <a class="knowledge-unit" href={pathItemHref(step.itemId,path.conceptId,path.level)}>
                   <span class="knowledge-unit-meta">
                     {step.trackTitle} · {applicationLabel[step.role]}
-                    {step.reviewedPrerequisite?' · Reviewed concept prerequisite':''}
+                    {step.reason==='reviewed-prerequisite'?' · Reviewed prerequisite':''}
                   </span>
                   <strong>{step.title}</strong>
-                  <span class="knowledge-unit-foot">{step.itemId} · {published.has(step.itemId)?'Full lesson available':'Curriculum outline only'}</span>
+                  <span class="knowledge-unit-foot">{step.itemId} · {step.priority} · {step.content==='published'?'Full lesson available':'Curriculum outline only'}</span>
                 </a>
               </li>
             ))}

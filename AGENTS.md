@@ -14,7 +14,7 @@ Purpose: publish a single-page catalogue of high-quality engineering materials, 
 ## Source of truth and authoring
 
 - `curriculum/manifest.v2.json`: domains, modules, topics, prerequisites, checkpoint ideas.
-- `curriculum/learning-graph.v1.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only. Competency outcomes must reference canonical mapped unit IDs; missing levels remain explicit gaps. Suggested item order is not a hard prerequisite; only reviewed `requires` edges are traversed as prerequisites. Rubric criteria must link to their outcome's source units and declare the actual evidence kind (design review, framework test, network lab, packet trace, cluster test, reproducible CLI build or live PostgreSQL test); they are proposed human-review guides, never quizzes or proof of mastery.
+- `curriculum/learning-graph.v2.json`: validated curated concept overlay, never inferred hard prerequisites. Proposed edges are discovery links only. Competency outcomes must reference canonical mapped unit IDs; missing levels remain explicit gaps. Suggested item order is not a hard prerequisite; only reviewed competency-level `requires` edges (plus legacy reviewed concept-level `requires` where explicitly present) are traversed as prerequisites. Rubric criteria must link to their outcome's source units and declare the actual evidence kind (design review, framework test, network lab, packet trace, cluster test, reproducible CLI build or live PostgreSQL test); they are proposed human-review guides, never quizzes or proof of mastery.
 - `.agents/skill/course-generator/SKILL.md`: generate one unit at a time.
 - `generation/`: metadata and authoring provenance.
 - `review-banks/`: authored self-check question sets; there is no scheduling backend.
@@ -39,3 +39,10 @@ No standalone checkpoint or hard prerequisite may be inferred solely from row or
 - `?item=<ID>`: Materi; `&view=soal`: guided practice/quiz; `&view=project`: implementation challenge. Only the active view renders in MDX; links are addressable without learner state.
 - All published Pedagogy V3 lessons require exactly three ordered `LessonStage` wrappers, with complete `SourceList` in `understand`, `Quiz` in `practice`, and `Challenge`/verification in `evidence`. Stage layout is checked both before promotion and during every published content validation. No older pedagogy schemas are accepted; previously preserved materials require new V3 review before publication.
 - An unauthored outline has no real quiz: its Materi CTA goes directly to Project rather than an empty Soal page. Never manufacture questions from the workbook.
+
+## Graph V2 operating rules
+
+- `pnpm graph:status` reports curated graph coverage independently from MDX publication; `pnpm graph:validate` enforces referential integrity and maps authored lessons.
+- The graph overlay adds depth-specific reviewed competency dependencies with canonical source-item support. Do not modify the imported 370-item manifest to manufacture prerequisite edges.
+- Two reviewed G1 competency dependencies currently connect API contract design → contract testing → provider contract verification; other semantic concept relations remain proposed.
+- `planLearningGoal` returns an explainable read-only curriculum path with explicit outline gaps. It does not grant learner completion, unlock achievements or read retired D1 state.

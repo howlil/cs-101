@@ -4,10 +4,11 @@ import AppLayout from '../layouts/AppLayout.astro';
 import ContentLibrary from '../components/library/ContentLibrary.astro';
 import EmptyCurriculum from '../components/library/EmptyCurriculum.astro';
 import KnowledgeGraph from '../components/curriculum/KnowledgeGraph.astro';
-import graphOverlay from '../../curriculum/learning-graph.v1.json';
+import graphOverlay from '../../curriculum/learning-graph.v2.json';
 import { buildLearningGraph, getFocusedConcept, conceptsForItem, assessmentForItem } from '../domain/learning-graph';
 import { curriculumGraph } from '../server/curriculum';
 import { getLearningPath, getItemPathContext } from '../domain/learning-path';
+import { planLearningGoal } from '../domain/learning-planner';
 import { projectIdeaFor, selectLibraryItem, resolveLibraryView } from '../domain/content-library';
 import { getItemLocation } from '../domain/curriculum-v2/selectors';
 import '../styles/library.css';
@@ -32,6 +33,7 @@ const location = item ? getItemLocation(curriculumGraph, item.id) : undefined;
 // Published status is derived from reviewed MDX, never from curriculum metadata alone.
 const lessons = await getCollection('lessons', ({ data }) => !data.demo);
 const publishedLessonIds = lessons.map((entry) => entry.data.taskId);
+const goalPlan = planLearningGoal(learningGraph, {conceptId:focusedConcept.concept.id,level:focusedConcept.level},new Set(publishedLessonIds));
 const lesson = item?.kind === 'unit'
   ? lessons.find((entry) => !entry.data.demo && entry.data.taskId === item.id)
   : undefined;
@@ -64,7 +66,7 @@ const prerequisites = item?.prerequisites.map((id) => {
 ---
 <AppLayout title={isGraph ? 'Knowledge Graph' : item?.title ?? 'Materi engineering'} description="Kumpulan materi, latihan soal, dan ide project CS-101." publishedLessonIds={publishedLessonIds}>
   {isGraph ? (
-    <KnowledgeGraph view={focusedConcept} path={learningPath} concepts={learningGraph.concepts} publishedLessonIds={publishedLessonIds} />
+    <KnowledgeGraph view={focusedConcept} path={learningPath} goalPlan={goalPlan} concepts={learningGraph.concepts} publishedLessonIds={publishedLessonIds} />
   ) : item ? (
     <ContentLibrary
       item={item}
